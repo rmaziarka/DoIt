@@ -1,0 +1,1 @@
+This folder contains DSC resources that will be installed automatically on destination servers if any DSC configuration is used.

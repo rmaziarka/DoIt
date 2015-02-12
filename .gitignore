@@ -1,0 +1,8 @@
+/_buildTools/testproject/bin
+/_buildTools/testproject/deploy/build.log.txt
+/_buildTools/testproject/database/dbdeploy/DbDeploy2.log*
+/_buildTools/testproject/database/changes/ScriptList.txt
+deploy.log.txt
+deploy_*.txt
+Test.xml
+ScriptCop.txt
