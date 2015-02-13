@@ -112,7 +112,7 @@ function Invoke-Sql {
 
     if ($Mode -eq 'sqlcmd') {
         $sqlCmdPath = Get-CurrentSqlCmdPath
-        if (!$sqlcmdPath) {
+        if (!$sqlCmdPath) {
             Write-Log -Warn 'Cannot find sqlcmd.exe - falling back to .NET'
             $Mode = '.net'
         } else { 

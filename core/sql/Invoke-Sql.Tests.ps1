@@ -35,8 +35,10 @@ Describe -Tag "PSCI.unit" "Invoke-Sql" {
         }
 
         Mock Start-ExternalProcess -MockWith { $Output.Value = "command_executed" }
-    
+        
+            
         Context "When Invoke-Sql Is called with mode sqlcmd" {
+            Mock Test-Path -MockWith { return $true }
             $connectionString = "data source=localhost;integrated security=True"
             $sql = "SELECT * FROM Categories"
             $param = @{"dummy"="param"; "anotherdummy"="parameter"}
