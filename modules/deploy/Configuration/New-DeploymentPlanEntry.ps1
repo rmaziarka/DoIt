@@ -220,8 +220,15 @@ function New-DeploymentPlanEntry {
             Write-Log -Info "Skipping configuration '$ConfigurationName'"
             return $null
         }
+		
+		# When RunOnCurrentNode = true, DSC will run in local mode (we don't want to open Cim session then)
+		if ($RunOnCurrentNode) {
+			$dscNode = 'localhost'
+		} else {
+			$dscNode = $Node
+		}
     
-        $mofDir = Invoke-ConfigurationOrFunction -ConfigurationName $ConfigurationName -OutputPath $DscOutputPath -Node $Node -Environment $Environment -ResolvedTokens $resolvedTokens -ConnectionParams $connectionParamsObj
+        $mofDir = Invoke-ConfigurationOrFunction -ConfigurationName $ConfigurationName -OutputPath $DscOutputPath -Node $dscNode -Environment $Environment -ResolvedTokens $resolvedTokens -ConnectionParams $connectionParamsObj
         if (!(Get-ChildItem -Path $mofDir -Filter "*.mof")) {
             Write-Log -Warn "Mof file has not been generated for configuration named '$ConfigurationName' (ServerRole '$serverRoleName' / Environment '$Environment'. Please ensure your configuration definition is correct."
             continue
