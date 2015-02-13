@@ -22,45 +22,47 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 #>
 
-<#
-.SYNOPSIS
-	Returns a scriptblock that uncompresses zip file and creates syncHash_* file for Copy-FilesToRemoteServer.
+function Get-PostCopyScriptBlock {
+    <#
+    .SYNOPSIS
+	    Returns a scriptblock that uncompresses zip file and creates syncHash_* file for Copy-FilesToRemoteServer.
 
-.DESCRIPTION
-    If $BlueGreenEnvVariableName is passed, it also creates '.currentLive' file in current destination directory.
+    .DESCRIPTION
+        If $BlueGreenEnvVariableName is passed, it also creates '.currentLive' file in current destination directory.
 
-.EXAMPLE
-    $postCopyScriptBlock = Get-PostCopyScriptBlock
-#>
-[CmdletBinding()]
-[OutputType([scriptblock])]
-param()
+    .EXAMPLE
+        $postCopyScriptBlock = Get-PostCopyScriptBlock
+    #>
+    [CmdletBinding()]
+    [OutputType([scriptblock])]
+    param()
 
-return {
-    param($DestFile, $BlueGreenEnvVariableName, $HashPath)
+    return {
+        param($DestFile, $BlueGreenEnvVariableName, $HashPath)
             
-    $destPath = Split-Path -Parent $DestFile
-    #Write-Host ("[{0}] Uncompressing file '{1}'" -f (hostname), $using:tempZipDst)       
-    $shell = New-Object -ComObject Shell.Application
-    $zip = $shell.NameSpace($DestFile)
+        $destPath = Split-Path -Parent $DestFile
+        #Write-Host ("[{0}] Uncompressing file '{1}'" -f (hostname), $using:tempZipDst)       
+        $shell = New-Object -ComObject Shell.Application
+        $zip = $shell.NameSpace($DestFile)
         
-    $dst = $shell.namespace($destPath)
-    # 0x14 = overwrite and don't show dialogs
-    $dst.Copyhere($zip.items(), 0x14)
+        $dst = $shell.namespace($destPath)
+        # 0x14 = overwrite and don't show dialogs
+        $dst.Copyhere($zip.items(), 0x14)
 
-    Remove-Item -Path $DestFile -Force
+        Remove-Item -Path $DestFile -Force
 
-    if ($BlueGreenEnvVariableName) {
-        $oldPath = [Environment]::GetEnvironmentVariable($BlueGreenEnvVariableName, 'Machine')
-        if ($oldPath) {
-            [void](Remove-Item -Path (Join-Path -Path $oldPath -ChildPath '.currentLive') -Force -ErrorAction SilentlyContinue)
+        if ($BlueGreenEnvVariableName) {
+            $oldPath = [Environment]::GetEnvironmentVariable($BlueGreenEnvVariableName, 'Machine')
+            if ($oldPath) {
+                [void](Remove-Item -Path (Join-Path -Path $oldPath -ChildPath '.currentLive') -Force -ErrorAction SilentlyContinue)
+            }
+            [Environment]::SetEnvironmentVariable($BlueGreenEnvVariableName, $destPath, 'Machine')
+            [void](New-Item -Path (Join-Path -Path $destPath -ChildPath '.currentLive') -Force -ItemType File)
         }
-        [Environment]::SetEnvironmentVariable($BlueGreenEnvVariableName, $destPath, 'Machine')
-        [void](New-Item -Path (Join-Path -Path $destPath -ChildPath '.currentLive') -Force -ItemType File)
-    }
 
-    if ($HashPath) {
-        $hashRemoteFilePath = Join-Path -Path $destPath -ChildPath "syncHash_$HashPath"
-        [void](New-Item -Path $hashRemoteFilePath -ItemType File -Force)
+        if ($HashPath) {
+            $hashRemoteFilePath = Join-Path -Path $destPath -ChildPath "syncHash_$HashPath"
+            [void](New-Item -Path $hashRemoteFilePath -ItemType File -Force)
+        }
     }
 }
