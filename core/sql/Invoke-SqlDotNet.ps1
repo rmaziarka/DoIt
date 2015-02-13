@@ -123,11 +123,16 @@ function Invoke-SqlDotNet {
             $errorOccurred = @{ Error = $false }
             $infoEventHandler = [System.Data.SqlClient.SqlInfoMessageEventHandler] { 
                 foreach ($err in $_.Errors) { 
-                    Write-Log -Error $err
+                    if ($err.Class -le 10) { 
+                        Write-Log -Info $err
+                    } else { 
+                        Write-Log -Error $err
+                        if (!$IgnoreErrors) {
+                            $errorOccurred.Error = $true
+                        }
+                    }
                 }
-                if (!$IgnoreErrors -and $_.Errors) {
-                    $errorOccurred.Error = $true
-                }
+                
             } 
             $connection.add_InfoMessage($infoEventHandler)
             $connection.Open()

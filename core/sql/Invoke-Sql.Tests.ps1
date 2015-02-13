@@ -72,6 +72,10 @@ Describe -Tag "PSCI.unit" "Invoke-Sql" {
                 Invoke-Sql -ConnectionString $connectionString -Query 'select * from Dummytable' -IgnoreErrors $true
             } 
 
+            It "should not fail when query prints output" {
+                Invoke-Sql -ConnectionString $connectionString -Query "print 'test'"                
+            } 
+
             It "should return rows" {
                 $result = Invoke-Sql -ConnectionString $connectionString -Query "select * from ObjPSCITest.dbo.changelog`nselect * from ObjPSCITest.dbo.changelog"
                 $result.Count | Should be 1
