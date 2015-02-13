@@ -64,8 +64,8 @@ foreach ($file in $customSources) {
 
 $notMatching
 if ($notMatching) {
-    throw ('There are {0} files without valid license header' -f $notMatching.Count)
+    throw ('Checked {0} files - there are {1} files without valid license header' -f $customSources.Count, $notMatching.Count)
 }
 
-Write-Host 'All files have valid license header.'
+Write-Host ('Checked {0} files - all have valid license header.' -f $customSources.Count)
 
