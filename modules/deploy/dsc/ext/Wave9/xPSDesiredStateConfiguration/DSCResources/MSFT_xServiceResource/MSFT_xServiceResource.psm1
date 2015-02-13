@@ -135,7 +135,7 @@ function Test-TargetResource
                 $service = Get-Service -Name $Name -ErrorAction SilentlyContinue
                 if($service -ne $null)
                 {
-                    throw "The service to create already exists"
+                    Write-Verbose "The service to create already exists"
                 }
                 else
                 {
@@ -156,7 +156,7 @@ function Test-TargetResource
             }
         }
     }
-    else
+    if (!$PSBoundParameters.ContainsKey("Ensure") -or $Ensure -eq "Present")
     {
 
         $svc=GetServiceResource $Name
@@ -254,7 +254,7 @@ function Set-TargetResource
                 $service = Get-Service -Name $Name -ErrorAction SilentlyContinue
                 if($service -ne $null)
                 {
-                    throw "The service to create already exists"
+                    Write-Verbose "The service to create already exists"
                 }
                 else
                 {
@@ -689,8 +689,11 @@ function StartService
         try
         {
             $svc.Start()
-            $twoSeconds = New-Object timespan 20000000
-            $svc.WaitForStatus("Running",$twoSeconds)
+            #$twoSeconds = New-Object timespan 20000000
+            #$svc.WaitForStatus("Running",$twoSeconds)
+			$thirtySeconds = New-Object timespan 300000000
+            $svc.WaitForStatus("Running",$thirtySeconds) 
+
         }
         catch
         {
