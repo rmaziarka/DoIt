@@ -22,7 +22,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 #>
 
-function Invoke-Sql-Sqlcmd {
+function Invoke-SqlSqlcmd {
     <# 
     .SYNOPSIS 
     Runs a T-SQL script using sqlcmd.exe. 
@@ -56,7 +56,7 @@ function Invoke-Sql-Sqlcmd {
     Credential to impersonate in Integrated Security mode.
 
     .EXAMPLE
-    Invoke-Sql-Sqlcmd -ConnectionString $connectionString -Sql $Query -SqlCmdVariables $param
+    Invoke-SqlSqlcmd -ConnectionString $connectionString -Sql $Query -SqlCmdVariables $param
     #> 
 
     [CmdletBinding()] 

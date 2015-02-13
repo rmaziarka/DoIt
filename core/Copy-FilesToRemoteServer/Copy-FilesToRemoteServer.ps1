@@ -115,13 +115,13 @@ function Copy-FilesToRemoteServer {
 
     # calculate hash for local files if required
     if ($Destination -and $CheckHashMode -ne 'DontCheckHash') {
-       Write-Progress -Activity "Checking whether '$Destination' needs updating" 
+       Write-Progress -Activity "Checking whether '$Destination' needs updating" -Id 1
        $hashPath = Get-Hash -Path $Path -Exclude $Exclude
     }
 
     $sessions = New-CopySessions -Path $Path -ConnectionParams $ConnectionParams -Exclude $Exclude -Destination $Destination -CheckHashMode $CheckHashMode -HashPath $hashPath
     if (!$sessions) {
-        Write-Progress -Activity "Finished" -Completed
+        Write-Progress -Activity "Finished" -Completed -Id 1
         return @()
     }
 
@@ -146,7 +146,7 @@ function Copy-FilesToRemoteServer {
         $items = Get-Item -Path $zipToCopy
         foreach ($session in $sessions) { 
            foreach ($item in $items) {
-                Write-Progress -Activity "Sending '$item'" -Status "Preparing file"
+                Write-Progress -Activity "Sending '$item'" -Status "Preparing file" -Id 1
                 $destFile = Invoke-Command -Session $session -ScriptBlock $preCopyScriptBlock -ArgumentList $item.Name, $Destination, $BlueGreenEnvVariableName, $Destinations, $ClearDestination
                 Write-Log -Info "Copying '$item' to remote node '$($session.ComputerName)' / '$destFile'"
     
@@ -157,7 +157,7 @@ function Copy-FilesToRemoteServer {
                 $file = [IO.File]::OpenRead($item.FullName)
 
                 while(($read = $file.Read($rawBytes, 0, $streamSize)) -gt 0) {
-                    Write-Progress -Activity "Writing $destFile" -Status "Sending file" -PercentComplete ($position / $item.Length * 100)
+                    Write-Progress -Activity "Writing $destFile" -Status "Sending file" -PercentComplete ($position / $item.Length * 100) -Id 1
         
                     # Ensure that our array is the same size as what we read from disk
                     if($read -ne $rawBytes.Length) {
@@ -177,11 +177,11 @@ function Copy-FilesToRemoteServer {
                 $file.Close()
             }
 
-            Write-Progress -Activity "Uncompressing $destFile"
+            Write-Progress -Activity "Uncompressing $destFile" -Id 1
             Invoke-Command -Session $session -ScriptBlock $postCopyScriptBlock -ArgumentList $destFile, $BlueGreenEnvVariableName, $hashPath
 
             Remove-PSSession -Session $session
-            Write-Progress -Activity "Finished" -Completed
+            Write-Progress -Activity "Finished" -Completed -Id 1
         }
     } finally {
         foreach ($session in ($sessions | Where-Object { $_.State -ne 'Closed' })) {

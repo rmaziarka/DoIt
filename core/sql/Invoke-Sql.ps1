@@ -146,24 +146,24 @@ function Invoke-Sql {
     if ($Mode -eq 'sqlcmd') {
         foreach ($q in $Query) { 
             $params['Query'] = $q
-            Invoke-Sql-Sqlcmd @params
+            Invoke-SqlSqlcmd @params
         }
 
         $params.Remove('Query')
         foreach ($file in $InputFile) {
             $params['InputFile'] = $file
-            Invoke-Sql-Sqlcmd @params
+            Invoke-SqlSqlcmd @params
         }
 
     } elseif ($Mode -eq '.net') {
         foreach ($q in $Query) { 
             $params['Query'] = $q
-            Invoke-Sql-DotNet @params
+            Invoke-SqlDotNet @params
         }
 
         foreach ($file in $InputFile) {
             $params['Query'] = Get-Content -Path $file -ReadCount 0 | Out-String
-            Invoke-Sql-DotNet @params
+            Invoke-SqlDotNet @params
         }
     } else {
         Write-Log -Critical "Unrecognized mode: ${Mode}."

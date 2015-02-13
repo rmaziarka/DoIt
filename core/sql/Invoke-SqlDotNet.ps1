@@ -22,7 +22,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 #>
 
-function Invoke-Sql-DotNet {
+function Invoke-SqlDotNet {
     <# 
     .SYNOPSIS 
     Runs a T-SQL script using .NET SqlCommand. 
@@ -55,7 +55,7 @@ function Invoke-Sql-DotNet {
     Credential to impersonate in Integrated Security mode.
 
     .EXAMPLE
-    Invoke-Sql-DotNet -ConnectionString $connectionString -Sql $Query-TimeoutInSeconds -SqlCmdVariables $param
+    Invoke-SqlDotNet -ConnectionString $connectionString -Sql $Query-TimeoutInSeconds -SqlCmdVariables $param
     #> 
 
     [CmdletBinding()] 
