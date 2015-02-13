@@ -42,7 +42,7 @@ function Deploy-DBDeploySqlScriptsPackage {
     .PARAMETER Credential
     Credentials to use for running dbdeploy and connecting to database (if Integrated Security).
 
-    .PARAMETER TimeoutInSeconds
+    .PARAMETER QueryTimeoutInSeconds
     Query timeout in seconds.
 
     .EXAMPLE
@@ -74,7 +74,7 @@ function Deploy-DBDeploySqlScriptsPackage {
 
         [Parameter(Mandatory=$false)]
         [int] 
-        $TimeoutInSeconds = 600
+        $QueryTimeoutInSeconds = 600
     )
 
     $configPaths = Get-ConfigurationPaths
@@ -104,6 +104,6 @@ function Deploy-DBDeploySqlScriptsPackage {
     Start-ExternalProcess -Command $DbDeployPath -ArgumentList $argumentList -Credential $Credential -FailOnStringPresence "ERROR"
 
     if (Test-Path($OutputScriptPath)) {
-        Invoke-Sql -ConnectionString $ConnectionString -InputFile $OutputScriptPath -TimeoutInSeconds $TimeoutInSeconds -Credential $Credential
+        Invoke-Sql -ConnectionString $ConnectionString -InputFile $OutputScriptPath -QueryTimeoutInSeconds $QueryTimeoutInSeconds -Credential $Credential
     }
 }

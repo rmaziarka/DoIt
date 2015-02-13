@@ -55,7 +55,7 @@ function Invoke-SqlDotNet {
     Credential to impersonate in Integrated Security mode.
 
     .EXAMPLE
-    Invoke-SqlDotNet -ConnectionString $connectionString -Sql $Query-TimeoutInSeconds -SqlCmdVariables $param
+    Invoke-SqlDotNet -ConnectionString $connectionString -Sql $Query -SqlCmdVariables $param
     #> 
 
     [CmdletBinding()] 

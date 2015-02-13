@@ -49,7 +49,7 @@ function Deploy-SqlPackage {
     .PARAMETER Credential
     Credential to use when opening a remoting session.
 
-    .PARAMETER TimeoutInSeconds
+    .PARAMETER QueryTimeoutInSeconds
     Sql query timeout in seconds.
 
     .LINK
@@ -88,7 +88,7 @@ function Deploy-SqlPackage {
 		
 		[Parameter(Mandatory=$false)]
         [int] 
-        $TimeoutInSeconds
+        $QueryTimeoutInSeconds
     )
 
     Write-Log -Info "Deploying SQL package '$PackageName' using connectionString '$ConnectionString'" -Emphasize
@@ -128,8 +128,8 @@ function Deploy-SqlPackage {
         if ($Credential) {
             $params.Credential = $Credential
         }
-        if ($TimeoutInSeconds) {
-            $params.TimeoutInSeconds = $TimeoutInSeconds
+        if ($QueryTimeoutInSeconds) {
+            $params.QueryTimeoutInSeconds = $QueryTimeoutInSeconds
         }
         if ($SqlCmdVariables) {
             $params.SqlCmdVariables = $SqlCmdVariables

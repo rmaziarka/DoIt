@@ -39,7 +39,7 @@ function Remove-SqlDatabase {
     .PARAMETER Credential
     Credential to impersonate in Integrated Security mode.
 
-    .PARAMETER TimeoutInSeconds
+    .PARAMETER QueryTimeoutInSeconds
     Query timeout
 
     .EXAMPLE
@@ -63,13 +63,13 @@ function Remove-SqlDatabase {
 
         [Parameter(Mandatory=$false)] 
         [int]
-        $TimeoutInSeconds
+        $QueryTimeoutInSeconds
 
     )
 
     $sqlScript = Join-Path -Path $PSScriptRoot -ChildPath "Remove-SqlDatabase.sql"
     $parameters = @{ "DatabaseName" = $databaseName }
-    $result = Invoke-Sql -ConnectionString $ConnectionString -InputFile $sqlScript -SqlCmdVariables $parameters -Credential $Credential -TimeoutInSeconds $TimeoutInSeconds  
+    $result = Invoke-Sql -ConnectionString $ConnectionString -InputFile $sqlScript -SqlCmdVariables $parameters -Credential $Credential -QueryTimeoutInSeconds $QueryTimeoutInSeconds  
     if ($result) {
         Write-Log -Info $result
     }

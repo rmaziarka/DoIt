@@ -42,7 +42,7 @@ function Restore-SqlDatabase {
     .PARAMETER Credential
     Credential to impersonate in Integrated Security mode.
 
-    .PARAMETER TimeoutInSeconds
+    .PARAMETER QueryTimeoutInSeconds
     Timeout for executing sql restore command.
 
     .EXAMPLE
@@ -70,13 +70,13 @@ function Restore-SqlDatabase {
             
         [Parameter(Mandatory=$false)] 
         [int]
-        $TimeoutInSeconds = 600
+        $QueryTimeoutInSeconds = 600
     )
 
     $sqlScript = Join-Path -Path $PSScriptRoot -ChildPath "Restore-SqlDatabase.sql"
     $parameters =  @{ "DatabaseName" = $DatabaseName }
     $parameters += @{ "Path" = $Path }
-    $result = Invoke-Sql -ConnectionString $ConnectionString -InputFile $sqlScript -SqlCmdVariables $parameters -Credential $Credential -TimeoutInSeconds $TimeoutInSeconds
+    $result = Invoke-Sql -ConnectionString $ConnectionString -InputFile $sqlScript -SqlCmdVariables $parameters -Credential $Credential -QueryTimeoutInSeconds $QueryTimeoutInSeconds
     if ($result) { 
         Write-Log -Info $result
     }

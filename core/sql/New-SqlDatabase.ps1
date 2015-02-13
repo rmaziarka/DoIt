@@ -39,7 +39,7 @@ function New-SqlDatabase {
     .PARAMETER Credential
     Credential to impersonate in Integrated Security mode.
 
-    .PARAMETER TimeoutInSeconds
+    .PARAMETER QueryTimeoutInSeconds
     Query timeout
 
     .EXAMPLE
@@ -63,12 +63,12 @@ function New-SqlDatabase {
 
         [Parameter(Mandatory=$false)] 
         [int]
-        $TimeoutInSeconds
+        $QueryTimeoutInSeconds
 
     )
 
     $sqlScript = Join-Path -Path $PSScriptRoot -ChildPath "New-SqlDatabase.sql"
     $parameters = @{ "DatabaseName" = $databaseName }
-    [void](Invoke-Sql -ConnectionString $ConnectionString -InputFile $sqlScript -SqlCmdVariables $parameters -Credential $Credential -TimeoutInSeconds $TimeoutInSeconds)
+    [void](Invoke-Sql -ConnectionString $ConnectionString -InputFile $sqlScript -SqlCmdVariables $parameters -Credential $Credential -QueryTimeoutInSeconds $QueryTimeoutInSeconds)
 }
 
