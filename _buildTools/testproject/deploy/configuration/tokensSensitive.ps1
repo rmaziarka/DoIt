@@ -28,4 +28,14 @@ Environment Default {
         Password = ''
         RemotingCredential = { ConvertTo-PSCredential -User $Tokens.Credentials.UserName -Password $Tokens.Credentials.Password }
     }
+    
+    Tokens Topology @{
+        Node = 'localhost'
+    }
+}
+
+Environment Dev {
+    Tokens Topology @{
+        Node = '<put_server_name_here>'
+    }
 }

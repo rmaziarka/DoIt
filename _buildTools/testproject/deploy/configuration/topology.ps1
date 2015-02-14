@@ -44,16 +44,15 @@ Environment Default {
 }
 
 Environment Local {
-    ServerRole WebServer -Nodes 'localhost'
-	ServerRole DatabaseServer -Nodes 'localhost'
+    ServerRole WebServer -Nodes { $Tokens.Topology.Node }
+	ServerRole DatabaseServer -Nodes { $Tokens.Topology.Node }
 }
 
 Environment Dev { 
-	$serverName = '<put_server_name_here>'
-    ServerRole WebServer -Nodes $serverName
-	ServerRole DatabaseServer -Nodes $serverName
+    ServerRole WebServer -Nodes { $Tokens.Topology.Node }
+	ServerRole DatabaseServer -Nodes { $Tokens.Topology.Node }
 
-    ServerRole RemotingTestPSRemoting -Nodes $serverName
-    ServerRole RemotingTestPSRemotingCredSSP -Nodes $serverName -CrossDomain
-    ServerRole RemotingTestMSDeploy -Nodes $serverName
+    ServerRole RemotingTestPSRemoting -Nodes { $Tokens.Topology.Node }
+    ServerRole RemotingTestPSRemotingCredSSP -Nodes { $Tokens.Topology.Node } -CrossDomain
+    ServerRole RemotingTestMSDeploy -Nodes { $Tokens.Topology.Node }
 }

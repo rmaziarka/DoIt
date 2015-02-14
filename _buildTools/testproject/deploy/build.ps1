@@ -45,7 +45,7 @@ Version number of the current build.
 param(
 	[Parameter(Mandatory=$false)]
 	[string]
-	$ProjectRootPath = "..", # Modify this pa4th according to your project structure. This is relative to the directory where build.ps1 resides ($PSScriptRoot).
+	$ProjectRootPath = "..", # Modify this path according to your project structure. This is relative to the directory where build.ps1 resides ($PSScriptRoot).
 	
 	[Parameter(Mandatory=$false)]
 	[string]
