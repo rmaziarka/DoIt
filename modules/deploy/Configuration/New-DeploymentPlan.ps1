@@ -119,11 +119,6 @@ function New-DeploymentPlan {
     )
 
     $deploymentPlan = New-Object -TypeName System.Collections.ArrayList
-    if ($ConfigurationsFilter) {
-        $configs = $ConfigurationsFilter -join ','
-    } else {
-        $configs = 'All'
-    }
     if ($TokensOverride) {
         $log = ($TokensOverride.GetEnumerator() | Foreach-Object { "$($_.Key)=$($_.Value)" }) -join ','
         Write-Log -Info "TokensOverride: $log"
@@ -134,79 +129,43 @@ function New-DeploymentPlan {
     }
 
     foreach ($env in $Environment) {
-        $serverRoles = Resolve-ServerRoles -AllEnvironments $AllEnvironments -Environment $env -ServerRolesFilter $ServerRolesFilter
+        Write-Log -Info ("Processing environment '{0}', server roles filter '{1}', server connections filter '{2}', configurations filter '{3}', deploy type '{4}'" -f `
+            $env, ($ServerRolesFilter -join ','), ($ServerConnectionsFilter -join ','), ($ConfigurationsFilter -join ','), $DeployType) -Emphasize
 
-        Write-Log -Info ("Processing following server roles: '{0}', configurations: '{1}', environment: '{2}'" -f ($serverRoles.Keys -join ','), $configs, $env) -Emphasize
-    
-        # if Nodes is scriptblock, we need to resolve tokens to pass them to Resolve-ScriptedToken
-        if ($ServerRoles.Values.Nodes | Where-Object { $_ -is [scriptblock] }) {
-            $resolvedTokensWithoutNode = Resolve-Tokens -AllEnvironments $AllEnvironments -Environment $env -Node '<no_node>' -TokensOverride $TokensOverride
-        }
-
-        foreach ($serverRoleName in $ServerRoles.Keys) {
-            $serverRole = $ServerRoles[$serverRoleName]
-            $nodes = $serverRole.Nodes
-            if ($nodes -is [scriptblock]) {
-                $nodes = (Resolve-ScriptedToken -ScriptedToken $nodes -Tokens $resolvedTokensWithoutNode -Environment $env)
-            }
-            if ($NodesFilter) {
-                if ($DeployType -ne 'Adhoc') {
-                    $nodes = $nodes | Where-Object { $NodesFilter -icontains $_ }
-                } else {
-                    $nodes = $NodesFilter
-                }
-            }
-            if (!$nodes -or $nodes.Count -eq 0) {
-                continue
-            }
+        $resolvedTokens = Resolve-Tokens -AllEnvironments $AllEnvironments -Environment $env -TokensOverride $TokensOverride
         
-            $configurations = $serverRole.Configurations
-            if ($ConfigurationsFilter) {
-                if ($DeployType -ne 'Adhoc') {
-                    $configurations = $configurations | Where-Object { $ConfigurationsFilter -icontains $_ }
-                } else {
-                    $configurations = $ConfigurationsFilter
-                }
-            }
-            if (!$configurations -or $configurations.Count -eq 0) {
-                Write-Log -Info "No configurations to deploy in ServerRole '$serverRoleName' / Environment '$env'."
-                continue
-            }
-
-            foreach ($configName in $configurations) {
-                $cmd = Get-Command -Name $configName -ErrorAction SilentlyContinue
-                if (!$cmd) {
-                    Write-Log -Critical "There is no configuration / function named '$configName'. It was referenced in ServerRole '$serverRoleName' / Environment '$env'."
-                }
-
-                foreach ($node in $nodes) {
-                    $createDeploymentPlanEntryParams = @{ 
-                        AllEnvironments = $AllEnvironments
-                        Environment = $env
-                        Node = $Node
-                        ConfigurationName = $configName
-                        TokensOverride = $TokensOverride
-                        DscOutputPath = $DscOutputPath
-                        RemotingCredential = $serverRole.RemotingCredential
-                        RunOn = $serverRole.RunOn
-                        RunOnCurrentNode = $serverRole.RunOnCurrentNode
-                        CopyTo = $serverRole['CopyTo']
-                        Port = $serverRole.Port
-                        RemotingMode = $serverRole.RemotingMode
-                        ServerRole = $serverRoleName
-                        Protocol = $serverRole.Protocol
-                        CrossDomain = $serverRole.CrossDomain
-                        RebootHandlingMode = $serverRole.RebootHandlingMode
-                        DeployType = $DeployType
-                    }
+        $serverRoles = Resolve-ServerRoles `
+            -AllEnvironments $AllEnvironments `
+            -Environment $env `
+            -ResolvedTokens $resolvedTokens `
+            -ServerRolesFilter $ServerRolesFilter `
+            -NodesFilter $NodesFilter `
+            -ConfigurationsFilter $ConfigurationsFilter `
+            -DeployType $deployType
                 
-                    if ($serverRole.authentication) {
-                        $createDeploymentPlanEntryParams.Authentication = $serverRole.Authentication
-                    }
+        foreach ($serverRoleName in $serverRoles.Keys) {
+            $serverRole = $serverRoles[$serverRoleName]
+            foreach ($config in $serverRole.Configurations) {
+                foreach ($serverConnection in $serverRole.ServerConnections) {
+                    foreach ($node in $serverConnection.Nodes) {
+
+                        $resolvedTokens = Resolve-Tokens -AllEnvironments $AllEnvironments -Environment $env -Node $node -TokensOverride $TokensOverride
+                        $createDeploymentPlanEntryParams = @{ 
+                            Environment = $env
+                            ServerRole = $serverRole
+                            ServerConnection = $serverConnection
+                            Node = $node
+                            Configuration = $config
+                            DscOutputPath = $DscOutputPath
+                            DeployType = $DeployType
+                            ResolvedTokens = $resolvedTokens
+                            TokensOverride = $TokensOverride
+                        }
                 
-                    $planEntry = New-DeploymentPlanEntry @createDeploymentPlanEntryParams
-                    if ($planEntry) {
-                        [void]($deploymentPlan.Add($planEntry))
+                        $planEntry = New-DeploymentPlanEntry @createDeploymentPlanEntryParams
+                        if ($planEntry) {
+                            [void]($deploymentPlan.Add($planEntry))
+                        }
                     }
                 }
             }

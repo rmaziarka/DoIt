@@ -33,9 +33,6 @@ If token value is a scriptblock, you can use variables $Tokens, $Node and $Envir
 #>
 
 Environment Default {
-    Tokens Credentials @{
-        #RemotingCredential = { ConvertTo-PsCredential -User $Tokens.Credentials.Username -Password $Tokens.Credentials.Password }
-    }
 
     Tokens DatabaseConfig @{
         DatabaseName = 'PSCITest'
@@ -50,9 +47,3 @@ Environment Default {
     }
 }
 
-
-Environment Local {
-    Tokens Credentials @{
-    #    RemotingCredential = $null
-    }
-}

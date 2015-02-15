@@ -108,7 +108,7 @@ function Resolve-Tokens {
         [string]
         $Environment,
 
-        [Parameter(Mandatory=$true)]
+        [Parameter(Mandatory=$false)]
         [string]
         $Node,
 
@@ -119,7 +119,7 @@ function Resolve-Tokens {
 
     $resolvedTokens = @{}
 
-    $envHierarchy = Resolve-EnvironmentHierarchy -AllEnvironments $AllEnvironments -Environment $Environment
+    $envHierarchy = Resolve-BasedOnHierarchy -AllElements $AllEnvironments -SelectedElement $Environment -ConfigElementName 'Environment'
 
     # get tokens from specific environments
     foreach ($env in $envHierarchy) {
@@ -167,7 +167,7 @@ function Resolve-Tokens {
 
             if ($tokenValue -and $tokenValue -is [ScriptBlock]) {
                 try { 
-                    $newValue = Resolve-ScriptedToken -ScriptedToken $tokenValue -Tokens $resolvedTokens -Node $Node -Environment $Environment
+                    $newValue = Resolve-ScriptedToken -ScriptedToken $tokenValue -ResolvedTokens $resolvedTokens -Node $Node -Environment $Environment
                 } catch {
                     Write-Log -Critical ("Cannot evaluate token '$Environment / $category / $tokenKey': {0}" -f $_.Exception.Message)
                 }

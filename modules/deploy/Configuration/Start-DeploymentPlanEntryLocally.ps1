@@ -70,7 +70,7 @@ function Start-DeploymentPlanEntryLocally {
             RebootHandlingMode = $rebootHandlingMode
         }
 
-        Write-Log -Info "Deploying configuration '$configName' to node '$($connectionParams.NodesAsString)' using mof '$MofDir'"
+        Write-Log -Info "Deploying configuration '$configName' to node '$($connectionParams.NodesAsString)' using mof '$mofDir'"
         Start-DscConfigurationWithRetries @params
 
     } elseif ($configuration.Type -eq "Function") {

@@ -40,53 +40,17 @@ function New-DeploymentPlanEntry {
     .PARAMETER ServerRole
     Name of the the server role that will be deployed.
 
+    .PARAMETER ServerConnection
+    ServerConnection object.
+
     .PARAMETER Node
     Name of the node to add to the deployment plan.
 
-    .PARAMETER ConfigurationName
-    Name of the configuration (DSC configuration or function) to add to the deployment plan.
-
-    .PARAMETER TokensOverride
-    A list of tokens to override. Token defined in the configuration files will be overrided with values specified in this array 
-    (tokens will be matched by name, ignoring categories).
+    .PARAMETER Configuration
+    DSC configuration or function to add to the deployment plan.
 
     .PARAMETER DscOutputPath
     Path where the .MOF files will be generated.
-
-    .PARAMETER RunOn
-    Defines on which machine run deployment of given server role.
-
-    .PARAMETER RunOnCurrentNode
-    If set then each conifguration deployment is run directly on the specified node.
-
-    .PARAMETER CopyTo
-    Defines location on remote machine where deployment package will be copied to.
-
-    .PARAMETER Port
-    Defines the port used for establishing remote connection.
-
-    .PARAMETER RemotingMode
-    Defines type of remoting protocol to be used for remote deployment.
-
-    .PARAMETER RemotingCredential
-    Credentials that should be used when invoking 'Start-DscConfiguration' (only relevent for DSC configurations).
-
-    .PARAMETER Authentication
-    Defines type of authentication that will be used to establish remote conncetion.
-
-    .PARAMETER Protocol
-    Defines the transport protocol used for establishing remote connection (HTTP or HTTPS).
-
-    .PARAMETER CrossDomain
-    This switch should be on when destination nodes are in different domain (additional setup is required in this case).
-
-    .PARAMETER RebootHandlingMode
-    Specifies what to do when a reboot is required by DSC resource:
-    None (default)     - don't check if reboot is required - leave it up to DSC (by default it stops current configuration, but next configurations will run)
-    Stop               - stop and fail the deployment
-    RetryWithoutReboot - retry several times without reboot
-    AutoReboot         - reboot the machine and continue deployment
-    Note that any setting apart from 'None' will cause output messages not to log in real-time.
 
     .PARAMETER DeployType
     Deployment type:
@@ -95,119 +59,83 @@ function New-DeploymentPlanEntry {
     Deploy    - deploy only non-DSC configurations
     Adhoc     - override configurations and nodes with $ConfigurationsFilter and $NodesFilter (they don't have to be defined in ServerRoles - useful for adhoc deployments)
 
+
+    .PARAMETER ResolvedTokens
+    Resolved tokens.
+
+    .PARAMETER TokensOverride
+    A list of tokens to override. Token defined in the configuration files will be overrided with values specified in this array 
+    (tokens will be matched by name, ignoring categories).    
+
+    
     .LINK
         New-DeploymentPlan
 
     .EXAMPLE
-        New-DeploymentPlanEntry -Environment $Environment -Node $Node `
-                                   -ConfigurationName $configName -DscOutputPath $DscOutputPath -RemotingCredential $remotingCredential
+        New-DeploymentPlanEntry ...
 
     #>
     [CmdletBinding()]
     [OutputType([PSCustomObject])]
     param(
         [Parameter(Mandatory=$true)]
-        [hashtable]
-        $AllEnvironments,
-
-        [Parameter(Mandatory=$true)]
         [string]
         $Environment,
 
         [Parameter(Mandatory=$true)]
-        [string]
+        [hashtable]
         $ServerRole,
+
+        [Parameter(Mandatory=$true)]
+        [hashtable]
+        $ServerConnection,
 
         [Parameter(Mandatory=$true)]
         [string]
         $Node,
 
         [Parameter(Mandatory=$true)]
-        [string]
-        $ConfigurationName,
-
-        [Parameter(Mandatory=$false)]
-        [hashtable]
-        $TokensOverride,
+        [object]
+        $Configuration,
 
         [Parameter(Mandatory=$true)]
         [string]
         $DscOutputPath,
 
         [Parameter(Mandatory=$false)]
-        [string]
-        $RunOn,
-
-        [Parameter(Mandatory=$false)]
-        [switch]
-        $RunOnCurrentNode = $false,
-
-        [Parameter(Mandatory=$false)]
-        [object]
-        $CopyTo,
-
-        [Parameter(Mandatory=$false)]
-        [object]
-        $Port,
-
-        [Parameter(Mandatory=$false)]
-        [ValidateSet("PSRemoting", "WebDeployHandler", "WebDeployAgentService")]
-        [string]
-        $RemotingMode,
-
-        [Parameter(Mandatory=$false)]
-        [object]
-        $RemotingCredential,
-
-        [Parameter(Mandatory=$false)]
-        [ValidateSet("Basic", "NTLM", "Credssp", "Default", "Digest", "Kerberos", "Negotiate", "NegotiateWithImplicitCredential")]
-        [string]
-        $Authentication,
-
-        [Parameter(Mandatory=$false)]
-        [ValidateSet($null, 'HTTP', 'HTTPS')]
-        [string]
-        $Protocol = 'HTTP',
-
-        [Parameter(Mandatory=$false)]
-        [switch]
-        $CrossDomain,
-
-        [Parameter(Mandatory=$false)]
-        [ValidateSet($null, 'None', 'Stop', 'RetryWithoutReboot', 'AutoReboot')]
-        [string]
-        $RebootHandlingMode,
-
-        [Parameter(Mandatory=$false)]
         [ValidateSet('All', 'Provision', 'Deploy', 'Adhoc')]
 	    [string]
-	    $DeployType = 'All'
+	    $DeployType = 'All',
+
+        [Parameter(Mandatory=$true)]
+        [hashtable]
+        $ResolvedTokens,
+
+        [Parameter(Mandatory=$false)]
+        [hashtable]
+        $TokensOverride
+        
     )
 
     $mofDir = ''
 
-    $cmd = Get-Command -Name $ConfigurationName -ErrorAction SilentlyContinue
-
-    $resolvedTokens = Resolve-Tokens -AllEnvironments $AllEnvironments -Environment $Environment -Node $Node -TokensOverride $TokensOverride
-
     # note that only parameters that are of type [object] in ServerRole can be scriptblock (otherwise scriptblock will be converted to string)
-
     $connectionParams = @{
                     Nodes = $Node
-                    RemotingMode = $RemotingMode
-                    Credential = (Resolve-ScriptedToken -ScriptedToken $RemotingCredential -Tokens $resolvedTokens -Environment $Environment -Node $Node)
-                    Authentication = $Authentication
-                    Port = (Resolve-ScriptedToken -ScriptedToken $Port -Tokens $resolvedTokens -Environment $Environment -Node $Node)
-                    Protocol = $Protocol
-                    CrossDomain = $CrossDomain
+                    RemotingMode = $ServerConnection.RemotingMode
+                    Credential = Resolve-ScriptedToken -ScriptedToken $ServerConnection.RemotingCredential -ResolvedTokens $ResolvedTokens -Environment $Environment -Node $Node
+                    Authentication = $ServerConnection.Authentication
+                    Port = Resolve-ScriptedToken -ScriptedToken $ServerConnection.Port -ResolvedTokens $ResolvedTokens -Environment $Environment -Node $Node
+                    Protocol = $ServerConnection.Protocol
+                    CrossDomain = $ServerConnection.CrossDomain
                 }
 
     $connectionParamsObj = New-ConnectionParameters @connectionParams
     
-    if ($RunOnCurrentNode) {
+    if ($ServerRole.RunOn) {
+        $runOnNode = $ServerRole.RunOn
+    } elseif ($ServerRole.RunRemotely) {
         $runOnNode = $Node
-    } elseif ($RunOn) {
-        $runOnNode = $RunOn
     }
 
     if ($runOnNode) {
@@ -215,49 +143,42 @@ function New-DeploymentPlanEntry {
         $runOnConnectionParamsObj = New-ConnectionParameters @connectionParams
     }
 
-    if ($cmd.CommandType -eq 'Configuration') {
-        if ($DeployType -eq 'Deploy') {
-            Write-Log -Info "Skipping configuration '$ConfigurationName'"
-            return $null
-        }
-		
-		# When RunOnCurrentNode = true, DSC will run in local mode (we don't want to open Cim session then)
-		if ($RunOnCurrentNode) {
+    $isLocalRun = $runOnNode -eq $Node
+
+    if ($Configuration.CommandType -eq 'Configuration') {		
+		if ($isLocalRun) {
 			$dscNode = 'localhost'
 		} else {
 			$dscNode = $Node
 		}
     
-        $mofDir = Invoke-ConfigurationOrFunction -ConfigurationName $ConfigurationName -OutputPath $DscOutputPath -Node $dscNode -Environment $Environment -ResolvedTokens $resolvedTokens -ConnectionParams $connectionParamsObj
+        $mofDir = Invoke-ConfigurationOrFunction -ConfigurationName $Configuration.Name -OutputPath $DscOutputPath -Node $dscNode -Environment $Environment -ResolvedTokens $ResolvedTokens -ConnectionParams $connectionParamsObj
         if (!(Get-ChildItem -Path $mofDir -Filter "*.mof")) {
-            Write-Log -Warn "Mof file has not been generated for configuration named '$ConfigurationName' (ServerRole '$serverRoleName' / Environment '$Environment'. Please ensure your configuration definition is correct."
+            Write-Log -Warn "Mof file has not been generated for configuration named '$($Configuration.Name)' (Environment '$Environment' / ServerRole '$($ServerRole.Name)'). Please ensure your configuration definition is correct."
             continue
         }
-    } elseif ($cmd.CommandType -eq 'Function') {
-        if ($DeployType -eq 'Provision') {
-            Write-Log -Info "Skipping configuration '$ConfigurationName'"
-            return $null
-        }
-    } else {
-        Write-Log -Critical "Command '$ConfigurationName' is of unrecognized type - neither 'Configuration' nor 'Function'."
     }
 
-    $isLocalRun = $RunOnCurrentNode -or $RunOn -eq $Node
+    $packageDirectory = (Resolve-ScriptedToken -ScriptedToken $ServerConnection.PackageDirectory -ResolvedTokens $ResolvedTokens -Environment $Environment -Node $Node)
+    if (!$packageDirectory) {
+        $packageDirectory = "c:\PSCIPackage"
+    }
 
     return [PSCustomObject]@{ 
         ConnectionParams = $connectionParamsObj
         RunOnConnectionParams = $runOnConnectionParamsObj
         IsLocalRun = $isLocalRun
         Environment = $Environment;
-        ServerRole = $ServerRole;
+        ServerRole = $ServerRole.Name;
         Configuration = [PSCustomObject]@{
-            "Type" = $cmd.CommandType; 
-            "Name" = $ConfigurationName;
+            "Type" = $Configuration.CommandType; 
+            "Name" = $Configuration.Name
             "MofDir" = $mofDir 
         }
-        Tokens = $resolvedTokens; 
+        Tokens = $ResolvedTokens; 
         TokensOverride = $TokensOverride;
-        CopyTo = (Resolve-ScriptedToken -ScriptedToken $CopyTo -Tokens $resolvedTokens -Environment $Environment -Node $Node)
+        PackageDirectory = $packageDirectory;
+        #Prerequisites = (Resolve-ScriptedToken -ScriptedToken $ServerRole.Prerequisites -ResolvedTokens $ResolvedTokens -Environment $Environment -Node $Node)
         RebootHandlingMode = $RebootHandlingMode
     }
 }

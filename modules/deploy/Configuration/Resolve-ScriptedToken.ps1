@@ -30,7 +30,7 @@ function Resolve-ScriptedToken {
     .PARAMETER ScriptedToken
     Object to resolve if it is a ScriptBlock
 
-    .PARAMETER Tokens
+    .PARAMETER ResolvedTokens
     Hashtable containing resolved tokens - will be available as $Tokens variable inside the scriptblock.
 
     .PARAMETER Node
@@ -53,7 +53,7 @@ function Resolve-ScriptedToken {
 
         [Parameter(Mandatory=$true)]
         [hashtable]
-        $Tokens,
+        $ResolvedTokens,
 
         [Parameter(Mandatory=$false)]
         [string]
@@ -64,8 +64,9 @@ function Resolve-ScriptedToken {
         $Environment
     )
 
-    # Add 'NodeName' variable
+    # Add 'NodeName' and 'Tokens' variables
     $NodeName = $Node
+    $Tokens = $ResolvedTokens
 
     $i = 0
     while ($ScriptedToken -is [ScriptBlock] -and $i -lt 20) {
@@ -73,11 +74,12 @@ function Resolve-ScriptedToken {
         $i++
     }
     if ($i -eq 20) {
-        Write-Log -Critical 'Too many nested script tokens (more than 20 loops). Ensure you don''t have circular reference in your tokens (e.g. a={ $Tokens.b }, b={ $Tokens.a })'
+        Write-Log -Critical 'Too many nested script tokens (more than 20 loops). Ensure you don''t have circular reference in your tokens (e.g. a={ $ResolvedTokens.b }, b={ $ResolvedTokens.a })'
     }
 
-    # suppression for ScriptCop unused variable
+    # suppression for ScriptCop unused variables
     [void]$NodeName
+    [void]$Tokens
 
     return $ScriptedToken
 }

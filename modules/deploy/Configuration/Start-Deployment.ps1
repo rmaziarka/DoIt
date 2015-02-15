@@ -146,6 +146,7 @@ function Start-Deployment {
     }
 
     Write-Log -Info "[START] BUILD DEPLOYMENT PLAN" -Emphasize
+
     # We need to include the configuration files in this function. We can't do it in separate Import-Configuration cmdlet, due to scoping issues (see http://stackoverflow.com/questions/15187510/dot-sourcing-functions-from-file-to-global-scope-inside-of-function)... 
     # Load file with 'tokens' in the name first, since other files can make use of it
     $configScripts = Get-ChildItem -Recurse $DeployConfigurationPath -Include *.ps*1 | Sort-Object -Property { $_.Name -inotmatch "tokens"}, { $_.Name }
@@ -158,10 +159,6 @@ function Start-Deployment {
     }
     # here $Global:Environments should be populated
 
-    if (!$Global:Environments -or $Global:Environments.Count -eq 0) {
-        Write-Log -Critical "No environments defined. Please ensure you have at least one invocation of 'Environment' function in your configuration files."
-    }
-
     $dscOutputPath = Join-Path -Path $packagesPath -ChildPath "_DscOutput"
     $Global:DeploymentPlan = New-DeploymentPlan -AllEnvironments $Global:Environments -Environment $Environment -ServerRolesFilter $ServerRolesToDeploy `
                                                 -ConfigurationsFilter $ConfigurationsFilter -NodesFilter $NodesFilter -TokensOverride $TokensOverride `
@@ -170,13 +167,13 @@ function Start-Deployment {
     Write-Log -Info 'Variable $Global:DeploymentPlan has been created.' -Emphasize
     Write-Log -Info "[END] BUILD DEPLOYMENT PLAN" -Emphasize
     if (!$Global:DeploymentPlan) {
-        Write-Log -Warn "No configurations to deploy anywhere. Please ensure your ServerRoles are properly defined and the ConfigurationsFilter '$ConfigurationsFilter' is correct."
+        Write-Log -Warn "No configurations to deploy anywhere. Please ensure your ServerRoles are properly defined and the ServerRoles / Configurations / Nodes filters are correct."
         return
     }
 
     $packageTempDir = ""
     if (!$ValidateOnly) {
-        # When 'DeployScripts' and 'PSCI' directories are not found in the package, and there is at least one RunOn/RunOnCurrentNode in deployment plan,
+        # When 'DeployScripts' and 'PSCI' directories are not found in the package, and there is at least one RunOn/RunRemotely in deployment plan,
         # we need to create a temporary package and copy configuration files to 'DeployScripts' and PSCI to PSCI.
         if (!$Global:RemotingMode -and ($DeploymentPlan | Where { $_.RunOnConnectionParams })) {
             Build-TemporaryPackage

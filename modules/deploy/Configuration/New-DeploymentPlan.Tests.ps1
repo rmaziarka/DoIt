@@ -22,7 +22,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 #>
 
-Import-Module -Name "$PSScriptRoot\..\..\..\PSCI.psm1"
+Import-Module -Name "$PSScriptRoot\..\..\..\PSCI.psm1" -Force
 
 Describe -Tag "PSCI.unit" "New-DeploymentPlan" {
     InModuleScope PSCI.deploy {
@@ -30,12 +30,16 @@ Describe -Tag "PSCI.unit" "New-DeploymentPlan" {
             Initialize-Deployment
 
             Environment Default {
-			    ServerRole WebServer -Configurations @('config1') -Nodes @('machine0')
+                ServerConnection WebServers -Nodes 'machine0'
+			    ServerRole Web -Configurations @('config1') -ServerConnections WebServers
 		    }
 
 		    Environment Local {
-                ServerRole DbServer -Configurations @('config3') -Nodes @('machine2')
-			    ServerRole WebServer -Configurations @('config1', 'config2') -Nodes @('machine1','machine2') -RunOn 'machine1' -CopyTo 'folder'               
+                ServerConnection DbServers -Nodes 'machine2'
+                ServerConnection WebServers -Nodes 'machine1','machine2' -PackageDirectory 'folder'
+                
+                ServerRole Database -Configurations @('config3') -ServerConnection DbServers
+			    ServerRole Web -Configurations @('config1', 'config2') -RunOn 'machine1' 
 		    }
 
             function config1 {}
@@ -46,49 +50,49 @@ Describe -Tag "PSCI.unit" "New-DeploymentPlan" {
                 $environment = 'Local'
 
                 $dscOutputPath = 'dscOutput'
-                $deploymentPlan = New-DeploymentPlan -AllEnvironments $Global:Environments -Environment $environment -DscOutputPath $dscOutputPath -ServerRolesFilter 'WebServer'
+                $deploymentPlan = New-DeploymentPlan -AllEnvironments $Global:Environments -Environment $environment -DscOutputPath $dscOutputPath -ServerRolesFilter 'Web'
 
                 $deploymentPlan.Count | Should Be 4
 
-                $deploymentPlan[0].ServerRole | Should Be 'WebServer'
+                $deploymentPlan[0].ServerRole | Should Be 'Web'
                 $deploymentPlan[0].Configuration.Name | Should Be 'config1'
                 $deploymentPlan[0].ConnectionParams | Should Not Be $null
                 $deploymentPlan[0].ConnectionParams.Nodes[0] | Should Be 'machine1'
                 $deploymentPlan[0].ConnectionParams.RemotingMode | Should Be 'PSRemoting'
                 $deploymentPlan[0].RunOnConnectionParams | Should Not Be $null
                 $deploymentPlan[0].RunOnConnectionParams.Nodes[0] | Should Be 'machine1'
-                $deploymentPlan[0].CopyTo | Should Be 'folder'
+                $deploymentPlan[0].PackageDirectory | Should Be 'folder'
                 $deploymentPlan[0].IsLocalRun | Should Be $true
                 
-                $deploymentPlan[1].ServerRole | Should Be 'WebServer'
+                $deploymentPlan[1].ServerRole | Should Be 'Web'
                 $deploymentPlan[1].Configuration.Name | Should Be 'config1'
                 $deploymentPlan[1].ConnectionParams | Should Not Be $null
                 $deploymentPlan[1].ConnectionParams.Nodes[0] | Should Be 'machine2'
                 $deploymentPlan[1].ConnectionParams.RemotingMode | Should Be 'PSRemoting'
                 $deploymentPlan[1].RunOnConnectionParams | Should Not Be $null
                 $deploymentPlan[1].RunOnConnectionParams.Nodes[0] | Should Be 'machine1'
-                $deploymentPlan[1].CopyTo | Should Be 'folder'
+                $deploymentPlan[1].PackageDirectory | Should Be 'folder'
                 $deploymentPlan[1].IsLocalRun | Should Be $false
                 
 
-                $deploymentPlan[2].ServerRole | Should Be 'WebServer'
+                $deploymentPlan[2].ServerRole | Should Be 'Web'
                 $deploymentPlan[2].Configuration.Name | Should Be 'config2'
                 $deploymentPlan[2].ConnectionParams | Should Not Be $null
                 $deploymentPlan[2].ConnectionParams.Nodes[0] | Should Be 'machine1'
                 $deploymentPlan[2].ConnectionParams.RemotingMode | Should Be 'PSRemoting'
                 $deploymentPlan[2].RunOnConnectionParams | Should Not Be $null
                 $deploymentPlan[2].RunOnConnectionParams.Nodes[0] | Should Be 'machine1'
-                $deploymentPlan[2].CopyTo | Should Be 'folder'
+                $deploymentPlan[2].PackageDirectory | Should Be 'folder'
                 $deploymentPlan[2].IsLocalRun | Should Be $true
 
-                $deploymentPlan[3].ServerRole | Should Be 'WebServer'
+                $deploymentPlan[3].ServerRole | Should Be 'Web'
                 $deploymentPlan[3].Configuration.Name | Should Be 'config2'
                 $deploymentPlan[3].ConnectionParams | Should Not Be $null
                 $deploymentPlan[3].ConnectionParams.Nodes[0] | Should Be 'machine2'
                 $deploymentPlan[3].ConnectionParams.RemotingMode | Should Be 'PSRemoting'
                 $deploymentPlan[3].RunOnConnectionParams | Should Not Be $null
                 $deploymentPlan[3].RunOnConnectionParams.Nodes[0] | Should Be 'machine1'
-                $deploymentPlan[3].CopyTo | Should Be 'folder'
+                $deploymentPlan[3].PackageDirectory | Should Be 'folder'
                 $deploymentPlan[3].IsLocalRun | Should Be $false
             }
 
@@ -100,23 +104,23 @@ Describe -Tag "PSCI.unit" "New-DeploymentPlan" {
 
                 $deploymentPlan.Count | Should Be 5
 
-                $deploymentPlan[0].ServerRole | Should Be 'WebServer'
+                $deploymentPlan[0].ServerRole | Should Be 'Web'
                 $deploymentPlan[0].Configuration.Name | Should Be 'config1'
                 $deploymentPlan[0].ConnectionParams | Should Not Be $null
                 $deploymentPlan[0].ConnectionParams.Nodes[0] | Should Be 'machine1'
                 $deploymentPlan[0].ConnectionParams.RemotingMode | Should Be 'PSRemoting'
                 $deploymentPlan[0].RunOnConnectionParams | Should Not Be $null
                 $deploymentPlan[0].RunOnConnectionParams.Nodes[0] | Should Be 'machine1'
-                $deploymentPlan[0].CopyTo | Should Be 'folder'
+                $deploymentPlan[0].PackageDirectory | Should Be 'folder'
                 $deploymentPlan[0].IsLocalRun | Should Be $true
 
-                $deploymentPlan[4].ServerRole | Should Be 'DbServer'
+                $deploymentPlan[4].ServerRole | Should Be 'Database'
                 $deploymentPlan[4].Configuration.Name | Should Be 'config3'
                 $deploymentPlan[4].ConnectionParams | Should Not Be $null
                 $deploymentPlan[4].ConnectionParams.Nodes[0] | Should Be 'machine2'
                 $deploymentPlan[4].ConnectionParams.RemotingMode | Should Be 'PSRemoting'
                 $deploymentPlan[4].RunOnConnectionParams | Should Be $null
-                $deploymentPlan[4].CopyTo | Should BeNullOrEmpty
+                $deploymentPlan[4].PackageDirectory | Should Be 'c:\PSCIPackage'
                 $deploymentPlan[4].IsLocalRun | Should Be $false
 
             }
@@ -128,19 +132,22 @@ Describe -Tag "PSCI.unit" "New-DeploymentPlan" {
             $cred = ConvertTo-PSCredential -User "Test" -Password "Test"
 
             Environment Default {
-			    ServerRole WebServer -Configurations @('config1') -Nodes @('machine0')
-                ServerRole SSRSServer -Configurations @('config1') -Nodes @('machine0')           
+                ServerConnection MyServers -Nodes @('machine0')
+			    ServerRole Web -Configurations @('config1') -ServerConnections MyServers
+                ServerRole SSRSServer -Configurations @('config1') -ServerConnections MyServers          
 		    }
 
 		    Environment Local {
-			    ServerRole WebServer -Configurations @('config1', 'config2') -Nodes @('machine1','machine2') -RunOn 'machine1' -CopyTo 'folder' -RemotingMode WebDeployAgentService -RemotingCredential $cred
-                ServerRole DbServer -Configurations @('config3') -Nodes @('machine2')
+                ServerConnection WebServers -Nodes @('machine1','machine2') -RemotingMode WebDeployAgentService -RemotingCredential $cred -PackageDirectory 'folder'
+                ServerConnection DbServers -Nodes @('machine2')
+			    ServerRole Web -Configurations @('config1', 'config2') -RunOn 'machine1' -ServerConnections WebServers
+                ServerRole Database -Configurations @('config3') -ServerConnection DbServers
 		    }
 
 		    Environment Tests -BasedOn Local {
-			    ServerRole WebServer -Configurations @('config1') -RunOn 'machine4' -CopyTo 'folder2'
-                ServerRole SSASServer -Configurations @('config4') -Nodes @('machine4')
-                ServerRole SSRSServer -Nodes $null
+			    ServerRole Web -Configurations @('config1') -RunOn $null -RunRemotely
+                ServerRole SSAS -Configurations @('config4') -ServerConnections (ServerConnection SSASServers -Nodes machine4)
+                ServerRole SSRS -ServerConnections $null
 		    }
 
             function config1 {}
@@ -150,9 +157,9 @@ Describe -Tag "PSCI.unit" "New-DeploymentPlan" {
 
             $environment = 'Tests'
             
-            It "should properly plan WebServer deployment" {
+            It "should properly plan Web deployment" {
                 $dscOutputPath = 'dscOutput'
-                $deploymentPlan = New-DeploymentPlan -AllEnvironments $Global:Environments -Environment $environment -DscOutputPath $dscOutputPath -ServerRolesFilter 'WebServer'
+                $deploymentPlan = New-DeploymentPlan -AllEnvironments $Global:Environments -Environment $environment -DscOutputPath $dscOutputPath -ServerRolesFilter 'Web'
 
                 $deploymentPlan.Count | Should Be 2
 
@@ -161,23 +168,23 @@ Describe -Tag "PSCI.unit" "New-DeploymentPlan" {
                 $deploymentPlan[0].ConnectionParams.Nodes[0] | Should Be 'machine1'
                 $deploymentPlan[0].ConnectionParams.RemotingMode | Should Be 'WebDeployAgentService'
                 $deploymentPlan[0].RunOnConnectionParams | Should Not Be $null
-                $deploymentPlan[0].RunOnConnectionParams.Nodes[0] | Should Be 'machine4'
-                $deploymentPlan[0].CopyTo | Should Be 'folder2'
-                $deploymentPlan[0].IsLocalRun | Should Be $false
+                $deploymentPlan[0].RunOnConnectionParams.Nodes[0] | Should Be 'machine1'
+                $deploymentPlan[0].PackageDirectory | Should Be 'folder'
+                $deploymentPlan[0].IsLocalRun | Should Be $true
 
                 $deploymentPlan[1].Configuration.Name | Should Be 'config1'
                 $deploymentPlan[1].ConnectionParams | Should Not Be $null
                 $deploymentPlan[1].ConnectionParams.Nodes[0] | Should Be 'machine2'
                 $deploymentPlan[1].ConnectionParams.RemotingMode | Should Be 'WebDeployAgentService'
                 $deploymentPlan[1].RunOnConnectionParams | Should Not Be $null
-                $deploymentPlan[1].RunOnConnectionParams.Nodes[0] | Should Be 'machine4'
-                $deploymentPlan[1].CopyTo | Should Be 'folder2'
-                $deploymentPlan[1].IsLocalRun | Should Be $false
+                $deploymentPlan[1].RunOnConnectionParams.Nodes[0] | Should Be 'machine2'
+                $deploymentPlan[1].PackageDirectory | Should Be 'folder'
+                $deploymentPlan[1].IsLocalRun | Should Be $true
             }
 
-            It "should properly plan DbServer deployment" {
+            It "should properly plan Database deployment" {
                 $dscOutputPath = 'dscOutput'
-                $deploymentPlan = New-DeploymentPlan -AllEnvironments $Global:Environments -Environment $environment -DscOutputPath $dscOutputPath -ServerRolesFilter 'DbServer'
+                $deploymentPlan = New-DeploymentPlan -AllEnvironments $Global:Environments -Environment $environment -DscOutputPath $dscOutputPath -ServerRolesFilter 'Database'
 
                 $deploymentPlan.Count | Should Be 1
 
@@ -188,9 +195,9 @@ Describe -Tag "PSCI.unit" "New-DeploymentPlan" {
                 $deploymentPlan[0].IsLocalRun | Should Be $false
             }
 
-            It "should properly plan SSASServer deployment" {
+            It "should properly plan SSAS deployment" {
                 $dscOutputPath = 'dscOutput'
-                $deploymentPlan = New-DeploymentPlan -AllEnvironments $Global:Environments -Environment $environment -DscOutputPath $dscOutputPath -ServerRolesFilter 'SSASServer'
+                $deploymentPlan = New-DeploymentPlan -AllEnvironments $Global:Environments -Environment $environment -DscOutputPath $dscOutputPath -ServerRolesFilter 'SSAS'
 
                 $deploymentPlan.Count | Should Be 1
 
@@ -201,9 +208,9 @@ Describe -Tag "PSCI.unit" "New-DeploymentPlan" {
                 $deploymentPlan[0].IsLocalRun | Should Be $false
             }
  
-            It "should properly plan SSRSServer deployment" {
+            It "should properly plan SSRS deployment" {
                 $dscOutputPath = 'dscOutput'
-                $deploymentPlan = New-DeploymentPlan -AllEnvironments $Global:Environments -Environment $environment -DscOutputPath $dscOutputPath -ServerRolesFilter 'SSRSServer'
+                $deploymentPlan = New-DeploymentPlan -AllEnvironments $Global:Environments -Environment $environment -DscOutputPath $dscOutputPath -ServerRolesFilter 'SSRS'
 
                 $deploymentPlan.Count | Should Be 0
             }
@@ -226,8 +233,9 @@ Describe -Tag "PSCI.unit" "New-DeploymentPlan" {
                 }
             }
 
-            Environment Tests {
-                ServerRole WebConfig -Configurations @('config1') -Nodes @('machine1') -RunOnCurrentNode -CopyTo {$Tokens.General.DeploymentPath} -RemotingCredential {$Tokens.General.Credentials}
+            Environment Tests {  
+                ServerConnection WebServers -Nodes @('machine1') -PackageDirectory {$Tokens.General.DeploymentPath} -RemotingCredential {$Tokens.General.Credentials}
+                ServerRole WebConfig -Configurations @('config1') -RunRemotely -ServerConnections WebServers
 		    }
 
             function config1 {}
@@ -248,7 +256,7 @@ Describe -Tag "PSCI.unit" "New-DeploymentPlan" {
                 $deploymentPlan[0].ConnectionParams.Credential.Username | Should Be 'Test'
                 $deploymentPlan[0].RunOnConnectionParams | Should Not Be $null
                 $deploymentPlan[0].RunOnConnectionParams.Nodes[0] | Should Be 'machine1'
-                $deploymentPlan[0].CopyTo | Should Be 'D:\Deploy'
+                $deploymentPlan[0].PackageDirectory | Should Be 'D:\Deploy'
                 $deploymentPlan[0].IsLocalRun | Should Be $true
             }
         }
@@ -275,7 +283,8 @@ Describe -Tag "PSCI.unit" "New-DeploymentPlan" {
             }
 
             Environment Tests {
-                ServerRole WebServer -Configurations @('config1') -Nodes @('s01', 's02') -RunOnCurrentNode -CopyTo {$Tokens.General.DeploymentPath} -RemotingCredential {$Tokens.General.Credentials}
+                ServerConnection WebServers -Nodes @('s01', 's02') -PackageDirectory {$Tokens.General.DeploymentPath} -RemotingCredential {$Tokens.General.Credentials}
+                ServerRole Web -Configurations @('config1') -RunRemotely -ServerConnections WebServers
 		    }
 
             function config1 {}
@@ -289,7 +298,7 @@ Describe -Tag "PSCI.unit" "New-DeploymentPlan" {
                 $deploymentPlan.Count | Should Be 2
 
                 $deploymentPlan[0].Configuration.Name | Should Be 'config1'
-                $deploymentPlan[0].CopyTo | Should Be 'D:\Deployment'
+                $deploymentPlan[0].PackageDirectory | Should Be 'D:\Deployment'
                 $deploymentPlan[0].ConnectionParams | Should Not Be $null
                 $deploymentPlan[0].ConnectionParams.Nodes[0] | Should Be 's01'
                 $deploymentPlan[0].ConnectionParams.RemotingMode | Should Be 'PSRemoting'
@@ -300,7 +309,7 @@ Describe -Tag "PSCI.unit" "New-DeploymentPlan" {
                 $deploymentPlan[0].IsLocalRun | Should Be $true
 
                 $deploymentPlan[1].Configuration.Name | Should Be 'config1'
-                $deploymentPlan[1].CopyTo | Should Be 'C:\Deployment'
+                $deploymentPlan[1].PackageDirectory | Should Be 'C:\Deployment'
                 $deploymentPlan[1].ConnectionParams | Should Not Be $null
                 $deploymentPlan[1].ConnectionParams.Nodes[0] | Should Be 's02'
                 $deploymentPlan[1].ConnectionParams.RemotingMode | Should Be 'PSRemoting'
@@ -328,7 +337,7 @@ Describe -Tag "PSCI.unit" "New-DeploymentPlan" {
             }
 
             Environment Default {
-                ServerRole WebServer -Configurations @('config1') -Nodes { $Tokens.General.AllNodes }
+                ServerRole Web -Configurations @('config1') -ServerConnections (ServerConnection WebServers -Nodes { $Tokens.General.AllNodes })
 		    }
 
             function config1 {}

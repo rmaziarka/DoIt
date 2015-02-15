@@ -78,7 +78,7 @@ function Deploy-SSRSModule {
     foreach ($path in $paths) {
         Write-Log -Info "Copying $PackagePath\*.* to $path ..."
         if (!(Test-Path $path)) {
-            Write-Log -Critical ("Path $path does not exist. Please ensure you're deploying SSRS module on correct server ({0}) - RunOn/RunOnCurrentNode missing?" -f (hostname))
+            Write-Log -Critical ("Path $path does not exist. Please ensure you're deploying SSRS module on correct server ({0}) - RunOn/RunRemotely missing?" -f (hostname))
         }
         Copy-Item -Path "$PackagePath\*.*" -Destination $path -Recurse -Force
     }

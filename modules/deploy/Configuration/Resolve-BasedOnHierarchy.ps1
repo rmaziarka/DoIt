@@ -22,19 +22,22 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 #>
 
-function Resolve-EnvironmentHierarchy { 
+function Resolve-BasedOnHierarchy { 
     <#
     .SYNOPSIS
-    Returns an array of environments from which given environment inherits
+    Returns an array of configuration elements from which given element inherits.
 
-    .PARAMETER AllEnvironments
-    Hashtable containing all environments.
+    .PARAMETER AllElements
+    Hashtable containing all configuration elements.
 
-    .PARAMETER Environment
-    Environment to resolve.
+    .PARAMETER SelectedElement
+    Element to resolve.
 
+    .PARAMETER ConfigElementName
+    Name of configuration element that is being resolved.
+    
     .EXAMPLE
-    Resolve-EnvironmentHierarchy -AllEnvironments $AllEnvironments -Environment Local
+    Resolve-BasedOnHierarchy -AllElements $AllEnvironments -SelectedElement Local -ConfigElementName 'Environment'
     #>
 
     [CmdletBinding()]
@@ -42,40 +45,43 @@ function Resolve-EnvironmentHierarchy {
     param(
         [Parameter(Mandatory=$true)]
         [hashtable]
-        $AllEnvironments,
+        $AllElements,
 
         [Parameter(Mandatory=$true)]
         [string]
-        $Environment
+        $SelectedElement,
+
+        [Parameter(Mandatory=$true)]
+        [string]
+        $ConfigElementName
     )   
 
-    if (!$AllEnvironments.ContainsKey($environment)) {
-        Write-Log -Critical "Environment '$Environment' is not defined."
+    if (!$AllElements.ContainsKey($SelectedElement)) {
+        Write-Log -Critical "$ConfigElementName '$SelectedElement' is not defined."
     }
 
-    # given environment is the top of hierarchy
-    $result = @($Environment)
+    $result = @($SelectedElement)
 
     # add all parents
-    $curEnv = $AllEnvironments[$Environment]
-    while ($curEnv.BasedOn) {
-        $basedOn = $curEnv.BasedOn
-        if (!$AllEnvironments.ContainsKey($basedOn)) {
+    $curElement = $AllElements[$SelectedElement]
+    while ($curElement.BasedOn) {
+        $basedOn = $curElement.BasedOn
+        if (!$AllElements.ContainsKey($basedOn)) {
             if ($basedOn -eq 'Default') {
-                $curEnv.BasedOn = ''
+                $curElement.BasedOn = ''
                 break
             } else {
-                Write-Log -Critical "Environment '$Environment' has invalid 'BasedOn' argument ('$basedOn'). Environment '$basedOn' does not exist."
+                Write-Log -Critical "$ConfigElementName '$SelectedElement' has invalid 'BasedOn' argument ('$basedOn'). $ConfigElementName '$basedOn' does not exist."
             }
         } else {
             if ($result.Contains($basedOn)) {
-                Write-Log -Critical "Inheritance cycle found - environment '$Environment'."
+                Write-Log -Critical "Inheritance cycle found - $ConfigElementName '$SelectedElement'."
             }
             # SuppressScriptCop - adding small arrays is ok
             $result += $basedOn
 
         }
-        $curEnv = $AllEnvironments[$basedOn]
+        $curElement = $AllElements[$basedOn]
     }
 
     # reverse to let iterate from Default to given

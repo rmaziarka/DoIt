@@ -37,4 +37,11 @@ function Initialize-Deployment {
     param()
 
     $Global:Environments = @{}
+    $Global:Environments['Default'] = @{
+        ServerConnections = @{}
+        ServerRoles = [ordered]@{}
+        Tokens = @{}
+        TokensChildren = @{}
+        BasedOn = ''
+    }
 }

@@ -59,20 +59,14 @@ function Start-DeploymentPlanEntryRemotely {
         [ValidateSet('All', 'Provision', 'Deploy', 'Adhoc')]
 	    [string]
 	    $DeployType = 'All'
-    )
-    
-    if (!$DeploymentPlanEntry.CopyTo) {
-        $CopyTo = "c:\PSCIPackage"
-    } else {
-        $CopyTo = $DeploymentPlanEntry.CopyTo
-    }
-  
+    )    
+ 
     $params = 
         @{ 
             Environment = $deploymentPlanEntry.Environment;
             ServerRole = $deploymentPlanEntry.ServerRole;
             ConnectionParams = $deploymentPlanEntry.RunOnConnectionParams;
-            CopyTo = $CopyTo;
+            CopyTo = $deploymentPlanEntry.PackageDirectory;
             DeployType = $DeployType;
             ConfigurationsFilter = $deploymentPlanEntry.Configuration.Name;
             NodesFilter = $deploymentPlanEntry.ConnectionParams.Nodes

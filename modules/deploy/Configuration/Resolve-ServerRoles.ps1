@@ -35,7 +35,7 @@ function Resolve-ServerRoles {
             ServerRoles = @{
                Name1 = @{
                     Configurations = @('WebServerProvision', 'WebServerDeploy')
-                    Nodes = $null
+                    ServerConnections = $null
                }
                Name2 = ...
             }
@@ -44,18 +44,18 @@ function Resolve-ServerRoles {
             ServerRoles = @{
                 Name1 = @{
                     Configurations = @('WebServerProvision', 'WebServerDeploy')
-                    Nodes = 'node1'
+                    ServerConnections = 'web1'
                }
             }
         }
 	}
 
-    And creates following structure:
+    And creates following structure (when resolved for environment 'Dev'):
 
     $ServerRoles = @{ 
         Name1 = @{ 
-            Configurations = @('WebServerProvision', 'WebServerDeploy') 
-            Nodes = 'node1' 
+            Configurations = @((DSC configuration handle with name 'WebServerProvision'), (function handle with name 'WebServerDeploy')) 
+            ServerConnections = (ServerConnection hashtable with name 'web1'')
         }
 		Name2 = ...
     }
@@ -66,11 +66,30 @@ function Resolve-ServerRoles {
     .PARAMETER Environment
     Name of the environment which the ServerRoles should be resolved for.
 
+    .PARAMETER ResolvedTokens
+    Resolved tokens.
+
     .PARAMETER ServerRolesFilter
     Filter for server roles - can be used if you don't want to deploy all server roles defined in the configuration files.
 
+    .PARAMETER ConfigurationsFilter
+    List of Configurations to deploy - can be used if you don't want to deploy all configurations defined in the configuration files.
+    If not set, configurations will be deployed according to the ServerRoles defined in the configuration files.
+
+    .PARAMETER NodesFilter
+    List of Nodes where configurations have to be deployed - can be used if you don't want to deploy to all nodes defined in the configuration files.
+    If not set, configurations will be deployed to all nodes according to the ServerRoles defined in the configuration files.
+
+    .PARAMETER DeployType
+    Deployment type:
+    All       - deploy everything according to configuration files (= Provision + Deploy)
+    Provision - deploy only DSC configurations
+    Deploy    - deploy only non-DSC configurations
+    Adhoc     - override configurations and nodes with $ConfigurationsFilter and $NodesFilter (they don't have to be defined in ServerRoles - useful for adhoc deployments)
+
     .EXAMPLE
-    $serverRoles = Resolve-ServerRoles -AllEnvironments $AllEnvironments -Environment $Environment
+    $serverRoles = Resolve-ServerRoles -AllEnvironments $AllEnvironments -Environment $env -ServerConnections $serverConnections `
+                    -ServerRolesFilter $ServerRolesFilter -NodesFilter $NodesFilter -ConfigurationsFilter $ConfigurationsFilter -DeployType $deployType
 
     #>
     [CmdletBinding()]
@@ -84,16 +103,33 @@ function Resolve-ServerRoles {
         [string]
         $Environment,
 
+        [Parameter(Mandatory=$true)]
+        [hashtable]
+        $ResolvedTokens,
+
         [Parameter(Mandatory=$false)]
         [string[]]
-        $ServerRolesFilter
+        $ServerRolesFilter,
+
+        [Parameter(Mandatory=$false)]
+        [string[]]
+        $ConfigurationsFilter,
+
+        [Parameter(Mandatory=$false)]
+        [string[]]
+        $NodesFilter,
+
+        [Parameter(Mandatory=$false)]
+        [ValidateSet('All', 'Provision', 'Deploy', 'Adhoc')]
+	    [string]
+	    $DeployType = 'All'
     )
 
-    $envHierarchy = @(Resolve-EnvironmentHierarchy -AllEnvironments $AllEnvironments -Environment $Environment)
+    $envHierarchy = @(Resolve-BasedOnHierarchy -AllElements $AllEnvironments -SelectedElement $Environment -ConfigElementName 'Environment')
 
     $result = [ordered]@{}
 
-    # traverse environments from top to bottom to set / override their properties
+    # traverse environments from top to bottom to set / override ServerRole properties
     foreach ($env in $envHierarchy) {
         $serverRoles = $AllEnvironments[$env].ServerRoles.Values | Where-Object { !$ServerRolesFilter -or $ServerRolesFilter -icontains $_.Name }
         foreach ($serverRole in $serverRoles) {
@@ -106,11 +142,46 @@ function Resolve-ServerRoles {
         }
     }
 
-    # fix default values of ServerRoles
+    $allServerConnections = Resolve-ServerConnectionsConfigElements -AllEnvironments $AllEnvironments -Environment $Environment -ResolvedTokens $resolvedTokens
+
+    $serverRolesToRemove = @()
     foreach ($serverRole in $result.Values) {
-        if (!$serverRole.RemotingMode) {
-            $serverRole.RemotingMode = 'PSRemoting'
+        
+        $serverRole.Configurations = Resolve-Configurations `
+                                        -Environment $Environment `
+                                        -Configurations $serverRole.Configurations `
+                                        -ConfigurationsFilter $ConfigurationsFilter `
+                                        -DeployType $DeployType `
+                                        -ServerRoleName $serverRole.Name`
+                                        -ResolvedTokens $resolvedTokens 
+
+        
+        if (!$serverRole.Configurations) {
+            Write-Log -Info "Environment '$Environment' / ServerRole '$($serverRole.Name)' has no configurations and will not be deployed."
+            $serverRolesToRemove += $serverRole.Name
+            continue
         }
+
+        $serverRole.ServerConnections = Resolve-ServerConnections `
+                                            -Environment $Environment `
+                                            -AllServerConnections $allServerConnections `
+                                            -SelectedServerConnections $serverRole.ServerConnections `
+                                            -NodesFilter $NodesFilter `
+                                            -DeployType $DeployType `
+                                            -ServerRoleName $serverRole.Name `
+                                            -ResolvedTokens $resolvedTokens 
+
+        # remove ServerRoles without any ServerConnections
+        if (!$serverRole.ServerConnections) {
+            Write-Log -Info "Environment '$Environment' / ServerRole '$($serverRole.Name)' has no ServerConnections or Nodes and will not be deployed."
+            $serverRolesToRemove += $serverRole.Name
+            continue
+        }
+        
+    }
+
+    foreach ($serverRoleName in $serverRolesToRemove) {
+        $result.Remove($serverRoleName)
     }
 
     return $result

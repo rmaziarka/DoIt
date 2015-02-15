@@ -23,6 +23,7 @@ SOFTWARE.
 #>
 
 Environment Default {
+
     Tokens Credentials @{
         UserName = '<put_your_service_user_here>'
         Password = ''
@@ -30,12 +31,12 @@ Environment Default {
     }
     
     Tokens Topology @{
-        Node = 'localhost'
+        Nodes = 'localhost'
     }
 }
 
 Environment Dev {
     Tokens Topology @{
-        Node = '<put_server_name_here>'
+        Nodes = '<server_name>'
     }
 }

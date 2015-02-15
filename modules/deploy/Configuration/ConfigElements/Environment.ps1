@@ -67,7 +67,7 @@ function Environment {
         $Definition
     )
 
-    # if $Env_Name is already defined then it means that it is a Server node inside of Environment node
+    # if $Env_Name is already defined then it means that it is a 'Server' node inside of Environment node
     if ((Test-Path variable:Env_Name) -and $Env_Name) {
         $Node_Name = $Name
     # InvokeWithContext does not seem to work with function from modules for some reason... but $Definition will have access to $Env_* variables if we declare them normally as below
@@ -76,15 +76,12 @@ function Environment {
 
         if (!$Global:Environments[$Name]) {
             $Global:Environments[$Name] = @{
+                ServerConnections = @{}
                 ServerRoles = [ordered]@{}
                 Tokens = @{}
                 TokensChildren = @{}
-            }
-            if ($Name -ine 'Default') {
-                $Global:Environments[$Name].BasedOn = 'Default'
-            } else {
-                $Global:Environments[$Name].BasedOn = ''
-            }
+                BasedOn = 'Default'
+            }            
         }
 
         if ($BasedOn) {
@@ -93,7 +90,7 @@ function Environment {
     }
     
     if ($Definition) {
-        $Definition.Invoke();
+        [void]($Definition.Invoke())
     }
     # suppressions for ScriptCop
     [void]$Node_Name

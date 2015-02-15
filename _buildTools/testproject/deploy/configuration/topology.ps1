@@ -35,24 +35,17 @@ For ServerRole examples, see .EXAMPLES section in PSCI\deployment\Configuration\
 
 # Default environment, parent for all others
 Environment Default {
-    ServerRole WebServer -Configurations @('WebServerProvision')
-	ServerRole DatabaseServer -Configurations @('DatabaseServerDeploy') 
+    ServerConnection TestNodeDefault -Nodes { $Tokens.Topology.Nodes }
+    ServerConnection TestNodePSRemoting -BasedOn TestNodeDefault -RemotingCredential { $Tokens.Credentials.RemotingCredential }
+    ServerConnection TestNodePSRemotingCredSSP -BasedOn TestNodePSRemoting -Authentication CredSSP -Protocol HTTPS -CrossDomain
+    ServerConnection TestNodeMSDeploy -BasedOn TestNodePSRemoting -RemotingMode WebDeployHandler
 
-    ServerRole RemotingTestPSRemoting -Configurations @('RemotingTest') -RunOnCurrentNode -RemotingCredential { $Tokens.Credentials.RemotingCredential }
-    ServerRole RemotingTestPSRemotingCredSSP -Configurations @('RemotingTest') -RunOnCurrentNode -RemotingCredential { $Tokens.Credentials.RemotingCredential } -Authentication CredSSP -Protocol HTTPS
-    ServerRole RemotingTestMSDeploy -Configurations @('RemotingTest') -RunOnCurrentNode -RemotingCredential { $Tokens.Credentials.RemotingCredential } -RemotingMode WebDeployHandler
+    ServerRole Web -Configurations @('WebServerProvision') -ServerConnections TestNodeDefault
+	ServerRole Database -Configurations @('DatabaseServerDeploy') -ServerConnections TestNodeDefault
+
+    ServerRole RemotingTestPSRemoting -Configurations @('RemotingTest') -RunRemotely -ServerConnections TestNodePSRemoting
+    ServerRole RemotingTestPSRemotingCredSSP -Configurations @('RemotingTest') -RunRemotely -ServerConnections TestNodePSRemotingCredSSP
+    ServerRole RemotingTestMSDeploy -Configurations @('RemotingTest') -RunRemotely -ServerConnections TestNodeMSDeploy
 }
 
-Environment Local {
-    ServerRole WebServer -Nodes { $Tokens.Topology.Node }
-	ServerRole DatabaseServer -Nodes { $Tokens.Topology.Node }
-}
 
-Environment Dev { 
-    ServerRole WebServer -Nodes { $Tokens.Topology.Node }
-	ServerRole DatabaseServer -Nodes { $Tokens.Topology.Node }
-
-    ServerRole RemotingTestPSRemoting -Nodes { $Tokens.Topology.Node }
-    ServerRole RemotingTestPSRemotingCredSSP -Nodes { $Tokens.Topology.Node } -CrossDomain
-    ServerRole RemotingTestMSDeploy -Nodes { $Tokens.Topology.Node }
-}

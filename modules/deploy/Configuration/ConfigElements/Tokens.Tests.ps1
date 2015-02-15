@@ -176,7 +176,7 @@ Describe -Tag "PSCI.unit" "Tokens" {
 	                }
                 }
 
-                $Environments.Count | Should Be 2
+                $Environments.Count | Should Be 3
                 $Environments.Parent | Should Not Be $null
                 $Environments.Parent.BasedOn | Should Be 'Default'
                 $Environments.Child | Should Not Be $null

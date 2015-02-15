@@ -22,7 +22,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 #>
 
-Import-Module -Name "$PSScriptRoot\..\..\..\..\PSCI.psm1"
+Import-Module -Name "$PSScriptRoot\..\..\..\..\PSCI.psm1" -Force
 
 Describe -Tag "PSCI.unit" "ServerRole" {
     InModuleScope PSCI.deploy {
@@ -33,21 +33,29 @@ Describe -Tag "PSCI.unit" "ServerRole" {
                 $remotingDefaultCredential = (ConvertTo-PsCredential -User 'UserName' -Password 'Password')
 
 			    Environment Local {
-				    ServerRole WebServer -Configurations @('config1', 'config2') -Nodes @('machine1','machine2') -RemotingCredential $remotingDefaultCredential -RunOn 'config1' -CopyTo "file"
+                    ServerConnection Web1 -Nodes @('machine1', 'machine2') -RemotingCredential $remotingDefaultCredential -PackageDirectory 'c:\dir'
+				    ServerRole Web -Configurations @('config1', 'config2') -ServerConnections Web1 -RunRemotely 
 			    }
 
-                $Environments.Count | Should Be 1
+                $Environments.Count | Should Be 2
                 $Environments.Local | Should Not Be $null
                 $Environments.Local.BasedOn | Should Be 'Default'
 
+                $Environments.Local.ServerConnections | Should Not Be $null
+                $Environments.Local.ServerConnections.Count | Should Be 1
+                $Environments.Local.ServerConnections.Web1 | Should Not Be $null
+                $Environments.Local.ServerConnections.Web1.Nodes | Should Be @('machine1', 'machine2')
+                $Environments.Local.ServerConnections.Web1.PackageDirectory | Should Be 'c:\dir'
+                $Environments.Local.ServerConnections.Web1.RemotingCredential | Should Be $remotingDefaultCredential
+               
+
                 $Environments.Local.ServerRoles | Should Not Be $null
                 $Environments.Local.ServerRoles.Count | Should Be 1
-                $Environments.Local.ServerRoles.WebServer | Should Not Be $null
-                $Environments.Local.ServerRoles.WebServer.Configurations | Should Be @('config1', 'config2')
-                $Environments.Local.ServerRoles.WebServer.Nodes | Should Be @('machine1', 'machine2')
-                $Environments.Local.ServerRoles.WebServer.RemotingCredential | Should Be $remotingDefaultCredential
-                $Environments.Local.ServerRoles.WebServer.RunOn | Should Be 'config1'
-                $Environments.Local.ServerRoles.WebServer.CopyTo | Should Be 'file'
+                $Environments.Local.ServerRoles.Web | Should Not Be $null
+                $Environments.Local.ServerRoles.Web.Configurations | Should Be @('config1', 'config2')
+                $Environments.Local.ServerRoles.Web.ServerConnections | Should Be @('Web1')
+                $Environments.Local.ServerRoles.Web.RunRemotely | Should Be $true
+                
             }
         }
 
@@ -55,29 +63,38 @@ Describe -Tag "PSCI.unit" "ServerRole" {
            It "ServerRole: should properly initialize internal structures" {
                 Initialize-Deployment
                 $cred = ConvertTo-PSCredential -User "Test" -Password "Test"
+                $cred2 = ConvertTo-PSCredential -User "Test2" -Password "Test2"
 
 			    Environment Default {
-				    ServerRole WebServer -Configurations @('config1') -Nodes @('machine1') -RemotingCredential $cred
+                    ServerConnection Web1 -Nodes @('machine1') -RemotingCredential $cred 
+				    ServerRole Web -Configurations @('config1') -ServerConnection Web1
 			    }
 
 			    Environment Local {
-				    ServerRole WebServer -Configurations @('config1', 'config2') -Nodes @('machine1','machine2')
+                    ServerConnection Web1 -Nodes @('machine1','machine2') -RemotingCredential $cred2 
+				    ServerRole Web -Configurations @('config1', 'config2') 
 			    }
 
                 $Environments.Count | Should Be 2
                 $Environments.Default | Should Not Be $null
                 $Environments.Default.BasedOn | Should Be ''
                 $Environments.Default.ServerRoles.Count | Should Be 1
-                $Environments.Default.ServerRoles.WebServer.Configurations | Should Be 'config1'
-                $Environments.Default.ServerRoles.WebServer.Nodes | Should Be 'machine1'
-                $Environments.Default.ServerRoles.WebServer.RemotingCredential | Should Be $cred
+                $Environments.Default.ServerRoles.Web.Configurations | Should Be 'config1'
+                $Environments.Default.ServerRoles.Web.ServerConnections | Should Be 'Web1'
+
+                $Environments.Default.ServerConnections.Count | Should Be 1
+                $Environments.Default.ServerConnections.Web1.Nodes | Should Be 'machine1'
+                $Environments.Default.ServerConnections.Web1.RemotingCredential | Should Be $cred
 
                 $Environments.Local | Should Not Be $null
                 $Environments.Local.BasedOn | Should Be 'Default'
                 $Environments.Local.ServerRoles.Count | Should Be 1
-                $Environments.Local.ServerRoles.WebServer.Configurations | Should Be @('config1', 'config2')
-                $Environments.Local.ServerRoles.WebServer.Nodes | Should Be @('machine1', 'machine2')
-                $Environments.Local.ServerRoles.WebServer.ContainsKey('RemotingCredential') | Should Be $false
+                $Environments.Local.ServerRoles.Web.Configurations | Should Be @('config1', 'config2')
+                $Environments.Local.ServerRoles.Web.ServerConnections | Should Be $null
+
+                $Environments.Local.ServerConnections.Count | Should Be 1
+                $Environments.Local.ServerConnections.Web1.Nodes | Should Be @('machine1', 'machine2')
+                $Environments.Local.ServerConnections.Web1.RemotingCredential | Should Be $cred2
             }
 
             It "ServerRole: should override with empty parameter" {
@@ -85,62 +102,73 @@ Describe -Tag "PSCI.unit" "ServerRole" {
                 $cred = ConvertTo-PSCredential -User "Test" -Password "Test"
 
 			    Environment Default {
-				    ServerRole WebServer -Configurations @('config1') -Nodes @('machine1') -RemotingCredential $cred
+                    ServerConnection Web1 -Nodes @('machine1') -RemotingCredential $cred 
+				    ServerRole Web -Configurations @('config1') -ServerConnection Web1
 			    }
 
 			    Environment Local {
-				    ServerRole WebServer -Configurations $null -Nodes $null -RemotingCredential $null -RunOn $null -CopyTo $null -Authentication $null
+                    ServerConnection Web1 -Nodes $null -RemotingCredential $null -Authentication $null -PackageDirectory $null
+				    ServerRole Web -Configurations $null -RunOn $null
 			    }
 
                 $Environments.Count | Should Be 2
                 $Environments.Default | Should Not Be $null
                 $Environments.Default.BasedOn | Should Be ''
                 $Environments.Default.ServerRoles.Count | Should Be 1
-                $Environments.Default.ServerRoles.WebServer.Configurations | Should Be 'config1'
-                $Environments.Default.ServerRoles.WebServer.Nodes | Should Be 'machine1'
-                $Environments.Default.ServerRoles.WebServer.RemotingCredential | Should Be $cred
+                $Environments.Default.ServerConnections.Count | Should Be 1
+                $Environments.Default.ServerRoles.Web.Configurations | Should Be 'config1'
+                $Environments.Default.ServerRoles.Web.ServerConnections | Should Be 'Web1'
+                $Environments.Default.ServerConnections.Web1.Nodes | Should Be 'machine1'
+                $Environments.Default.ServerConnections.Web1.RemotingCredential | Should Be $cred
 
                 $Environments.Local | Should Not Be $null
                 $Environments.Local.BasedOn | Should Be 'Default'
                 $Environments.Local.ServerRoles.Count | Should Be 1
-                $Environments.Local.ServerRoles.WebServer.Configurations | Should Be $null
-                $Environments.Local.ServerRoles.WebServer.ContainsKey('Nodes') | Should Be $true
-                $Environments.Local.ServerRoles.WebServer.Nodes | Should Be $null
-                $Environments.Local.ServerRoles.WebServer.ContainsKey('RemotingCredential') | Should Be $true
-                $Environments.Local.ServerRoles.WebServer.RemotingCredential | Should Be $null
-                $Environments.Local.ServerRoles.WebServer.ContainsKey('RunOn') | Should Be $true
-                $Environments.Local.ServerRoles.WebServer.RunOn | Should Be ''
-                $Environments.Local.ServerRoles.WebServer.ContainsKey('CopyTo') | Should Be $true
-                $Environments.Local.ServerRoles.WebServer.CopyTo | Should Be $null
-                $Environments.Local.ServerRoles.WebServer.ContainsKey('Authentication') | Should Be $true
-                $Environments.Local.ServerRoles.WebServer.Authentication | Should Be ''
+                $Environments.Local.ServerConnections.Count | Should Be 1
+                $Environments.Local.ServerRoles.Web.Configurations | Should Be $null
+                $Environments.Local.ServerRoles.Web.ContainsKey('RunOn') | Should Be $true
+                $Environments.Local.ServerRoles.Web.RunOn | Should Be ''
+                $Environments.Local.ServerConnections.Web1.ContainsKey('Nodes') | Should Be $true
+                $Environments.Local.ServerConnections.Web1.Nodes | Should Be $null
+                $Environments.Local.ServerConnections.Web1.ContainsKey('RemotingCredential') | Should Be $true
+                $Environments.Local.ServerConnections.Web1.RemotingCredential | Should Be $null
+                $Environments.Local.ServerConnections.Web1.ContainsKey('PackageDirectory') | Should Be $true
+                $Environments.Local.ServerConnections.Web1.PackageDirectory | Should Be $null
+                $Environments.Local.ServerConnections.Web1.ContainsKey('Authentication') | Should Be $true
+                $Environments.Local.ServerConnections.Web1.Authentication | Should Be ''
             }
         }
 
-        Context "when used with multiple roles" {
+        Context "when used with multiple roles and connections" {
            It "ServerRole: should properly initialize internal structures" {
                 Initialize-Deployment
 
                 Environment Default {
-				    ServerRole WebServer -Configurations @('config1') -Nodes @('machine1')
+                    ServerConnection Web1 -Nodes @('machine1') 
+                    ServerConnection Web2 -Nodes @('machine2') 
+				    ServerRole Web -Configurations @('config1') -ServerConnections Web1,Web2
 			    }
 
 			    Environment Local {
-				    ServerRole DbServer -Configurations @('config2') -Nodes @('machine2')
+				    ServerRole Database -Configurations @('config2') -ServerConnections Web1
 			    }
 
                 $Environments.Count | Should Be 2
                 $Environments.Default | Should Not Be $null
                 $Environments.Default.BasedOn | Should Be ''
                 $Environments.Default.ServerRoles.Count | Should Be 1
-                $Environments.Default.ServerRoles.WebServer.Configurations | Should Be 'config1'
-                $Environments.Default.ServerRoles.WebServer.Nodes | Should Be 'machine1'
+                $Environments.Default.ServerConnections.Count | Should Be 2
+                $Environments.Default.ServerRoles.Web.Configurations | Should Be 'config1'
+                $Environments.Default.ServerRoles.Web.ServerConnections | Should Be @('Web1','Web2')
+                $Environments.Default.ServerConnections.Web1.Nodes | Should Be 'machine1'
+                $Environments.Default.ServerConnections.Web2.Nodes | Should Be 'machine2'
 
                 $Environments.Local | Should Not Be $null
                 $Environments.Local.BasedOn | Should Be 'Default'
                 $Environments.Local.ServerRoles.Count | Should Be 1
-                $Environments.Local.ServerRoles.DbServer.Configurations | Should Be 'config2'
-                $Environments.Local.ServerRoles.DbServer.Nodes | Should Be 'machine2'
+                $Environments.Local.ServerConnections.Count | Should Be 0
+                $Environments.Local.ServerRoles.Database.Configurations | Should Be 'config2'
+                $Environments.Local.ServerRoles.Database.ServerConnections | Should Be 'Web1'
             }
         }
 
@@ -149,13 +177,13 @@ Describe -Tag "PSCI.unit" "ServerRole" {
                 Initialize-Deployment
 
                 Environment Default {
-				    ServerRole WebServer -Configurations @('config1') -Nodes @('machine1')
-                    ServerRole DbServer -Configurations @('config2') -Nodes @('machine2')
+				    ServerRole Web -Configurations @('config1')
+                    ServerRole Database -Configurations @('config2')
 			    }
 
                 Environment Local {
-                    ServerRole DbServer -Configurations @('config2') -Nodes @('machine2')
-				    ServerRole WebServer -Configurations @('config1') -Nodes @('machine1')
+                    ServerRole Database -Configurations @('config2')
+				    ServerRole Web -Configurations @('config1') 
 			    }
 
 
@@ -163,18 +191,14 @@ Describe -Tag "PSCI.unit" "ServerRole" {
                 $Environments.Default | Should Not Be $null
                 $Environments.Default.BasedOn | Should Be ''
                 $Environments.Default.ServerRoles.Count | Should Be 2
-                $Environments.Default.ServerRoles[0].Name | Should Be 'WebServer'
-                $Environments.Default.ServerRoles[1].Name | Should Be 'DbServer'
+                $Environments.Default.ServerRoles[0].Name | Should Be 'Web'
+                $Environments.Default.ServerRoles[1].Name | Should Be 'Database'
 
-                $Environments.Default.ServerRoles.WebServer.Configurations | Should Be 'config1'
-                $Environments.Default.ServerRoles.WebServer.Nodes | Should Be 'machine1'
-                $Environments.Default.ServerRoles.DbServer.Configurations | Should Be 'config2'
-                $Environments.Default.ServerRoles.DbServer.Nodes | Should Be 'machine2'
+                $Environments.Default.ServerRoles.Web.Configurations | Should Be 'config1'
+                $Environments.Default.ServerRoles.Database.Configurations | Should Be 'config2'
 
-                $Environments.Local.ServerRoles.WebServer.Configurations | Should Be 'config1'
-                $Environments.Local.ServerRoles.WebServer.Nodes | Should Be 'machine1'
-                $Environments.Local.ServerRoles.DbServer.Configurations | Should Be 'config2'
-                $Environments.Local.ServerRoles.DbServer.Nodes | Should Be 'machine2'
+                $Environments.Local.ServerRoles.Web.Configurations | Should Be 'config1'
+                $Environments.Local.ServerRoles.Database.Configurations | Should Be 'config2'
             }
         }
     }
