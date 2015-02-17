@@ -162,7 +162,7 @@ Describe -Tag "PSCI.unit" "Copy-FilesToRemoteServer" {
             }
         } 
 
-        Context "when copying several directories to several Destinations when destination exist" {
+        Context "when copying several directories to several Destinations without ClearDestination flag when destination exist" {
             try {
                 New-TestDirStructure
                 
@@ -173,7 +173,7 @@ Describe -Tag "PSCI.unit" "Copy-FilesToRemoteServer" {
 
                 $len = (Get-Item -Path "$dstDir\testFileAdditional").Length
 
-                Copy-FilesToRemoteServer -Path 'testFolder1', 'testFolder2' -Destination "$dstDir\test1", "$dstDir\test2" -ConnectionParams $connectionParams
+                Copy-FilesToRemoteServer -Path 'testFolder1', 'testFolder2' -Destination "$dstDir\test1", "$dstDir\test2" -ConnectionParams $connectionParams -ClearDestination:$false
 
                 It "should copy the files with structure intact" {
                     Validate-TestDirStructure $dstDir
