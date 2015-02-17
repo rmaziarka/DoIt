@@ -26,7 +26,7 @@ function Get-WriteBytesScriptBlock {
 
     <#
 	.SYNOPSIS
-		Returns a scriptblock that writes specified byte array to file. This is a helper for Copy-FilesToRemoteServer.
+		Returns a scriptblock that writes specified byte array to file. This is a helper for Copy-FilesToRemoteServer / Send-FileStream.
 
     .EXAMPLE
         $writeBytesRemoteScript = Get-WriteBytesScriptBlock

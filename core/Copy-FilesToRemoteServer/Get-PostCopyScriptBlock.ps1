@@ -38,30 +38,60 @@ function Get-PostCopyScriptBlock {
     param()
 
     return {
-        param($DestFile, $BlueGreenEnvVariableName, $HashPath)
-            
-        $destPath = Split-Path -Parent $DestFile
-        #Write-Host ("[{0}] Uncompressing file '{1}'" -f (hostname), $using:tempZipDst)       
-        $shell = New-Object -ComObject Shell.Application
-        $zip = $shell.NameSpace($DestFile)
-        
-        $dst = $shell.namespace($destPath)
-        # 0x14 = overwrite and don't show dialogs
-        $dst.Copyhere($zip.items(), 0x14)
 
-        Remove-Item -Path $DestFile -Force
+        [CmdletBinding()]
+	    [OutputType([string])]
+	    param(
+            [Parameter(Mandatory = $true)]
+            [string]
+            $ZipFilePath,
+
+            [Parameter(Mandatory = $false)]
+            [boolean]
+            $IsStructuredZip,
+
+            [Parameter(Mandatory = $false)]
+            [string]
+            $BlueGreenEnvVariableName,
+
+            [Parameter(Mandatory = $false)]
+            [string]
+            $HashPath
+        )
+
+        $Global:ErrorActionPreference = 'Stop'
+
+        $zipDir = Split-Path -Path $ZipFilePath -Parent
+        $shell = New-Object -ComObject Shell.Application
+        $zip = $shell.Namespace($ZipFilePath)
+        if ($IsStructuredZip) {
+            foreach ($rootItem in $zip.Items()) {
+                $rootDisk = $rootItem.Name
+                $destPath = "${rootDisk}:"
+                $dst = $shell.Namespace($destPath)
+                # 0x14 = overwrite and don't show dialogs
+                $dst.Copyhere($rootItem.GetFolder.Items(), 0x14)
+            }
+        } else {
+            $dst = $shell.namespace($zipDir)
+            # 0x14 = overwrite and don't show dialogs
+            $dst.Copyhere($zip.Items(), 0x14)
+        }
+
+        Remove-Item -Path $ZipFilePath -Force
 
         if ($BlueGreenEnvVariableName) {
             $oldPath = [Environment]::GetEnvironmentVariable($BlueGreenEnvVariableName, 'Machine')
             if ($oldPath) {
                 [void](Remove-Item -Path (Join-Path -Path $oldPath -ChildPath '.currentLive') -Force -ErrorAction SilentlyContinue)
             }
+            $destPath = Split-Path -Parent $ZipFilePath
             [Environment]::SetEnvironmentVariable($BlueGreenEnvVariableName, $destPath, 'Machine')
             [void](New-Item -Path (Join-Path -Path $destPath -ChildPath '.currentLive') -Force -ItemType File)
         }
-
         if ($HashPath) {
-            $hashRemoteFilePath = Join-Path -Path $destPath -ChildPath "syncHash_$HashPath"
+            Get-ChildItem -Path $zipDir -Filter "syncHash_*" | Remove-Item
+            $hashRemoteFilePath = Join-Path -Path $FirstDestination -ChildPath "syncHash_$HashPath"
             [void](New-Item -Path $hashRemoteFilePath -ItemType File -Force)
         }
     }

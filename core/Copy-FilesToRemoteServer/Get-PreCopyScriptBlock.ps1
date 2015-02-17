@@ -40,32 +40,56 @@ function Get-PreCopyScriptBlock {
     param()
 
     return {
-        param($FileName, $Destination, $BlueGreenEnvVariableName, $Destinations, $ClearDestination)
+        
+        [CmdletBinding()]
+	    [OutputType([string])]
+	    param(
+            [Parameter(Mandatory = $true)]
+            [string]
+            $ZipFileName,
+
+            [Parameter(Mandatory = $true)]
+            [string[]]
+            $Destination,
+
+            [Parameter(Mandatory = $false)]
+            [string]
+            $BlueGreenEnvVariableName,
+
+            [Parameter(Mandatory = $false)]
+            [boolean]
+            $ClearDestination
+        )
+        $Global:ErrorActionPreference = 'Stop'
 
         if ($BlueGreenEnvVariableName) {
             $currentDest = [Environment]::GetEnvironmentVariable($BlueGreenEnvVariableName, 'Machine')
-            $destPath = $Destinations[0]
+            $destPath = $Destination[0]
             if ($currentDest -ieq $destPath) {
-                $destPath = $Destinations[1]
+                $destPath = $Destination[1]
             }
-        } elseif ($Destination) {
-            $destPath = $Destination
+            $Destination = @($destPath)
         }
 
-        $destFile = Join-Path -Path $destPath -ChildPath $FileName
-        if (Test-Path -Path $destPath -PathType Leaf) {
-            [void](Remove-Item -Path $destPath)
-        } 
-            
-        if (!(Test-Path -Path $destPath -PathType Container)) {
-            [void](New-Item -Path $destPath -ItemType Directory)
-        } elseif ($clearDestination) {
-            $filesToRemove = Join-Path -Path $destPath -ChildPath "*"
-            [void](Remove-Item -Path $filesToRemove -Recurse -Force)
-        } elseif (Test-Path -Path $destFile) {
-            # Delete the previously-existing file if it exists
-            [void](Remove-Item -Path $destFile)
+        $destZipFile = Join-Path -Path $Destination[0] -ChildPath $ZipFileName
+        if (Test-Path -Path $destZipFile) {
+            Remove-Item -Path $destZipFile -Force
         }
-        return $destFile
+
+        foreach ($destPath in $Destination) { 
+            if (Test-Path -Path $destPath -PathType Leaf) {
+                # if a file with the same name as Destination directory, just delete it
+                [void](Remove-Item -Path $destPath -Force)
+            } elseif ($ClearDestination -and (Test-Path -Path $destPath -PathType Container)) {
+                # if Destination directory exists and $ClearDestination = $true, delete it
+                [void](Remove-Item -Path $destPath -Force -Recurse)
+            }
+
+            # create Destination directory
+            if (!(Test-Path -Path $destPath)) {
+                [void](New-Item -Path $destPath -ItemType Directory)
+            }   
+        }
+        return $destZipFile
     }
 }

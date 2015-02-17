@@ -34,7 +34,7 @@ function Copy-FilesToRemoteServer {
         Connection parameters created by New-ConnectionParameters function.
 
 	.PARAMETER Destination
-		The remote path where the file will be saved to.
+		The remote path where the file will be saved to (must be absolute path and always mean directory, not a file).
 
     .PARAMETER BlueGreenEnvVariableName
         If specified, this environment variable name will be used for blue-green deployment 
@@ -74,16 +74,13 @@ function Copy-FilesToRemoteServer {
         $ConnectionParams,
         
         [Parameter(Mandatory = $true, ParameterSetName = 'JustCopy')]
-        [string]
+        [Parameter(Mandatory = $true, ParameterSetName = 'BlueGreen')]
+        [string[]]
         $Destination,
 
         [Parameter(Mandatory = $true, ParameterSetName = 'BlueGreen')]
         [string]
         $BlueGreenEnvVariableName,
-
-        [Parameter(Mandatory = $true, ParameterSetName = 'BlueGreen')]
-        [string[]]
-        $Destinations,
 
         [Parameter(Mandatory = $false)]
         [string[]]
@@ -102,19 +99,26 @@ function Copy-FilesToRemoteServer {
     if ($ConnectionParams.RemotingMode -ne 'PSRemoting') {
         Write-Log -Critical "ConnectionParams.RemotingMode = $($ConnectionParams.RemotingMode) is not supported by this function (only PSRemoting is)."
     }
-    if ($Destinations -and $Destinations.Count -ne 2) {
+    foreach ($dest in $Destination) {
+        if (![System.IO.Path]::IsPathRooted($dest)) {
+            Write-Log -Critical "'Destination' must be an absolute path - invalid value '$dest'."
+        }
+    }
+    if ($Path.Count -ne $Destination.Count -and $Destination.Count -ne 1) {
+        Write-Log -Critical "'Destination' array must be of length 1 or the same length as 'Path' array."
+    }
+    if ($BlueGreenEnvVariableName -and $Destination.Count -ne 2) {
         Write-Log -Critical "'Destinations' parameter must be two-element array (two paths for blue-green copy)."
     }
-    if ($Destinations -and $Destinations[0] -ieq $Destinations[1]) {
-        Write-Log -Critical "'Destinations' parameter must contain two different paths (currently are the same - $($Destinations[0])."
+    if ($BlueGreenEnvVariableName -and $Destination[0] -ieq $Destination[1]) {
+        Write-Log -Critical "'Destinations' parameter must contain two different paths (currently are the same - $($Destination[0])."
     }
 
     $preCopyScriptBlock = Get-PreCopyScriptBlock 
-    $writeBytesRemoteScript = Get-WriteBytesScriptBlock
     $postCopyScriptBlock = Get-PostCopyScriptBlock
 
     # calculate hash for local files if required
-    if ($Destination -and $CheckHashMode -ne 'DontCheckHash') {
+    if ($CheckHashMode -ne 'DontCheckHash') {
        Write-Progress -Activity "Checking whether '$Destination' needs updating" -Id 1
        $hashPath = Get-Hash -Path $Path -Exclude $Exclude
     }
@@ -135,53 +139,35 @@ function Copy-FilesToRemoteServer {
         if ($Path.Count -eq 1 -and $Path.ToLower().EndsWith('zip')) {
             $tempZip = $null
             $zipToCopy = $Path
+            $isStructuredZip = $false
         } else {
             $tempZip = ([IO.Path]::GetTempFileName()) + ".zip"
             $zipToCopy = $tempZip
             if (Test-Path -Path $tempZip) {
                 [void](Remove-Item -Path $tempZip -Force)
             }
-            New-Zip -Path $Path -OutputFile $tempZip -Exclude $Exclude
-        }
-        $items = Get-Item -Path $zipToCopy
-        foreach ($session in $sessions) { 
-           foreach ($item in $items) {
-                Write-Progress -Activity "Sending '$item'" -Status "Preparing file" -Id 1
-                $destFile = Invoke-Command -Session $session -ScriptBlock $preCopyScriptBlock -ArgumentList $item.Name, $Destination, $BlueGreenEnvVariableName, $Destinations, $ClearDestination
-                Write-Log -Info "Copying '$item' to remote node '$($session.ComputerName)' / '$destFile'"
-    
-                # Now break it into chunks [1MB] to stream
-                $streamSize = 1MB
-                $position = 0
-                $rawBytes = New-Object -TypeName byte[] -ArgumentList $streamSize
-                $file = [IO.File]::OpenRead($item.FullName)
-
-                while(($read = $file.Read($rawBytes, 0, $streamSize)) -gt 0) {
-                    Write-Progress -Activity "Writing $destFile" -Status "Sending file" -PercentComplete ($position / $item.Length * 100) -Id 1
-        
-                    # Ensure that our array is the same size as what we read from disk
-                    if($read -ne $rawBytes.Length) {
-                        [Array]::Resize( [ref] $rawBytes, $read)
-                    }
-        
-                    # And send that array to the remote system
-                    Invoke-Command -Session $session -ScriptBlock $writeBytesRemoteScript -ArgumentList $destFile, $rawBytes
-        
-                    # Ensure that our array is the same size as what we read from disk
-                    if($rawBytes.Length -ne $streamSize) {
-                        [Array]::Resize( [ref] $rawBytes, $streamSize)
-                    }
-        
-                    $position += $read
-                }
-                $file.Close()
+            Write-Progress -Activity "Creating '$zipToCopy'" -Status "Preparing files to copy" -Id 1
+            if (!$BlueGreenEnvVariableName) { 
+                New-Zip -Path $Path -OutputFile $tempZip -Exclude $Exclude -DestinationZipPath $Destination
+                $isStructuredZip = $true
+            } else {
+                New-Zip -Path $Path -OutputFile $tempZip -Exclude $Exclude
+                $isStructuredZip = $false
             }
+            if (!(Test-Path -Path $tempZip)) {
+                Write-Log -Critical "Temporary zip file '$tempZip' has not been created - critical exception, please investigate."
+            }
+        }
+        $zipItem = Get-Item -Path $zipToCopy
+        foreach ($session in $sessions) { 
+           $destZipFile = Invoke-Command -Session $session -ScriptBlock $preCopyScriptBlock -ArgumentList $zipItem.Name, $Destination, $BlueGreenEnvVariableName, $ClearDestination
+           Send-FileStream -Session $session -ItemToCopy $zipItem -DestinationPath $destZipFile
 
-            Write-Progress -Activity "Uncompressing $destFile" -Id 1
-            Invoke-Command -Session $session -ScriptBlock $postCopyScriptBlock -ArgumentList $destFile, $BlueGreenEnvVariableName, $hashPath
+           Write-Progress -Activity "Uncompressing $destZipFile" -Id 1
+           Invoke-Command -Session $session -ScriptBlock $postCopyScriptBlock -ArgumentList $destZipFile, $isStructuredZip, $BlueGreenEnvVariableName, $hashPath
 
-            Remove-PSSession -Session $session
-            Write-Progress -Activity "Finished" -Completed -Id 1
+           Remove-PSSession -Session $session
+           Write-Progress -Activity "Finished" -Completed -Id 1
         }
     } finally {
         foreach ($session in ($sessions | Where-Object { $_.State -ne 'Closed' })) {

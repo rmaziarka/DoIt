@@ -66,7 +66,7 @@ function New-CopySessions {
         $ConnectionParams,
 
         [Parameter(Mandatory = $false)]
-        [string]
+        [string[]]
         $Destination,
 
         [Parameter(Mandatory = $false)]
@@ -97,11 +97,17 @@ function New-CopySessions {
             Invoke-Command -Session $session -ScriptBlock (Convert-FunctionToScriptBlock -FunctionName Get-FlatFileList)
             Invoke-Command -Session $session -ScriptBlock (Convert-FunctionToScriptBlock -FunctionName Get-Hash)
             $remoteHash = Invoke-Command -Session $session -ScriptBlock {
-                Get-Hash -Path $using:Destination -Exclude $using:Exclude
+                $destinations = $using:Destination
+                foreach ($dest in $destinations) {
+                    if (!(Test-Path -Path $dest)) {
+                        return $null
+                    }
+                }
+                Get-Hash -Path $destinations -Exclude $using:Exclude
             }
             $needUpdate = $remoteHash -ne $HashPath
         } elseif ($CheckHashMode -eq 'UseHashFile' -and $HashPath) {
-            $hashRemoteFilePath = Join-Path -Path $Destination -ChildPath "syncHash_$HashPath"
+            $hashRemoteFilePath = Join-Path -Path $Destination[0] -ChildPath "syncHash_$HashPath"
             $hashFileExistsRemotely = Invoke-Command -Session $session -ScriptBlock {
                 Test-Path -Path $using:hashRemoteFilePath
             }

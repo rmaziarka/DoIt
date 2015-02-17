@@ -29,7 +29,7 @@ function Get-FlatFileList {
     Gets a flat file list from an array of files and directories.
 
     .DESCRIPTION
-    It returns a list of files (as returned by Get-Item) with additional 'RelativePath' property using following algorithm:
+    It returns a list of files (as returned by Get-ChildItem) with additional 'RelativePath' property using following algorithm:
     a) for each file provided in 'Path', add this file with RelativePath = name of the file (without directory)
     b) for each directory $dir provided in 'Path', add each file from the directory with RelativePath = $dir.
 
@@ -57,11 +57,16 @@ function Get-FlatFileList {
     $result = New-Object System.Collections.ArrayList
     foreach ($p in $Path) {
         if (!(Test-Path -Path $p)) {
-            Write-Log -Critical "Path '$p' does not exist."
+            # this function can be run remotely without PSCI available
+            if (Get-Command -Name Write-Log -ErrorAction SilentlyContinue) {
+                Write-Log -Critical "Path '$p' does not exist."
+            } else {
+                throw "Path '$p' does not exist"
+            }
         } elseif (Test-Path -Path $p -PathType Container) {
             try {
                 Push-Location -Path $p
-                $files = Get-ChildItem -Path $p -Recurse -Exclude $Exclude -File
+                $files = Get-ChildItem -Path '.' -Recurse -Exclude $Exclude -File
                 foreach ($file in $files) {
                     $relativePath = Resolve-Path -Path $file.FullName -Relative
                     if ($relativePath.StartsWith(".\")) {

@@ -36,6 +36,12 @@ function New-Zip {
     .PARAMETER Exclude
         Exclude mask.
 
+    .PARAMETER DestinationZipPath
+        Destination path in .zip file. 
+        If not specified, all files from Path will be stored in root directory of .zip file.
+        If specified with only one entry, all files from Path will be stored under $DestinationZipPath.
+        If specified with the same number of entries as $Path, files from $Path[i] will be stored under $DestinationZipPath[i].
+
     .PARAMETER CompressionLevel
         Compression level.
 
@@ -65,6 +71,10 @@ function New-Zip {
         [Parameter(Mandatory=$false)]
         [string[]]
 		$Exclude,
+
+        [Parameter(Mandatory=$false)]
+		[string[]]
+		$DestinationZipPath,
 
         [Parameter(Mandatory=$false)]
         [ValidateSet('Fastest', 'NoCompression', 'Optimal')]
@@ -98,6 +108,20 @@ function New-Zip {
         }
     }
 
+    if ($DestinationZipPath -and ($Path.Count -ne $DestinationZipPath.Count -and $DestinationZipPath.Count -ne 1)) {
+        Write-Log -Critical "'DestinationZipPath' array must be of length 1 or the same length as 'Path' array."
+    }
+
+    # remove roots
+    $unrootedDestinationZipPath = @()
+    foreach ($destPath in $DestinationZipPath) {
+        if ([System.IO.Path]::IsPathRooted($destPath)) {
+            $unrootedDestinationZipPath += $destPath[0] + '\' + $destPath.Substring(3)
+        } else {
+            $unrootedDestinationZipPath += $destPath
+        }
+    }
+
     try {        
         Add-Type -AssemblyName System.IO.Compression
         Add-Type -AssemblyName System.IO.Compression.FileSystem
@@ -107,10 +131,27 @@ function New-Zip {
         $zipArchive = New-Object -TypeName System.IO.Compression.ZipArchive -ArgumentList $fileStream, $zipArchiveMode
     
         Write-Log -Info "Creating archive '$OutputFile'"
-
-        $items = Get-FlatFileList -Path $Path -Exclude $Exclude
-        foreach ($item in $items) {
-            [void]([System.IO.Compression.ZipFileExtensions]::CreateEntryFromFile($zipArchive, $item.FullName, $item.RelativePath, $CompressionLevel))
+        $i = 0
+        foreach ($p in $Path) { 
+            if ($DestinationZipPath) {
+                if ($DestinationZipPath.Count -eq 1) {
+                    $destBasePath = $unrootedDestinationZipPath[0]
+                } else {
+                    $destBasePath = $unrootedDestinationZipPath[$i]
+                }
+            } else {
+                $destBasePath = ''
+            }
+            $items = Get-FlatFileList -Path $p -Exclude $Exclude
+            foreach ($item in $items) {
+                if ($destBasePath) { 
+                    $destPath = Join-Path -Path $destBasePath -ChildPath $item.RelativePath
+                } else {
+                    $destPath = $item.RelativePath
+                }
+                [void]([System.IO.Compression.ZipFileExtensions]::CreateEntryFromFile($zipArchive, $item.FullName, $destPath, $CompressionLevel))
+            }
+            $i++
         }
     } finally {
         if ($zipArchive) {

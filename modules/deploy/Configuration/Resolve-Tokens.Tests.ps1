@@ -29,7 +29,7 @@ Describe -Tag "PSCI.unit" "Resolve-Tokens" {
     InModuleScope PSCI.deploy {
 
         Mock Write-Log { 
-            Write-Output $Message
+            Write-Host $Message
             if ($Critical) {
                 throw $Message
             }
