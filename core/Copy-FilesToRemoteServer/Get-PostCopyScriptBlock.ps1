@@ -91,7 +91,7 @@ function Get-PostCopyScriptBlock {
         }
         if ($HashPath) {
             Get-ChildItem -Path $zipDir -Filter "syncHash_*" | Remove-Item
-            $hashRemoteFilePath = Join-Path -Path $FirstDestination -ChildPath "syncHash_$HashPath"
+            $hashRemoteFilePath = Join-Path -Path $zipDir -ChildPath "syncHash_$HashPath"
             [void](New-Item -Path $hashRemoteFilePath -ItemType File -Force)
         }
     }
