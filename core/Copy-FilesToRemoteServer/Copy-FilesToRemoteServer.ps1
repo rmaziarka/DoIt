@@ -38,10 +38,7 @@ function Copy-FilesToRemoteServer {
 
     .PARAMETER BlueGreenEnvVariableName
         If specified, this environment variable name will be used for blue-green deployment 
-        (destination directories will be changing between those specified in $Destinations).
-
-    .PARAMETER Destinations
-        Only if BlueGreenEnvVariableName is specified - list of destination directories to use for blue-green deployment.
+        (destination directories will be changing between those specified in $Destination).
 
     .PARAMETER Exclude
         The files to be excluded from copying to remote server.
@@ -93,7 +90,7 @@ function Copy-FilesToRemoteServer {
 
         [Parameter(Mandatory = $false)]
         [switch]
-        $ClearDestination = $false
+        $ClearDestination = $true
     )
 
     if ($ConnectionParams.RemotingMode -ne 'PSRemoting') {
@@ -102,15 +99,22 @@ function Copy-FilesToRemoteServer {
     if (!$ConnectionParams.Nodes) {
         Write-Log -Critical "ConnectionParams.Nodes is empty. It must be specified for this function."
     }
-
-    foreach ($dest in $Destination) {
+    
+    for ($i = 0; $i -lt $DestinationZipPath.Count; $i++) {
+        $dest = $DestinationZipPath[$i]
+        $destNext = $DestinationZipPath[$i+1]
         if (![System.IO.Path]::IsPathRooted($dest)) {
             Write-Log -Critical "'Destination' must be an absolute path - invalid value '$dest'."
         }
-    }
+        if ($destNext -and $dest[0] -ne $destNext[0]) {
+            Write-Log -Critical "'Destination' paths must be on the same disk."
+        }
+    } 
+
     if ($Path.Count -ne $Destination.Count -and $Destination.Count -ne 1) {
         Write-Log -Critical "'Destination' array must be of length 1 or the same length as 'Path' array."
     }
+
     if ($BlueGreenEnvVariableName -and $Destination.Count -ne 2) {
         Write-Log -Critical "'Destinations' parameter must be two-element array (two paths for blue-green copy)."
     }
@@ -168,7 +172,13 @@ function Copy-FilesToRemoteServer {
            Send-FileStream -Session $session -ItemToCopy $zipItem -DestinationPath $destZipFile
 
            Write-Progress -Activity "Uncompressing $destZipFile" -Id 1
-           Invoke-Command -Session $session -ScriptBlock $postCopyScriptBlock -ArgumentList $destZipFile, $isStructuredZip, $BlueGreenEnvVariableName, $hashPath
+           if ($isStructuredZip) {
+               # if we have a 'structured' zip, we just need to expand it to root drive
+               $dest = $Destination[0].Substring(0, 3)
+           } else {
+               $dest = Split-Path -Parent $destZipFile
+           }
+           Invoke-Command -Session $session -ScriptBlock $postCopyScriptBlock -ArgumentList $destZipFile, $dest, $BlueGreenEnvVariableName, $hashPath, $ClearDestination
 
            Remove-PSSession -Session $session
            Write-Progress -Activity "Finished" -Completed -Id 1

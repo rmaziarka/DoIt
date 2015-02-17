@@ -116,7 +116,7 @@ function New-Zip {
     $unrootedDestinationZipPath = @()
     foreach ($destPath in $DestinationZipPath) {
         if ([System.IO.Path]::IsPathRooted($destPath)) {
-            $unrootedDestinationZipPath += $destPath[0] + '\' + $destPath.Substring(3)
+            $unrootedDestinationZipPath += $destPath.Substring(3)
         } else {
             $unrootedDestinationZipPath += $destPath
         }

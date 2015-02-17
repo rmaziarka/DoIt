@@ -47,8 +47,8 @@ function Get-PostCopyScriptBlock {
             $ZipFilePath,
 
             [Parameter(Mandatory = $false)]
-            [boolean]
-            $IsStructuredZip,
+            [string]
+            $Destination,
 
             [Parameter(Mandatory = $false)]
             [string]
@@ -56,24 +56,25 @@ function Get-PostCopyScriptBlock {
 
             [Parameter(Mandatory = $false)]
             [string]
-            $HashPath
+            $HashPath,
+
+            [Parameter(Mandatory = $false)]
+            [boolean]
+            $ZipDestinationIsClear
         )
 
         $Global:ErrorActionPreference = 'Stop'
 
-        $zipDir = Split-Path -Path $ZipFilePath -Parent
-        $shell = New-Object -ComObject Shell.Application
-        $zip = $shell.Namespace($ZipFilePath)
-        if ($IsStructuredZip) {
-            foreach ($rootItem in $zip.Items()) {
-                $rootDisk = $rootItem.Name
-                $destPath = "${rootDisk}:"
-                $dst = $shell.Namespace($destPath)
-                # 0x14 = overwrite and don't show dialogs
-                $dst.Copyhere($rootItem.GetFolder.Items(), 0x14)
-            }
+        # we want to use .NET, but it fails if destination already exists
+        if ($ZipDestinationIsClear) {
+            Add-Type -AssemblyName System.IO.Compression.FileSystem
+            [System.IO.Compression.ZipFile]::ExtractToDirectory($ZipFilePath, $Destination) 
         } else {
-            $dst = $shell.namespace($zipDir)
+            # if it does we use Shell, which can be slow when running remotely for unknown reasons
+            $shell = New-Object -ComObject Shell.Application
+            $zip = $shell.Namespace($ZipFilePath)
+        
+            $dst = $shell.namespace($Destination)
             # 0x14 = overwrite and don't show dialogs
             $dst.Copyhere($zip.Items(), 0x14)
         }
@@ -85,11 +86,12 @@ function Get-PostCopyScriptBlock {
             if ($oldPath) {
                 [void](Remove-Item -Path (Join-Path -Path $oldPath -ChildPath '.currentLive') -Force -ErrorAction SilentlyContinue)
             }
-            $destPath = Split-Path -Parent $ZipFilePath
+            
             [Environment]::SetEnvironmentVariable($BlueGreenEnvVariableName, $destPath, 'Machine')
-            [void](New-Item -Path (Join-Path -Path $destPath -ChildPath '.currentLive') -Force -ItemType File)
+            [void](New-Item -Path (Join-Path -Path $Destination -ChildPath '.currentLive') -Force -ItemType File)
         }
         if ($HashPath) {
+            $zipDir = Split-Path -Parent $ZipFilePath
             Get-ChildItem -Path $zipDir -Filter "syncHash_*" | Remove-Item
             $hashRemoteFilePath = Join-Path -Path $zipDir -ChildPath "syncHash_$HashPath"
             [void](New-Item -Path $hashRemoteFilePath -ItemType File -Force)
