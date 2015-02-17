@@ -37,7 +37,7 @@ function Send-FileStream {
         Destination path on the remote server.
 
 	.EXAMPLE			
-       
+        Send-FileStream -Session $session -ItemToCopy $zipItem -DestinationPath $destZipFile 
 
 	#>
     [CmdletBinding()]
