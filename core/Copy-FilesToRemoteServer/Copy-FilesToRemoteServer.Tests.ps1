@@ -24,7 +24,7 @@ SOFTWARE.
 
 Import-Module -Name "$PSScriptRoot\..\..\PSCI.psm1" -Force
 
-Describe -Tag "PSCI.integration" "Copy-FilesToRemoteServer" {
+Describe -Tag "PSCI.unit" "Copy-FilesToRemoteServer" {
 
     InModuleScope PSCI.core {
 

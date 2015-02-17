@@ -47,6 +47,8 @@ function Start-DeploymentPlan {
     If true, custom DSC resources included in PSCI will be automatically copied to localhost (required for parsing DSC configurations)
     and to the destination servers (required for running DSC configurations).
 
+    .PARAMETER DscModuleNames
+    Dsc modules to install if AutoInstallDscResources is $true.
 
     .EXAMPLE
     Start-DeploymentPlan -DeploymentPlan $Global:DeploymentPlan -DeploymentMethod $DeployMethod -Environment $Environment -DscForce:$DscForce
@@ -70,7 +72,11 @@ function Start-DeploymentPlan {
 
         [Parameter(Mandatory=$false)]
         [switch]
-        $AutoInstallDscResources = $true
+        $AutoInstallDscResources = $true,
+
+        [Parameter(Mandatory=$false)]
+        [string[]]
+        $DscModuleNames
 
     )
 
@@ -102,7 +108,7 @@ function Start-DeploymentPlan {
             Write-Log -Info '[START] INSTALL DSC RESOURCES' -Emphasize
             foreach ($entry in $entriesToInstallDSC) {
                 if ($dscInstalledNodes -notcontains $entry.ConnectionParams.Nodes[0]) {
-                    Install-DscResources -ConnectionParams $entry.ConnectionParams
+                    Install-DscResources -ConnectionParams $entry.ConnectionParams -ModuleNames $DscModuleNames
                     # SuppressScriptCop - adding small arrays is ok
                     $dscInstalledNodes += @($entry.ConnectionParams.Nodes[0])
                 }

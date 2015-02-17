@@ -75,4 +75,6 @@ Export-ModuleMember -Function `
     New-ConnectionParameters, `
     New-MsDeployDestinationString, `
     Convert-HashtableToString, `
-    Test-IsSubdirectory
+    Test-IsSubdirectory, `
+    Read-ConfigurationFiles, `
+    Copy-Directory

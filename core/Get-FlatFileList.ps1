@@ -55,6 +55,12 @@ function Get-FlatFileList {
     ) 
 
     $result = New-Object System.Collections.ArrayList
+    if ($Exclude) { 
+        $excludeRegex = $Exclude -join '\\|'
+        $excludeRegex += '\\'
+        $excludeRegex = $excludeRegex -replace '\*', '.*'
+    }
+        
     foreach ($p in $Path) {
         if (!(Test-Path -Path $p)) {
             # this function can be run remotely without PSCI available
@@ -69,9 +75,13 @@ function Get-FlatFileList {
                 $files = Get-ChildItem -Path '.' -Recurse -Exclude $Exclude -File
                 foreach ($file in $files) {
                     $relativePath = Resolve-Path -Path $file.FullName -Relative
+                    if ($excludeRegex -and $relativePath -imatch $excludeRegex) {
+                        continue
+                    }
                     if ($relativePath.StartsWith(".\")) {
                        $relativePath = $relativePath.Remove(0,2);
                     }
+                    
                     Add-Member -InputObject $file -MemberType NoteProperty -Name RelativePath -Value $relativePath
                     [void]($result.Add($file))
                 }

@@ -99,6 +99,10 @@ function Copy-FilesToRemoteServer {
     if ($ConnectionParams.RemotingMode -ne 'PSRemoting') {
         Write-Log -Critical "ConnectionParams.RemotingMode = $($ConnectionParams.RemotingMode) is not supported by this function (only PSRemoting is)."
     }
+    if (!$ConnectionParams.Nodes) {
+        Write-Log -Critical "ConnectionParams.Nodes is empty. It must be specified for this function."
+    }
+
     foreach ($dest in $Destination) {
         if (![System.IO.Path]::IsPathRooted($dest)) {
             Write-Log -Critical "'Destination' must be an absolute path - invalid value '$dest'."

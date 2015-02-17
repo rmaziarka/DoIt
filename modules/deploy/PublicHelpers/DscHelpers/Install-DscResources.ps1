@@ -32,6 +32,9 @@ function Install-DscResources {
     If no parameter is provided, the DSC resources will be copied locally with robocopy.
     If $ComputerNames is provided, the DSC resources will be copied using Powershell remoting (using Copy-FilesToRemoteServers).
 
+    .PARAMETER ModuleNames
+    List of module names to install. 
+
     .PARAMETER ConnectionParams
     Connection parameters created by New-ConnectionParameters function.
 
@@ -44,90 +47,68 @@ function Install-DscResources {
 	[OutputType([void])]
     param(
         [Parameter(Mandatory=$false)]
+        [string[]] 
+        $ModuleNames,
+
+        [Parameter(Mandatory=$false)]
         [object] 
         $ConnectionParams
     )
 
+    if (!$ModuleNames) {
+        return
+    }
+
     if (!$ConnectionParams) {
         $ConnectionParams = New-ConnectionParameters -Nodes 'localhost'
     }
-
-    $srcBasePath = Resolve-Path -Path (Join-Path -Path $PSScriptRoot -ChildPath "..\..\dsc")
-    # note: $Env:ProgramFiles gives Program Files (x86) if running Powershell x86...
-    $baseDestPath = Join-Path -Path "C:\Program Files" -ChildPath "WindowsPowerShell\Modules"
-    $externalLibDirs = @(Join-Path -Path $srcBasePath -ChildPath "ext\*\*" | Get-ChildItem -Directory | Select-Object -ExpandProperty FullName)
-    $customDSCResources = @(Join-Path -Path $srcBasePath -ChildPath "custom" | Get-ChildItem -Directory | Select-Object -ExpandProperty FullName)
-    $srcPaths = $customDSCResources + $externalLibDirs
-    
-    $clearDSCCache = {
-        $DscNamespace = "root/Microsoft/Windows/DesiredStateConfiguration" 
-
-        Write-Verbose 'Stopping any existing WMI processes to clear cached resources.'
-        Get-process -Name WmiPrvSE -erroraction silentlycontinue | stop-process -force
-                
-        Write-Verbose 'Clearing out any tmp WMI classes from tested resources.'
-        Get-wmiobject -Namespace $DscNamespace -List -Class tmp* | ForEach-Object { (Get-wmiobject -Namespace $DscNamespace -list -Class $_).psbase.delete() }
-    }
-
     $nodes = $ConnectionParams.Nodes.Clone()
+    $baseDscDir = Resolve-Path -Path (Join-Path -Path $PSScriptRoot -ChildPath '..\..\dsc')
 
-    Write-Log -Info ("Installing DSC modules from '$srcBasePath' to {0}" -f ($nodes -join ", "))
+    $dscModulesInfo = Get-DscResourcesPaths -ModuleNames $ModuleNames
+    Write-Log -Info ("Installing following DSC modules from '$baseDscDir' to {0}: {1}" -f ($nodes -join ', '), ($dscModulesInfo.Name -join ', '))
 
-    $localhostNodePresent = $false
+    $isLocalhostDone = $false
+    $exclude = @('Docs', 'Examples', 'Samples')
     foreach ($node in $ConnectionParams.Nodes) {
-        if (Test-ComputerNameIsLocalhost -ComputerName $node) {
-            $localhostNodePresent = $true
-            $nodes = $nodes -ne $node
-        }
-    }
-
-    if ($localhostNodePresent) {
-        #TODO: this does not copy files in root of external\ReskitWave7 and can result in mismatching hashes (for now patched by specifying exclude below)
-        foreach ($srcPath in $srcPaths) {
-            $dscDirName = Split-Path -Path $srcPath -Leaf
-            $destPath = Join-Path -Path $baseDestPath -ChildPath $dscDirName
-            Sync-DirectoriesWithRobocopy -SrcPath $srcPath -DestPath $destPath -Sync:$true -Quiet
-        }
-
-        Write-Log -Info "Clearing DSC cache on 'localhost'"
-        try { 
-            Invoke-Command -ScriptBlock $clearDSCCache
-        } catch {
-            Write-Log -Warn "Failed to clear DSC cache (you might need to clear it manually): $_."
-        }
-    } 
-      
-    if ($nodes) {
-        $uniqueSrcPaths = $srcPaths | Split-Path -Parent | Select-Object -Unique
+        $isLocalhost = Test-ComputerNameIsLocalhost -ComputerName $node
         
-        foreach ($computerName in $nodes) {
-            #TODO: exclude workaround - see comment above
-
+        if ($isLocalhost) {
+            if (!$isLocalhostDone) {
+                foreach ($dscModuleInfo in $dscModulesInfo) {
+                    Copy-Directory -Path $dscModuleInfo.SrcPath -Destination $dscModuleInfo.DstPath -Exclude $exclude -Overwrite
+                }
+                try { 
+                    Clear-DscCache
+                } catch {
+                    Write-Log -Warn "Failed to clear DSC cache (you might need to clear it manually): $_."
+                }
+                $isLocalhostDone = $true
+            }
+        } else {
             $copyParams = @{
-                Path = $uniqueSrcPaths
-                Destination = $baseDestPath
-                ConnectionParams = New-ConnectionParameters -Nodes $computerName -Credential $ConnectionParams.Credential -Authentication $ConnectionParams.Authentication -Port $ConnectionParams.Port -Protocol $ConnectionParams.Protocol
-                Exclude = 'upgrade.txt','AllResources*.html'
+                Path = $dscModulesInfo.SrcPath
+                Destination = $dscModulesInfo.DstPath
+                ConnectionParams = New-ConnectionParameters -Nodes $node -Credential $ConnectionParams.Credential -Authentication $ConnectionParams.Authentication -Port $ConnectionParams.Port -Protocol $ConnectionParams.Protocol
                 ClearDestination = $true
-                CheckHashMode = 'UseHashFile'
+                Exclude = $exclude
+               # CheckHashMode = 'UseHashFile'
             } 
 
-            $clearDSCCacheParams = $connectionParams.PSSessionParams
-            $clearDSCCacheParams.ScriptBlock = $clearDSCCache
-
-            try { 
+             try { 
                 $updated = Copy-FilesToRemoteServer @copyParams
             } catch {
                 # Sometimes wmiprvse.exe is locking dlls used by DSC resources - restarting the process helps
                 Write-Log -Warn ("Copy-FilesToRemoteServer failed with message: '{0}' - clearing DSC cache and retrying" -f $_.Exception.Message)
-                Invoke-Command @clearDSCCacheParams
+                Clear-DscCache -ConnectionParams $ConnectionParams
                 $updated = Copy-FilesToRemoteServer @copyParams
             }
 
             if ($updated) {
-                Write-Log -Info "Clearing DSC cache on '$($ConnectionParams.NodesAsString)'"
-                Invoke-Command @clearDSCCacheParams
+                Clear-DscCache -ConnectionParams $ConnectionParams  
             }
+
         }
     }
+
 }
