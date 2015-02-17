@@ -135,29 +135,27 @@ function Start-Deployment {
                              -DefaultPath (Join-Path -Path $packagesPath -ChildPath "DeployScripts\configuration"), (Join-Path -Path $packagesPath -ChildPath "configuration")
 
     Write-Log -Info ("Starting deployment to environment '{0}' using package at '$packagesPath' and configuration at '$DeployConfigurationPath'" -f ($Environment -join ',')) -Emphasize
-    
+
+    Write-Log -Info "[START] PARSE CONFIG FILES" -Emphasize
+    $configInfo = Read-ConfigurationFiles -Path $DeployConfigurationPath
+
+    # need to install DSC resources locally in order to be able to parse configurations
+    if ($AutoInstallDscResources) {
+        Install-DscResources -ModuleNames $configInfo.RequiredDSCModules
+    }
 
     # Clear global variables before including configuration files
     Initialize-Deployment
     
-    # need to install DSC resources locally in order to be able to parse configurations
-    if ($AutoInstallDscResources) {
-        Install-DscResources
-    }
-
-    Write-Log -Info "[START] BUILD DEPLOYMENT PLAN" -Emphasize
-
     # We need to include the configuration files in this function. We can't do it in separate Import-Configuration cmdlet, due to scoping issues (see http://stackoverflow.com/questions/15187510/dot-sourcing-functions-from-file-to-global-scope-inside-of-function)... 
-    # Load file with 'tokens' in the name first, since other files can make use of it
-    $configScripts = Get-ChildItem -Recurse $DeployConfigurationPath -Include *.ps*1 | Sort-Object -Property { $_.Name -inotmatch "tokens"}, { $_.Name }
-    if (!$configScripts) {
-        Write-Log -Critical "There is no configuration files at '$DeployConfigurationPath'. Please ensure you have run the build or pass 'DeployConfigurationPath' parameter to override the default convention."
-    }
-    foreach ($configScript in $configScripts.FullName) {
+    foreach ($configScript in $configInfo.Files) {
         Write-Log -Info "Including file $configScript"
         . $configScript 
     }
     # here $Global:Environments should be populated
+    
+    Write-Log -Info "[END] PARSE CONFIG FILES" -Emphasize
+    Write-Log -Info "[START] BUILD DEPLOYMENT PLAN" -Emphasize
 
     $dscOutputPath = Join-Path -Path $packagesPath -ChildPath "_DscOutput"
     $Global:DeploymentPlan = New-DeploymentPlan -AllEnvironments $Global:Environments -Environment $Environment -ServerRolesFilter $ServerRolesToDeploy `
