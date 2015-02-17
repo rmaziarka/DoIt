@@ -176,7 +176,7 @@ function Start-Deployment {
         if (!$Global:RemotingMode -and ($DeploymentPlan | Where { $_.RunOnConnectionParams })) {
             Build-TemporaryPackage
         }
-        Start-DeploymentPlan -DeploymentPlan $Global:DeploymentPlan -DscForce:$DscForce -DeployType $DeployType -AutoInstallDscResources:$AutoInstallDscResources
+        Start-DeploymentPlan -DeploymentPlan $Global:DeploymentPlan -DscForce:$DscForce -DeployType $DeployType -AutoInstallDscResources:$AutoInstallDscResources -DscModuleNames $configInfo.RequiredDSCModules
     }
 
     if ($packageTempDir) {

@@ -100,6 +100,7 @@ function Start-DeploymentPlan {
    
     if ($AutoInstallDSCResources -and !$PSCIGlobalConfiguration.RemotingMode) {
         # we need to install DSC resources on nodes where configurations will be applied remotely
+        # TODO: is this valid?
         $entriesToInstallDSC = $DeploymentPlan | Where-Object { $_.Configuration.Type -eq 'Configuration' -and !$_.IsLocalRun }
 
         if ($entriesToInstallDSC) {
