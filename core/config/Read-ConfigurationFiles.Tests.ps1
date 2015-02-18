@@ -44,7 +44,7 @@ Describe -Tag "PSCI.unit" "Read-ConfigurationFiles" {
             It "should throw exception" {
                 $fail = $false
                 try {
-                    Remove-Item -Path $testConfigDir -Force -Recurse
+                    Remove-Item -Path $testConfigDir -Force -Recurse -ErrorAction SilentlyContinue
                     Read-ConfigurationFiles -Path 'DoesNotExist'
                 } catch {
                     $fail = $true
