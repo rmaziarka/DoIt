@@ -121,7 +121,7 @@ function Invoke-SqlSqlcmd {
     }
 
     if (!$IgnoreErrors) {
-        $params += '-b"'
+        $params += '-b'
     } 
 
     $output = ''
