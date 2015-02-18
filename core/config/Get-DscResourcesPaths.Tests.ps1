@@ -26,7 +26,7 @@ Import-Module -Name "$PSScriptRoot\..\..\PSCI.psm1" -Force
 
 Describe -Tag "PSCI.unit" "Get-DscResourcesPaths" {
 
-    InModuleScope PSCI.deploy {
+    InModuleScope PSCI.core {
 
         Mock Write-Log { 
             Write-Host $Message
