@@ -22,7 +22,9 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 #>
 
-Import-Module -Name "$PSScriptRoot\..\..\PSCI.psm1" -Force
+# note: this is test for a function that resides in Core, but it needs access to dsc modules - so it needs to be run with 'PSCI.deploy' module.
+
+Import-Module -Name "$PSScriptRoot\..\..\..\PSCI.psm1" -Force
 
 Describe -Tag "PSCI.unit" "Get-DscResourcesPaths" {
 
@@ -50,7 +52,7 @@ Describe -Tag "PSCI.unit" "Get-DscResourcesPaths" {
             $result = Get-DscResourcesPaths -ModuleNames $moduleNames
 
             It "should return proper paths" {
-                $expectedSrcPaths = Get-ChildItem -Path "$PSScriptRoot\..\..\modules\deploy\dsc" -Directory -Recurse -Include $moduleNames | Sort -Property Name | Select-Object -ExpandProperty FullName
+                $expectedSrcPaths = Get-ChildItem -Path "$PSScriptRoot\..\dsc" -Directory -Recurse -Include $moduleNames | Sort -Property Name | Select-Object -ExpandProperty FullName
                 $expectedDstPaths = $moduleNames | Foreach-Object { Join-Path -Path 'C:\Program Files\WindowsPowerShell\Modules' -ChildPath $_ }
 
                 $result.Count | Should Be $moduleNames.Count
