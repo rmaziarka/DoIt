@@ -1,3 +1,4 @@
+
 <#
 The MIT License (MIT)
 
@@ -48,54 +49,28 @@ Version number of the current build.
 param(
 	[Parameter(Mandatory=$false)]
 	[string]
-	$ProjectRootPath = "..", # Modify this path according to your project structure. This is relative to the directory where build.ps1 resides ($PSScriptRoot).
+	$ProjectRootPath, 
 	
 	[Parameter(Mandatory=$false)]
 	[string]
-	$PSCILibraryPath = "..\..", # Modify this path according to your project structure. This is absolute or relative to $ProjectRootPath.
+	$PSCILibraryPath,
 
 	[Parameter(Mandatory=$false)]
 	[string]
-	$PackagesPath = "bin", # Modify this path according to your project structure. This is absolute or relative to $ProjectRootPath.
+	$PackagesPath,
 
     [Parameter(Mandatory=$false)]
 	[string]
-	$DeployConfigurationPath = "", # Modify this path according to your project structure. This is absolute or relative to $ProjectRootPath (by default '<script directory>\configuration').
+	$DeployConfigurationPath,
 
     [Parameter(Mandatory=$false)]
 	[string]
-	$Version = '1.0.0'
+	$Version
 )
 
-$global:ErrorActionPreference = "Stop"
+Build-DeploymentScriptsPackage -DeployConfigurationPath $DeployConfigurationPath
 
-try { 
-    ############# Initialization
-    Push-Location -Path $PSScriptRoot
-    if (![System.IO.Path]::IsPathRooted($PSCILibraryPath)) {
-    	$PSCILibraryPath = Join-Path -Path $ProjectRootPath -ChildPath $PSCILibraryPath
-    }
-    if (!(Test-Path "$PSCILibraryPath\PSCI.psm1")) {
-        Write-Output -InputObject "Cannot find PSCI library at '$PSCILibraryPath'. Please ensure your ProjectRootPath and PSCILibraryPath parameters are correct."
-    	exit 1
-    }
-    Import-Module "$PSCILibraryPath\PSCI.psm1" -Force 
+Build-DBDeployPackage -PackageName 'DBDeploy' -DBDeployPath 'database\dbdeploy'
 
-    $PSCIGlobalConfiguration.LogFile = "build.log.txt"
-    Remove-Item -Path $PSCIGlobalConfiguration.LogFile -ErrorAction SilentlyContinue
-
-    Initialize-ConfigurationPaths -ProjectRootPath $ProjectRootPath -PackagesPath $PackagesPath -PSCILibraryPath $PSCILibraryPath	
-    Remove-PackagesDir
-
-    ############# Actual build steps are in build\buildPackage.ps1 - all parameters will be passed automatically to this script.
-    ############# Feel free to add additional parameters to build.ps1 and buildPackage.ps1.
-
-    $buildPackageScript = Resolve-Path -Path 'build\buildPackage.ps1'
-    Write-Log -Info "Running $buildPackageScript" -Emphasize
-    . $buildPackageScript @PSBoundParameters
-    Write-Log -Info "Build finished successfully." -Emphasize
-} catch {
-    Write-ErrorRecord -ErrorRecord $_
-} finally {
-    Pop-Location
-}
+Build-SqlScriptsPackage -PackageName 'DatabaseCleanup' -ScriptsPath 'database\cleanup'
+Build-SqlScriptsPackage -PackageName 'DatabaseUpdate' -ScriptsPath 'database\changes'

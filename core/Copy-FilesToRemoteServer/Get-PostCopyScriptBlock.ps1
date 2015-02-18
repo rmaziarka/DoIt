@@ -64,6 +64,7 @@ function Get-PostCopyScriptBlock {
         )
 
         $Global:ErrorActionPreference = 'Stop'
+        $Global:VerbosePreference = 'Continue'
         $success = $false
 
         # try decompressing with .NET first (only if destination does not exist - otherwise it fails)
@@ -73,7 +74,7 @@ function Get-PostCopyScriptBlock {
                 [System.IO.Compression.ZipFile]::ExtractToDirectory($ZipFilePath, $Destination) 
                 $success = $true
             } catch {
-                Write-Host ".Net decompression failed: $_ - falling back to 7-zip / shell"
+                Write-Verbose -Message ".Net decompression failed: $_ - falling back to 7-zip / shell."
             }
         }
 
@@ -94,7 +95,7 @@ function Get-PostCopyScriptBlock {
                     }
                 }
             } catch {
-                Write-Host "7zip decompression failed: $_ - falling back to shell"
+                Write-Verbose -Message "7zip decompression failed: $_ - falling back to shell."
             }
         }
 

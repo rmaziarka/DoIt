@@ -45,7 +45,7 @@ function Build-TemporaryPackage {
             Copy-Item -Path "$($configPaths.PackagesPath)\*" -Recurse -Destination $packageTempDir
         }
         $configPaths.PackagesPath = $packageTempDir
-        Build-DeploymentScriptsPackage -DeployScriptsPath '.'
+        Build-DeploymentScriptsPackage
     }
 
 }

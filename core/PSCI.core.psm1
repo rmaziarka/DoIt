@@ -77,4 +77,5 @@ Export-ModuleMember -Function `
     Convert-HashtableToString, `
     Test-IsSubdirectory, `
     Read-ConfigurationFiles, `
+    Get-DscResourcesPaths, `
     Copy-Directory

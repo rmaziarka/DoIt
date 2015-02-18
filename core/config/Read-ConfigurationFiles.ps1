@@ -48,14 +48,14 @@ function Read-ConfigurationFiles {
     ) 
 
     if (!(Test-Path -Path $Path)) {
-        Write-Log -Critical "Path that should contain configuration files ('$Path') does not exist. Please ensure you have run the build or passed 'DeployConfigurationPath' parameter to override the default convention."
+        Write-Log -Critical "Path that should contain configuration files ('$Path') does not exist. Please ensure you have passed valid 'DeployConfigurationPath' parameter."
     }
     $Path = Resolve-Path -Path $Path
     Write-Log -Info "Reading configuration files from '$Path'."
     # Load file with 'tokens' in the name first, since other files can make use of it
     $configScripts = Get-ChildItem -Recurse $Path -Include *.ps*1 | Sort-Object -Property { $_.Name -inotmatch "tokens" }, { $_.Name }
     if (!$configScripts) {
-        Write-Log -Critical "There are no configuration files at '$Path'. Please ensure you have run the build or passed 'DeployConfigurationPath' parameter to override the default convention."
+        Write-Log -Critical "There are no configuration files at '$Path'. Please ensure you have passed valid 'DeployConfigurationPath' parameter."
     }
 
     $result = [PSCustomObject]@{

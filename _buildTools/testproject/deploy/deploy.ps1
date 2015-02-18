@@ -96,29 +96,26 @@ param(
 
 $global:ErrorActionPreference = "Stop"
 
-if (![System.IO.Path]::IsPathRooted($ProjectRootPath)) {
-    $ProjectRootPath = Join-Path -Path $PSScriptRoot -ChildPath $ProjectRootPath
-}
-if (![System.IO.Path]::IsPathRooted($PSCILibraryPath)) {
-	$PSCILibraryPath = Join-Path -Path $ProjectRootPath -ChildPath $PSCILibraryPath
-}
-
-if (!(Test-Path "$PSCILibraryPath\PSCI.psm1")) {
-    Write-Output -InputObject "Cannot find PSCI library at '$PSCILibraryPath'. Please ensure your ProjectRootPath and PSCILibraryPath parameters are correct."
-	exit 1
-}
-
-Import-Module "$PSCILibraryPath\PSCI.psm1" -Force
-
-$PSCIGlobalConfiguration.LogFile = "$PSScriptRoot\deploy.log.txt"
-Remove-Item -Path $PSCIGlobalConfiguration.LogFile -ErrorAction SilentlyContinue
-
-Push-Location -Path $PSScriptRoot
-
 try {
-    # This will set paths that will be used in Start-Deployment
+    ############# Initialization
+    Push-Location -Path $PSScriptRoot
+
+    if (![System.IO.Path]::IsPathRooted($PSCILibraryPath)) {
+    	$PSCILibraryPath = Join-Path -Path $ProjectRootPath -ChildPath $PSCILibraryPath
+    }
+    if (!(Test-Path "$PSCILibraryPath\PSCI.psm1")) {
+        Write-Output -InputObject "Cannot find PSCI library at '$PSCILibraryPath'. Please ensure your ProjectRootPath and PSCILibraryPath parameters are correct."
+    	exit 1
+    }
+    Import-Module "$PSCILibraryPath\PSCI.psm1" -Force
+
+    $PSCIGlobalConfiguration.LogFile = 'deploy.log.txt'
+    Remove-Item -Path $PSCIGlobalConfiguration.LogFile -ErrorAction SilentlyContinue
+
     Initialize-ConfigurationPaths -ProjectRootPath $ProjectRootPath -PackagesPath $PackagesPath -PackagesPathMustExist -PSCILibraryPath $PSCILibraryPath
 	
+    ############# Deployment - no custom code here, you need to put your configuration scripts under 'configuration' directory
+
     # This will start the deployment according to configuration files from $DeployConfigurationPath
 	# You can limit what you deploy by using additional parameters, e.g. -ServerRolesToDeploy, -ConfigurationsFilter or -ValidateOnly
     Start-Deployment -Environment $Environment -TokensOverride $TokensOverride -ServerRolesToDeploy $ServerRolesToDeploy -DeployConfigurationPath $DeployConfigurationPath

@@ -50,7 +50,9 @@ function Get-DscResourcesPaths {
     }
 
     $result = New-Object System.Collections.ArrayList
-    $baseDscDir = Resolve-Path -Path (Join-Path -Path $PSScriptRoot -ChildPath '..\..\dsc')
+    #note: this needs to get path to PSCI.deploy module
+    $modulePath = Get-PSCIModulePath -ModuleName 'PSCI.deploy'
+    $baseDscDir = Join-Path -Path $modulePath -ChildPath 'dsc'
     # note: $Env:ProgramFiles gives Program Files (x86) if running Powershell x86...
     $baseDestPath = Join-Path -Path 'C:\Program Files' -ChildPath 'WindowsPowerShell\Modules'
 
