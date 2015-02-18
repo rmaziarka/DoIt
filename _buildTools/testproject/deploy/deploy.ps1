@@ -50,15 +50,30 @@ you can pass them using this parameter. It should be a 'flat' hashtable containi
 
 .PARAMETER ServerRolesToDeploy
 Allows to limit server roles to deploy.
+
+.PARAMETER NodesFilter
+List of Nodes where configurations will be deployed - can be used if you don't want to deploy to all nodes defined in the configuration files.
+If not set, configurations will be deployed to all nodes according to the ServerRoles defined in the configuration files.
+
+.PARAMETER ConfigurationsFilter
+List of Configurations to deploy - can be used if you don't want to deploy all configurations defined in the configuration files.
+If not set, configurations will be deployed according to the ServerRoles defined in the configuration files.
+
+.PARAMETER DeployType
+Deployment type:
+All       - deploy everything according to configuration files (= Provision + Deploy)
+Provision - deploy only DSC configurations
+Deploy    - deploy only non-DSC configurations
+Adhoc     - don't use configuration files, but deploy configurations $ConfigurationsFilter to nodes $NodesFilter
 #>
 param(
 	[Parameter(Mandatory=$false)]
 	[string]
-	$ProjectRootPath = "..", # Modify this path according to your project structure. This is relative to the directory where deploy.ps1 resides ($PSScriptRoot).
+	$ProjectRootPath = '..', # Modify this path according to your project structure. This is relative to the directory where deploy.ps1 resides ($PSScriptRoot).
 	
 	[Parameter(Mandatory=$false)]
 	[string]
-	$PSCILibraryPath = "..\..", # Modify this path according to your project structure. This is absolute or relative to $ProjectRootPath.
+	$PSCILibraryPath = '..\..', # Modify this path according to your project structure. This is absolute or relative to $ProjectRootPath.
 
 	[Parameter(Mandatory=$false)]
 	[string]
@@ -74,11 +89,11 @@ param(
 
     [Parameter(Mandatory=$false)]
 	[hashtable]
-	$TokensOverride = $null,
+	$TokensOverride,
 	
 	[Parameter(Mandatory=$false)]
 	[string[]]
-	$ServerRolesToDeploy, # = "DatabaseServer",
+	$ServerRolesToDeploy,
 
     [Parameter(Mandatory=$false)]
     [string[]]
@@ -117,8 +132,13 @@ try {
     ############# Deployment - no custom code here, you need to put your configuration scripts under 'configuration' directory
 
     # This will start the deployment according to configuration files from $DeployConfigurationPath
-	# You can limit what you deploy by using additional parameters, e.g. -ServerRolesToDeploy, -ConfigurationsFilter or -ValidateOnly
-    Start-Deployment -Environment $Environment -TokensOverride $TokensOverride -ServerRolesToDeploy $ServerRolesToDeploy -DeployConfigurationPath $DeployConfigurationPath
+    Start-Deployment -Environment $Environment `
+                     -DeployConfigurationPath $DeployConfigurationPath `
+                     -ServerRolesToDeploy $ServerRolesToDeploy `
+                     -ConfigurationsFilter $ConfigurationsFilter `
+                     -NodesFilter $NodesFilter `
+                     -TokensOverride $TokensOverride `
+                     -DeployType $DeployType            
     
 } catch {
     Write-ErrorRecord -ErrorRecord $_

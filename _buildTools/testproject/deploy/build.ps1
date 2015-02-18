@@ -48,19 +48,19 @@ Version number of the current build.
 param(
 	[Parameter(Mandatory=$false)]
 	[string]
-	$ProjectRootPath = "..", # Modify this path according to your project structure. This is relative to the directory where build.ps1 resides ($PSScriptRoot).
+	$ProjectRootPath = '..', # Modify this path according to your project structure. This is relative to the directory where build.ps1 resides ($PSScriptRoot).
 	
 	[Parameter(Mandatory=$false)]
 	[string]
-	$PSCILibraryPath = "..\..", # Modify this path according to your project structure. This is absolute or relative to $ProjectRootPath.
+	$PSCILibraryPath = '..\..', # Modify this path according to your project structure. This is absolute or relative to $ProjectRootPath.
 
 	[Parameter(Mandatory=$false)]
 	[string]
-	$PackagesPath = "bin", # Modify this path according to your project structure. This is absolute or relative to $ProjectRootPath.
+	$PackagesPath = 'bin', # Modify this path according to your project structure. This is absolute or relative to $ProjectRootPath.
 
     [Parameter(Mandatory=$false)]
 	[string]
-	$DeployConfigurationPath = "", # Modify this path according to your project structure. This is absolute or relative to $ProjectRootPath (by default '<script directory>\configuration').
+	$DeployConfigurationPath = '', # Modify this path according to your project structure. This is absolute or relative to $ProjectRootPath (by default '<script directory>\configuration').
 
     [Parameter(Mandatory=$false)]
 	[string]
@@ -81,7 +81,7 @@ try {
     }
     Import-Module "$PSCILibraryPath\PSCI.psm1" -Force 
 
-    $PSCIGlobalConfiguration.LogFile = "build.log.txt"
+    $PSCIGlobalConfiguration.LogFile = 'build.log.txt'
     Remove-Item -Path $PSCIGlobalConfiguration.LogFile -ErrorAction SilentlyContinue
 
     Initialize-ConfigurationPaths -ProjectRootPath $ProjectRootPath -PackagesPath $PackagesPath -PSCILibraryPath $PSCILibraryPath	
@@ -93,7 +93,7 @@ try {
     $buildPackageScript = Resolve-Path -Path 'build\buildPackage.ps1'
     Write-Log -Info "Running $buildPackageScript" -Emphasize
     . $buildPackageScript @PSBoundParameters
-    Write-Log -Info "Build finished successfully." -Emphasize
+    Write-Log -Info 'Build finished successfully.' -Emphasize
 } catch {
     Write-ErrorRecord -ErrorRecord $_
 } finally {

@@ -31,12 +31,18 @@ Describe -Tag "PSCI.unit" "Install-DscResources" {
         $Global:loggedMessage = ''
         $moduleNames = @('cPSCI', 'cWebAdministration', 'xWebAdministration')
 
-        Mock Write-Log { 
+        $Global:writeLogMock = {
             $Global:loggedMessage += $Message
             Write-Host $Message
             if ($Critical) {
                 throw $Message
             }
+        } 
+
+        Mock Write-Log $Global:writeLogMock
+
+        InModuleScope PSCI.core {
+           Mock Write-Log $Global:writeLogMock
         }
 
         Context "when ModuleNames is empty" {
@@ -51,7 +57,7 @@ Describe -Tag "PSCI.unit" "Install-DscResources" {
 
         Context "when supply non-existing ModuleName" {
             $fail = $false
-
+            
             try { 
                 Install-DscResources -ModuleNames 'NonExisting'
             } catch {
