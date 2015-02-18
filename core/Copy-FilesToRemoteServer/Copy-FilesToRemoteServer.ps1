@@ -111,7 +111,7 @@ function Copy-FilesToRemoteServer {
         }
     } 
 
-    if ($Path.Count -ne $Destination.Count -and $Destination.Count -ne 1) {
+    if (!$BlueGreenEnvVariableName -and $Path.Count -ne $Destination.Count -and $Destination.Count -ne 1) {
         Write-Log -Critical "'Destination' array must be of length 1 or the same length as 'Path' array."
     }
 
