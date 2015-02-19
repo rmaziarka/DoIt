@@ -53,16 +53,14 @@ function Start-DeploymentPlanEntryLocally {
     )
 
     $connectionParams = $deploymentPlanEntry.ConnectionParams
-    $configuration = $deploymentPlanEntry.Configuration
     $resolvedTokens = $deploymentPlanEntry.Tokens
     $rebootHandlingMode = $deploymentPlanEntry.RebootHandlingMode
     $environment = $DeploymentPlanEntry.Environment
+    $configName = $deploymentPlanEntry.ConfigurationName
+    $configType = $deploymentPlanEntry.ConfigurationType
+    $mofDir = $deploymentPlanEntry.ConfigurationMofDir
 
-    $configName = $configuration.Name
-
-    if ($configuration.Type -eq "Configuration") {
-        $mofDir = $configuration.MofDir
-
+    if ($configType -eq "Configuration") {
         $params = @{
             ConnectionParams = $connectionParams
             MofDir = $mofDir
@@ -73,7 +71,7 @@ function Start-DeploymentPlanEntryLocally {
         Write-Log -Info "Deploying configuration '$configName' to node '$($connectionParams.NodesAsString)' using mof '$mofDir'"
         Start-DscConfigurationWithRetries @params
 
-    } elseif ($configuration.Type -eq "Function") {
+    } elseif ($configType -eq "Function") {
         Invoke-ConfigurationOrFunction -ConfigurationName $configName -Node $connectionParams.Nodes[0] -Environment $Environment -ResolvedTokens $resolvedTokens -ConnectionParams $ConnectionParams
     }
 }

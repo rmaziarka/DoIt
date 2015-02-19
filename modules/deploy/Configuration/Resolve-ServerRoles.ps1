@@ -144,6 +144,8 @@ function Resolve-ServerRoles {
 
     $allServerConnections = Resolve-ServerConnectionsConfigElements -AllEnvironments $AllEnvironments -Environment $Environment -ResolvedTokens $resolvedTokens
 
+    $configurationsSettings = Resolve-ConfigurationsSettings -AllEnvironments $AllEnvironments -Environment $Environment -ConfigurationsFilter $ConfigurationsFilter
+
     $serverRolesToRemove = @()
     foreach ($serverRole in $result.Values) {
         
@@ -151,8 +153,9 @@ function Resolve-ServerRoles {
                                         -Environment $Environment `
                                         -Configurations $serverRole.Configurations `
                                         -ConfigurationsFilter $ConfigurationsFilter `
+                                        -ConfigurationsSettings $configurationsSettings `
                                         -DeployType $DeployType `
-                                        -ServerRoleName $serverRole.Name`
+                                        -ServerRole $serverRole `
                                         -ResolvedTokens $resolvedTokens 
 
         
@@ -168,7 +171,7 @@ function Resolve-ServerRoles {
                                             -SelectedServerConnections $serverRole.ServerConnections `
                                             -NodesFilter $NodesFilter `
                                             -DeployType $DeployType `
-                                            -ServerRoleName $serverRole.Name `
+                                            -ServerRole $serverRole `
                                             -ResolvedTokens $resolvedTokens 
 
         # remove ServerRoles without any ServerConnections

@@ -47,7 +47,7 @@ function New-DeploymentPlanEntry {
     Name of the node to add to the deployment plan.
 
     .PARAMETER Configuration
-    DSC configuration or function to add to the deployment plan.
+    Configuration object containing information about DSC configuration or function to be added to the deployment plan (created in Resolve-Configurations).
 
     .PARAMETER DscOutputPath
     Path where the .MOF files will be generated.
@@ -132,9 +132,9 @@ function New-DeploymentPlanEntry {
 
     $connectionParamsObj = New-ConnectionParameters @connectionParams
     
-    if ($ServerRole.RunOn) {
-        $runOnNode = $ServerRole.RunOn
-    } elseif ($ServerRole.RunRemotely) {
+    if ($Configuration.RunOn) {
+        $runOnNode = $Configuration.RunOn
+    } elseif ($Configuration.RunRemotely) {
         $runOnNode = $Node
     }
 
@@ -145,7 +145,7 @@ function New-DeploymentPlanEntry {
 
     $isLocalRun = $runOnNode -eq $Node
 
-    if ($Configuration.CommandType -eq 'Configuration') {		
+    if ($Configuration.Type -eq 'Configuration') {		
 		if ($isLocalRun) {
 			$dscNode = 'localhost'
 		} else {
@@ -157,6 +157,8 @@ function New-DeploymentPlanEntry {
             Write-Log -Warn "Mof file has not been generated for configuration named '$($Configuration.Name)' (Environment '$Environment' / ServerRole '$($ServerRole.Name)'). Please ensure your configuration definition is correct."
             continue
         }
+        $mofDir = Resolve-Path -Path $mofDir
+
     }
 
     $packageDirectory = (Resolve-ScriptedToken -ScriptedToken $ServerConnection.PackageDirectory -ResolvedTokens $ResolvedTokens -Environment $Environment -Node $Node)
@@ -170,15 +172,13 @@ function New-DeploymentPlanEntry {
         IsLocalRun = $isLocalRun
         Environment = $Environment;
         ServerRole = $ServerRole.Name;
-        Configuration = [PSCustomObject]@{
-            "Type" = $Configuration.CommandType; 
-            "Name" = $Configuration.Name
-            "MofDir" = $mofDir 
-        }
+        ConfigurationName = $Configuration.Name
+        ConfigurationType = $Configuration.Type
+        ConfigurationMofDir = $mofDir
         Tokens = $ResolvedTokens; 
         TokensOverride = $TokensOverride;
         PackageDirectory = $packageDirectory;
-        #Prerequisites = (Resolve-ScriptedToken -ScriptedToken $ServerRole.Prerequisites -ResolvedTokens $ResolvedTokens -Environment $Environment -Node $Node)
+        RequiredPackages = (Resolve-ScriptedToken -ScriptedToken $Configuration.RequiredPackages -ResolvedTokens $ResolvedTokens -Environment $Environment -Node $Node)
         RebootHandlingMode = $RebootHandlingMode
     }
 }

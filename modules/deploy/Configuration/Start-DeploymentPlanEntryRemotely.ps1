@@ -68,7 +68,7 @@ function Start-DeploymentPlanEntryRemotely {
             ConnectionParams = $deploymentPlanEntry.RunOnConnectionParams;
             CopyTo = $deploymentPlanEntry.PackageDirectory;
             DeployType = $DeployType;
-            ConfigurationsFilter = $deploymentPlanEntry.Configuration.Name;
+            ConfigurationsFilter = $deploymentPlanEntry.ConfigurationName;
             NodesFilter = $deploymentPlanEntry.ConnectionParams.Nodes
             TokensOverride = $deploymentPlanEntry.TokensOverride
         }
@@ -84,7 +84,7 @@ function Start-DeploymentPlanEntryRemotely {
     } elseif ($deploymentPlanEntry.RunOnConnectionParams.RemotingMode -eq "PSRemoting") {
         Start-DeploymentByPSRemoting @params
     } else {
-        Write-Log -Critical "Remoting Mode `"$($deploymentPlanEntry.RunOnConnectionParams.RemotingMode)`" is not supported."
+        Write-Log -Critical "Remoting Mode '$($deploymentPlanEntry.RunOnConnectionParams.RemotingMode)' is not supported."
     }
     
 }

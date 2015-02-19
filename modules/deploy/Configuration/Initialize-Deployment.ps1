@@ -40,6 +40,7 @@ function Initialize-Deployment {
     $Global:Environments['Default'] = @{
         ServerConnections = @{}
         ServerRoles = [ordered]@{}
+        ConfigurationSettings = @{}
         Tokens = @{}
         TokensChildren = @{}
         BasedOn = ''

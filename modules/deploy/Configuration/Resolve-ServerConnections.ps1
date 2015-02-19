@@ -47,8 +47,8 @@ function Resolve-ServerConnections {
     Deploy    - deploy only non-DSC configurations
     Adhoc     - override configurations and nodes with $ConfigurationsFilter and $NodesFilter (they don't have to be defined in ServerRoles - useful for adhoc deployments)
 
-    .PARAMETER ServerRoleName
-    Name of ServerRole containing the configurations to resolve.
+    .PARAMETER ServerRole
+    ServerRole containing the configurations to resolve.
 
     .PARAMETER ResolvedTokens
     Resolved tokens.
@@ -84,8 +84,8 @@ function Resolve-ServerConnections {
 	    $DeployType = 'All',
 
         [Parameter(Mandatory=$false)]
-        [string[]]
-        $ServerRoleName,
+        [hashtable]
+        $ServerRole,
 
         [Parameter(Mandatory=$true)]
         [hashtable]
@@ -101,7 +101,7 @@ function Resolve-ServerConnections {
             $serverConn = Resolve-ServerConnectionConfigElement -AllServerConnections $AllServerConnections -ServerConnection $serverConnectionName -ResolvedTokens $resolvedTokens -Environment $Environment
         } else {
             if (!$AllServerConnections.ContainsKey($serverConnectionName)) {
-                Write-Log -Critical "Invalid ServerConnection reference ('$serverConnectionName') - Environment '$Environment' / ServerRole '$ServerRoleName'."
+                Write-Log -Critical "Invalid ServerConnection reference ('$serverConnectionName') - Environment '$Environment' / ServerRole '$($ServerRole.Name)'."
             }
             $serverConn = $AllServerConnections[$serverConnectionName]
         }

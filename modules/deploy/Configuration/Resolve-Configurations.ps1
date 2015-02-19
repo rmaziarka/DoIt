@@ -37,6 +37,9 @@ function Resolve-Configurations {
     List of Configurations to deploy - can be used if you don't want to deploy all configurations defined in the configuration files.
     If not set, configurations will be deployed according to the ServerRoles defined in the configuration files.
 
+    .PARAMETER ConfigurationsSettings
+    Hashtable containing all ConfigurationsSettings.
+
     .PARAMETER DeployType
     Deployment type:
     All       - deploy everything according to configuration files (= Provision + Deploy)
@@ -44,8 +47,8 @@ function Resolve-Configurations {
     Deploy    - deploy only non-DSC configurations
     Adhoc     - override configurations and nodes with $ConfigurationsFilter and $NodesFilter (they don't have to be defined in ServerRoles - useful for adhoc deployments)
 
-    .PARAMETER ServerRoleName
-    Name of ServerRole containing the configurations to resolve.
+    .PARAMETER ServerRole
+    ServerRole containing the configurations to resolve.
 
     .PARAMETER ResolvedTokens
     Resolved tokens.
@@ -72,20 +75,22 @@ function Resolve-Configurations {
         $ConfigurationsFilter,
 
         [Parameter(Mandatory=$false)]
+        [hashtable]
+        $ConfigurationsSettings,
+
+        [Parameter(Mandatory=$false)]
         [ValidateSet('All', 'Provision', 'Deploy', 'Adhoc')]
 	    [string]
 	    $DeployType = 'All',
 
         [Parameter(Mandatory=$false)]
-        [string[]]
-        $ServerRoleName,
+        [hashtable]
+        $ServerRole,
 
         [Parameter(Mandatory=$true)]
         [hashtable]
         $ResolvedTokens
     )
-
-
 
     if ($DeployType -eq 'Adhoc') {
         # in adhoc deployment Configurations are overriden directly from filters
@@ -102,7 +107,7 @@ function Resolve-Configurations {
     foreach ($configName in $Configurations) {
         $cmd = Get-Command -Name $configName -ErrorAction SilentlyContinue
         if (!$cmd) {
-            Write-Log -Critical "Invalid Configuration reference ('$configName') - Environment '$Environment' / ServerRole '$serverRoleName'."
+            Write-Log -Critical "Invalid Configuration reference ('$configName') - Environment '$Environment' / ServerRole '$($ServerRole.Name)'."
         }
         if ($cmd.CommandType -eq 'Configuration') {
             if ($DeployType -eq 'Deploy') {
@@ -115,7 +120,20 @@ function Resolve-Configurations {
         } else {
             Write-Log -Critical "Command '$configName' is of unrecognized type ('$($cmd.CommandType)') - neither 'Configuration' nor 'Function'."
         }
-        $result += $cmd
+
+        $configSettings = $ConfigurationsSettings[$configName]
+
+        $configObject = [PSCustomObject]@{
+            Name = $configName
+            Type = $cmd.CommandType
+            RequiredPackages = if ($configSettings -and $configSettings.ContainsKey('RequiredPackages')) { $configSettings.RequiredPackages } else { $ServerRole.RequiredPackages }
+            RunRemotely = if ($configSettings -and $configSettings.ContainsKey('RunRemotely')) { $configSettings.RunRemotely } else { $ServerRole.RunRemotely }
+            RunOn = if ($configSettings -and $configSettings.ContainsKey('RunOn')) { $configSettings.RunOn } else { $ServerRole.RunOn }
+            RebootHandlingMode = if ($configSettings -and $configSettings.ContainsKey('RebootHandlingMode')) { $configSettings.RebootHandlingMode } else { $ServerRole.RebootHandlingMode }
+        }
+
+        $result += $configObject
+
     }
 
     return ,($result)

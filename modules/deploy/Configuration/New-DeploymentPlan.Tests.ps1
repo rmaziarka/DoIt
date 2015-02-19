@@ -26,6 +26,24 @@ Import-Module -Name "$PSScriptRoot\..\..\..\PSCI.psm1" -Force
 
 Describe -Tag "PSCI.unit" "New-DeploymentPlan" {
     InModuleScope PSCI.deploy {
+
+        function config1 {}
+        function config2 {}
+        function config3 {}
+        function config4 {}
+
+        Configuration dsc1 {
+            param ($NodeName, $Environment, $Tokens)
+
+            Node $NodeName {
+                File test {
+                    DestinationPath = 'c:\test'
+                }
+            }
+        }
+
+
+
         Context "when used with two environments and two server roles" {
             Initialize-Deployment
 
@@ -42,20 +60,14 @@ Describe -Tag "PSCI.unit" "New-DeploymentPlan" {
 			    ServerRole Web -Configurations @('config1', 'config2') -RunOn 'machine1' 
 		    }
 
-            function config1 {}
-            function config2 {}
-            function config3 {}
-
             It "should properly initialize internal structures for ServerRolesFilter = WebServer" {
-                $environment = 'Local'
-
-                $dscOutputPath = 'dscOutput'
-                $deploymentPlan = New-DeploymentPlan -AllEnvironments $Global:Environments -Environment $environment -DscOutputPath $dscOutputPath -ServerRolesFilter 'Web'
+                $deploymentPlan = New-DeploymentPlan -AllEnvironments $Global:Environments -Environment 'Local' -DscOutputPath 'dscOutput' -ServerRolesFilter 'Web'
 
                 $deploymentPlan.Count | Should Be 4
 
                 $deploymentPlan[0].ServerRole | Should Be 'Web'
-                $deploymentPlan[0].Configuration.Name | Should Be 'config1'
+                $deploymentPlan[0].ConfigurationName | Should Be 'config1'
+                $deploymentPlan[0].ConfigurationType | Should Be 'Function'
                 $deploymentPlan[0].ConnectionParams | Should Not Be $null
                 $deploymentPlan[0].ConnectionParams.Nodes[0] | Should Be 'machine1'
                 $deploymentPlan[0].ConnectionParams.RemotingMode | Should Be 'PSRemoting'
@@ -65,7 +77,7 @@ Describe -Tag "PSCI.unit" "New-DeploymentPlan" {
                 $deploymentPlan[0].IsLocalRun | Should Be $true
                 
                 $deploymentPlan[1].ServerRole | Should Be 'Web'
-                $deploymentPlan[1].Configuration.Name | Should Be 'config1'
+                $deploymentPlan[1].ConfigurationName | Should Be 'config1'
                 $deploymentPlan[1].ConnectionParams | Should Not Be $null
                 $deploymentPlan[1].ConnectionParams.Nodes[0] | Should Be 'machine2'
                 $deploymentPlan[1].ConnectionParams.RemotingMode | Should Be 'PSRemoting'
@@ -76,7 +88,8 @@ Describe -Tag "PSCI.unit" "New-DeploymentPlan" {
                 
 
                 $deploymentPlan[2].ServerRole | Should Be 'Web'
-                $deploymentPlan[2].Configuration.Name | Should Be 'config2'
+                $deploymentPlan[2].ConfigurationName | Should Be 'config2'
+                $deploymentPlan[2].ConfigurationType | Should Be 'Function'
                 $deploymentPlan[2].ConnectionParams | Should Not Be $null
                 $deploymentPlan[2].ConnectionParams.Nodes[0] | Should Be 'machine1'
                 $deploymentPlan[2].ConnectionParams.RemotingMode | Should Be 'PSRemoting'
@@ -86,7 +99,7 @@ Describe -Tag "PSCI.unit" "New-DeploymentPlan" {
                 $deploymentPlan[2].IsLocalRun | Should Be $true
 
                 $deploymentPlan[3].ServerRole | Should Be 'Web'
-                $deploymentPlan[3].Configuration.Name | Should Be 'config2'
+                $deploymentPlan[3].ConfigurationName | Should Be 'config2'
                 $deploymentPlan[3].ConnectionParams | Should Not Be $null
                 $deploymentPlan[3].ConnectionParams.Nodes[0] | Should Be 'machine2'
                 $deploymentPlan[3].ConnectionParams.RemotingMode | Should Be 'PSRemoting'
@@ -97,15 +110,12 @@ Describe -Tag "PSCI.unit" "New-DeploymentPlan" {
             }
 
             It "should properly initialize internal structures for ServerRolesFilter = empty" {
-                $environment = 'Local'
-
-                $dscOutputPath = 'dscOutput'
-                $deploymentPlan = New-DeploymentPlan -AllEnvironments $Global:Environments -Environment $environment -DscOutputPath $dscOutputPath
+                $deploymentPlan = New-DeploymentPlan -AllEnvironments $Global:Environments -Environment 'Local' -DscOutputPath 'dscOutput'
 
                 $deploymentPlan.Count | Should Be 5
 
                 $deploymentPlan[0].ServerRole | Should Be 'Web'
-                $deploymentPlan[0].Configuration.Name | Should Be 'config1'
+                $deploymentPlan[0].ConfigurationName | Should Be 'config1'
                 $deploymentPlan[0].ConnectionParams | Should Not Be $null
                 $deploymentPlan[0].ConnectionParams.Nodes[0] | Should Be 'machine1'
                 $deploymentPlan[0].ConnectionParams.RemotingMode | Should Be 'PSRemoting'
@@ -115,7 +125,7 @@ Describe -Tag "PSCI.unit" "New-DeploymentPlan" {
                 $deploymentPlan[0].IsLocalRun | Should Be $true
 
                 $deploymentPlan[4].ServerRole | Should Be 'Database'
-                $deploymentPlan[4].Configuration.Name | Should Be 'config3'
+                $deploymentPlan[4].ConfigurationName | Should Be 'config3'
                 $deploymentPlan[4].ConnectionParams | Should Not Be $null
                 $deploymentPlan[4].ConnectionParams.Nodes[0] | Should Be 'machine2'
                 $deploymentPlan[4].ConnectionParams.RemotingMode | Should Be 'PSRemoting'
@@ -150,20 +160,12 @@ Describe -Tag "PSCI.unit" "New-DeploymentPlan" {
                 ServerRole SSRS -ServerConnections $null
 		    }
 
-            function config1 {}
-            function config2 {}
-            function config3 {}
-            function config4 {}
-
-            $environment = 'Tests'
-            
             It "should properly plan Web deployment" {
-                $dscOutputPath = 'dscOutput'
-                $deploymentPlan = New-DeploymentPlan -AllEnvironments $Global:Environments -Environment $environment -DscOutputPath $dscOutputPath -ServerRolesFilter 'Web'
+                $deploymentPlan = New-DeploymentPlan -AllEnvironments $Global:Environments -Environment 'Tests' -DscOutputPath 'dscOutput' -ServerRolesFilter 'Web'
 
                 $deploymentPlan.Count | Should Be 2
 
-                $deploymentPlan[0].Configuration.Name | Should Be 'config1'
+                $deploymentPlan[0].ConfigurationName | Should Be 'config1'
                 $deploymentPlan[0].ConnectionParams | Should Not Be $null
                 $deploymentPlan[0].ConnectionParams.Nodes[0] | Should Be 'machine1'
                 $deploymentPlan[0].ConnectionParams.RemotingMode | Should Be 'WebDeployAgentService'
@@ -172,7 +174,7 @@ Describe -Tag "PSCI.unit" "New-DeploymentPlan" {
                 $deploymentPlan[0].PackageDirectory | Should Be 'folder'
                 $deploymentPlan[0].IsLocalRun | Should Be $true
 
-                $deploymentPlan[1].Configuration.Name | Should Be 'config1'
+                $deploymentPlan[1].ConfigurationName | Should Be 'config1'
                 $deploymentPlan[1].ConnectionParams | Should Not Be $null
                 $deploymentPlan[1].ConnectionParams.Nodes[0] | Should Be 'machine2'
                 $deploymentPlan[1].ConnectionParams.RemotingMode | Should Be 'WebDeployAgentService'
@@ -183,34 +185,31 @@ Describe -Tag "PSCI.unit" "New-DeploymentPlan" {
             }
 
             It "should properly plan Database deployment" {
-                $dscOutputPath = 'dscOutput'
-                $deploymentPlan = New-DeploymentPlan -AllEnvironments $Global:Environments -Environment $environment -DscOutputPath $dscOutputPath -ServerRolesFilter 'Database'
+                $deploymentPlan = New-DeploymentPlan -AllEnvironments $Global:Environments -Environment 'Tests' -DscOutputPath 'dscOutput' -ServerRolesFilter 'Database'
 
                 $deploymentPlan.Count | Should Be 1
 
                 $deploymentPlan[0].ConnectionParams | Should Not Be $null
                 $deploymentPlan[0].ConnectionParams.Nodes[0] | Should Be 'machine2'
                 $deploymentPlan[0].RunOnConnectionParams | Should Be $null
-                $deploymentPlan[0].Configuration.Name | Should Be 'config3'
+                $deploymentPlan[0].ConfigurationName | Should Be 'config3'
                 $deploymentPlan[0].IsLocalRun | Should Be $false
             }
 
             It "should properly plan SSAS deployment" {
-                $dscOutputPath = 'dscOutput'
-                $deploymentPlan = New-DeploymentPlan -AllEnvironments $Global:Environments -Environment $environment -DscOutputPath $dscOutputPath -ServerRolesFilter 'SSAS'
+                $deploymentPlan = New-DeploymentPlan -AllEnvironments $Global:Environments -Environment 'Tests' -DscOutputPath 'dscOutput' -ServerRolesFilter 'SSAS'
 
                 $deploymentPlan.Count | Should Be 1
 
                 $deploymentPlan[0].ConnectionParams | Should Not Be $null
                 $deploymentPlan[0].ConnectionParams.Nodes[0] | Should Be 'machine4'
                 $deploymentPlan[0].RunOnConnectionParams | Should Be $null
-                $deploymentPlan[0].Configuration.Name | Should Be 'config4'
+                $deploymentPlan[0].ConfigurationName | Should Be 'config4'
                 $deploymentPlan[0].IsLocalRun | Should Be $false
             }
  
             It "should properly plan SSRS deployment" {
-                $dscOutputPath = 'dscOutput'
-                $deploymentPlan = New-DeploymentPlan -AllEnvironments $Global:Environments -Environment $environment -DscOutputPath $dscOutputPath -ServerRolesFilter 'SSRS'
+                $deploymentPlan = New-DeploymentPlan -AllEnvironments $Global:Environments -Environment 'Tests' -DscOutputPath 'dscOutput' -ServerRolesFilter 'SSRS'
 
                 $deploymentPlan.Count | Should Be 0
             }
@@ -238,17 +237,12 @@ Describe -Tag "PSCI.unit" "New-DeploymentPlan" {
                 ServerRole WebConfig -Configurations @('config1') -RunRemotely -ServerConnections WebServers
 		    }
 
-            function config1 {}
-
-            $environment = 'Tests'
+            $deploymentPlan = New-DeploymentPlan -AllEnvironments $Global:Environments -Environment 'Tests' -DscOutputPath 'dscOutput' -ServerRolesFilter 'WebConfig'
 
             It "should properly assign credentials" {
-                $dscOutputPath = 'dscOutput'
-                $deploymentPlan = New-DeploymentPlan -AllEnvironments $Global:Environments -Environment $environment -DscOutputPath $dscOutputPath -ServerRolesFilter 'WebConfig'
-
                 $deploymentPlan.Count | Should Be 1
 
-                $deploymentPlan[0].Configuration.Name | Should Be 'config1'
+                $deploymentPlan[0].ConfigurationName | Should Be 'config1'
                 $deploymentPlan[0].ConnectionParams | Should Not Be $null
                 $deploymentPlan[0].ConnectionParams.Nodes[0] | Should Be 'machine1'
                 $deploymentPlan[0].ConnectionParams.RemotingMode | Should Be 'PSRemoting'
@@ -287,17 +281,12 @@ Describe -Tag "PSCI.unit" "New-DeploymentPlan" {
                 ServerRole Web -Configurations @('config1') -RunRemotely -ServerConnections WebServers
 		    }
 
-            function config1 {}
+            $deploymentPlan = New-DeploymentPlan -AllEnvironments $Global:Environments -Environment 'Tests' -DscOutputPath 'dscOutput'
 
             It "should properly plan deployment" {
-                $environment = 'Tests'
-                $dscOutputPath = 'dscOutput'
-
-                $deploymentPlan = New-DeploymentPlan -AllEnvironments $Global:Environments -Environment $environment -DscOutputPath $dscOutputPath
-
                 $deploymentPlan.Count | Should Be 2
 
-                $deploymentPlan[0].Configuration.Name | Should Be 'config1'
+                $deploymentPlan[0].ConfigurationName | Should Be 'config1'
                 $deploymentPlan[0].PackageDirectory | Should Be 'D:\Deployment'
                 $deploymentPlan[0].ConnectionParams | Should Not Be $null
                 $deploymentPlan[0].ConnectionParams.Nodes[0] | Should Be 's01'
@@ -308,7 +297,7 @@ Describe -Tag "PSCI.unit" "New-DeploymentPlan" {
                 $deploymentPlan[0].RunOnConnectionParams.Nodes[0] | Should Be 's01'
                 $deploymentPlan[0].IsLocalRun | Should Be $true
 
-                $deploymentPlan[1].Configuration.Name | Should Be 'config1'
+                $deploymentPlan[1].ConfigurationName | Should Be 'config1'
                 $deploymentPlan[1].PackageDirectory | Should Be 'C:\Deployment'
                 $deploymentPlan[1].ConnectionParams | Should Not Be $null
                 $deploymentPlan[1].ConnectionParams.Nodes[0] | Should Be 's02'
@@ -340,28 +329,156 @@ Describe -Tag "PSCI.unit" "New-DeploymentPlan" {
                 ServerRole Web -Configurations @('config1') -ServerConnections (ServerConnection WebServers -Nodes { $Tokens.General.AllNodes })
 		    }
 
-            function config1 {}
+            $deploymentPlan = New-DeploymentPlan -AllEnvironments $Global:Environments -Environment 'Test1' -DscOutputPath 'dscOutput'
 
             It "should properly plan deployment" {
-                $environment = 'Test1'
-                $dscOutputPath = 'dscOutput'
-
-                $deploymentPlan = New-DeploymentPlan -AllEnvironments $Global:Environments -Environment $environment -DscOutputPath $dscOutputPath
-
                 $deploymentPlan.Count | Should Be 2
 
-                $deploymentPlan[0].Configuration.Name | Should Be 'config1'
+                $deploymentPlan[0].ConfigurationName | Should Be 'config1'
                 $deploymentPlan[0].ConnectionParams | Should Not Be $null
                 $deploymentPlan[0].ConnectionParams.Nodes[0] | Should Be 'Node1'
                 $deploymentPlan[0].RunOnConnectionParams | Should Be $null
                 $deploymentPlan[0].IsLocalRun | Should Be $false
 
-                $deploymentPlan[1].Configuration.Name | Should Be 'config1'
+                $deploymentPlan[1].ConfigurationName | Should Be 'config1'
                 $deploymentPlan[1].ConnectionParams | Should Not Be $null
                 $deploymentPlan[1].ConnectionParams.Nodes[0] | Should Be 'Node2'
                 $deploymentPlan[1].RunOnConnectionParams | Should Be $null
                 $deploymentPlan[1].IsLocalRun | Should Be $false
            }
-       }
+        }
+
+        Context "when used with DSC configuration" {
+            try { 
+                Initialize-Deployment
+
+                Environment Test1 {
+                    ServerRole Web -Configurations 'dsc1' -ServerConnections (ServerConnection WebServers -Nodes @('node1', 'node2'))
+                }
+
+                $deploymentPlan = New-DeploymentPlan -AllEnvironments $Global:Environments -Environment 'Test1' -DscOutputPath 'dscOutput'
+
+                It "should properly plan deployment" {
+                    $deploymentPlan.Count | Should Be 2
+
+                    $deploymentPlan[0].ConfigurationName | Should Be 'dsc1'
+                    $deploymentPlan[0].ConfigurationType | Should Be 'Configuration'
+                    Test-Path -Path 'dscOutput\node1\dsc1\node1.mof' -PathType Leaf | Should Be $true
+                    $deploymentPlan[0].ConfigurationMofDir | Should Be (Resolve-Path -Path 'dscOutput\node1\dsc1').Path
+                    
+                    $deploymentPlan[0].ConnectionParams | Should Not Be $null
+                    $deploymentPlan[0].ConnectionParams.Nodes[0] | Should Be 'node1'
+                    $deploymentPlan[0].RunOnConnectionParams | Should Be $null
+                    $deploymentPlan[0].IsLocalRun | Should Be $false
+
+                    $deploymentPlan[1].ConfigurationName | Should Be 'dsc1'
+                    $deploymentPlan[1].ConfigurationType | Should Be 'Configuration'
+                    Test-Path -Path 'dscOutput\node2\dsc1\node2.mof' -PathType Leaf | Should Be $true
+                    $deploymentPlan[1].ConfigurationMofDir | Should Be (Resolve-Path -Path 'dscOutput\node2\dsc1').Path
+                    $deploymentPlan[1].ConnectionParams | Should Not Be $null
+                    $deploymentPlan[1].ConnectionParams.Nodes[0] | Should Be 'node2'
+                    $deploymentPlan[1].RunOnConnectionParams | Should Be $null
+                    $deploymentPlan[1].IsLocalRun | Should Be $false
+                }
+            } finally {
+                Remove-Item -Path 'dscOutput' -Force -Recurse -ErrorAction SilentlyContinue
+            }
+        }
+
+        Context "when used with ConfigurationSettings" {
+            try { 
+                Initialize-Deployment
+
+                Environment Default {
+                    ServerRole Web -Configurations 'dsc1','config1' -ServerConnections (ServerConnection WebServers -Nodes @('node1', 'node2')) -RequiredPackages 'package1'
+                    ConfigurationSettings config1 -RunRemotely
+                }
+
+                Environment Test1 {
+                    ConfigurationSettings dsc1 -RequiredPackages 'package2'
+                }
+
+                Environment Test2 {
+                   ConfigurationSettings dsc1 -RequiredPackages { if ($NodeName -eq 'node1') { 'packagen1' } else { 'packagen2' } }
+                }
+
+                It "should properly plan deployment for Environment Default" {
+                    $deploymentPlan = New-DeploymentPlan -AllEnvironments $Global:Environments -Environment Default -DscOutputPath 'dscOutput'
+                    $deploymentPlan.Count | Should Be 4
+
+                    $deploymentPlan[0].ConfigurationName | Should Be 'dsc1'
+                    $deploymentPlan[0].ConnectionParams.Nodes | Should Be 'node1'
+                    $deploymentPlan[0].RunOnConnectionParams | Should Be $null
+                    $deploymentPlan[0].RequiredPackages | Should Be 'package1'
+                    
+                    $deploymentPlan[1].ConfigurationName | Should Be 'dsc1'
+                    $deploymentPlan[1].ConnectionParams.Nodes | Should Be 'node2'
+                    $deploymentPlan[1].RunOnConnectionParams | Should Be $null
+                    $deploymentPlan[1].RequiredPackages | Should Be 'package1'
+
+                    $deploymentPlan[2].ConfigurationName | Should Be 'config1'
+                    $deploymentPlan[2].ConnectionParams.Nodes | Should Be 'node1'
+                    $deploymentPlan[2].RunOnConnectionParams.Nodes | Should Be 'node1'
+                    $deploymentPlan[2].RequiredPackages | Should Be 'package1'
+
+                    $deploymentPlan[3].ConfigurationName | Should Be 'config1'
+                    $deploymentPlan[3].ConnectionParams.Nodes[0] | Should Be 'node2'
+                    $deploymentPlan[3].RunOnConnectionParams.Nodes | Should Be 'node2'
+                    $deploymentPlan[3].RequiredPackages | Should Be 'package1'
+                }
+                
+                It "should properly plan deployment for Environment Test1" {
+                    $deploymentPlan = New-DeploymentPlan -AllEnvironments $Global:Environments -Environment 'Test1' -DscOutputPath 'dscOutput'
+                    $deploymentPlan.Count | Should Be 4
+
+                    $deploymentPlan[0].ConfigurationName | Should Be 'dsc1'
+                    $deploymentPlan[0].ConnectionParams.Nodes | Should Be 'node1'
+                    $deploymentPlan[0].RunOnConnectionParams | Should Be $null
+                    $deploymentPlan[0].RequiredPackages | Should Be 'package2'
+                    
+                    $deploymentPlan[1].ConfigurationName | Should Be 'dsc1'
+                    $deploymentPlan[1].ConnectionParams.Nodes | Should Be 'node2'
+                    $deploymentPlan[1].RunOnConnectionParams | Should Be $null
+                    $deploymentPlan[1].RequiredPackages | Should Be 'package2'
+
+                    $deploymentPlan[2].ConfigurationName | Should Be 'config1'
+                    $deploymentPlan[2].ConnectionParams.Nodes | Should Be 'node1'
+                    $deploymentPlan[2].RunOnConnectionParams.Nodes | Should Be 'node1'
+                    $deploymentPlan[2].RequiredPackages | Should Be 'package1'
+
+                    $deploymentPlan[3].ConfigurationName | Should Be 'config1'
+                    $deploymentPlan[3].ConnectionParams.Nodes[0] | Should Be 'node2'
+                    $deploymentPlan[3].RunOnConnectionParams.Nodes | Should Be 'node2'
+                    $deploymentPlan[3].RequiredPackages | Should Be 'package1'
+                }
+
+                It "should properly plan deployment for Environment Test1" {
+                    $deploymentPlan = New-DeploymentPlan -AllEnvironments $Global:Environments -Environment Test2 -DscOutputPath 'dscOutput'
+                    $deploymentPlan.Count | Should Be 4
+
+                    $deploymentPlan[0].ConfigurationName | Should Be 'dsc1'
+                    $deploymentPlan[0].ConnectionParams.Nodes | Should Be 'node1'
+                    $deploymentPlan[0].RunOnConnectionParams | Should Be $null
+                    $deploymentPlan[0].RequiredPackages | Should Be 'packagen1'
+                    
+                    $deploymentPlan[1].ConfigurationName | Should Be 'dsc1'
+                    $deploymentPlan[1].ConnectionParams.Nodes | Should Be 'node2'
+                    $deploymentPlan[1].RunOnConnectionParams | Should Be $null
+                    $deploymentPlan[1].RequiredPackages | Should Be 'packagen2'
+
+                    $deploymentPlan[2].ConfigurationName | Should Be 'config1'
+                    $deploymentPlan[2].ConnectionParams.Nodes | Should Be 'node1'
+                    $deploymentPlan[2].RunOnConnectionParams.Nodes | Should Be 'node1'
+                    $deploymentPlan[2].RequiredPackages | Should Be 'package1'
+
+                    $deploymentPlan[3].ConfigurationName | Should Be 'config1'
+                    $deploymentPlan[3].ConnectionParams.Nodes[0] | Should Be 'node2'
+                    $deploymentPlan[3].RunOnConnectionParams.Nodes | Should Be 'node2'
+                    $deploymentPlan[3].RequiredPackages | Should Be 'package1'
+                }
+            } finally {
+                Remove-Item -Path 'dscOutput' -Force -Recurse -ErrorAction SilentlyContinue
+            }
+        }
     }
 }

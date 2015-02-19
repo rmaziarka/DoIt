@@ -31,17 +31,22 @@ function New-DeploymentPlan {
     It iterates through resolved ServerRoles (created for given environment with Resolve-ServerRoles) and Configurations defined in each ServerRole,
     and creates a deployment plan entry for each of such configuration.
     If the configuration is a DSC configuration (as opposed to function), it will be run and MOF files will be created for each node.
-    The deployment plan has a form of array of hashtables @( $hashTableForNode1, $hashTableForNode2, ...) where each hashTable has the following structure:
+    The deployment plan has a form of array of hashtables @( $hashTableForNode1, $hashTableForNode2, ...) where each hashTable has the structure you can
+    see in New-DeploymentPlanEntry:
 
-    Node = <name of the node>
-    Tokens = <hashtable containing resolved tokens which will be used during the deployment> 
-    RemotingCredential = <PSCredential object which will be passed to Start-DscConfiguration>
-    Configurations = <list of hashtables containing information required to run DSC configurations or custom functions>
-
-    Each of Configuration hashtable has the following structure:
-        Type = (Configuration|Function)
-        Name = <name of the Configuration or Function>
-        MofDir = <path to the directory containing MOF files - used only when Type = Configuration>
+    ConnectionParams = <ConnectionParameters object containing connection information for the destination server (where the packages will be deployed)>
+    RunOnConnectionParams = <ConnectionParameters object containing connection information for the server where the deployment configurations will run>
+    IsLocalRun = <$True if destination server is the same as the server where the deployment configurations will run>
+    Environment = <Environment name>
+    ServerRole = <ServerRole name>
+    ConfigurationName = <Name of DSC configuration or custom function that will be run on the destination server>
+    ConfigurationType = <'Configuration' for DSC configuration or 'Function' for custom function>
+    ConfigurationMofDir = <Directory where the generated .mof file resides - only used if ConfigurationType = 'Configuration'>
+    Tokens = <Hashtable containing resolved tokens - they can be varying between Environment/Nodes combinations>
+    TokensOverride = <Hashtable containing tokens overriden by user - passed directly to deploy.ps1>
+    PackageDirectory = <Path to the directory where the files required for the deployment will be copied - only used if deployment configurations will not run locally>
+    RequiredPackages = <List of packages required for the deployment as specified by the user in the configuration files>
+    RebootHandlingMode = <Determines how to handle reboot requests - only used if ConfigurationType = 'Configuration'>
 
     .PARAMETER AllEnvironments
     Hashtable containing all environment definitions.
@@ -142,7 +147,7 @@ function New-DeploymentPlan {
             -NodesFilter $NodesFilter `
             -ConfigurationsFilter $ConfigurationsFilter `
             -DeployType $deployType
-                
+
         foreach ($serverRoleName in $serverRoles.Keys) {
             $serverRole = $serverRoles[$serverRoleName]
             foreach ($config in $serverRole.Configurations) {

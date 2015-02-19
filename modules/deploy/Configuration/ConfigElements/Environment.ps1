@@ -78,6 +78,7 @@ function Environment {
             $Global:Environments[$Name] = @{
                 ServerConnections = @{}
                 ServerRoles = [ordered]@{}
+                ConfigurationSettings = @{}
                 Tokens = @{}
                 TokensChildren = @{}
                 BasedOn = 'Default'

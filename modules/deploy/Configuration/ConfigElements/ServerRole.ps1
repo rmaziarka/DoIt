@@ -63,6 +63,9 @@ function ServerRole {
     .PARAMETER Configurations
     List of configurations which will be deployed to the $Nodes.
 
+    .PARAMETER RequiredPackages
+    List of packages that will be copied to remote server before running actual configurations.
+
     .PARAMETER RunRemotely
     If set then each configuration is run remotely (on nodes defined in $ServerConnections, or on specified $RunOn node).
 
@@ -127,7 +130,7 @@ function ServerRole {
 
 #>
 
-    [CmdletBinding(DefaultParametersetName='NoRunOn')]
+    [CmdletBinding()]
     [OutputType([void])]
     param(
         [Parameter(Mandatory=$true)]
@@ -142,14 +145,13 @@ function ServerRole {
         [object]
         $Configurations,
 
-        #TODO
-        #[Parameter(Mandatory=$false)]
-        #[object]
-        #$Prerequisites,
+        [Parameter(Mandatory=$false)]
+        [object]
+        $RequiredPackages,
 
         [Parameter(Mandatory=$false)]
         [switch]
-        $RunRemotely = $false,
+        $RunRemotely,
 
         [Parameter(Mandatory=$false)]
         [string]
@@ -177,9 +179,9 @@ function ServerRole {
         if ($PSBoundParameters.ContainsKey('Configurations')) {
             $serverRole.Configurations = $Configurations
         }
-        #if ($PSBoundParameters.ContainsKey('Prerequisites')) {
-            #$serverRole.Prerequisites = $Prerequisites
-        #}
+        if ($PSBoundParameters.ContainsKey('RequiredPackages')) {
+            $serverRole.RequiredPackages = $RequiredPackages
+        }
         if ($PSBoundParameters.ContainsKey('RunOn')) {
             $serverRole.RunOn = $RunOn
         }
