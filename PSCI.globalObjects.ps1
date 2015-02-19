@@ -48,6 +48,6 @@ $PSCIGlobalConfiguration = [PSCustomObject]@{
     RemotingMode = $null;
 }
 
-if (Test-Path -Path Variable:Global:RemotingMode) {
-    $PSCIGlobalConfiguration.RemotingMode = $Global:RemotingMode
+if (Test-Path -Path Variable:Global:PSCIRemotingMode) {
+    $PSCIGlobalConfiguration.RemotingMode = $Global:PSCIRemotingMode
 }

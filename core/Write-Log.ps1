@@ -132,7 +132,7 @@ Function Write-Log {
         } else {
             $currentHostname = hostname
             $currentUsername = $env:USERNAME    
-            if ($Global:RemotingMode) {
+            if ($PSCIGlobalConfiguration.RemotingMode) {
                 $remotingFlag = '[R] '
             } else {
                 $remotingFlag = ''

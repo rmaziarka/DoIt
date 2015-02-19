@@ -124,7 +124,7 @@ function Start-Deployment {
         $DeployType = 'All'
      )  
 
-    if (!$Global:RemotingMode) {
+    if (!$PSCIGlobalConfiguration.RemotingMode) {
         Write-ProgressExternal -Message ("Starting deployment to env {0}" -f ($Environment -join ',')) -ErrorMessage "Deployment init error"
     }
     $configPaths = Get-ConfigurationPaths
@@ -169,22 +169,17 @@ function Start-Deployment {
         return
     }
 
-    $packageTempDir = ""
     if (!$ValidateOnly) {
         # When 'DeployScripts' and 'PSCI' directories are not found in the package, and there is at least one RunOn/RunRemotely in deployment plan,
         # we need to create a temporary package and copy configuration files to 'DeployScripts' and PSCI to PSCI.
-        if (!$Global:RemotingMode -and ($DeploymentPlan | Where { $_.RunOnConnectionParams })) {
+        if (!$PSCIGlobalConfiguration.RemotingMode -and ($DeploymentPlan | Where { $_.RunOnConnectionParams })) {
             Build-TemporaryPackage
         }
         Start-DeploymentPlan -DeploymentPlan $Global:DeploymentPlan -DscForce:$DscForce -DeployType $DeployType -AutoInstallDscResources:$AutoInstallDscResources -DscModuleNames $configInfo.RequiredDSCModules
     }
 
-    if ($packageTempDir) {
-        Remove-TempDirectory -DirName 'PSCI.tempPackage'
-    }
-
     # if running remotely, return a string to let know that everything went ok (checked in Start-DeploymentByPSRemoting)
-    if ($Global:RemotingMode) {
+    if ($PSCIGlobalConfiguration.RemotingMode) {
         return "success"
     } else {
         Write-ProgressExternal -Message 'Deployment successful' -ErrorMessage ''

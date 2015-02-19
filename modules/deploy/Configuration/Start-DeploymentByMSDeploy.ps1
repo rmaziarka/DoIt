@@ -125,7 +125,7 @@ function Start-DeploymentByMSDeploy {
         $postDeploymentScript = "-skip:Directory=`".`" "
     }
 
-    $postDeploymentScript += "-PostSync:runCommand='powershell -Command `"`$Global:RemotingMode = '{0}'; & {1}`"',dontUseCommandExe=true,waitInterval=2147483647,waitAttempts=1" -f $ConnectionParams.RemotingMode, $deployScript
+    $postDeploymentScript += "-PostSync:runCommand='powershell -Command `"`$Global:PSCIRemotingMode = '{0}'; & {1}`"',dontUseCommandExe=true,waitInterval=2147483647,waitAttempts=1" -f $ConnectionParams.RemotingMode, $deployScript
 
     $configPaths = Get-ConfigurationPaths
     $packagesPath = $configPaths.PackagesPath

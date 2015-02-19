@@ -143,7 +143,7 @@ function Start-DeploymentByPSRemoting {
             $RemotingMode
         )
 
-        $Global:RemotingMode = $RemotingMode
+        $Global:PSCIRemotingMode = $RemotingMode
         Invoke-Expression -Command "& $DeployScript"
     }
 
