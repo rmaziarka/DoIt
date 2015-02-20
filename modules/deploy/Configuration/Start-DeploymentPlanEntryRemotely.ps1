@@ -61,32 +61,51 @@ function Start-DeploymentPlanEntryRemotely {
 	    $DeployType = 'All'
     )    
  
+    $configInfo = $DeploymentPlanGroupedEntry.GroupedConfigurationInfo
+    $remotingMode = $configInfo.RunOnConnectionParams.RemotingMode
+
     $params = 
         @{ 
-            Environment = $DeploymentPlanGroupedEntry.GroupedConfigurationInfo.Environment
-            ServerRole = $DeploymentPlanGroupedEntry.GroupedConfigurationInfo.ServerRole
-            ConnectionParams = $DeploymentPlanGroupedEntry.GroupedConfigurationInfo.RunOnConnectionParams
-            PackageDirectory = $DeploymentPlanGroupedEntry.GroupedConfigurationInfo.PackageDirectory
+            Environment = $configInfo.Environment
+            ServerRole = $configInfo.ServerRole
+            RunOnConnectionParams = $configInfo.RunOnConnectionParams
+            PackageDirectory = $configInfo.PackageDirectory
             RequiredPackages = $DeploymentPlanGroupedEntry.RequiredPackages
             DeployType = $DeployType
-            ConfigurationsFilter = $DeploymentPlanGroupedEntry.GroupedConfigurationInfo.Name
-            #TODO: check the below
-            NodesFilter = $DeploymentPlanGroupedEntry.GroupedConfigurationInfo.ConnectionParams.Nodes
+            ConfigurationsFilter = $configInfo.Name
+            NodesFilter = $configInfo.ConnectionParams.Nodes
             TokensOverride = $DeploymentPlanGroupedEntry.TokensOverride
         }
         
-    $node = $deploymentPlanEntry.RunOnConnectionParams.Nodes[0]
-    if ($PackageCopiedToNodes.Value -notcontains $node) {
-        $PackageCopiedToNodes.Value += @($node)
+    $runOnNode = $configInfo.RunOnConnectionParams.Nodes[0]
+    if ($PackageCopiedToNodes.Value -notcontains $runOnNode) {
+        $PackageCopiedToNodes.Value += @($runOnNode)
         $params.CopyPackages = $true
     }
 
-    if (($deploymentPlanEntry.RunOnConnectionParams.RemotingMode -eq "WebDeployHandler") -or ($deploymentPlanEntry.RunOnConnectionParams.RemotingMode -eq "WebDeployAgentService")) {
+    if ($configInfo.RunOnConnectionParams.Credential) {
+        $userName = $configInfo.RunOnConnectionParams.Credential.UserName
+    } else {
+        $userName = ''
+    }
+    
+    Write-Log -Info ("[START] RUN REMOTE CONFIGURATION(s) '{0}' / RUNON '{1}' / REMOTING '{2}' / AUTH '{3}' / CRED '{4}' / PROTOCOL '{5}'" -f `
+        ($configInfo.Name -join "','"),
+        $runOnNode, `
+        $configInfo.RunOnConnectionParams.RemotingMode, `
+        $configInfo.RunOnConnectionParams.Authentication, `
+        $userName, `
+        $configInfo.RunOnConnectionParams.Protocol) -Emphasize
+    Write-ProgressExternal -Message ('Deploying {0} to {1}' -f ($configInfo.Name -join "','"), $runOnNode) `
+        -ErrorMessage ('Deploy error - node {0}, conf {1}' -f $runOnNode, ($configInfo.Name -join "','"))
+
+    if ($remotingMode -eq 'WebDeployHandler' -or $remotingMode -eq 'WebDeployAgentService') {
         Start-DeploymentByMSDeploy @params
-    } elseif ($deploymentPlanEntry.RunOnConnectionParams.RemotingMode -eq "PSRemoting") {
+    } elseif ($remotingMode -eq 'PSRemoting') {
         Start-DeploymentByPSRemoting @params
     } else {
-        Write-Log -Critical "Remoting Mode '$($deploymentPlanEntry.RunOnConnectionParams.RemotingMode)' is not supported."
+        Write-Log -Critical "Remoting Mode '$remotingMode' is not supported."
     }
+    Write-Log -Info ("[END] RUN REMOTE CONFIGURATION '{0}' / RUNON '{1}'" -f ($configInfo.Name -join "','"), $runOnNode) -Emphasize
     
 }

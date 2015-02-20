@@ -128,22 +128,9 @@ function Start-DeploymentPlan {
     $packageCopiedToNodes = @()
     foreach ($entry in $planByRunOn) {
         if ($entry.RunOnConnectionParams -and !$PSCIGlobalConfiguration.RemotingMode) {   
-            if ($entry.RunOnConnectionParams.Credential) {
-                $userName = $entry.RunOnConnectionParams.Credential.UserName
-            } else {
-                $userName = ''
-            }
-            $nodes = $entry.RunOnConnectionParams.NodesAsString
-            Write-Log -Info ("[START] RUN REMOTE CONFIGURATION '{0}' / RUNON '{1}' / REMOTING '{2}' / AUTH '{3}' / CRED '{4}' / PROTOCOL '{5}'" -f $entry.ConfigurationName, $nodes, $entry.RunOnConnectionParams.RemotingMode, $entry.RunOnConnectionParams.Authentication, $userName, $entry.RunOnConnectionParams.Protocol) -Emphasize
-            Write-ProgressExternal -Message ('Deploying {0} to {1}' -f $entry.ConfigurationName, $nodes) -ErrorMessage ('Deploy error - node {0}, conf {1}' -f $nodes, $entry.ConfigurationName)
-            Start-DeploymentPlanEntryRemotely -DeploymentPlanGroupedEntry $entry -DeployType $DeployType -PackageCopiedToNodes ([ref]$packageCopiedToNodes)
-            Write-Log -Info ("[END] RUN REMOTE CONFIGURATION '{0}' / RUNON '{1}'" -f $entry.ConfigurationName, $nodes) -Emphasize
+            Start-DeploymentPlanEntryRemotely -DeploymentPlanGroupedEntry $entry -DeployType $DeployType -PackageCopiedToNodes ([ref]$packageCopiedToNodes)            
         } else {
-            $nodes = $entry.ConnectionParams.NodesAsString
-            Write-Log -Info ("[START] RUN LOCAL CONFIGURATION '{0}' / NODE '{1}'" -f $entry.ConfigurationName, $nodes) -Emphasize
-            Write-ProgressExternal -Message ('Deploying {0} to {1}' -f $entry.ConfigurationName, $nodes) -ErrorMessage ('Deploy error - node {0}, conf {1}' -f $nodes, $entry.ConfigurationName)
             Start-DeploymentPlanEntryLocally -DeploymentPlanGroupedEntry $entry -DscForce:$DscForce
-            Write-Log -Info ("[END] RUN LOCAL CONFIGURATION '{0}' / NODE '{1}'" -f $entry.ConfigurationName, $nodes) -Emphasize
         }
     }
     if (!$PSCIGlobalConfiguration.RemotingMode) {

@@ -52,8 +52,10 @@ function Start-DeploymentPlanEntryLocally {
         $DscForce
     )
 
-
     foreach ($configInfo in $DeploymentPlanGroupedEntry.GroupedConfigurationInfo) {
+        Write-Log -Info ("[START] RUN LOCAL CONFIGURATION '{0}' / NODE '{1}'" -f $configInfo.Name, $configInfo.ConnectionParams.NodesAsString) -Emphasize
+        Write-ProgressExternal -Message ('Deploying {0} to {1}' -f $configInfo.Name, $configInfo.ConnectionParams.NodesAsString) `
+                               -ErrorMessage ('Deploy error - node {0}, conf {1}' -f $configInfo.ConnectionParams.NodesAsString, $configInfo.Name)
         if ($configInfo.Type -eq 'Configuration') {
             $params = @{
                 ConnectionParams = $configInfo.ConnectionParams
@@ -63,7 +65,6 @@ function Start-DeploymentPlanEntryLocally {
             }
 
             #TODO: group DSCs that are next to each other and have the same ConnectionParams/RebootHandlingMode
-            Write-Log -Info "Deploying configuration '$configName' to node '$($connectionParams.NodesAsString)' using mof '$mofDir'"
             Start-DscConfigurationWithRetries @params
         } elseif ($configInfo.Type -eq "Function") {
             Invoke-ConfigurationOrFunction -ConfigurationName $configInfo.Name `
@@ -72,6 +73,6 @@ function Start-DeploymentPlanEntryLocally {
                                            -ResolvedTokens $configInfo.Tokens `
                                            -ConnectionParams $configInfo.ConnectionParams
         }
-    }
-    
+        Write-Log -Info ("[END] RUN LOCAL CONFIGURATION '{0}' / NODE '{1}'" -f $configInfo.Name, $configInfo.ConnectionParams.NodesAsString) -Emphasize
+    }   
 }

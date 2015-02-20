@@ -107,8 +107,9 @@ function Group-DeploymentPlan {
                 TokensOverride = $TokensOverride
                 GroupedConfigurationInfo = @($configInfo)
             }
-            $result.Add($newEntry)
+            [void]($result.Add($newEntry))
         }
         $currentEntryNo = $entry.EntryNo
     }
+    return $result
 }
