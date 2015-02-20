@@ -86,6 +86,7 @@ function Start-DeploymentPlan {
 
     Write-Log -Info "Running following deployment plan with DeployType = ${DeployType}:"
     
+    # Log information to console
     foreach ($entry in $DeploymentPlan) {
         if (!$entry.RunOnConnectionParams) {
             $remotingMode = ''
@@ -98,30 +99,35 @@ function Start-DeploymentPlan {
     }
     Write-Log -Info ' '
    
-    if ($AutoInstallDSCResources -and !$PSCIGlobalConfiguration.RemotingMode) {
-        # we need to install DSC resources on nodes where configurations will be applied remotely
-        # TODO: is this valid?
-        $entriesToInstallDSC = $DeploymentPlan | Where-Object { $_.ConfigurationType -eq 'Configuration' -and !$_.IsLocalRun }
+    # Install DSC resources where required - on nodes where DSC will be applied to different nodes (remotely)
 
-        if ($entriesToInstallDSC) {
-            $dscInstalledNodes = @()
-            Write-ProgressExternal -Message 'Installing DSC resources' -ErrorMessage 'DSC resources install error'
-            Write-Log -Info '[START] INSTALL DSC RESOURCES' -Emphasize
-            foreach ($entry in $entriesToInstallDSC) {
-                if ($dscInstalledNodes -notcontains $entry.ConnectionParams.Nodes[0]) {
-                    Install-DscResources -ConnectionParams $entry.ConnectionParams -ModuleNames $DscModuleNames
-                    # SuppressScriptCop - adding small arrays is ok
-                    $dscInstalledNodes += @($entry.ConnectionParams.Nodes[0])
+    if (!$PSCIGlobalConfiguration.RemotingMode) { 
+
+        if ($AutoInstallDSCResources) {
+            $entriesToInstallDSC = $DeploymentPlan | Where-Object { $_.ConfigurationType -eq 'Configuration' -and !$_.IsLocalRun }
+            if ($entriesToInstallDSC) {
+                $dscInstalledNodes = @()
+                Write-ProgressExternal -Message 'Installing DSC resources' -ErrorMessage 'DSC resources install error'
+                Write-Log -Info '[START] INSTALL DSC RESOURCES' -Emphasize
+                foreach ($entry in $entriesToInstallDSC) {
+                    if ($dscInstalledNodes -notcontains $entry.ConnectionParams.Nodes[0]) {
+                        # TODO: install only modules required for given configurations
+                        Install-DscResources -ConnectionParams $entry[0].ConnectionParams -ModuleNames $DscModuleNames
+                        $dscInstalledNodes += @($entry.ConnectionParams.Nodes[0])
+                    }
                 }
+                Write-Log -Info '[END] INSTALL DSC RESOURCES' -Emphasize
             }
-            Write-Log -Info '[END] INSTALL DSC RESOURCES' -Emphasize
         }
-    }
+        $planByRunOn = Group-DeploymentPlan -DeploymentPlan $DeploymentPlan -GroupByRunOnConnectionParamsAndPackage -PreserveOrder
+    } else {
+        # if RemotingMode, every entry is run locally and we ignore RunOnConnectionsParams
+        $planByRunOn = Group-DeploymentPlan -DeploymentPlan $DeploymentPlan -PreserveOrder
+    }  
 
     $packageCopiedToNodes = @()
-    foreach ($entry in $DeploymentPlan) {
-        
-        if ($entry.RunOnConnectionParams -and !$PSCIGlobalConfiguration.RemotingMode) {
+    foreach ($entry in $planByRunOn) {
+        if ($entry.RunOnConnectionParams -and !$PSCIGlobalConfiguration.RemotingMode) {   
             if ($entry.RunOnConnectionParams.Credential) {
                 $userName = $entry.RunOnConnectionParams.Credential.UserName
             } else {
@@ -130,13 +136,13 @@ function Start-DeploymentPlan {
             $nodes = $entry.RunOnConnectionParams.NodesAsString
             Write-Log -Info ("[START] RUN REMOTE CONFIGURATION '{0}' / RUNON '{1}' / REMOTING '{2}' / AUTH '{3}' / CRED '{4}' / PROTOCOL '{5}'" -f $entry.ConfigurationName, $nodes, $entry.RunOnConnectionParams.RemotingMode, $entry.RunOnConnectionParams.Authentication, $userName, $entry.RunOnConnectionParams.Protocol) -Emphasize
             Write-ProgressExternal -Message ('Deploying {0} to {1}' -f $entry.ConfigurationName, $nodes) -ErrorMessage ('Deploy error - node {0}, conf {1}' -f $nodes, $entry.ConfigurationName)
-            Start-DeploymentPlanEntryRemotely -DeploymentPlanEntry $entry -DeployType $DeployType -PackageCopiedToNodes ([ref]$packageCopiedToNodes)
+            Start-DeploymentPlanEntryRemotely -DeploymentPlanGroupedEntry $entry -DeployType $DeployType -PackageCopiedToNodes ([ref]$packageCopiedToNodes)
             Write-Log -Info ("[END] RUN REMOTE CONFIGURATION '{0}' / RUNON '{1}'" -f $entry.ConfigurationName, $nodes) -Emphasize
         } else {
             $nodes = $entry.ConnectionParams.NodesAsString
             Write-Log -Info ("[START] RUN LOCAL CONFIGURATION '{0}' / NODE '{1}'" -f $entry.ConfigurationName, $nodes) -Emphasize
             Write-ProgressExternal -Message ('Deploying {0} to {1}' -f $entry.ConfigurationName, $nodes) -ErrorMessage ('Deploy error - node {0}, conf {1}' -f $nodes, $entry.ConfigurationName)
-            Start-DeploymentPlanEntryLocally -DeploymentPlanEntry $entry -DscForce:$DscForce
+            Start-DeploymentPlanEntryLocally -DeploymentPlanGroupedEntry $entry -DscForce:$DscForce
             Write-Log -Info ("[END] RUN LOCAL CONFIGURATION '{0}' / NODE '{1}'" -f $entry.ConfigurationName, $nodes) -Emphasize
         }
     }

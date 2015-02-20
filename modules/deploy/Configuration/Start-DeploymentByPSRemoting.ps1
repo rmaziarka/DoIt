@@ -33,11 +33,17 @@ function Start-DeploymentByPSRemoting {
     .PARAMETER ServerRole
     Name of the the server role that will be deployed.
 
-    .PARAMETER ConnectionParams
+    .PARAMETER RunOnConnectionParams
     Connection parameters created by New-ConnectionParameters function.
 
-    .PARAMETER CopyTo
+    .PARAMETER PackageDirectory
     Defines location on remote machine where deployment package will be copied to.
+
+    .PARAMETER RequiredPackages
+    List of packages that will be copied to the remote server.
+
+    .PARAMETER CopyPackages
+    If true then packages will be copied to the remote server. If false then deployment assumes that packages are already there.
 
     .PARAMETER DeployType
     Deployment type:
@@ -45,9 +51,6 @@ function Start-DeploymentByPSRemoting {
     Provision - deploy only DSC configurations
     Deploy    - deploy only non-DSC configurations
     Adhoc     - override configurations and nodes with $ConfigurationsFilter and $NodesFilter (they don't have to be defined in ServerRoles - useful for adhoc deployments)
-
-    .PARAMETER CopyPackage
-    If true then package will be copied to the remote server. If false then deployment assumes that package is already there.
 
     .PARAMETER NodesFilter
     List of Nodes where configurations have to be deployed - can be used if you don't want to deploy to all nodes defined in the configuration files.
@@ -62,36 +65,40 @@ function Start-DeploymentByPSRemoting {
     (tokens will be matched by name, ignoring categories).
 
     .EXAMPLE
-    Start-DeploymentByPSRemoting -Environment $Environment -ServerRole $ServerRole -CopyTo "C:\test" -ConnectionParams (New-ConnectionParameters -Nodes localhost -RemotingMode PSRemoting)
+    Start-DeploymentByPSRemoting -Environment $Environment -ServerRole $ServerRole -CopyTo "C:\test" -RunOnConnectionParams (New-ConnectionParameters -Nodes localhost -RemotingMode PSRemoting)
     
     #>
     [CmdletBinding()]
     [OutputType([void])]
     param(
         [Parameter(Mandatory=$true)]
-        [string]
+        [string[]]
         $Environment,
 
         [Parameter(Mandatory=$true)]
-        [string]
+        [string[]]
         $ServerRole,
 
         [Parameter(Mandatory=$true)]
         [object]
-        $ConnectionParams,
+        $RunOnConnectionParams,
 
         [Parameter(Mandatory=$true)]
         [string]
-        $CopyTo,
+        $PackageDirectory,
+
+        [Parameter(Mandatory=$false)]
+        [string[]]
+        $RequiredPackages,
+
+        [Parameter(Mandatory=$false)]
+        [switch]
+        $CopyPackages = $false,
 
         [Parameter(Mandatory=$false)]
         [ValidateSet('All', 'Provision', 'Deploy', 'Adhoc')]
 	    [string]
 	    $DeployType = 'All',
-
-        [Parameter(Mandatory=$false)]
-        [switch]
-        $CopyPackage = $false,
 
         [Parameter(Mandatory=$false)]
         [string[]]
@@ -106,16 +113,24 @@ function Start-DeploymentByPSRemoting {
         $TokensOverride
     )
 
-    if ($ConnectionParams.Authentication -ieq "Credssp") {
+    # TODO: this need review
+    if ($RunOnConnectionParams.Authentication -ieq "Credssp") {
         if ((Get-Item WSMan:\LocalHost\Client\Auth\CredSSP).Value -ne "true") {
             Enable-WSManCredSSP -Role Client -DelegateComputer * -Force
         }
-        if ($ConnectionParams.CrossDomain) {
+        if ($RunOnConnectionParams.CrossDomain) {
             Enable-FreshCredNtlmOnlyDelegation
         }
     }
 
-    $deployScript = (Join-Path -Path $CopyTo -ChildPath "DeployScripts\deploy.ps1") + " -Environment $Environment -ServerRolesToDeploy $ServerRole -DeployType $DeployType"
+    if ($CopyPackages) {
+        $configPaths = Get-ConfigurationPaths
+        $includePackages = Get-IncludePackageList -AllPackagesPath $configPaths.PackagesPath -RequiredPackages $RequiredPackages
+        [void](Copy-FilesToRemoteServer -Path $configPaths.PackagesPath -Destination $PackageDirectory -ConnectionParams $RunOnConnectionParams -Include $includePackages -ClearDestination)
+    }
+
+    $deployScript = (Join-Path -Path $PackageDirectory -ChildPath "DeployScripts\deploy.ps1") + " -Environment '{0}' -ServerRolesToDeploy '{1}' -DeployType $DeployType" `
+                    -f ($Environment -join "','"), ($ServerRole -join "','")
     
     if ($NodesFilter) {
         $deployScript += " -NodesFilter '{0}'" -f ($NodesFilter -join "','")
@@ -126,12 +141,6 @@ function Start-DeploymentByPSRemoting {
     if ($TokensOverride) {
        $tokensOverrideString = Convert-HashtableToString -Hashtable $TokensOverride
        $deployScript += " -TokensOverride {0}" -f $tokensOverrideString
-    }
-
-    if ($CopyPackage) {
-        $configPaths = Get-ConfigurationPaths
-        $packagesPath = $configPaths.PackagesPath
-        [void](Copy-FilesToRemoteServer -Path $packagesPath -Destination $CopyTo -ConnectionParams $ConnectionParams -ClearDestination)
     }
 
     $scriptBlock = {
@@ -147,10 +156,10 @@ function Start-DeploymentByPSRemoting {
         Invoke-Expression -Command "& $DeployScript"
     }
 
-    Write-Log -Info "Running `"$deployScript`" using $($ConnectionParams.RemotingMode) on `"$($ConnectionParams.NodesAsString)`""
-    $psSessionParams = $ConnectionParams.PSSessionParams
-    $success = Invoke-Command @psSessionParams -ScriptBlock $scriptBlock -ArgumentList $deployScript, $ConnectionParams.RemotingMode
+    Write-Log -Info "Running `"$deployScript`" using $($RunOnConnectionParams.RemotingMode) on `"$($RunOnConnectionParams.NodesAsString)`""
+    $psSessionParams = $RunOnConnectionParams.PSSessionParams
+    $success = Invoke-Command @psSessionParams -ScriptBlock $scriptBlock -ArgumentList $deployScript, $RunOnConnectionParams.RemotingMode
     if (!$success) {
-        Write-Log -Critical "Remote invocation failed."
+        Write-Log -Critical 'Remote invocation failed.'
     }
 }

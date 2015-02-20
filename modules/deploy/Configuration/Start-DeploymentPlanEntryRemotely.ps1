@@ -27,8 +27,8 @@ function Start-DeploymentPlanEntryRemotely {
     .SYNOPSIS
     Runs the actual deployment basing on the deployment plan on a remote server.
 
-    .PARAMETER DeploymentPlanEntry
-    Deployment plan entry to deploy.
+    .PARAMETER DeploymentPlanGroupedEntry
+    Deployment plan entry to deploy (grouped).
 
     .PARAMETER PackageCopiedToNodes
     Defines array with node names where the package was already copied to.
@@ -49,7 +49,7 @@ function Start-DeploymentPlanEntryRemotely {
     param(
         [Parameter(Mandatory=$true)]
         [PSCustomObject]
-        $DeploymentPlanEntry,
+        $DeploymentPlanGroupedEntry,
 
         [Parameter(Mandatory=$true)]
         [ref]
@@ -63,20 +63,22 @@ function Start-DeploymentPlanEntryRemotely {
  
     $params = 
         @{ 
-            Environment = $deploymentPlanEntry.Environment;
-            ServerRole = $deploymentPlanEntry.ServerRole;
-            ConnectionParams = $deploymentPlanEntry.RunOnConnectionParams;
-            CopyTo = $deploymentPlanEntry.PackageDirectory;
-            DeployType = $DeployType;
-            ConfigurationsFilter = $deploymentPlanEntry.ConfigurationName;
-            NodesFilter = $deploymentPlanEntry.ConnectionParams.Nodes
-            TokensOverride = $deploymentPlanEntry.TokensOverride
+            Environment = $DeploymentPlanGroupedEntry.GroupedConfigurationInfo.Environment
+            ServerRole = $DeploymentPlanGroupedEntry.GroupedConfigurationInfo.ServerRole
+            ConnectionParams = $DeploymentPlanGroupedEntry.GroupedConfigurationInfo.RunOnConnectionParams
+            PackageDirectory = $DeploymentPlanGroupedEntry.GroupedConfigurationInfo.PackageDirectory
+            RequiredPackages = $DeploymentPlanGroupedEntry.RequiredPackages
+            DeployType = $DeployType
+            ConfigurationsFilter = $DeploymentPlanGroupedEntry.GroupedConfigurationInfo.Name
+            #TODO: check the below
+            NodesFilter = $DeploymentPlanGroupedEntry.GroupedConfigurationInfo.ConnectionParams.Nodes
+            TokensOverride = $DeploymentPlanGroupedEntry.TokensOverride
         }
         
     $node = $deploymentPlanEntry.RunOnConnectionParams.Nodes[0]
     if ($PackageCopiedToNodes.Value -notcontains $node) {
         $PackageCopiedToNodes.Value += @($node)
-        $params.Add("CopyPackage", $true)
+        $params.CopyPackages = $true
     }
 
     if (($deploymentPlanEntry.RunOnConnectionParams.RemotingMode -eq "WebDeployHandler") -or ($deploymentPlanEntry.RunOnConnectionParams.RemotingMode -eq "WebDeployAgentService")) {

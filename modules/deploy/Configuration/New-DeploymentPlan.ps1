@@ -148,6 +148,7 @@ function New-DeploymentPlan {
             -ConfigurationsFilter $ConfigurationsFilter `
             -DeployType $deployType
 
+        $entryNo = 1
         foreach ($serverRoleName in $serverRoles.Keys) {
             $serverRole = $serverRoles[$serverRoleName]
             foreach ($config in $serverRole.Configurations) {
@@ -156,6 +157,7 @@ function New-DeploymentPlan {
 
                         $resolvedTokens = Resolve-Tokens -AllEnvironments $AllEnvironments -Environment $env -Node $node -TokensOverride $TokensOverride
                         $createDeploymentPlanEntryParams = @{ 
+                            EntryNo = $entryNo
                             Environment = $env
                             ServerRole = $serverRole
                             ServerConnection = $serverConnection
@@ -170,6 +172,7 @@ function New-DeploymentPlan {
                         $planEntry = New-DeploymentPlanEntry @createDeploymentPlanEntryParams
                         if ($planEntry) {
                             [void]($deploymentPlan.Add($planEntry))
+                            $entryNo++
                         }
                     }
                 }

@@ -73,6 +73,7 @@ Export-ModuleMember -Function `
     Get-AllBytes, `
     Write-ProgressExternal, `
     New-ConnectionParameters, `
+    Compare-ConnectionParameters, `
     New-MsDeployDestinationString, `
     Convert-HashtableToString, `
     Test-IsSubdirectory, `

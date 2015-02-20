@@ -31,8 +31,8 @@ function New-DeploymentPlanEntry {
     See New-DeploymentPlan.
     Returns modified deployment plan.
 
-    .PARAMETER AllEnvironments
-    Hashtable containing all environment definitions.
+    .PARAMETER EntryNo
+    Consecutive number of this entry in the whole deployment plan.
 
     .PARAMETER Environment
     Name of the environment where the packages should be deployed.
@@ -78,6 +78,10 @@ function New-DeploymentPlanEntry {
     [CmdletBinding()]
     [OutputType([PSCustomObject])]
     param(
+        [Parameter(Mandatory=$true)]
+        [int]
+        $EntryNo,
+
         [Parameter(Mandatory=$true)]
         [string]
         $Environment,
@@ -143,7 +147,7 @@ function New-DeploymentPlanEntry {
         $runOnConnectionParamsObj = New-ConnectionParameters @connectionParams
     }
 
-    $isLocalRun = $runOnNode -eq $Node
+    $isLocalRun = $runOnNode -ieq $Node
 
     if ($Configuration.Type -eq 'Configuration') {		
 		if ($isLocalRun) {
@@ -167,8 +171,10 @@ function New-DeploymentPlanEntry {
     }
 
     return [PSCustomObject]@{ 
+        EntryNo = $entryNo
         ConnectionParams = $connectionParamsObj
         RunOnConnectionParams = $runOnConnectionParamsObj
+        PackageDirectory = $packageDirectory;
         IsLocalRun = $isLocalRun
         Environment = $Environment;
         ServerRole = $ServerRole.Name;
@@ -177,8 +183,7 @@ function New-DeploymentPlanEntry {
         ConfigurationMofDir = $mofDir
         Tokens = $ResolvedTokens; 
         TokensOverride = $TokensOverride;
-        PackageDirectory = $packageDirectory;
-        RequiredPackages = (Resolve-ScriptedToken -ScriptedToken $Configuration.RequiredPackages -ResolvedTokens $ResolvedTokens -Environment $Environment -Node $Node)
+        RequiredPackages = @((Resolve-ScriptedToken -ScriptedToken $Configuration.RequiredPackages -ResolvedTokens $ResolvedTokens -Environment $Environment -Node $Node))
         RebootHandlingMode = $RebootHandlingMode
     }
 }

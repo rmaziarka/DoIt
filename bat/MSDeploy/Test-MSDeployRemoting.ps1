@@ -111,7 +111,7 @@ function Test-MSDeployRemoting {
     $msdeployString = New-MsDeployDestinationString @params
 
     $tempDir = New-TempDirectory
-    Sync-MsDeployDirectory -SourceDir $tempDir -DestinationDir 'C:\MsDeployTest' -DestString $msdeployString
+    Sync-MsDeployDirectory -SourcePath $tempDir -DestinationDir 'C:\MsDeployTest' -DestString $msdeployString
     Remove-TempDirectory
 
     Write-Log -Info "Test successful." -Emphasize

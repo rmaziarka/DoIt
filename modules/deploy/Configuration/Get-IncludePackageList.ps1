@@ -22,61 +22,35 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 #>
 
-function Sync-MsDeployDirectory {
+function Get-IncludePackageList {
     <#
     .SYNOPSIS
-    Syncs a local directory to a target host using msdeploy.
+    Returns list of package names that are required (including packages that are always required).
 
-    .PARAMETER SourcePath
-    Local directory or .zip file to sync.
+    .PARAMETER AllPackagesPath
+    Path to the directory that will be traversed.
 
-    .PARAMETER DestinationDir
-    Destination directory that will be created on target computer.
-
-    .PARAMETER DestString
-    Destination string to pass to msdeploy.
-
-    .PARAMETER AddParameters
-    Additional parameters to pass to msdeploy.
+    .PARAMETER RequiredPackages
+    List of required packages.
 
     .EXAMPLE
-    Sync-MsDeployDirectory -SourceDir $tempDir -DestinationDir $destinationPath -DestString $msDeployDestString -AddParameters $msDeployAddParameters
+    $includePackages = Get-IncludePackageList -AllPackagesPath $configPaths.PackagesPath -RequiredPackages $RequiredPackages
     #>
-
     [CmdletBinding()]
     [OutputType([void])]
     param(
         [Parameter(Mandatory=$true)]
-        [string] 
-        $SourcePath, 
-
-        [Parameter(Mandatory=$true)]
-        [string] 
-        $DestinationDir, 
-
-        [Parameter(Mandatory=$true)]
-        [string] 
-        $DestString, 
+        [string]
+        $AllPackagesPath,
 
         [Parameter(Mandatory=$false)]
-        [string[]] 
-        $AddParameters
+        [string[]]
+        $RequiredPackages
     )
 
-    $params = @(
-        "-verb:sync",
-        "-dest:dirPath='$DestinationDir',$DestString",
-        "-useCheckSum"
-    )
+    $requiredAllPackages = $RequiredPackages -icontains 'all'
 
-    if (Test-Path -Path $SourcePath -PathType Leaf) {
-        $params += "-source:package='$SourcePath'"
-    } else {
-        $params += "-source:dirPath='$SourcePath'"
-    }
-    if ($AddParameters) {
-        # SuppressScriptCop - adding small arrays is ok
-        $params += $AddParameters
-    }
-    Start-MsDeploy -Params $params
+    $RequiredPackages = @('DeployScripts', 'PSCI') + @($RequiredPackages)
+    $packages = Get-ChildItem -Path $AllPackagesPath -Directory | Where-Object { $RequiredPackages -icontains $_.Name -or $requiredAllPackages }
+    return $packages.Name
 }

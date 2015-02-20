@@ -35,16 +35,27 @@ Describe -Tag "PSCI.unit" "Copy-Directory" {
             }
         }
 
+        function New-TestDirStructure {
+            Remove-Item -Path 'testDir' -Force -Recurse -ErrorAction SilentlyContinue
+            Remove-Item -Path 'testDirOut' -Force -Recurse -ErrorAction SilentlyContinue
+
+            New-Item -Path 'testDir\testDir1\testDir11' -ItemType Directory -Force
+            New-Item -Path 'testDir\testDir1\testDir2' -ItemType Directory -Force
+            New-Item -Path 'testDir\testDir2' -ItemType Directory -Force
+
+            New-Item -Path 'testDir\testDir1\testDir11\testFile11' -ItemType File -Value 'testFile11' -Force
+            New-Item -Path 'testDir\testDir1\testDir2\testFile12' -ItemType File -Value 'testFile12' -Force
+            New-Item -Path 'testDir\testDir2\testFile2' -ItemType File -Value 'testFile2' -Force
+        }
+
+        function Remove-TestDirStructure {
+            Remove-Item -Path 'testDir' -Force -Recurse -ErrorAction SilentlyContinue
+            Remove-Item -Path 'testDirOut' -Force -Recurse -ErrorAction SilentlyContinue
+        }
+
         Context "when copying directory structure" {
             try {
-                Remove-Item -Path 'testDir' -Force -Recurse -ErrorAction SilentlyContinue
-                Remove-Item -Path 'testDirOut' -Force -Recurse -ErrorAction SilentlyContinue
-
-                New-Item -Path 'testDir\testDir1\testDir11' -ItemType Directory -Force
-                New-Item -Path 'testDir\testDir2' -ItemType Directory -Force
-
-                New-Item -Path 'testDir\testDir1\testDir11\testFile11' -ItemType File -Value 'testFile11' -Force
-                New-Item -Path 'testDir\testDir2\testFile2' -ItemType File -Value 'testFile2' -Force
+                New-TestDirStructure
                 
                 Copy-Directory -Path 'testDir' -Destination 'testDirOut'
                 
@@ -53,34 +64,67 @@ Describe -Tag "PSCI.unit" "Copy-Directory" {
                     Test-Path -Path 'testDirOut\testDir2\testFile2' -PathType Leaf | Should Be $true
                 }
             } finally {
-                Remove-Item -Path 'testDir' -Force -Recurse -ErrorAction SilentlyContinue
-                Remove-Item -Path 'testDirOut' -Force -Recurse -ErrorAction SilentlyContinue
+                Remove-TestDirStructure
             }
         }
 
-        Context "when copying directory structure with exclude" {
+        Context "when copying directory structure with exclude / recurse" {
             try {
-                Remove-Item -Path 'testDir' -Force -Recurse -ErrorAction SilentlyContinue
-                Remove-Item -Path 'testDirOut' -Force -Recurse -ErrorAction SilentlyContinue
-
-                New-Item -Path 'testDir\testDir1\testDir11' -ItemType Directory -Force
-                New-Item -Path 'testDir\testDir2' -ItemType Directory -Force
-
-                New-Item -Path 'testDir\testDir1\testDir11\testFile11' -ItemType File -Value 'testFile11' -Force
-                New-Item -Path 'testDir\testDir2\testFile2' -ItemType File -Value 'testFile2' -Force
+                New-TestDirStructure
                 
-                Copy-Directory -Path 'testDir' -Destination 'testDirOut' -Exclude 'testDir2'
+                Copy-Directory -Path 'testDir' -Destination 'testDirOut' -Exclude 'testDir2' -ExcludeRecurse
                 
                 It "should properly copy the structure" {
                     Test-Path -Path 'testDirOut\testDir1\testDir11\testFile11' -PathType Leaf | Should Be $true
                 }
 
                 It "should not copy the excluded directory" {
-                Test-Path -Path 'testDirOut\testDir2\testFile2' | Should Be $false
+                    Test-Path -Path 'testDirOut\testDir1\testDir2' | Should Be $false
+                    Test-Path -Path 'testDirOut\testDir2' | Should Be $false
                 }
             } finally {
-                Remove-Item -Path 'testDir' -Force -Recurse -ErrorAction SilentlyContinue
-                Remove-Item -Path 'testDirOut' -Force -Recurse -ErrorAction SilentlyContinue
+                Remove-TestDirStructure
+            }
+        }
+
+        Context "when copying directory structure with exclude / not recurse" {
+            try {
+                New-TestDirStructure
+                
+                Copy-Directory -Path 'testDir' -Destination 'testDirOut' -Exclude 'testDir2' 
+                
+                It "should properly copy the structure" {
+                    Test-Path -Path 'testDirOut\testDir1\testDir11\testFile11' -PathType Leaf | Should Be $true
+                    Test-Path -Path 'testDirOut\testDir1\testDir2\testFile12' -PathType Leaf | Should Be $true
+                }
+
+                It "should not copy the excluded directory" {
+                    Test-Path -Path 'testDirOut\testDir2' | Should Be $false
+                }
+            } finally {
+                Remove-TestDirStructure
+            }
+        }
+
+        Context "when copying directory structure with include / recurse" {
+            try {
+                New-TestDirStructure
+                
+                Copy-Directory -Path 'testDir' -Destination 'testDirOut' -Include 'testDir2' -IncludeRecurse
+                
+                It "should properly copy the structure" {
+                    Test-Path -Path 'testDirOut\testDir2\testFile2' -PathType Leaf | Should Be $true
+                }
+
+                It "should not copy the not-included directory on root level" {
+                    Test-Path -Path 'testDirOut\testDir1\testDir11' | Should Be $false
+                }
+
+                It "should copy the included directory even if not on root level" {
+                    Test-Path -Path 'testDirOut\testDir1\testDir2\testFile12' -PathType Leaf | Should Be $true
+                }
+            } finally {
+                Remove-TestDirStructure
             }
         }
     }

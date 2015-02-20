@@ -232,7 +232,7 @@ function Deploy-MsDeployPackage {
         Write-Log -Info "Deploying directory package '$PackageName' to server '$Node'" -Emphasize
         $tempDir = New-TempDirectory
         Expand-Zip -ArchiveFile $PackagePath -OutputDirectory $tempDir
-        Sync-MsDeployDirectory -SourceDir $tempDir -DestinationDir $PhysicalPath -DestString $MsDeployDestinationString -AddParameters $MsDeployAddParameters
+        Sync-MsDeployDirectory -SourcePath $tempDir -DestinationDir $PhysicalPath -DestString $MsDeployDestinationString -AddParameters $MsDeployAddParameters
         Remove-TempDirectory
     }
 

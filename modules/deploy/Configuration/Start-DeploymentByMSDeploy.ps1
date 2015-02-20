@@ -33,10 +33,10 @@ function Start-DeploymentByMSDeploy {
     .PARAMETER ServerRole
     Name of the the server role that will be deployed.
 
-    .PARAMETER ConnectionParams
+    .PARAMETER RunOnConnectionParams
     Connection parameters created by New-ConnectionParameters function.
 
-    .PARAMETER CopyTo
+    .PARAMETER PackageDirectory
     Defines location on remote machine where deployment package will be copied to.
 
     .PARAMETER DeployType
@@ -46,8 +46,11 @@ function Start-DeploymentByMSDeploy {
     Deploy    - deploy only non-DSC configurations
     Adhoc     - override configurations and nodes with $ConfigurationsFilter and $NodesFilter (they don't have to be defined in ServerRoles - useful for adhoc deployments)
 
-    .PARAMETER CopyPackage
-    If true then package will be copied to the remote server. If false then deployment assumes that package is already there.
+    .PARAMETER RequiredPackages
+    List of packages that will be copied to the remote server.
+
+    .PARAMETER CopyPackages
+    If true then packages will be copied to the remote server. If false then deployment assumes that packages are already there.
 
     .PARAMETER NodesFilter
     List of Nodes where configurations have to be deployed - can be used if you don't want to deploy to all nodes defined in the configuration files.
@@ -62,36 +65,40 @@ function Start-DeploymentByMSDeploy {
     (tokens will be matched by name, ignoring categories).
 
     .EXAMPLE
-    Start-DeploymentByMSDeploy -Environment $Environment -ServerRole $ServerRole -CopyTo "C:\test" -ConnectionParams (New-ConnectionParameters -Nodes localhost -RemotingMode WebDeployHandler)
+    Start-DeploymentByMSDeploy -Environment $Environment -ServerRole $ServerRole -CopyTo "C:\test" -RunOnConnectionParams (New-ConnectionParameters -Nodes localhost -RemotingMode WebDeployHandler)
     
     #>
     [CmdletBinding()]
     [OutputType([void])]
     param(
         [Parameter(Mandatory=$true)]
-        [string]
+        [string[]]
         $Environment,
 
         [Parameter(Mandatory=$true)]
-        [string]
+        [string[]]
         $ServerRole,
 
         [Parameter(Mandatory=$true)]
         [object]
-        $ConnectionParams,
+        $RunOnConnectionParams,
 
         [Parameter(Mandatory=$true)]
         [string]
-        $CopyTo,
+        $PackageDirectory,
+
+        [Parameter(Mandatory=$false)]
+        [string[]]
+        $RequiredPackages,
+
+        [Parameter(Mandatory=$false)]
+        [switch]
+        $CopyPackages = $false,
 
         [Parameter(Mandatory=$false)]
         [ValidateSet('All', 'Provision', 'Deploy', 'Adhoc')]
 	    [string]
 	    $DeployType = 'All',
-
-        [Parameter(Mandatory=$false)]
-        [switch]
-        $CopyPackage = $false,
 
         [Parameter(Mandatory=$false)]
         [string[]]
@@ -105,9 +112,10 @@ function Start-DeploymentByMSDeploy {
         [hashtable]
         $TokensOverride
     )
-   
-    $deployScript = (Join-Path -Path $CopyTo -ChildPath "DeployScripts\deploy.ps1") + " -Environment $Environment -ServerRolesToDeploy $ServerRole -DeployType $DeployType"
-    
+      
+    $deployScript = (Join-Path -Path $PackageDirectory -ChildPath "DeployScripts\deploy.ps1") + " -Environment '{0}' -ServerRolesToDeploy '{1}' -DeployType $DeployType" `
+                    -f ($Environment -join "','"), ($ServerRole -join "','")
+
     if ($NodesFilter) {
         $deployScript += " -NodesFilter '{0}'" -f ($NodesFilter -join "','")
     }
@@ -119,24 +127,25 @@ function Start-DeploymentByMSDeploy {
        $deployScript += " -TokensOverride {0}" -f $tokensOverrideString
     }
   
-    $msDeployDestinationString = $ConnectionParams.MsDeployDestinationString
+    $msDeployDestinationString = $RunOnConnectionParams.MsDeployDestinationString
 
-    if (!$CopyPackage) {
+    if (!$CopyPackages) {
         $postDeploymentScript = "-skip:Directory=`".`" "
+        $tempSrcPath = New-Item -Path (Join-Path -Path ([IO.Path]::GetTempPath()) -ChildPath 'MsDeployDummy') -ItemType Directory
+    } else {
+        $configPaths = Get-ConfigurationPaths
+        $tempZip = ([IO.Path]::GetTempFileName()) + ".zip"
+
+        Write-Log -Info "Compressing package to `"$tempZip`" for remote deployment on $($RunOnConnectionParams.NodesAsString)"
+        $includePackages = Get-IncludePackageList -AllPackagesPath $configPaths.PackagesPath -RequiredPackages $RequiredPackages
+        New-Zip -Path $configPaths.PackagesPath -OutputFile $tempZip -Include $includePackages -Try7Zip
+        $tempSrcPath = $tempZip
     }
 
-    $postDeploymentScript += "-PostSync:runCommand='powershell -Command `"`$Global:PSCIRemotingMode = '{0}'; & {1}`"',dontUseCommandExe=true,waitInterval=2147483647,waitAttempts=1" -f $ConnectionParams.RemotingMode, $deployScript
+    $postDeploymentScript += "-PostSync:runCommand='powershell -Command `"`$Global:PSCIRemotingMode = '{0}'; & {1}`"',dontUseCommandExe=true,waitInterval=2147483647,waitAttempts=1" -f $RunOnConnectionParams.RemotingMode, $deployScript
 
-    $configPaths = Get-ConfigurationPaths
-    $packagesPath = $configPaths.PackagesPath
-    $tempZip = ([IO.Path]::GetTempFileName()) + ".zip"
-
-    Write-Log -Info "Compressing package to `"$tempZip`" for remote deployment on $($ConnectionParams.NodesAsString)"
-    New-Zip -Path $packagesPath -OutputFile $tempZip -Try7Zip
-
-    Write-Log -Info "Sending `"$tempZip`" to `"$($CopyTo)`" @ `"$($ConnectionParams.NodesAsString)`" and running `"$deployScript`" using $($ConnectionParams.RemotingMode)" -Emphasize
-    Sync-MsDeployWebPackage -PackagePath $tempZip -DestinationDir $CopyTo -DestString $msDeployDestinationString -AddParameters @($postDeploymentScript)
+    Write-Log -Info "Sending `"$tempSrcPath`" to `"$($PackageDirectory)`" @ `"$($RunOnConnectionParams.NodesAsString)`" and running `"$deployScript`" using $($RunOnConnectionParams.RemotingMode)" -Emphasize
+    Sync-MsDeployDirectory -SourcePath $tempSrcPath -DestinationDir $PackageDirectory -DestString $msDeployDestinationString -AddParameters @($postDeploymentScript)
                     
-    [void](Remove-Item -Path $tempZip -Force)
-    
+    [void](Remove-Item -Path $tempSrcPath -Force -ErrorAction SilentlyContinue)
 }

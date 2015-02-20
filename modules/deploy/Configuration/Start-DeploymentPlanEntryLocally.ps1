@@ -30,8 +30,8 @@ function Start-DeploymentPlanEntryLocally {
     .DESCRIPTION
     It iterates through the deployment plan and it either runs 'Start-DscConfiguration' or the specified function for each entry.
 
-    .PARAMETER DeploymentPlanEntry
-    Deployment plan entry.
+    .PARAMETER DeploymentPlanGroupedEntry
+    Deployment plan entry (grouped).
 
     .PARAMETER DscForce
     If true, '-Force' parameter will be passed to 'Start-DscConfiguration'. It is required e.g. when last attempt failed and is still running.
@@ -45,33 +45,33 @@ function Start-DeploymentPlanEntryLocally {
     param(
         [Parameter(Mandatory=$true)]
         [PSCustomObject]
-        $DeploymentPlanEntry,
+        $DeploymentPlanGroupedEntry,
 
         [Parameter(Mandatory=$true)]
         [switch]
         $DscForce
     )
 
-    $connectionParams = $deploymentPlanEntry.ConnectionParams
-    $resolvedTokens = $deploymentPlanEntry.Tokens
-    $rebootHandlingMode = $deploymentPlanEntry.RebootHandlingMode
-    $environment = $DeploymentPlanEntry.Environment
-    $configName = $deploymentPlanEntry.ConfigurationName
-    $configType = $deploymentPlanEntry.ConfigurationType
-    $mofDir = $deploymentPlanEntry.ConfigurationMofDir
 
-    if ($configType -eq "Configuration") {
-        $params = @{
-            ConnectionParams = $connectionParams
-            MofDir = $mofDir
-            DscForce = $DscForce
-            RebootHandlingMode = $rebootHandlingMode
+    foreach ($configInfo in $DeploymentPlanGroupedEntry.GroupedConfigurationInfo) {
+        if ($configInfo.Type -eq 'Configuration') {
+            $params = @{
+                ConnectionParams = $configInfo.ConnectionParams
+                MofDir = $configInfo.MofDir
+                DscForce = $DscForce
+                RebootHandlingMode = $configInfo.RebootHandlingMode
+            }
+
+            #TODO: group DSCs that are next to each other and have the same ConnectionParams/RebootHandlingMode
+            Write-Log -Info "Deploying configuration '$configName' to node '$($connectionParams.NodesAsString)' using mof '$mofDir'"
+            Start-DscConfigurationWithRetries @params
+        } elseif ($configInfo.Type -eq "Function") {
+            Invoke-ConfigurationOrFunction -ConfigurationName $configInfo.Name `
+                                           -Node $configInfo.ConnectionParams.Nodes[0] `
+                                           -Environment $configInfo.Environment `
+                                           -ResolvedTokens $configInfo.Tokens `
+                                           -ConnectionParams $configInfo.ConnectionParams
         }
-
-        Write-Log -Info "Deploying configuration '$configName' to node '$($connectionParams.NodesAsString)' using mof '$mofDir'"
-        Start-DscConfigurationWithRetries @params
-
-    } elseif ($configType -eq "Function") {
-        Invoke-ConfigurationOrFunction -ConfigurationName $configName -Node $connectionParams.Nodes[0] -Environment $Environment -ResolvedTokens $resolvedTokens -ConnectionParams $ConnectionParams
     }
+    
 }

@@ -50,13 +50,13 @@ function Sync-MsDeployWebPackage {
         [string] 
         $PackagePath, 
 
-        [Parameter(Mandatory=$true)]
-        [string] 
-        $DestString, 
-
         [Parameter(Mandatory=$false)]
         [string]
         $DestinationDir,
+
+        [Parameter(Mandatory=$true)]
+        [string] 
+        $DestString, 
 
         [Parameter(Mandatory=$false)]
         [string[]] 
