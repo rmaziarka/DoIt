@@ -35,10 +35,16 @@ function Copy-Directory {
     Destination path.
 
     .PARAMETER Include
-    Include mask - passed directly to Copy-File.
+    List of file / directory to include.
+
+    .PARAMETER IncludeRecurse
+    Recurse type for Include rules (if set, wildcards will be matched recursively).
 
     .PARAMETER Exclude
-    Exclude mask - passed to Copy-File AND excludes directory names.
+    List of file / directory to exclude.
+
+    .PARAMETER ExcludeRecurse
+    Recurse type for Include rules (if set, wildcards will be matched recursively).
 
     .PARAMETER Overwrite
     If specified, the destination directory will be removed prior to copying.
@@ -58,12 +64,20 @@ function Copy-Directory {
         $Destination,
 
         [Parameter(Mandatory=$false)]
-        [string[]]
+        [string[]] 
         $Include,
 
         [Parameter(Mandatory=$false)]
-        [string[]]
+        [switch] 
+        $IncludeRecurse,
+         
+        [Parameter(Mandatory=$false)]
+        [string[]] 
         $Exclude,
+
+        [Parameter(Mandatory=$false)]
+        [switch] 
+        $ExcludeRecurse,
 
         [Parameter(Mandatory=$false)]
         [switch]
@@ -75,13 +89,13 @@ function Copy-Directory {
     }
     [void](New-Item -Path $Destination -ItemType Directory -Force)
 
-    $filesToCopy = Get-FlatFileList -Path $Path -Exclude $exclude 
+    $filesToCopy = Get-FlatFileList -Path $Path -Include $Include -IncludeRecurse:$IncludeRecurse -Exclude $Exclude -ExcludeRecurse:$ExcludeRecurse
     foreach ($file in $filesToCopy) {
         $destFile = Join-Path -Path $Destination -ChildPath $file.RelativePath
         $destFolder = Split-Path -Path $destFile -Parent
         if ($destFolder -and !(Test-Path -Path $destFolder)) {
             [void](New-Item -Path $destFolder -ItemType Directory -Force)
         }
-        Copy-Item -Path $file.FullName -Destination $destFile -Force -Include $include
+        Copy-Item -Path $file.FullName -Destination $destFile -Force
     }
 }

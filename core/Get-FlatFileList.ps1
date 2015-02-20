@@ -36,8 +36,17 @@ function Get-FlatFileList {
     .PARAMETER Path
     List of directories / files.
 
+    .PARAMETER Include
+    List of file / directory to include.
+
+    .PARAMETER IncludeRecurse
+    Recurse type for Include rules (if set, wildcards will be matched recursively).
+
     .PARAMETER Exclude
-    Exclude mask.
+    List of file / directory to exclude.
+
+    .PARAMETER ExcludeRecurse
+    Recurse type for Include rules (if set, wildcards will be matched recursively).
 
     .EXAMPLE
     Get-FlatFileList -Path 'c:\dir1', 'c:\dir2\file1'    
@@ -50,15 +59,41 @@ function Get-FlatFileList {
         $Path,
 
         [Parameter(Mandatory=$false)]
-        [string[]]
-        $Exclude
+        [string[]] 
+        $Include,
+
+        [Parameter(Mandatory=$false)]
+        [switch] 
+        $IncludeRecurse,
+         
+        [Parameter(Mandatory=$false)]
+        [string[]] 
+        $Exclude,
+
+        [Parameter(Mandatory=$false)]
+        [switch] 
+        $ExcludeRecurse
     ) 
 
     $result = New-Object System.Collections.ArrayList
-    if ($Exclude) { 
-        $excludeRegex = $Exclude -join '\\|'
-        $excludeRegex += '\\'
-        $excludeRegex = $excludeRegex -replace '\*', '.*'
+
+    if ($Include) {
+        if ($IncludeRecurse) {
+            $includeRegex = '\\'
+        } else {
+            $includeRegex = '^(\.\\)?'
+        }
+        $includeRegex += $Include -join '|\\'
+        $includeRegex = $includeRegex -replace '\*', '[^\\].*'
+    }
+    if ($Exclude) {
+        if ($ExcludeRecurse) {
+            $excludeRegex = '\\'
+        } else {
+            $excludeRegex = '^(\.\\)?'
+        }
+        $excludeRegex += $Exclude -join '|\\'
+        $excludeRegex = $excludeRegex -replace '\*', '[^\\].*'
     }
         
     foreach ($p in $Path) {
@@ -72,16 +107,19 @@ function Get-FlatFileList {
         } elseif (Test-Path -Path $p -PathType Container) {
             try {
                 Push-Location -Path $p
-                $files = Get-ChildItem -Path '.' -Recurse -Exclude $Exclude -File
+                $files = Get-ChildItem -Path '.' -Recurse -File
                 foreach ($file in $files) {
                     $relativePath = Resolve-Path -Path $file.FullName -Relative
                     if ($excludeRegex -and $relativePath -imatch $excludeRegex) {
                         continue
                     }
+                    if ($includeRegex -and $relativePath -inotmatch $includeRegex) {
+                        continue
+                    }
                     if ($relativePath.StartsWith(".\")) {
                        $relativePath = $relativePath.Remove(0,2);
                     }
-                    
+                    # TODO: this probably isn't good for performance
                     Add-Member -InputObject $file -MemberType NoteProperty -Name RelativePath -Value $relativePath
                     [void]($result.Add($file))
                 }
@@ -89,7 +127,7 @@ function Get-FlatFileList {
                 Pop-Location
             }
         } else {
-            $files = Get-Item -Path $p -Exclude $Exclude
+            $files = Get-Item -Path $p
             foreach ($file in $files) {
                 [void]($result.Add($file))
                 Add-Member -InputObject $file -MemberType NoteProperty -Name RelativePath -Value $file.Name

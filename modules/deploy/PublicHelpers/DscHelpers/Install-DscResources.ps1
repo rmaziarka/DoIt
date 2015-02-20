@@ -69,14 +69,14 @@ function Install-DscResources {
     Write-Log -Info ("Installing following DSC modules from '$baseDscDir' to {0}: {1}" -f ($nodes -join ', '), ($dscModulesInfo.Name -join ', '))
 
     $isLocalhostDone = $false
-    $exclude = @('Docs', 'Examples', 'Samples')
+    $dscExclude = @('Docs', 'Examples', 'Samples')
     foreach ($node in $ConnectionParams.Nodes) {
         $isLocalhost = Test-ComputerNameIsLocalhost -ComputerName $node
         
         if ($isLocalhost) {
             if (!$isLocalhostDone) {
                 foreach ($dscModuleInfo in $dscModulesInfo) {
-                    Copy-Directory -Path $dscModuleInfo.SrcPath -Destination $dscModuleInfo.DstPath -Exclude $exclude -Overwrite
+                    Copy-Directory -Path $dscModuleInfo.SrcPath -Destination $dscModuleInfo.DstPath -Exclude $dscExclude -ExcludeRecurse -Overwrite
                 }
                 try { 
                     Clear-DscCache
@@ -91,7 +91,8 @@ function Install-DscResources {
                 Destination = $dscModulesInfo.DstPath
                 ConnectionParams = New-ConnectionParameters -Nodes $node -Credential $ConnectionParams.Credential -Authentication $ConnectionParams.Authentication -Port $ConnectionParams.Port -Protocol $ConnectionParams.Protocol
                 ClearDestination = $true
-                Exclude = $exclude
+                Exclude = $dscExclude
+                ExcludeRecurse = $true
                # CheckHashMode = 'UseHashFile'
             } 
 

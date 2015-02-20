@@ -30,8 +30,17 @@ function Compress-With7Zip {
     .PARAMETER PathsToCompress
     Array of paths to compress. Can use 7zip's wildcards format.
 
-    .PARAMETER ExcludeFilenames
-    List of filenames to exclude. Will be passed to -Xr! switches.
+    .PARAMETER Include
+    List of file / directory to include. Will be passed to -i! switches.
+
+    .PARAMETER IncludeRecurse
+    Recurse type for Include rules (if set, wildcards will be matched recursively).
+
+    .PARAMETER Exclude
+    List of file / directory to exclude. Will be passed to -x! switches.
+
+    .PARAMETER ExcludeRecurse
+    Recurse type for Include rules (if set, wildcards will be matched recursively).
 
     .PARAMETER OutputFile
     Output archive file.
@@ -57,10 +66,22 @@ function Compress-With7Zip {
         [Parameter(Mandatory=$true)]
         [string[]]
         $PathsToCompress,
+        
+        [Parameter(Mandatory=$false)]
+        [string[]] 
+        $Include,
+
+        [Parameter(Mandatory=$false)]
+        [switch] 
+        $IncludeRecurse,
          
         [Parameter(Mandatory=$false)]
         [string[]] 
-        $ExcludeFilenames,
+        $Exclude,
+
+        [Parameter(Mandatory=$false)]
+        [switch] 
+        $ExcludeRecurse,
 
         [Parameter(Mandatory=$true)]
         [string] 
@@ -85,7 +106,10 @@ function Compress-With7Zip {
         $Password
     )
 
-    $7zip = Add-QuotesToPaths (Get-PathTo7Zip -FailIfNotFound)
+    $cmdLine = New-Object System.Text.StringBuilder
+
+    $7zipPath = Add-QuotesToPaths (Get-PathTo7Zip -FailIfNotFound)
+    $cmdLine.Append($7zipPath)
 
     if (([uri]$WorkingDirectory).IsUnc) {
         Write-Log -Critical "Working directory '$WorkingDirectory' is an unc path. 7-zip does not support that."
@@ -104,19 +128,37 @@ function Compress-With7Zip {
         "good" { "7" }
         "ultra" { "9" }
     }
-    $7zip += " a $OutputFile " + ($PathsToCompress -join " ") + " -r -t$ArchiveFormat -mx$compressionSwitch"
+    $cmdLine.Append(" a $OutputFile ")
+    $cmdLine.Append(($PathsToCompress -join " "))
+    $cmdLine.Append(" -r -t$ArchiveFormat -mx$compressionSwitch")
     if ($Password) {
-        $7zip += " -p$($Password.GetNetworkCredential().Password)"
+        $cmdLine.Append(" -p$($Password.GetNetworkCredential().Password)")
     }
         
-    if ($ExcludeFilenames) {
-        $ExcludeFilenames | ForEach-Object { $7zip += " -xr!$_" }
+    if ($Include) {
+        foreach ($wildcard in $Include) {
+            if ($IncludeRecurse) {
+               $cmdLine.Append(" -ir!$wildcard")
+            } else {
+               $cmdLine.Append(" -i!$wildcard")
+            }
+        }
+    }
+        
+    if ($Exclude) {
+        foreach ($wildcard in $Exclude) {
+            if ($ExcludeRecurse) {
+               $cmdLine.Append(" -xr!$wildcard")
+            } else {
+               $cmdLine.Append(" -x!$wildcard")
+            }
+        }
     }
 
     try { 
         Push-Location -Path $WorkingDirectory
         Write-Log -_Debug "Invoking 7zip at directory '$WorkingDirectory'"
-        [void](Invoke-ExternalCommand -Command $7zip -Quiet)
+        [void](Invoke-ExternalCommand -Command ($cmdLine.ToString()) -Quiet)
     } finally {
         Pop-Location
     }

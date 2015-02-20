@@ -55,14 +55,12 @@ function Test-ComputerNameIsLocalhost {
 
     try {
         if (Get-Command -Name Get-NetIPAddress -ErrorAction SilentlyContinue) { 
-            # SuppressScriptCop - adding small arrays is ok
-            $localhostNames += (Get-NetIPAddress -AddressFamily IPv4).IPAddress
+           $localhostNames += (Get-NetIPAddress -AddressFamily IPv4).IPAddress
         }
     } catch {
         Write-Log -Warn 'Failed to get IP address for localhost'
     }
     try { 
-        # SuppressScriptCop - adding small arrays is ok
         $localhostNames += ([System.Net.Dns]::GetHostEntry([string]$env:computername).HostName)
     } catch {
         Write-Log -Warn 'Failed to get FQDN for localhost'

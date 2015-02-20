@@ -40,8 +40,17 @@ function Copy-FilesToRemoteServer {
         If specified, this environment variable name will be used for blue-green deployment 
         (destination directories will be changing between those specified in $Destination).
 
+    .PARAMETER Include
+        List of file / directory to include.
+
+    .PARAMETER IncludeRecurse
+        Recurse type for Include rules (if set, wildcards will be matched recursively).
+
     .PARAMETER Exclude
-        The files to be excluded from copying to remote server.
+        List of file / directory to exclude.
+
+    .PARAMETER ExcludeRecurse
+        Recurse type for Include rules (if set, wildcards will be matched recursively).
 
     .PARAMETER CheckHashMode
         There are three modes for checking whether the destination path needs to be updated:
@@ -79,9 +88,21 @@ function Copy-FilesToRemoteServer {
         [string]
         $BlueGreenEnvVariableName,
 
-        [Parameter(Mandatory = $false)]
-        [string[]]
+        [Parameter(Mandatory=$false)]
+        [string[]] 
+        $Include,
+
+        [Parameter(Mandatory=$false)]
+        [switch] 
+        $IncludeRecurse,
+         
+        [Parameter(Mandatory=$false)]
+        [string[]] 
         $Exclude,
+
+        [Parameter(Mandatory=$false)]
+        [switch] 
+        $ExcludeRecurse,
 
         [Parameter(Mandatory = $false, ParameterSetName = 'JustCopy')]
         [string]
@@ -128,10 +149,18 @@ function Copy-FilesToRemoteServer {
     # calculate hash for local files if required
     if ($CheckHashMode -ne 'DontCheckHash') {
        Write-Progress -Activity "Checking whether '$Destination' needs updating" -Id 1
-       $hashPath = Get-Hash -Path $Path -Exclude $Exclude
+       $hashPath = Get-Hash -Path $Path -Include $Include -IncludeRecurse:$IncludeRecurse -Exclude $Exclude -ExcludeRecurse:$ExcludeRecurse
     }
 
-    $sessions = New-CopySessions -Path $Path -ConnectionParams $ConnectionParams -Exclude $Exclude -Destination $Destination -CheckHashMode $CheckHashMode -HashPath $hashPath
+    $sessions = New-CopySessions -Path $Path `
+                                 -ConnectionParams $ConnectionParams `
+                                 -Include $Include `
+                                 -IncludeRecurse:$IncludeRecurse `
+                                 -Exclude $Exclude `
+                                 -ExcludeRecurse:$ExcludeRecurse `
+                                 -Destination $Destination `
+                                 -CheckHashMode $CheckHashMode `
+                                 -HashPath $hashPath
     if (!$sessions) {
         Write-Progress -Activity "Finished" -Completed -Id 1
         return @()
@@ -155,11 +184,21 @@ function Copy-FilesToRemoteServer {
                 [void](Remove-Item -Path $tempZip -Force)
             }
             Write-Progress -Activity "Creating '$zipToCopy'" -Status "Preparing files to copy" -Id 1
+
+            $zipParams = @{
+                Path = $Path
+                OutputFile = $tempZip
+                Include = $Include
+                IncludeRecurse = $IncludeRecurse
+                Exclude = $Exclude
+                ExcludeRecurse = $ExcludeRecurse
+            }
+
             if (!$BlueGreenEnvVariableName) { 
-                New-Zip -Path $Path -OutputFile $tempZip -Exclude $Exclude -DestinationZipPath $Destination
+                New-Zip @zipParams -DestinationZipPath $Destination
                 $isStructuredZip = $true
             } else {
-                New-Zip -Path $Path -OutputFile $tempZip -Exclude $Exclude
+                New-Zip @zipParams
                 $isStructuredZip = $false
             }
             if (!(Test-Path -Path $tempZip)) {

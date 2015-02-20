@@ -106,7 +106,7 @@ function Copy-PSCI {
         $dscDst = Join-Path -Path $dstPath -ChildPath 'dsc'
         foreach ($dscModuleInfo in $dscModulesToInclude) {
             $dest = Join-Path -Path $dscDst -ChildPath ($dscModuleInfo.SrcPath.Substring($dscSrc.Length))
-            Copy-Directory -Path $dscModuleInfo.SrcPath -Destination $dest -Exclude $dscExclude
+            Copy-Directory -Path $dscModuleInfo.SrcPath -Destination $dest -Exclude $dscExclude -ExcludeRecurse
         }   
 
         foreach ($externalLib in $externalLibs) {

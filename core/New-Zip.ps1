@@ -33,8 +33,17 @@ function New-Zip {
 	.PARAMETER OutputFile
 		The output zip file path.
        
+    .PARAMETER Include
+        List of file / directory to include.
+
+    .PARAMETER IncludeRecurse
+        Recurse type for Include rules (if set, wildcards will be matched recursively).
+
     .PARAMETER Exclude
-        Exclude mask.
+        List of file / directory to exclude.
+
+    .PARAMETER ExcludeRecurse
+        Recurse type for Include rules (if set, wildcards will be matched recursively).
 
     .PARAMETER DestinationZipPath
         Destination path in .zip file. 
@@ -69,8 +78,20 @@ function New-Zip {
 		$OutputFile,
 
         [Parameter(Mandatory=$false)]
-        [string[]]
-		$Exclude,
+        [string[]] 
+        $Include,
+
+        [Parameter(Mandatory=$false)]
+        [switch] 
+        $IncludeRecurse,
+         
+        [Parameter(Mandatory=$false)]
+        [string[]] 
+        $Exclude,
+
+        [Parameter(Mandatory=$false)]
+        [switch] 
+        $ExcludeRecurse,
 
         [Parameter(Mandatory=$false)]
 		[string[]]
@@ -101,7 +122,14 @@ function New-Zip {
             } else {
                 $7zipPath = '*'
             }
-            Compress-With7Zip -PathsToCompress $7zipPath -OutputFile $OutputFile -ExcludeFileNames $Exclude -WorkingDirectory $Path[0] -CompressionLevel $7zipCompressionLevel
+            Compress-With7Zip -PathsToCompress $7zipPath `
+                              -OutputFile $OutputFile `
+                              -Include $Include `
+                              -IncludeRecurse:$IncludeRecurse `
+                              -Exclude $Exclude `
+                              -ExcludeRecurse:$ExcludeRecurse `
+                              -WorkingDirectory $Path[0] `
+                              -CompressionLevel $7zipCompressionLevel
             return
         } else {
             Write-Log -_Debug '7-Zip not installed - falling back to .NET. Note msdeploy sync will be slower.'
@@ -142,7 +170,7 @@ function New-Zip {
             } else {
                 $destBasePath = ''
             }
-            $items = Get-FlatFileList -Path $p -Exclude $Exclude
+            $items = Get-FlatFileList -Path $p -Include $Include -IncludeRecurse:$IncludeRecurse -Exclude $Exclude -ExcludeRecurse:$ExcludeRecurse
             foreach ($item in $items) {
                 if ($destBasePath) { 
                     $destPath = Join-Path -Path $destBasePath -ChildPath $item.RelativePath

@@ -37,8 +37,17 @@ function New-CopySessions {
 	.PARAMETER Destination
 		The remote path where the file will be saved to.
         
+    .PARAMETER Include
+        List of file / directory to include.
+
+    .PARAMETER IncludeRecurse
+        Recurse type for Include rules (if set, wildcards will be matched recursively).
+
     .PARAMETER Exclude
-        The files to be excluded from copying to remote server.
+        List of file / directory to exclude.
+
+    .PARAMETER ExcludeRecurse
+        Recurse type for Include rules (if set, wildcards will be matched recursively).
 
     .PARAMETER CheckHashMode
         There are three modes for checking whether the destination path needs to be updated:
@@ -69,9 +78,21 @@ function New-CopySessions {
         [string[]]
         $Destination,
 
-        [Parameter(Mandatory = $false)]
-        [string[]]
+        [Parameter(Mandatory=$false)]
+        [string[]] 
+        $Include,
+
+        [Parameter(Mandatory=$false)]
+        [switch] 
+        $IncludeRecurse,
+         
+        [Parameter(Mandatory=$false)]
+        [string[]] 
         $Exclude,
+
+        [Parameter(Mandatory=$false)]
+        [switch] 
+        $ExcludeRecurse,
 
         [Parameter(Mandatory = $false)]
         [string]
@@ -103,7 +124,7 @@ function New-CopySessions {
                         return $null
                     }
                 }
-                Get-Hash -Path $destinations -Exclude $using:Exclude
+                Get-Hash -Path $destinations -Include $Include -IncludeRecurse:$IncludeRecurse -Exclude $Exclude -ExcludeRecurse:$ExcludeRecurse
             }
             $needUpdate = $remoteHash -ne $HashPath
         } elseif ($CheckHashMode -eq 'UseHashFile' -and $HashPath) {

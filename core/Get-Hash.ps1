@@ -35,8 +35,17 @@ function Get-Hash {
     .PARAMETER Path
     Path of the directory to traverse.
 
+    .PARAMETER Include
+    List of file / directory to include.
+
+    .PARAMETER IncludeRecurse
+    Recurse type for Include rules (if set, wildcards will be matched recursively).
+
     .PARAMETER Exclude
-    Exclude mask.
+    List of file / directory to exclude.
+
+    .PARAMETER ExcludeRecurse
+    Recurse type for Include rules (if set, wildcards will be matched recursively).
 
     .PARAMETER Algorithm
     Algorithm to use.   
@@ -53,8 +62,20 @@ function Get-Hash {
         $Path,
 
         [Parameter(Mandatory=$false)]
-        [string[]]
+        [string[]] 
+        $Include,
+
+        [Parameter(Mandatory=$false)]
+        [switch] 
+        $IncludeRecurse,
+         
+        [Parameter(Mandatory=$false)]
+        [string[]] 
         $Exclude,
+
+        [Parameter(Mandatory=$false)]
+        [switch] 
+        $ExcludeRecurse,
 
         [Parameter(Mandatory=$false)]
         [ValidateSet("MD5", "SHA1", "SHA-256", "SHA-384", "SHA-512")]
@@ -65,7 +86,7 @@ function Get-Hash {
     $encoding = New-Object System.Text.UTF8Encoding
     $sb = New-Object System.Text.StringBuilder
 
-    $files = Get-FlatFileList -Path $Path -Exclude $Exclude | Sort-Object -Property RelativePath
+    $files = Get-FlatFileList -Path $Path -Include $Include -IncludeRecurse:$IncludeRecurse -Exclude $Exclude -ExcludeRecurse:$ExcludeRecurse | Sort-Object -Property RelativePath
     foreach ($file in $files) {
         try {
             [System.IO.FileStream]$fileStream = [System.IO.File]::Open($file.FullName, [System.IO.FileMode]::Open, [System.IO.FileAccess]::Read, [System.IO.FileShare]::ReadWrite);
