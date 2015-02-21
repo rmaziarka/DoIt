@@ -101,7 +101,7 @@ param(
 
     [Parameter(Mandatory=$false)]
     [string[]]
-    $NodesFilter,
+    $NodesFilter = 'objplbuild-exp',
 
     [Parameter(Mandatory=$false)]
     [ValidateSet('All', 'Provision', 'Deploy', 'Adhoc')]

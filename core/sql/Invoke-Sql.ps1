@@ -146,22 +146,38 @@ function Invoke-Sql {
     if ($Mode -eq 'sqlcmd') {
         foreach ($q in $Query) { 
             $params['Query'] = $q
+            if ($q.Length -gt 40) {
+                $qLog = $q.Substring(0, 40) + '...'
+            } else {
+                $qLog = $q
+            }
+            Write-Log -Info "Running custom query at $($csb.DataSource) / $($csb.InitialCatalog) using sqlcmd (${qLog}...)"
             Invoke-SqlSqlcmd @params
         }
 
         $params.Remove('Query')
         foreach ($file in $InputFile) {
+            $file = Resolve-Path -Path $file
             $params['InputFile'] = $file
+            Write-Log -Info "Running sql file '$file' at $($csb.DataSource) / $($csb.InitialCatalog) using sqlcmd"
             Invoke-SqlSqlcmd @params
         }
 
     } elseif ($Mode -eq '.net') {
         foreach ($q in $Query) { 
             $params['Query'] = $q
+            if ($q.Length -gt 40) {
+                $qLog = $q.Substring(0, 40) + '...'
+            } else {
+                $qLog = $q
+            }
+            Write-Log -Info "Running custom query at $($csb.DataSource) / $($csb.InitialCatalog) using .Net (${qLog})"
             Invoke-SqlDotNet @params
         }
 
         foreach ($file in $InputFile) {
+            $file = Resolve-Path -Path $file
+            Write-Log -Info "Running sql file '$file' at $($csb.DataSource) / $($csb.InitialCatalog) using .Net"
             $params['Query'] = Get-Content -Path $file -ReadCount 0 | Out-String
             Invoke-SqlDotNet @params
         }

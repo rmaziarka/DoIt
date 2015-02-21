@@ -170,6 +170,17 @@ function New-DeploymentPlanEntry {
         $packageDirectory = "c:\PSCIPackage"
     }
 
+    $requiredPackages = @((Resolve-ScriptedToken -ScriptedToken $Configuration.RequiredPackages -ResolvedTokens $ResolvedTokens -Environment $Environment -Node $Node))
+    if ($requiredPackages) {
+        $packagePath = (Get-ConfigurationPaths).PackagesPath
+        foreach ($package in $requiredPackages) {
+            $dir = Join-Path -Path $packagePath -ChildPath $package
+            if (!(Test-Path -Path $dir)) {
+                Write-Log -Critical "A required package named '$package' does not exist at '$dir' (defined in environment '$Environment' / ServerRole '$($ServerRole.Name)' / Configuration '$($Configuration.Name)'."
+            }
+        }
+    }
+
     return [PSCustomObject]@{ 
         EntryNo = $entryNo
         ConnectionParams = $connectionParamsObj
@@ -183,7 +194,7 @@ function New-DeploymentPlanEntry {
         ConfigurationMofDir = $mofDir
         Tokens = $ResolvedTokens; 
         TokensOverride = $TokensOverride;
-        RequiredPackages = @((Resolve-ScriptedToken -ScriptedToken $Configuration.RequiredPackages -ResolvedTokens $ResolvedTokens -Environment $Environment -Node $Node))
+        RequiredPackages = $requiredPackages
         RebootHandlingMode = $RebootHandlingMode
     }
 }

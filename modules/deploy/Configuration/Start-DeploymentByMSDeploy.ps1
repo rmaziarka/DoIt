@@ -113,7 +113,7 @@ function Start-DeploymentByMSDeploy {
         $TokensOverride
     )
       
-    $deployScript = (Join-Path -Path $PackageDirectory -ChildPath "DeployScripts\deploy.ps1") + " -Environment '{0}' -ServerRolesToDeploy '{1}' -DeployType $DeployType" `
+    $deployScript = ".\DeployScripts\deploy.ps1 -Environment '{0}' -ServerRolesFilter '{1}' -DeployType $DeployType" `
                     -f ($Environment -join "','"), ($ServerRole -join "','")
 
     if ($NodesFilter) {
@@ -142,7 +142,7 @@ function Start-DeploymentByMSDeploy {
         $tempSrcPath = $tempZip
     }
 
-    $postDeploymentScript += "-PostSync:runCommand='powershell -Command `"`$Global:PSCIRemotingMode = '{0}'; & {1}`"',dontUseCommandExe=true,waitInterval=2147483647,waitAttempts=1" -f $RunOnConnectionParams.RemotingMode, $deployScript
+    $postDeploymentScript += "-PostSync:runCommand='powershell -Command `"Set-Location -Path '{0}'; `$Global:PSCIRemotingMode = '{1}'; & {2}`"',dontUseCommandExe=true,waitInterval=2147483647,waitAttempts=1" -f $PackageDirectory, $RunOnConnectionParams.RemotingMode, $deployScript
 
     Write-Log -Info "Sending `"$tempSrcPath`" to `"$($PackageDirectory)`" @ `"$($RunOnConnectionParams.NodesAsString)`" and running `"$deployScript`" using $($RunOnConnectionParams.RemotingMode)" -Emphasize
     Sync-MsDeployDirectory -SourcePath $tempSrcPath -DestinationDir $PackageDirectory -DestString $msDeployDestinationString -AddParameters @($postDeploymentScript)

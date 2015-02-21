@@ -85,16 +85,29 @@ Configuration WebServerProvision {
 function DatabaseServerDeploy {
 	param ($NodeName, $Tokens, $Environment)
 
-    Deploy-SqlPackage -PackageName 'DatabaseCleanup' -ConnectionString $Tokens.DatabaseConfig.DatabaseDeploymentConnectionString -Credential $Tokens.Credentials.RemoteCredential
-    Deploy-DBDeploySqlScriptsPackage -PackageName 'DatabaseUpdate' -ConnectionString $Tokens.DatabaseConfig.DatabaseDeploymentConnectionString -Credential $Tokens.Credentials.RemoteCredential
+    $databaseName = $Tokens.DatabaseConfig.DatabaseName
+    $connectionString = $Tokens.DatabaseConfig.DatabaseDeploymentConnectionString
+    $credential = $Tokens.Credentials.RemoteCredential
 
+    Remove-SqlDatabase -DatabaseName $databaseName -ConnectionString $connectionString
+    New-SqlDatabase -DatabaseName $databaseName -ConnectionString $connectionString
+
+    Invoke-Sql -ConnectionString $connectionString -Query "USE ${databaseName}; PRINT 'Test'"
+
+    Deploy-SqlPackage -PackageName 'sql' -ConnectionString $connectionString -Credential $credential
 }
 
-function RemotingTest {
+function RemotingTestPrepare {
+    param ($NodeName, $Tokens, $Environment, $ConnectionParams)
+
+    .\RemotingTest\test.ps1
+}
+
+function RemotingTestValidate {
 	param ($NodeName, $Tokens, $Environment, $ConnectionParams)
 
-    New-Item -Path 'c:\PSCITest' -ItemType Directory -Force
-    $path = "c:\PSCITest\$($ConnectionParams.NodesAsString)_$($ConnectionParams.RemotingMode)_$($ConnectionParams.Authentication)"
-    Write-Log -Info "Creating file '$fileName'"
-    New-Item -Path $path -ItemType File -Force
+    if (!(Test-Path -Path 'c:\PSCITest\RemotingTestEvidence')) {
+        Write-Log -Critical 'Test evidence does not exist at c:\PSCITest\RemotingTestEvidence.'
+    }
+    Remove-Item -Path 'c:\PSCITest' -Force -Recurse
 }

@@ -67,11 +67,17 @@ function Start-DeploymentPlanEntryLocally {
             #TODO: group DSCs that are next to each other and have the same ConnectionParams/RebootHandlingMode
             Start-DscConfigurationWithRetries @params
         } elseif ($configInfo.Type -eq "Function") {
-            Invoke-ConfigurationOrFunction -ConfigurationName $configInfo.Name `
-                                           -Node $configInfo.ConnectionParams.Nodes[0] `
-                                           -Environment $configInfo.Environment `
-                                           -ResolvedTokens $configInfo.Tokens `
-                                           -ConnectionParams $configInfo.ConnectionParams
+            try { 
+                $packagePath = (Get-ConfigurationPaths).PackagesPath
+                Push-Location -Path $packagePath
+                Invoke-ConfigurationOrFunction -ConfigurationName $configInfo.Name `
+                                               -Node $configInfo.ConnectionParams.Nodes[0] `
+                                               -Environment $configInfo.Environment `
+                                               -ResolvedTokens $configInfo.Tokens `
+                                               -ConnectionParams $configInfo.ConnectionParams
+           } finally {
+                Pop-Location
+           }
         }
         Write-Log -Info ("[END] RUN LOCAL CONFIGURATION '{0}' / NODE '{1}'" -f $configInfo.Name, $configInfo.ConnectionParams.NodesAsString) -Emphasize
     }   

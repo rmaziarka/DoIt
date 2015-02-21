@@ -62,29 +62,32 @@ function Start-DeploymentPlanEntryRemotely {
     )    
  
     $configInfo = $DeploymentPlanGroupedEntry.GroupedConfigurationInfo
-    $remotingMode = $configInfo.RunOnConnectionParams.RemotingMode
+    $runOnConnectionParams = $configInfo[0].RunOnConnectionParams
+    $packageDirectory = $configInfo[0].PackageDirectory
+    $remotingMode = $runOnConnectionParams.RemotingMode
 
+    
     $params = 
         @{ 
-            Environment = $configInfo.Environment
-            ServerRole = $configInfo.ServerRole
-            RunOnConnectionParams = $configInfo.RunOnConnectionParams
-            PackageDirectory = $configInfo.PackageDirectory
+            Environment = $configInfo.Environment | Select-Object -Unique
+            ServerRole = $configInfo.ServerRole | Select-Object -Unique
+            RunOnConnectionParams = $runOnConnectionParams
+            PackageDirectory = $packageDirectory
             RequiredPackages = $DeploymentPlanGroupedEntry.RequiredPackages
             DeployType = $DeployType
             ConfigurationsFilter = $configInfo.Name
-            NodesFilter = $configInfo.ConnectionParams.Nodes
+            NodesFilter = $configInfo.ConnectionParams.Nodes | Select-Object -Unique
             TokensOverride = $DeploymentPlanGroupedEntry.TokensOverride
         }
         
-    $runOnNode = $configInfo.RunOnConnectionParams.Nodes[0]
+    $runOnNode = $runOnConnectionParams.Nodes[0]
     if ($PackageCopiedToNodes.Value -notcontains $runOnNode) {
         $PackageCopiedToNodes.Value += @($runOnNode)
         $params.CopyPackages = $true
     }
 
-    if ($configInfo.RunOnConnectionParams.Credential) {
-        $userName = $configInfo.RunOnConnectionParams.Credential.UserName
+    if ($runOnConnectionParams.Credential) {
+        $userName = $runOnConnectionParams.Credential.UserName
     } else {
         $userName = ''
     }
@@ -92,10 +95,10 @@ function Start-DeploymentPlanEntryRemotely {
     Write-Log -Info ("[START] RUN REMOTE CONFIGURATION(s) '{0}' / RUNON '{1}' / REMOTING '{2}' / AUTH '{3}' / CRED '{4}' / PROTOCOL '{5}'" -f `
         ($configInfo.Name -join "','"),
         $runOnNode, `
-        $configInfo.RunOnConnectionParams.RemotingMode, `
-        $configInfo.RunOnConnectionParams.Authentication, `
+        $runOnConnectionParams.RemotingMode, `
+        $runOnConnectionParams.Authentication, `
         $userName, `
-        $configInfo.RunOnConnectionParams.Protocol) -Emphasize
+        $runOnConnectionParams.Protocol) -Emphasize
     Write-ProgressExternal -Message ('Deploying {0} to {1}' -f ($configInfo.Name -join "','"), $runOnNode) `
         -ErrorMessage ('Deploy error - node {0}, conf {1}' -f $runOnNode, ($configInfo.Name -join "','"))
 

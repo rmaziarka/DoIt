@@ -83,51 +83,53 @@ function Start-DeploymentPlan {
     if (!$PSCIGlobalConfiguration.RemotingMode) {
         Write-Log -Info '[START] ACTUAL DEPLOYMENT' -Emphasize
     }
-
-    Write-Log -Info "Running following deployment plan with DeployType = ${DeployType}:"
     
-    # Log information to console
-    foreach ($entry in $DeploymentPlan) {
-        if (!$entry.RunOnConnectionParams) {
-            $remotingMode = ''
-            $runOnNodes = 'localhost'
-        } else {
-            $remotingMode = '(' + $entry.RunOnConnectionParams.RemotingMode + ')'
-            $runOnNodes = $entry.RunOnConnectionParams.NodesAsString
-        }
-        Write-Log -Info ('{0} -> {1}, RunOn = {2} {3}' -f $entry.ConfigurationName, $entry.ConnectionParams.NodesAsString, $runOnNodes, $remotingMode) -Emphasize
-    }
-    Write-Log -Info ' '
-   
-    # Install DSC resources where required - on nodes where DSC will be applied to different nodes (remotely)
-
+    # Group deployment plan entries by RunOnConnectionParams and PackageDirectory
     if (!$PSCIGlobalConfiguration.RemotingMode) { 
-
-        if ($AutoInstallDSCResources) {
-            $entriesToInstallDSC = $DeploymentPlan | Where-Object { $_.ConfigurationType -eq 'Configuration' -and !$_.IsLocalRun }
-            if ($entriesToInstallDSC) {
-                $dscInstalledNodes = @()
-                Write-ProgressExternal -Message 'Installing DSC resources' -ErrorMessage 'DSC resources install error'
-                Write-Log -Info '[START] INSTALL DSC RESOURCES' -Emphasize
-                foreach ($entry in $entriesToInstallDSC) {
-                    if ($dscInstalledNodes -notcontains $entry.ConnectionParams.Nodes[0]) {
-                        # TODO: install only modules required for given configurations
-                        Install-DscResources -ConnectionParams $entry[0].ConnectionParams -ModuleNames $DscModuleNames
-                        $dscInstalledNodes += @($entry.ConnectionParams.Nodes[0])
-                    }
-                }
-                Write-Log -Info '[END] INSTALL DSC RESOURCES' -Emphasize
-            }
-        }
         $planByRunOn = Group-DeploymentPlan -DeploymentPlan $DeploymentPlan -GroupByRunOnConnectionParamsAndPackage -PreserveOrder
     } else {
         # if RemotingMode, every entry is run locally and we ignore RunOnConnectionsParams
         $planByRunOn = Group-DeploymentPlan -DeploymentPlan $DeploymentPlan -PreserveOrder
     }  
 
+    Write-Log -Info "Running following deployment plan with DeployType = ${DeployType}:"
+    foreach ($entry in $planByRunOn) {
+        $configInfo = $entry.GroupedConfigurationInfo
+        $runOnParams = $configInfo[0].RunOnConnectionParams
+        if (!$runOnParams -and !$PSCIGlobalConfiguration.RemotingMode) {
+            $remotingMode = ''
+            $runOnNodes = 'localhost'
+        } else {
+            $remotingMode = ' (' + $runOnParams.RemotingMode + ')'
+            $runOnNodes = $runOnParams.NodesAsString
+        }
+        $configNames = $configInfo.Name -join ', '
+        $nodes = $configInfo.ConnectionParams.Nodes -join ', '
+        Write-Log -Info ('RunOn = {0}{1}: {2} -> {3}' -f $runOnNodes, $remotingMode, $configNames, $nodes) -Emphasize
+    }
+    Write-Log -Info ' '
+
+    # Install DSC resources where required - on nodes where DSC will be applied to different nodes (remotely)
+    if (!$PSCIGlobalConfiguration.RemotingMode -and $AutoInstallDscResources) {
+        $entriesToInstallDSC = $DeploymentPlan | Where-Object { $_.ConfigurationType -eq 'Configuration' -and !$_.IsLocalRun }
+        if ($entriesToInstallDSC) {
+            $dscInstalledNodes = @()
+            Write-ProgressExternal -Message 'Installing DSC resources' -ErrorMessage 'DSC resources install error'
+            Write-Log -Info '[START] INSTALL DSC RESOURCES' -Emphasize
+            foreach ($entry in $entriesToInstallDSC) {
+                if ($dscInstalledNodes -notcontains $entry.ConnectionParams.Nodes[0]) {
+                    # TODO: install only modules required for given configurations
+                    Install-DscResources -ConnectionParams $entry[0].ConnectionParams -ModuleNames $DscModuleNames
+                    $dscInstalledNodes += @($entry.ConnectionParams.Nodes[0])
+                }
+            }
+            Write-Log -Info '[END] INSTALL DSC RESOURCES' -Emphasize
+        }
+    }
+
     $packageCopiedToNodes = @()
     foreach ($entry in $planByRunOn) {
-        if ($entry.RunOnConnectionParams -and !$PSCIGlobalConfiguration.RemotingMode) {   
+        if ($entry.GroupedConfigurationInfo[0].RunOnConnectionParams -and !$PSCIGlobalConfiguration.RemotingMode) {   
             Start-DeploymentPlanEntryRemotely -DeploymentPlanGroupedEntry $entry -DeployType $DeployType -PackageCopiedToNodes ([ref]$packageCopiedToNodes)            
         } else {
             Start-DeploymentPlanEntryLocally -DeploymentPlanGroupedEntry $entry -DscForce:$DscForce

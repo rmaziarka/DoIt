@@ -43,9 +43,11 @@ Environment Default {
     ServerRole Web -Configurations @('WebServerProvision') -ServerConnections TestNodeDefault
 	ServerRole Database -Configurations @('DatabaseServerDeploy') -ServerConnections TestNodeDefault
 
-    ServerRole RemotingTestPSRemoting -Configurations @('RemotingTest') -RunRemotely -ServerConnections TestNodePSRemoting
-    ServerRole RemotingTestPSRemotingCredSSP -Configurations @('RemotingTest') -RunRemotely -ServerConnections TestNodePSRemotingCredSSP
-    ServerRole RemotingTestMSDeploy -Configurations @('RemotingTest') -RunRemotely -ServerConnections TestNodeMSDeploy
+    ServerRole RemotingTestPSRemoting -Configurations @('RemotingTestPrepare', 'RemotingTestValidate') -RunRemotely -ServerConnections TestNodePSRemoting
+    ServerRole RemotingTestPSRemotingCredSSP -Configurations @('RemotingTestPrepare', 'RemotingTestValidate') -RunRemotely -ServerConnections TestNodePSRemotingCredSSP
+    ServerRole RemotingTestMSDeploy -Configurations @('RemotingTestPrepare', 'RemotingTestValidate') -RunRemotely -ServerConnections TestNodeMSDeploy
+
+    ConfigurationSettings RemotingTestPrepare -RequiredPackages RemotingTest
 }
 
 

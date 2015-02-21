@@ -64,7 +64,7 @@ function Compare-ConnectionParameters {
     if ($ConnectionParams1.RemotingMode -ine $ConnectionParams2.RemotingMode) {
         return $false
     }
-    if ($ConnectionParams1.Credential -ine $ConnectionParams2.Credential) {
+    if ($ConnectionParams1.Credential.UserName -ine $ConnectionParams2.Credential.UserName) {
         return $false
     }
     if ($ConnectionParams1.Authentication -ine $ConnectionParams2.Authentication) {

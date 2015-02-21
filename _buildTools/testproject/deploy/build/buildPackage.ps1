@@ -49,11 +49,12 @@ param(
    DeployScriptsPath       - path to directory with deploy.ps1
 #>
 
-# $configPaths = Get-ConfigurationPaths
+$configPaths = Get-ConfigurationPaths
+$projectRootPath = $configPaths.ProjectRootPath
+$packagesPath = $configPaths.PackagesPath
+
 
 Build-DeploymentScriptsPackage 
 
-Build-DBDeployPackage -PackageName 'DBDeploy' -DBDeployPath 'database\dbdeploy'
-
-Build-SqlScriptsPackage -PackageName 'DatabaseCleanup' -ScriptsPath 'database\cleanup'
-Build-SqlScriptsPackage -PackageName 'DatabaseUpdate' -ScriptsPath 'database\changes'
+Build-SqlScriptsPackage -PackageName 'sql' -ScriptsPath 'packages\sql'
+Copy-Item -Path "$projectRootPath\packages\RemotingTest" -Destination "$packagesPath\RemotingTest" -Recurse

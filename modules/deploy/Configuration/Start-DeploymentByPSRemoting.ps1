@@ -129,7 +129,7 @@ function Start-DeploymentByPSRemoting {
         [void](Copy-FilesToRemoteServer -Path $configPaths.PackagesPath -Destination $PackageDirectory -ConnectionParams $RunOnConnectionParams -Include $includePackages -ClearDestination)
     }
 
-    $deployScript = (Join-Path -Path $PackageDirectory -ChildPath "DeployScripts\deploy.ps1") + " -Environment '{0}' -ServerRolesToDeploy '{1}' -DeployType $DeployType" `
+    $deployScript = ".\DeployScripts\deploy.ps1 -Environment '{0}' -ServerRolesFilter '{1}' -DeployType $DeployType" `
                     -f ($Environment -join "','"), ($ServerRole -join "','")
     
     if ($NodesFilter) {
@@ -146,19 +146,23 @@ function Start-DeploymentByPSRemoting {
     $scriptBlock = {
         param(
             [string]
+            $PackageDirectory,
+
+            [string]
             $DeployScript,
 
             [string]
             $RemotingMode
         )
 
+        Set-Location -Path $PackageDirectory
         $Global:PSCIRemotingMode = $RemotingMode
         Invoke-Expression -Command "& $DeployScript"
     }
 
     Write-Log -Info "Running `"$deployScript`" using $($RunOnConnectionParams.RemotingMode) on `"$($RunOnConnectionParams.NodesAsString)`""
     $psSessionParams = $RunOnConnectionParams.PSSessionParams
-    $success = Invoke-Command @psSessionParams -ScriptBlock $scriptBlock -ArgumentList $deployScript, $RunOnConnectionParams.RemotingMode
+    $success = Invoke-Command @psSessionParams -ScriptBlock $scriptBlock -ArgumentList $PackageDirectory, $deployScript, $RunOnConnectionParams.RemotingMode
     if (!$success) {
         Write-Log -Critical 'Remote invocation failed.'
     }

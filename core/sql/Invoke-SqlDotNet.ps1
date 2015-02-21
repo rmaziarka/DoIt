@@ -124,9 +124,9 @@ function Invoke-SqlDotNet {
             $infoEventHandler = [System.Data.SqlClient.SqlInfoMessageEventHandler] { 
                 foreach ($err in $_.Errors) { 
                     if ($err.Class -le 10) { 
-                        Write-Log -Info $err
+                        Write-Log -Info $err.Message
                     } else { 
-                        Write-Log -Error $err
+                        Write-Log -Error $err.Message
                         if (!$IgnoreErrors) {
                             $errorOccurred.Error = $true
                         }

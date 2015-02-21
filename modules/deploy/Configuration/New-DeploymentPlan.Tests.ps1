@@ -32,6 +32,8 @@ Describe -Tag "PSCI.unit" "New-DeploymentPlan" {
         function config3 {}
         function config4 {}
 
+        Mock Get-ConfigurationPaths { return @{ PackagesPath = '.' } }
+
         Configuration dsc1 {
             param ($NodeName, $Environment, $Tokens)
 
@@ -389,6 +391,11 @@ Describe -Tag "PSCI.unit" "New-DeploymentPlan" {
             try { 
                 Initialize-Deployment
 
+                New-Item -Path 'package1' -ItemType Directory -Force
+                New-Item -Path 'package2' -ItemType Directory -Force
+                New-Item -Path 'packagen1' -ItemType Directory -Force
+                New-Item -Path 'packagen2' -ItemType Directory -Force
+
                 Environment Default {
                     ServerRole Web -Configurations 'dsc1','config1' -ServerConnections (ServerConnection WebServers -Nodes @('node1', 'node2')) -RequiredPackages 'package1'
                     ConfigurationSettings config1 -RunRemotely
@@ -478,6 +485,10 @@ Describe -Tag "PSCI.unit" "New-DeploymentPlan" {
                 }
             } finally {
                 Remove-Item -Path 'dscOutput' -Force -Recurse -ErrorAction SilentlyContinue
+                Remove-Item -Path 'package1' -Force -Recurse -ErrorAction SilentlyContinue
+                Remove-Item -Path 'package2' -Force -Recurse -ErrorAction SilentlyContinue
+                Remove-Item -Path 'packagen1' -Force -Recurse -ErrorAction SilentlyContinue
+                Remove-Item -Path 'packagen2' -Force -Recurse -ErrorAction SilentlyContinue
             }
         }
     }
