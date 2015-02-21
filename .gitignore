@@ -6,3 +6,5 @@ deploy.log.txt
 deploy_*.txt
 Test.xml
 ScriptCop.txt
+_DscOutput
+tokensSensitive.ps1

@@ -22,7 +22,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 #>
 
-$PSCIGlobalConfiguration = [PSCustomObject]@{
+$Global:PSCIGlobalConfiguration = [PSCustomObject]@{
     # Logging level threshold - available values: DEBUG, INFO, WARN, ERROR, CRITICAL
     LogLevel = [PSCI.LogSeverity]::INFO;
 
@@ -46,8 +46,17 @@ $PSCIGlobalConfiguration = [PSCustomObject]@{
     # WebDeployHandler - means script is executed remotely using web deployment hanlder (IIS handler)
     # WebDeployAgentService - means script is executed remotely using remote agent service
     RemotingMode = $null;
+
+    # ConfigurationPaths object created in Initialize-ConfigurationPaths. It has following properties:
+    # ProjectRootPath         - base directory of the project, relative to the directory where this script resides (it is used as a base directory for other directories)
+    # PackagesPath            - path to directory with packages
+    # PackagesExist           - $true if $PackagesPath exists and is valid PSCI package
+    # DeployConfigurationPath - path to directory with configuration files
+    # DeployScriptsPath       - path to directory with deploy.ps1
+    ConfigurationPaths = $null
 }
 
 if (Test-Path -Path Variable:Global:PSCIRemotingMode) {
-    $PSCIGlobalConfiguration.RemotingMode = $Global:PSCIRemotingMode
+    $Global:PSCIGlobalConfiguration.RemotingMode = $Global:PSCIRemotingMode
 }
+

@@ -33,21 +33,20 @@ function Initialize-ConfigurationPaths {
     .PARAMETER PackagesPath
     Base directory where packages reside.
 
-    .PARAMETER PackagesPathMustExist
-    If true and $PackagesPath does not exist, an error will be thrown.
+    .PARAMETER DeployConfigurationPath
+    Path to the directory where configuration files reside, relative to $ProjectRootPath.
 
-    .PARAMETER PSCILibraryPath
-    Root path of PSCI library.
-
+    .PARAMETER ValidatePackagesPath
+    If set, $PackagesPath will be validated for existence of folders DeployScripts and PSCI.
 
     .EXAMPLE
-    $configPaths = Initialize-ConfigurationPaths -ProjectRootPath $ProjectRootPath -PackagesPath $PackagesPath
+    $configPaths = Initialize-ConfigurationPaths -ProjectRootPath $ProjectRootPath -PackagesPath $PackagesPath -DeployConfigurationPath $DeployConfigurationPath
     #>
 
     [CmdletBinding()]
     [OutputType([void])]
     param(
-        [Parameter(Mandatory=$true)]
+        [Parameter(Mandatory=$false)]
         [string] 
         $ProjectRootPath,
        
@@ -56,42 +55,100 @@ function Initialize-ConfigurationPaths {
         $PackagesPath,
 
         [Parameter(Mandatory=$false)]
-        [switch] 
-        $PackagesPathMustExist,
-
-        [Parameter(Mandatory=$true)]
 	    [string]
-	    $PSCILibraryPath
+	    $DeployConfigurationPath,
+
+        [Parameter(Mandatory=$false)]
+	    [switch]
+	    $ValidatePackagesPath
     )
 
     $configPaths = [PSCustomObject]@{
-        ProjectRootPath = $null;
-        PackagesPath = $null;
-        ModulePath = $PSScriptRoot;
-        PSCILibraryPath = $null;
+        ProjectRootPath = $null
+        PackagesPath = $null
+        PackagesExist = $false
+        DeployConfigurationPath = $null
+        DeployScriptsPath = (Get-Location).Path
     }
-    if (!(Test-Path -Path $ProjectRootPath -PathType Container)) {
-        Write-Log -Critical "Project root directory '$ProjectRootPath' does not exist. Please ensure you have passed valid 'ProjectRootPath' argument to Initialize-ConfigurationPaths."
+
+    # DeployScriptsPath - validate deploy.ps1 exists in current directory
+    if (!(Test-Path -Path 'deploy.ps1')) {
+        Write-Log -Critical "deploy.ps1 has not been found at '$($configPaths.deployScriptsPath)'. Please ensure you open the directory with deploy.ps1 before invoking Build-DeploymentScriptsPackage function."
     }
-    $configPaths.ProjectRootPath = Resolve-Path -Path $ProjectRootPath
 
-    $configPaths.PSCILibraryPath = Resolve-Path -Path $PSCILibraryPath
-
-    if (!$PackagesPath) {
-        $PackagesPath = $configPaths.ProjectRootPath
-    } elseif (![System.IO.Path]::IsPathRooted($PackagesPath)) {
-        $PackagesPath = Join-Path -Path ($configPaths.ProjectRootPath) -ChildPath $PackagesPath
-    }
-    
-
-    if ((Test-Path -Path $PackagesPath -PathType Container)) {
-        $configPaths.PackagesPath = Resolve-Path -Path $PackagesPath
-    } else {
-        if ($PackagesPathMustExist) {
-            Write-Log -Critical "Packages directory '$PackagesPath' does not exist. Please ensure you have packages available in this location (possibly you need to run the build?)."
+    # ProjectRootPath - if not empty validate it exists, if empty set to current directory
+    if ($ProjectRootPath) {
+        if (!(Test-Path -Path $ProjectRootPath -PathType Container)) {
+            Write-Log -Critical "Project root directory '$ProjectRootPath' does not exist. Please ensure you have passed valid 'ProjectRootPath' argument to Initialize-ConfigurationPaths."
         }
-        $configPaths.PackagesPath = $PackagesPath
+        $configPaths.ProjectRootPath = Resolve-Path -Path $ProjectRootPath
+    } else {
+        $configPaths.ProjectRootPath = $configPaths.DeployScriptsPath
+    } 
+
+    # PackagesPath - if not empty validate it exists (if -ValidatePackagesPath), then check if DeployScripts/PSCI subdirectories exist
+    $packagesValidLog = ''
+    if ($PackagesPath) {
+        if (![System.IO.Path]::IsPathRooted($PackagesPath)) {
+            $configPaths.PackagesPath = Join-Path -Path ($configPaths.ProjectRootPath) -ChildPath $PackagesPath
+        } else {
+            $configPaths.PackagesPath = $PackagesPath
+        }
+        if ((Test-Path -Path $configPaths.PackagesPath -PathType Container)) {
+            $configPaths.PackagesPath = Resolve-Path -Path $configPaths.PackagesPath
+        } elseif ($ValidatePackagesPath) {
+            Write-Log -Critical "Packages directory '$($configPaths.PackagesPath)' does not exist. Please ensure you have packages available in this location (do you need to run the build?)."  
+        }
+
+        if ($ValidatePackagesPath) {
+            $packagesNotExisting = @()
+            if (!(Test-Path -Path (Join-Path -Path $configPaths.PackagesPath -ChildPath 'DeployScripts'))) {
+                $packagesNotExisting += 'DeployScripts'
+            }
+            if (!(Test-Path -Path (Join-Path -Path $configPaths.PackagesPath -ChildPath 'PSCI'))) {
+                $packagesNotExisting += 'PSCI'
+            }
+            if (!$packagesNotExisting) {
+                $packagesValidLog = '[valid]'
+            } else {
+                Write-Log -Critical ("Packages directory '$($configPaths.PackagesPath)' does not contain {0}. Please ensure it's a valid PSCI package." -f ($packagesNotExisting -join ' and '))
+            }
+            $configPaths.PackagesExist = !$packagesNotExisting
+        }
+    } else {
+        $configPaths.PackagesPath = (Get-Location).Path
+        if ($ValidatePackagesPath) {
+            $packagesValidLog = '[packageless mode]'
+        }
     }
 
-    $global:PSCIConfigurationPaths = $configPaths
+    # DeployConfigurationPath - if not empty validate it exists, if empty try convention
+    if ($DeployConfigurationPath) {
+        if (![System.IO.Path]::IsPathRooted($DeployConfigurationPath)) {
+            $pathsToCheck = Join-Path -Path ($configPaths.ProjectRootPath) -ChildPath $DeployConfigurationPath
+        } else {
+            $pathsToCheck = $DeployConfigurationPath
+        }
+    } else {
+        $pathsToCheck = @((Join-Path -Path $configPaths.PackagesPath -ChildPath 'DeployScripts\configuration'), `
+                          (Join-Path -Path $configPaths.ProjectRootPath -ChildPath 'configuration'), `
+                          (Join-Path -Path $configPaths.ProjectRootPath -ChildPath 'DeployScripts\configuration'), `
+                          (Join-Path -Path $configPaths.DeployScriptsPath -ChildPath 'configuration')
+                        )
+    }
+
+    foreach ($path in $pathsToCheck) {
+        if ((Test-Path -Path "$path\*.ps*1")) {
+            $configPaths.DeployConfigurationPath = Resolve-Path -Path $path
+            break
+        }
+    }
+    if (!$configPaths.DeployConfigurationPath) {
+        Write-Log -Critical "Cannot find configuration scripts - tried following locations: $($pathsToCheck -join ', ')."
+    }
+
+    $Global:PSCIGlobalConfiguration.ConfigurationPaths = $configPaths
+
+    Write-Log -Info -Message ("Using following configuration paths: `nProjectRootPath         = {0}`nPackagesPath            = {1} {2}`nDeployConfigurationPath = {3}" -f `
+        $configPaths.ProjectRootPath, $configPaths.PackagesPath, $packagesValidLog, $configPaths.DeployConfigurationPath)
 }

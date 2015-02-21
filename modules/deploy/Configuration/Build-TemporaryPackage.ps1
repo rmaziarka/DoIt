@@ -35,17 +35,10 @@ function Build-TemporaryPackage {
     param()
 
     $configPaths = Get-ConfigurationPaths
-    if (!(Test-Path -Path (Join-Path -Path $configPaths.PackagesPath -ChildPath 'DeployScripts')) -and `
-        !(Test-Path -Path (Join-Path -Path $configPaths.PackagesPath -ChildPath 'PSCI'))) {
-        $packageTempDir = New-TempDirectory -DirName 'PSCI.tempPackage'
+    $packageTempDir = New-TempDirectory -DirName 'PSCI.packagelessMode'
                                 
-        Write-Log -Info "'DeployScripts' and 'PSCI' directories have not been found in the package - creating temporary package."
-        # When 'configuration' directory is present at PackagesPath, it means we don't have any package at all
-        if (!(Test-Path -Path (Join-Path -Path $configPaths.PackagesPath -ChildPath 'configuration'))) {
-            Copy-Item -Path "$($configPaths.PackagesPath)\*" -Recurse -Destination $packageTempDir
-        }
-        $configPaths.PackagesPath = $packageTempDir
-        Build-DeploymentScriptsPackage
-    }
+    Write-Log -Info "'DeployScripts' and 'PSCI' directories have not been found in the package - creating temporary package."
+    $configPaths.PackagesPath = $packageTempDir
+    Build-DeploymentScriptsPackage
 
 }

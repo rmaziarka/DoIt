@@ -37,11 +37,7 @@ function Start-Deployment {
     .PARAMETER Environment
     Name of the environment where the packages will be deployed.
 
-    .PARAMETER DeployConfigurationPath
-    Path to the configuration files which contain the tokens and server roles. 
-    If not set, path '$PackagesPath\DeployScripts\configuration' will be used as a convention.
-
-    .PARAMETER ServerRolesToDeploy
+    .PARAMETER ServerRolesFilter
     List of ServerRoles to deploy - can be used if you don't want to deploy all server roles defined in the configuration files.
     If not set, all server roles will be deployed.
 
@@ -87,12 +83,8 @@ function Start-Deployment {
         $Environment,
 
         [Parameter(Mandatory=$false)]
-        [string]
-        $DeployConfigurationPath,
-
-        [Parameter(Mandatory=$false)]
         [string[]]
-        $ServerRolesToDeploy,
+        $ServerRolesFilter,
 
         [Parameter(Mandatory=$false)]
         [string[]]
@@ -129,15 +121,9 @@ function Start-Deployment {
     }
     $configPaths = Get-ConfigurationPaths
     $packagesPath = $configPaths.PackagesPath
-
-    $DeployConfigurationPath = Resolve-PathRelativeToProjectRoot `
-                             -Path $DeployConfigurationPath `
-                             -DefaultPath (Join-Path -Path $packagesPath -ChildPath "DeployScripts\configuration"), (Join-Path -Path $packagesPath -ChildPath "configuration")
-
-    Write-Log -Info ("Starting deployment to environment '{0}' using package at '$packagesPath' and configuration at '$DeployConfigurationPath'" -f ($Environment -join ',')) -Emphasize
-
-    Write-Log -Info "[START] PARSE CONFIG FILES" -Emphasize
-    $configInfo = Read-ConfigurationFiles -Path $DeployConfigurationPath
+    
+    Write-Log -Info "[START] PARSE CONFIG FILES - environment(s) '$($Environment -join ',')'" -Emphasize
+    $configInfo = Read-ConfigurationFiles
 
     # need to install DSC resources locally in order to be able to parse configurations
     if ($AutoInstallDscResources) {
@@ -158,7 +144,7 @@ function Start-Deployment {
     Write-Log -Info "[START] BUILD DEPLOYMENT PLAN" -Emphasize
 
     $dscOutputPath = Join-Path -Path $packagesPath -ChildPath "_DscOutput"
-    $Global:DeploymentPlan = New-DeploymentPlan -AllEnvironments $Global:Environments -Environment $Environment -ServerRolesFilter $ServerRolesToDeploy `
+    $Global:DeploymentPlan = New-DeploymentPlan -AllEnvironments $Global:Environments -Environment $Environment -ServerRolesFilter $ServerRolesFilter `
                                                 -ConfigurationsFilter $ConfigurationsFilter -NodesFilter $NodesFilter -TokensOverride $TokensOverride `
                                                 -DscOutputPath $dscOutputPath -DeployType $DeployType
 
@@ -172,7 +158,7 @@ function Start-Deployment {
     if (!$ValidateOnly) {
         # When 'DeployScripts' and 'PSCI' directories are not found in the package, and there is at least one RunOn/RunRemotely in deployment plan,
         # we need to create a temporary package and copy configuration files to 'DeployScripts' and PSCI to PSCI.
-        if (!$PSCIGlobalConfiguration.RemotingMode -and ($DeploymentPlan | Where { $_.RunOnConnectionParams })) {
+        if (!$configPaths.PackagesExist -and !$PSCIGlobalConfiguration.RemotingMode -and ($DeploymentPlan | Where { $_.RunOnConnectionParams })) {
             Build-TemporaryPackage
         }
         Start-DeploymentPlan -DeploymentPlan $Global:DeploymentPlan -DscForce:$DscForce -DeployType $DeployType -AutoInstallDscResources:$AutoInstallDscResources -DscModuleNames $configInfo.RequiredDSCModules

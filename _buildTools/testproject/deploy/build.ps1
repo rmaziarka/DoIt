@@ -84,15 +84,15 @@ try {
     $PSCIGlobalConfiguration.LogFile = 'build.log.txt'
     Remove-Item -Path $PSCIGlobalConfiguration.LogFile -ErrorAction SilentlyContinue
 
-    Initialize-ConfigurationPaths -ProjectRootPath $ProjectRootPath -PackagesPath $PackagesPath -PSCILibraryPath $PSCILibraryPath	
+    Initialize-ConfigurationPaths -ProjectRootPath $ProjectRootPath -PackagesPath $PackagesPath -DeployConfigurationPath $DeployConfigurationPath
     Remove-PackagesDir
 
-    ############# Actual build steps are in build\buildPackage.ps1 - all parameters will be passed automatically to this script.
+    ############# Actual build steps are in build\buildPackage.ps1.
     ############# Feel free to add additional parameters to build.ps1 and buildPackage.ps1.
 
     $buildPackageScript = Resolve-Path -Path 'build\buildPackage.ps1'
     Write-Log -Info "Running $buildPackageScript" -Emphasize
-    . $buildPackageScript @PSBoundParameters
+    . $buildPackageScript -Version $Version
     Write-Log -Info 'Build finished successfully.' -Emphasize
 } catch {
     Write-ErrorRecord -ErrorRecord $_

@@ -27,35 +27,27 @@ function Read-ConfigurationFiles {
     .SYNOPSIS
         Reads configuration files and analyzes 'Import-DSCResource' invocations to collect DSC module dependencies.
 
-    .PARAMETER Path
-        Path where the configuration files will be read from.
-
     .OUTPUTS
         PSCustom object with following properties:
           Files - array containing full paths to the configuration files
           RequiredDSCModules - array containing names of required DSC modules
 
     .EXAMPLE
-        $configInfo = Read-ConfigurationFiles -Path $DeployConfigurationPath
+        $configInfo = Read-ConfigurationFiles
     #>
 
     [CmdletBinding()]
     [OutputType([object])]
     param(
-        [Parameter(Mandatory=$true)]
-        [string]
-        $Path
     ) 
 
-    if (!(Test-Path -Path $Path)) {
-        Write-Log -Critical "Path that should contain configuration files ('$Path') does not exist. Please ensure you have passed valid 'DeployConfigurationPath' parameter."
-    }
-    $Path = Resolve-Path -Path $Path
-    Write-Log -Info "Reading configuration files from '$Path'."
+    $configPath = (Get-ConfigurationPaths).DeployConfigurationPath
+
+    Write-Log -Info "Reading configuration files from '$configPath'."
     # Load file with 'tokens' in the name first, since other files can make use of it
-    $configScripts = Get-ChildItem -Recurse $Path -Include *.ps*1 | Sort-Object -Property { $_.Name -inotmatch "tokens" }, { $_.Name }
+    $configScripts = Get-ChildItem -Recurse $configPath -Include *.ps*1 | Sort-Object -Property { $_.Name -inotmatch "tokens" }, { $_.Name }
     if (!$configScripts) {
-        Write-Log -Critical "There are no configuration files at '$Path'. Please ensure you have passed valid 'DeployConfigurationPath' parameter."
+        Write-Log -Critical "There are no configuration files at '$configPath'. Please ensure you have passed valid 'DeployConfigurationPath' parameter."
     }
 
     $result = [PSCustomObject]@{
@@ -69,7 +61,7 @@ function Read-ConfigurationFiles {
     foreach ($script in $configScripts) {
         $contents = Get-Content -Path $script.FullName -ReadCount 0 | Out-String
         if ($contents -imatch $invalidLineRegex) {
-            Write-Log -Critical "File '$Path' contains 'Import-DSCResource' line that ends with backtick, which is not allowed. Please change it to fit into one line. Offending line: $($matches[0])"
+            Write-Log -Critical "File '$configPath' contains 'Import-DSCResource' line that ends with backtick, which is not allowed. Please change it to fit into one line. Offending line: $($matches[0])"
         }
         $result.Files += $script.FullName
         $matchInfo = Select-String -InputObject $contents -Pattern $dscResourceRegex -AllMatches
@@ -79,10 +71,10 @@ function Read-ConfigurationFiles {
             } elseif ($match.Groups[2].Success) {
                $moduleName = $match.Groups[2].Value
             } else {
-                Write-Log -Critical "Critical regex error during reading file '$Path' - matches.Groups: $($matches.Groups)"
+                Write-Log -Critical "Critical regex error during reading file '$configPath' - matches.Groups: $($matches.Groups)"
             }
             if ($moduleName -imatch '\$') {
-                Write-Log -Critical "File '$Path' contains 'Import-DSCResource' invocation with a variable substitution which is not allowed. Please change it to a string. Offending line: $($match.Value)"
+                Write-Log -Critical "File '$configPath' contains 'Import-DSCResource' invocation with a variable substitution which is not allowed. Please change it to a string. Offending line: $($match.Value)"
             }
             $moduleName = $moduleName -replace '"', ''
             $moduleName = $moduleName -replace "'", ''

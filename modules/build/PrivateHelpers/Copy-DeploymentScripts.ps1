@@ -27,12 +27,6 @@ function Copy-DeploymentScripts {
     .SYNOPSIS
     Copies deployment scripts and deploy configuration scripts to output directories.
 
-    .PARAMETER DeployScriptsPath
-    Path to deployment scripts.
-
-    .PARAMETER DeployConfigurationPath
-    Path to configuration scripts.
-
     .PARAMETER OutputDeployScriptsPath
     Output path for deployment scripts.
 
@@ -40,21 +34,12 @@ function Copy-DeploymentScripts {
     Output path for configuration scripts.
 
     .EXAMPLE
-    Copy-DeploymentScripts -DeployScriptsPath $deployScriptsPath -DeployConfigurationPath $DeployConfigurationPath `
-                           -OutputDeployScriptsPath $OutputPathDeploymentScripts -OutputDeployConfigurationPath "$OutputPathDeploymentScripts\configuration"
+    Copy-DeploymentScripts -OutputDeployScriptsPath $OutputPathDeploymentScripts -OutputDeployConfigurationPath "$OutputPathDeploymentScripts\configuration"
 
     #>
     [CmdletBinding()]
     [OutputType([void])]
     param(
-        [Parameter(Mandatory=$true)]
-        [string] 
-        $DeployScriptsPath,
-
-        [Parameter(Mandatory=$true)]
-        [string] 
-        $DeployConfigurationPath,
-
         [Parameter(Mandatory=$true)]
         [string] 
         $OutputDeployScriptsPath,
@@ -64,13 +49,16 @@ function Copy-DeploymentScripts {
         $OutputDeployConfigurationPath
     )
 
-    Write-Log -Info "Copying deployment scripts from '$DeployScriptsPath' to '$OutputDeployScriptsPath'"
-    [void](New-Item -Path $OutputDeployScriptsPath -ItemType Directory -Force)
-    [void](Copy-Item -Path "${DeployScriptsPath}\deploy.ps1" -Destination $OutputDeployScriptsPath -Force)
-    [void](Copy-Item -Path "${DeployScriptsPath}\*.bat" -Destination $OutputDeployScriptsPath -Force)
+    $deployConfigurationPath = (Get-ConfigurationPaths).DeployConfigurationPath
+    $deployScriptsPath = (Get-ConfigurationPaths).DeployScriptsPath
 
-    Write-Log -Info "Copying deployment configuration from '$DeployConfigurationPath' to '$OutputDeployConfigurationPath'"
-    [void](Copy-Item -Path $DeployConfigurationPath -Destination $OutputDeployConfigurationPath -Recurse -Force)
+    Write-Log -Info "Copying deployment scripts from '$deployScriptsPath' to '$OutputDeployScriptsPath'"
+    [void](New-Item -Path $OutputDeployScriptsPath -ItemType Directory -Force)
+    [void](Copy-Item -Path "${deployScriptsPath}\deploy.ps1" -Destination $OutputDeployScriptsPath -Force)
+    [void](Copy-Item -Path "${deployScriptsPath}\*.bat" -Destination $OutputDeployScriptsPath -Force)
+
+    Write-Log -Info "Copying deployment configuration from '$deployConfigurationPath' to '$OutputDeployConfigurationPath'"
+    [void](Copy-Item -Path $deployConfigurationPath -Destination $OutputDeployConfigurationPath -Recurse -Force)
 
     # make sure that deployment and configuration scripts are editable inside of the package
     Get-ChildItem -Path $OutputDeployScriptsPath -Recurse -File | ForEach-Object {

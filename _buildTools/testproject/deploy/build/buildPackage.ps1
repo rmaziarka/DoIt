@@ -28,47 +28,30 @@ SOFTWARE.
 Starts the build process. 
 
 .DESCRIPTION
-It imports PSCI library and packages projects according to the commands in the 'try' block. The packages will be stored at $PackagesPath.
-
-.PARAMETER ProjectRootPath
-Base directory of the project, relative to the directory where this script resides. It is used as a base directory for other directories.
-  
-.PARAMETER PSCILibraryPath
-Base directory where PSCI library resides, relative to $ProjectRootPath.
-
-.PARAMETER PackagesPath
-Path to the directory where packages will be created, relative to $ProjectRootPath.
-
-.PARAMETER DeployConfigurationPath
-Path to the directory where configuration files reside, relative to $ProjectRootPath. By default '<script directory>\configuration'.
+This is project-specific file that contains custom build steps.
 
 .PARAMETER Version
 Version number of the current build.
 #>
 
 param(
-	[Parameter(Mandatory=$false)]
-	[string]
-	$ProjectRootPath, 
-	
-	[Parameter(Mandatory=$false)]
-	[string]
-	$PSCILibraryPath,
-
-	[Parameter(Mandatory=$false)]
-	[string]
-	$PackagesPath,
-
-    [Parameter(Mandatory=$false)]
-	[string]
-	$DeployConfigurationPath,
-
     [Parameter(Mandatory=$false)]
 	[string]
 	$Version
 )
 
-Build-DeploymentScriptsPackage -DeployConfigurationPath $DeployConfigurationPath
+
+<# Get-ConfigurationPaths returns an object with the following properties:
+   ProjectRootPath         - base directory of the project, relative to the directory where this script resides (it is used as a base directory for other directories)
+   PackagesPath            - path to directory with packages
+   PackagesExist           - $true if $PackagesPath exists and is valid PSCI package
+   DeployConfigurationPath - path to directory with configuration files
+   DeployScriptsPath       - path to directory with deploy.ps1
+#>
+
+# $configPaths = Get-ConfigurationPaths
+
+Build-DeploymentScriptsPackage 
 
 Build-DBDeployPackage -PackageName 'DBDeploy' -DBDeployPath 'database\dbdeploy'
 

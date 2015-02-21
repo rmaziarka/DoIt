@@ -32,16 +32,12 @@ function Build-DeploymentScriptsPackage {
     - PSCI library to $OutputPathPsci - by default only core functions, PSCI.deploy module and DSC modules that are used in configuration files will be copied.
       If you need additional modules or external libraries, use $ModulesToInclude or $ExternalLibsToInclude parameters.
     - deploy.ps1 from current directory to $OutputPathDeploymentScripts
-    - project configuration files (tokens / server roles) from $DeployConfigurationPath to $OutputPathDeploymentScripts\configuration.
+    - project configuration files (tokens / server roles) from $deployConfigurationPath to $OutputPathDeploymentScripts\configuration.
     These files are required for any deployment that is to be run by PSCI.
 
-    If $DeployConfigurationPath is not provided, it will be set to <current dir>\configuration.
     If $OutputPathPsci is not provided, it will be set to $PackagesPath\PSCI.
     If $OutputPathDeploymentScripts is not provided, it will be set to $PackagesPath\DeployScripts.
     
-    .PARAMETER DeployConfigurationPath
-    Path to the directory where configuration files reside, relative to $ProjectRootPath. By default '<script directory>\configuration'.
-
     .PARAMETER ReplaceDeployScriptParameters
     If true, default variable values (paths) in deploy.ps1 file will be updated to reflect the default package directory structure.
 
@@ -65,10 +61,6 @@ function Build-DeploymentScriptsPackage {
     [OutputType([void])]
     param(
         [Parameter(Mandatory=$false)]
-        [string]
-        $DeployConfigurationPath,
-
-        [Parameter(Mandatory=$false)]
         [switch]
         $ReplaceDeployScriptParameters = $true,
 
@@ -91,18 +83,7 @@ function Build-DeploymentScriptsPackage {
     )
 
     $configPaths = Get-ConfigurationPaths
-
-    $deployScriptsPath = (Get-Location).Path
-    if (!(Test-Path -Path 'deploy.ps1')) {
-        Write-Log -Critical "deploy.ps1 has not been found at '$deployScriptsPath'. Please ensure you open the directory with deploy.ps1 before invoking Build-DeploymentScriptsPackage function."
-    }
-    
-    $DeployConfigurationPath = Resolve-PathRelativeToProjectRoot `
-                            -Path $DeployConfigurationPath `
-                            -DefaultPath (Join-Path -Path $deployScriptsPath -ChildPath 'configuration') `
-                            -CheckExistence:$true `
-                            -ErrorMsg "DeployConfigurationPath '{0}' does not exist."
-    
+       
     $OutputPathPsci = Resolve-PathRelativeToProjectRoot `
                             -Path $OutputPathPsci `
                             -DefaultPath (Join-Path -Path $configPaths.PackagesPath -ChildPath "PSCI") `
@@ -114,15 +95,12 @@ function Build-DeploymentScriptsPackage {
                             -CheckExistence:$false
 
     
-    Copy-PSCI -DeployConfigurationPath $DeployConfigurationPath `
-              -OutputPathPsci $OutputPathPsci `
+    Copy-PSCI -OutputPathPsci $OutputPathPsci `
               -ModulesToInclude $ModulesToInclude `
               -ExternalLibsToInclude $ExternalLibsToInclude
 
 
-    Copy-DeploymentScripts -DeployScriptsPath $deployScriptsPath `
-                           -DeployConfigurationPath $DeployConfigurationPath `
-                           -OutputDeployScriptsPath $OutputPathDeploymentScripts `
+    Copy-DeploymentScripts -OutputDeployScriptsPath $OutputPathDeploymentScripts `
                            -OutputDeployConfigurationPath "$OutputPathDeploymentScripts\configuration"
 
 

@@ -30,9 +30,6 @@ function Copy-PSCI {
     .DESCRIPTION
     Not all DSC modules will be included - only these that are actually used in configuration files will be copied.
 
-    .PARAMETER DeployConfigurationPath
-    Path to configuration scripts.
-
     .PARAMETER OutputPathPsci
     Output path where PSCI will be copied to.
 
@@ -43,8 +40,7 @@ function Copy-PSCI {
     List of external libraries from to include (will be copied from 'externalLibs' folder).
 
     .EXAMPLE
-    Copy-PSCI -DeployConfigurationPath $DeployConfigurationPath `
-              -OutputPathPsci $OutputPathPsci `
+    Copy-PSCI -OutputPathPsci $OutputPathPsci `
               -ModulesToInclude $ModulesToInclude `
               -ExternalLibsToInclude $ExternalLibsToInclude
 
@@ -52,10 +48,6 @@ function Copy-PSCI {
     [CmdletBinding()]
     [OutputType([void])]
     param(
-        [Parameter(Mandatory=$true)]
-        [string]
-        $DeployConfigurationPath,
-
         [Parameter(Mandatory=$true)]
         [string]
         $OutputPathPsci,
@@ -72,7 +64,7 @@ function Copy-PSCI {
     $psciRootPath = Get-PSCIModulePath
     $externalLibsPath = Get-PathToExternalLib
 
-    $configInfo = Read-ConfigurationFiles -Path $DeployConfigurationPath
+    $configInfo = Read-ConfigurationFiles
     $dscModulesToInclude = Get-DscResourcesPaths -ModuleNames $configInfo.RequiredDSCModules
     $dscExclude = @('Docs', 'Examples', 'Samples')
 

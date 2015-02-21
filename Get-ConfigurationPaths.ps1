@@ -27,6 +27,14 @@ function Get-ConfigurationPaths {
     .SYNOPSIS
     Gets a global object containing configuration paths (e.g. ProjectRootPath), configured in Initialize-ConfigurationPaths.
 
+    .DESCRIPTION
+    Returns ConfigurationPaths object created in Initialize-ConfigurationPaths. It has following properties:
+    ProjectRootPath         - base directory of the project, relative to the directory where this script resides (it is used as a base directory for other directories)
+    PackagesPath            - path to directory with packages
+    PackagesExist           - $true if $PackagesPath exists and is valid PSCI package
+    DeployConfigurationPath - path to directory with configuration files
+    DeployScriptsPath       - path to directory with deploy.ps1  
+
     .EXAMPLE
     $configPaths = Get-ConfigurationPaths
     #>
@@ -35,9 +43,13 @@ function Get-ConfigurationPaths {
     [OutputType([PSCustomObject])]
     param()
 
-    if (!(Test-Path -Path variable:global:PSCIConfigurationPaths)) {
-        Write-Log -Critical "No global PSCIConfigurationPaths variable. Please ensure you have invoked cmdlet 'Initialize-ConfigurationPaths'."
+    if (!(Test-Path -Path variable:global:PSCIGlobalConfiguration)) {
+        Write-Log -Critical 'No global PSCIGlobalConfiguration variable.'
     }
 
-    return $Global:PSCIConfigurationPaths
+    $configPaths = $Global:PSCIGlobalConfiguration.ConfigurationPaths
+    if (!$configPaths) {
+        Initialize-ConfigurationPaths
+    }
+    return $Global:PSCIGlobalConfiguration.ConfigurationPaths
 }
