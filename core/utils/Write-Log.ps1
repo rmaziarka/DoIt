@@ -105,14 +105,19 @@ Function Write-Log {
 
         if ($Critical) {
             $Severity = [PSCI.LogSeverity]::CRITICAL
+            $severityChar = 'C'
         } elseif ($Error) {
             $Severity = [PSCI.LogSeverity]::ERROR
+            $severityChar = 'E'
         } elseif ($warn) {
             $Severity = [PSCI.LogSeverity]::WARN
+            $severityChar = 'W'
         } elseif ($info) {
             $Severity = [PSCI.LogSeverity]::INFO
+            $severityChar = 'I'
         } elseif ($_debug) {
             $Severity = [PSCI.LogSeverity]::DEBUG
+            $severityChar = 'D'
         } else {
             $severityNotSet = $true;
         }
@@ -137,7 +142,7 @@ Function Write-Log {
             } else {
                 $remotingFlag = ''
             }
-            $outputHeader = "$timestamp ${remotingFlag}[$currentHostname/${currentUsername}]: ($callerInfo)`t"
+            $outputHeader = "[$severityChar] $timestamp ${remotingFlag}[$currentHostname/${currentUsername}]: ($callerInfo)`t"
         }
         if ($Critical) {
             $Message += "`r`nCritical exception. Please see messages above for details.`r`n"
@@ -312,8 +317,16 @@ function Write-LogToStdOut() {
             ([PSCI.LogSeverity]::CRITICAL) { [ConsoleColor]::Red }
             ([PSCI.LogSeverity]::ERROR) { [ConsoleColor]::Red }
             ([PSCI.LogSeverity]::WARN) { [ConsoleColor]::Yellow }
-            ([PSCI.LogSeverity]::INFO) { if ($Emphasize) { [ConsoleColor]::Cyan } else { [ConsoleColor]::White } }
-            ([PSCI.LogSeverity]::DEBUG) { [ConsoleColor]::Gray }
+            ([PSCI.LogSeverity]::INFO) { 
+                if ($PSCIGlobalConfiguration.RemotingMode) {
+                    if ($Emphasize) { [ConsoleColor]::DarkCyan } else { [ConsoleColor]::Gray } 
+                } else {
+                    if ($Emphasize) { [ConsoleColor]::Cyan } else { [ConsoleColor]::White } 
+                }
+            }
+            ([PSCI.LogSeverity]::DEBUG) { 
+                if ($PSCIGlobalConfiguration.RemotingMode) { [ConsoleColor]::DarkGray } else { [ConsoleColor]::Gray }
+            }
             default { [ConsoleColor]::Red }
         }
 

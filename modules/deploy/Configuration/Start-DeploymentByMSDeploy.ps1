@@ -132,6 +132,7 @@ function Start-DeploymentByMSDeploy {
     if (!$CopyPackages) {
         $postDeploymentScript = "-skip:Directory=`".`" "
         $tempSrcPath = New-Item -Path (Join-Path -Path ([IO.Path]::GetTempPath()) -ChildPath 'MsDeployDummy') -ItemType Directory
+        Write-Log -Info "Running '$($PackageDirectory)\DeployScripts\deploy.ps1' at '$($RunOnConnectionParams.NodesAsString)' using $($RunOnConnectionParams.RemotingMode)" -Emphasize
     } else {
         $configPaths = Get-ConfigurationPaths
         $tempZip = ([IO.Path]::GetTempFileName()) + ".zip"
@@ -140,11 +141,11 @@ function Start-DeploymentByMSDeploy {
         $includePackages = Get-IncludePackageList -AllPackagesPath $configPaths.PackagesPath -RequiredPackages $RequiredPackages
         New-Zip -Path $configPaths.PackagesPath -OutputFile $tempZip -Include $includePackages -Try7Zip
         $tempSrcPath = $tempZip
+        Write-Log -Info "Sending package to '$($PackageDirectory)' at '$($RunOnConnectionParams.NodesAsString)' and running '$($PackageDirectory)\DeployScripts\deploy.ps1' using $($RunOnConnectionParams.RemotingMode)" -Emphasize
     }
 
     $postDeploymentScript += "-PostSync:runCommand='powershell -Command `"Set-Location -Path '{0}'; `$Global:PSCIRemotingMode = '{1}'; & {2}`"',dontUseCommandExe=true,waitInterval=2147483647,waitAttempts=1" -f $PackageDirectory, $RunOnConnectionParams.RemotingMode, $deployScript
 
-    Write-Log -Info "Sending `"$tempSrcPath`" to `"$($PackageDirectory)`" @ `"$($RunOnConnectionParams.NodesAsString)`" and running `"$deployScript`" using $($RunOnConnectionParams.RemotingMode)" -Emphasize
     Sync-MsDeployDirectory -SourcePath $tempSrcPath -DestinationDir $PackageDirectory -DestString $msDeployDestinationString -AddParameters @($postDeploymentScript)
                     
     [void](Remove-Item -Path $tempSrcPath -Force -ErrorAction SilentlyContinue)

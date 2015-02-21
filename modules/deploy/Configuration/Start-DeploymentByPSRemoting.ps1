@@ -113,7 +113,8 @@ function Start-DeploymentByPSRemoting {
         $TokensOverride
     )
 
-    # TODO: this need review
+    # TODO: do we really want to do this automatically?
+    <#
     if ($RunOnConnectionParams.Authentication -ieq "Credssp") {
         if ((Get-Item WSMan:\LocalHost\Client\Auth\CredSSP).Value -ne "true") {
             Enable-WSManCredSSP -Role Client -DelegateComputer * -Force
@@ -122,6 +123,7 @@ function Start-DeploymentByPSRemoting {
             Enable-FreshCredNtlmOnlyDelegation
         }
     }
+    #>
 
     if ($CopyPackages) {
         $configPaths = Get-ConfigurationPaths

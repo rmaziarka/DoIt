@@ -48,8 +48,6 @@ function Deploy-SSRSModule {
         $PackagePath
     )
 
-    # TODO: add check to ensure that we're on correct node ($node) - as this will fail if 'RunOn' is not specified
-
     $PackagePath = Resolve-PathRelativeToProjectRoot `
                 -Path $PackagePath `
                 -DefaultPath (Join-Path -Path $configPaths.PackagesPath -ChildPath $PackageName) `

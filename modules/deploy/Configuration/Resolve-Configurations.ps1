@@ -97,7 +97,7 @@ function Resolve-Configurations {
         $Configurations = $ConfigurationsFilter
     } else {
         $Configurations = Resolve-ScriptedToken -ScriptedToken $Configurations -ResolvedTokens $ResolvedTokens -Environment $Environment
-        # remove configurations not matching ServerConnectionsFilter
+        # remove configurations not matching ConfigurationsFilter
         if ($ConfigurationsFilter) {
             $Configurations = $Configurations | Where-Object { $ConfigurationsFilter -icontains $_ }
         }

@@ -28,7 +28,7 @@ function Deploy-MsDeployPackage {
     Deploys a msdeploy package.
 
     .DESCRIPTION
-    Deploys a package created with cmdlet Build-WebPackage or (TODO) Build-DirPackage.
+    Deploys a package created with cmdlet Build-WebPackage or Build-MsBuildPackage.
     If $TokensForConfigFiles is provided, it resolves all token placeholders '${Name}' in all .config files inside the msdeploy package. 
     Then it runs msdeploy.exe for the package $PackagePath\$PackageName.zip.
 

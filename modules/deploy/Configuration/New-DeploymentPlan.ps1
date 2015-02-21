@@ -134,8 +134,8 @@ function New-DeploymentPlan {
     }
 
     foreach ($env in $Environment) {
-        Write-Log -Info ("Processing environment '{0}', server roles filter '{1}', server connections filter '{2}', configurations filter '{3}', deploy type '{4}'" -f `
-            $env, ($ServerRolesFilter -join ','), ($ServerConnectionsFilter -join ','), ($ConfigurationsFilter -join ','), $DeployType) -Emphasize
+        Write-Log -Info ("Processing environment '{0}', server roles filter '{1}', configurations filter '{2}', nodes filter '{3}', deploy type '{4}'" -f `
+            $env, ($ServerRolesFilter -join ','), ($ConfigurationsFilter -join ','), ($NodesFilter -join ','), $DeployType) -Emphasize
 
         $resolvedTokens = Resolve-Tokens -AllEnvironments $AllEnvironments -Environment $env -TokensOverride $TokensOverride
         
