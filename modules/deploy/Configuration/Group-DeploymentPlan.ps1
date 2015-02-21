@@ -51,10 +51,6 @@ function Group-DeploymentPlan {
 
         [Parameter(Mandatory=$false)]
         [switch]
-        $GroupByConnectionParams,
-
-        [Parameter(Mandatory=$false)]
-        [switch]
         $GroupByRunOnConnectionParamsAndPackage,
 
         [Parameter(Mandatory=$false)]
@@ -70,10 +66,10 @@ function Group-DeploymentPlan {
         $foundEntry = $null
         foreach ($addedEntryList in $result) {
             foreach ($addedEntry in $addedEntryList) {
-                if ((!$GroupByConnectionParams -or (Compare-ConnectionParameters -ConnectionParams1 $addedEntry.ConnectionParams -ConnectionParams2 $entry.ConnectionParams)) -and `
-                    (!$GroupByRunOnConnectionParamsAndPackage -or ((Compare-ConnectionParameters -ConnectionParams1 $addedEntry.RunOnConnectionParams -ConnectionParams2 $entry.RunOnConnectionParams) -and `
-                        $addedEntry.PackageDirectory -ieq $entry.PackageDirectory)) -and `
-                    (!$PreserveOrder -or $addedEntry.EntryNo -eq $currentEntryNo)) {
+                $firstConfigInfo = $addedEntry.GroupedConfigurationInfo[0]
+                if ((!$GroupByRunOnConnectionParamsAndPackage -or ((Compare-ConnectionParameters -ConnectionParams1 $firstConfigInfo.RunOnConnectionParams -ConnectionParams2 $entry.RunOnConnectionParams) -and `
+                        $firstConfigInfo.PackageDirectory -ieq $entry.PackageDirectory)) -and `
+                    (!$PreserveOrder -or $addedEntry.LastEntryNo -eq $currentEntryNo)) {
                         $foundEntry = $addedEntry
                         break
                 }
@@ -99,17 +95,18 @@ function Group-DeploymentPlan {
                 if ($addedEntry.RequiredPackages -inotcontains $requiredPackage) {
                     $addedEntry.RequiredPackages += $requiredPackage
                 }
-            }            
+            }
+            $foundEntry.LastEntryNo = $entry.EntryNo         
         } else {
             $newEntry = @{
-                RunOnConnectionParams = $entry.RunOnConnectionParams
                 RequiredPackages = @($entry.RequiredPackages)
-                TokensOverride = $TokensOverride
+                TokensOverride = $entry.TokensOverride
                 GroupedConfigurationInfo = @($configInfo)
+                LastEntryNo = $entry.EntryNo
             }
             [void]($result.Add($newEntry))
         }
         $currentEntryNo = $entry.EntryNo
     }
-    return $result
+    return ,($result)
 }
