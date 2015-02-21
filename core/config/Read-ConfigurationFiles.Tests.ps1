@@ -40,26 +40,14 @@ Describe -Tag "PSCI.unit" "Read-ConfigurationFiles" {
        $testFileFunc = Join-Path -Path $testConfigDir -ChildPath 'testFileFunc.ps1'
        $testFileDSC = Join-Path -Path $testConfigDir -ChildPath 'testFileDSC.ps1'
 
-        Context "when configuration directory does not exist" {
-            It "should throw exception" {
-                $fail = $false
-                try {
-                    Remove-Item -Path $testConfigDir -Force -Recurse -ErrorAction SilentlyContinue
-                    Read-ConfigurationFiles -Path 'DoesNotExist'
-                } catch {
-                    $fail = $true
-                }
-                $fail | Should Be $true
-            }
-        }
-
         Context "when configuration directory does not have any files" {
             It "should throw exception" {
                 $fail = $false
                 try {
                     [void](New-Item -Path $testConfigDir -ItemType Directory -Force)
+                    $Global:PSCIGlobalConfiguration = @{ ConfigurationPaths = @{ DeployConfigurationPath = $testConfigDir } }
                     Remove-Item -Path "$testConfigDir\*" 
-                    Read-ConfigurationFiles -Path $testConfigDir
+                    Read-ConfigurationFiles
                 } catch {
                     $fail = $true
                 } finally {
@@ -68,13 +56,14 @@ Describe -Tag "PSCI.unit" "Read-ConfigurationFiles" {
                 $fail | Should Be $true
             }
         }
-
+        
        Context "when configuration directory has some files but no DSC" {
             It "should succeed and return files" {
                 try {
                     [void](New-Item -Path $testConfigDir -ItemType Directory -Force)
                     [void](New-Item -Path $testFileFunc -ItemType File -Force)
-                    $result = Read-ConfigurationFiles -Path $testConfigDir
+                    $Global:PSCIGlobalConfiguration = @{ ConfigurationPaths = @{ DeployConfigurationPath = $testConfigDir } }
+                    $result = Read-ConfigurationFiles
                 
                     $result | Should Not Be $null
                     $result.Files | Should Be (Resolve-Path -Path $testFileFunc).Path
@@ -104,7 +93,8 @@ Describe -Tag "PSCI.unit" "Read-ConfigurationFiles" {
     }
 
 '@)
-                    $result = Read-ConfigurationFiles -Path $testConfigDir
+                    $Global:PSCIGlobalConfiguration = @{ ConfigurationPaths = @{ DeployConfigurationPath = $testConfigDir } }
+                    $result = Read-ConfigurationFiles
                 
                     $result | Should Not Be $null
                     $result.Files | Should Be (Resolve-Path -Path $testFileDSC).Path
@@ -132,7 +122,8 @@ Describe -Tag "PSCI.unit" "Read-ConfigurationFiles" {
 '@)
                     $fail = $false
                     try { 
-                        Read-ConfigurationFiles -Path $testConfigDir
+                        $Global:PSCIGlobalConfiguration = @{ ConfigurationPaths = @{ DeployConfigurationPath = $testConfigDir } }
+                        Read-ConfigurationFiles
                     } catch {
                         $fail = $true
                     }    
@@ -157,7 +148,8 @@ Describe -Tag "PSCI.unit" "Read-ConfigurationFiles" {
 '@)
                     $fail = $false
                     try { 
-                        Read-ConfigurationFiles -Path $testConfigDir
+                        $Global:PSCIGlobalConfiguration = @{ ConfigurationPaths = @{ DeployConfigurationPath = $testConfigDir } }
+                        Read-ConfigurationFiles
                     } catch {
                         $fail = $true
                     }    

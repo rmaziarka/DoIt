@@ -23,8 +23,9 @@ SOFTWARE.
 #>
 
 Import-Module -Name "$PSScriptRoot\..\..\..\PSCI.psm1" -Force
-. "$PSScriptRoot\..\PSCI.includeForTests.ps1"
+
 <# TODO: find a place for this test in Teamcity
+
 Describe -Tag "PSCI.integration" "Deploy-DBDeploySqlScriptsPackage" {
     InModuleScope PSCI.deploy {
         Mock -ModuleName PSCI.core Write-Log { 
@@ -34,8 +35,8 @@ Describe -Tag "PSCI.integration" "Deploy-DBDeploySqlScriptsPackage" {
             }
         }
         Mock New-Item {}
-        
-    
+        Mock Get-ConfigurationPaths { return @{ PackagesPath = '.' }}
+
         $connectionString = "data source=localhost;initial catalog=XYZ;integrated security=True"
         $packageName = "DatabseUpdate"
         $scriptPath = Join-Path -Path (Get-PSCIModulePath) -ChildPath "_buildTools\testproject\database\changes\"

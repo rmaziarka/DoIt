@@ -23,7 +23,6 @@ SOFTWARE.
 #>
 
 Import-Module -Name "$PSScriptRoot\..\..\..\PSCI.psm1" -Force
-. "$PSScriptRoot\..\PSCI.includeForTests.ps1"
 
 Describe -Tag "PSCI.integration" "Deploy-SSRSReportsByWebService " {
     InModuleScope PSCI.deploy {
@@ -36,6 +35,7 @@ Describe -Tag "PSCI.integration" "Deploy-SSRSReportsByWebService " {
 
         Context "when deploying SSRS project file" { 
             Mock Test-Path { return $true }
+            Mock Get-ConfigurationPaths { return @{ PackagesPath = '.' }}
             Mock New-SSRSCatalogItem {}
             Mock New-SSRSFolder {}
             Mock Set-SSRSItemDataSources {}

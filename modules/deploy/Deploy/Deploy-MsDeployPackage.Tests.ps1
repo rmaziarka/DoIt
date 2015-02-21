@@ -36,6 +36,7 @@ Describe -Tag "PSCI.unit" "Deploy-MsDeployPackage" {
         Mock Remove-Item {}
         Mock Start-MsDeploy {}
         Mock Update-TokensInZipFile {}
+        Mock Get-ConfigurationPaths { return @{ PackagesPath = '.' }}
         Mock Resolve-PathRelativeToProjectRoot { return 'WebApp.zip' }
 
         $dest = New-MsDeployDestinationString -Url 'https://localhost:8172/msdeploy.axd' -UserName 'test' -Password 'test' -AuthType 'Basic'
