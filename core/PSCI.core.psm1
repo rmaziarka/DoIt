@@ -79,4 +79,7 @@ Export-ModuleMember -Function `
     Test-IsSubdirectory, `
     Read-ConfigurationFiles, `
     Get-DscResourcesPaths, `
-    Copy-Directory
+    Copy-Directory, `
+    Get-ConfigurationPaths, `
+    Initialize-ConfigurationPaths, `
+    Resolve-PathRelativeToProjectRoot

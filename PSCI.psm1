@@ -39,13 +39,10 @@ Set-StrictMode -Version Latest
 $curDir = Split-Path -Parent $MyInvocation.MyCommand.Definition
 . "$curDir\PSCI.classes.ps1"
 . "$curDir\PSCI.globalObjects.ps1"
-. "$curDir\Initialize-ConfigurationPaths.ps1"
-. "$curDir\Get-ConfigurationPaths.ps1"
-. "$curDir\Resolve-PathRelativeToProjectRoot.ps1"
 
 Import-Module -Name "$curDir\core\PSCI.core.psm1" -Force -Global
 
-$buildNumber = Get-PSCIBuildNumber
+$buildNumber = Get-PSCIBuildNumber -Path $curDir
 
 if (Test-Path -Path "$curDir\modules") {
 	$modulesToImport = Get-ChildItem -Path "$curDir\modules\*\*.psm1"
@@ -63,7 +60,3 @@ Export-ModuleMember -Variable `
     PSCIGlobalConfiguration, `
     LogSeverity
 
-Export-ModuleMember -Function `
-    Initialize-ConfigurationPaths, `
-    Get-ConfigurationPaths, `
-    Resolve-PathRelativeToProjectRoot

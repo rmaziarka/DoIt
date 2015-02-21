@@ -76,7 +76,7 @@ function Copy-PSCI {
 
     Write-Log -Info "Copying PSCI library from '$psciRootPath' to '$OutputPathPsci'"
     [void](New-Item -Path $OutputPathPsci -ItemType Directory -Force)
-    Copy-Item -Path "${psciRootPath}\*" -Destination $OutputPathPsci -Recurse -Force -Include 'bat','build.*','Get-ConfigurationPaths.ps1','Initialize-ConfigurationPaths.ps1','Resolve-Path*.ps1','PSCI.*' -Exclude '*.Tests.ps1'
+    Copy-Item -Path "${psciRootPath}\*" -Destination $OutputPathPsci -Recurse -Force -Include 'bat','build.*','PSCI.*' -Exclude '*.Tests.ps1'
 
     try { 
         Push-Location -Path $psciRootPath

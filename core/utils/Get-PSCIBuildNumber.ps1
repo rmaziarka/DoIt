@@ -46,8 +46,7 @@ function Get-PSCIBuildNumber {
     )
 
     if (!$Path) {
-        #TODO: should use Get-PSCIModulePAth, but can be not initialized yet + support for modules
-        $Path = Resolve-Path -Path (Join-Path -Path $PSScriptRoot -ChildPath "..")
+        $Path = Get-PSCIModulePath
     }
     $buildFile = Get-ChildItem -Path $Path -Filter "build.*" -File | Select-Object -ExpandProperty Name
     if (!$buildFile) {
