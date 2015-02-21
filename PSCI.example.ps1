@@ -23,13 +23,12 @@ SOFTWARE.
 #>
 
 # This file can be used for testing PSCI usage
-$global:ErrorActionPreference = "Stop"
+$global:ErrorActionPreference = 'Stop'
 
-$currentDir = Split-Path -Parent -Path $MyInvocation.MyCommand.Definition
-Import-Module -Name (Join-Path -Path $currentDir -ChildPath "PSCI.psm1") -Force
+Import-Module -Name (Join-Path -Path $PSScriptRoot -ChildPath "PSCI.psm1") -Force
 
 # If you uncomment this line, all log messages will be saved to C:\test.txt. See more PSCIGlobalConfiguration properties in PSCI.configuration.default.ps1.
-$PSCIGlobalConfiguration.LogFile = 'C:\test.txt'
+# $PSCIGlobalConfiguration.LogFile = "$PSScriptRoot\PSCI.example.txt"
 
 try {
 	# Put your code here
