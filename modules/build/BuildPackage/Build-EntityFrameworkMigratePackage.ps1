@@ -37,7 +37,7 @@ function Build-EntityFrameworkMigratePackage {
     Name of the package. It determines OutputPath if it's not provided.
 
     .PARAMETER MigrationsDir
-    Path to the directory containing the compiled migrations. They must already exist if $ProjectFile is not specified.
+    Path to the directory containing the compiled migrations. They must already exist if $ProjectPat is not specified.
 
     .PARAMETER EntityFrameworkDir
     Path to the directory containing Entity Framework dlls.
@@ -152,6 +152,10 @@ function Build-EntityFrameworkMigratePackage {
         Invoke-MsBuild -ProjectPath $ProjectPath -MsBuildOptions $MsBuildOptions
     }
 
+    if (!(Test-Path -Path "$migrationsDir\*.dll")) {
+        Write-Log -Critical "There are no .dll files at '$migrationsDir' - please ensure `$migrationsDir points to the directory with compiled migrations."
+    }
+
     Write-Log -Info "Packaging '$PackageName'." -Emphasize
     [void](New-Item -Path $OutputPath -ItemType Directory -Force)
     [void](Copy-Item -Path "$migrationsDir\*.dll" -Destination $OutputPath)
@@ -161,7 +165,7 @@ function Build-EntityFrameworkMigratePackage {
     }
 
     $outputFile = Join-Path -Path $OutputPath -ChildPath "$packageName.zip"
-    Compress-With7Zip -PathsToCompress "*" -OutputFile $outputFile -WorkingDirectory $OutputPath -ArchiveFormat zip
+    New-Zip -Path $OutputPath -OutputFile $outputFile -Try7Zip
     Remove-Item -Path "$OutputPath\*" -Exclude "*.zip" -Force
 
 }

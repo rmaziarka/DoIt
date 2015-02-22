@@ -157,7 +157,7 @@ function New-Zip {
         $fileStream = New-Object -TypeName System.IO.FileStream -ArgumentList $OutputFile, $fileMode
         $zipArchiveMode = [System.IO.Compression.ZipArchiveMode]::Create
         $zipArchive = New-Object -TypeName System.IO.Compression.ZipArchive -ArgumentList $fileStream, $zipArchiveMode
-    
+        $outputFileResolved = (Resolve-Path -Path $OutputFile).Path
         Write-Log -Info "Creating archive '$OutputFile'"
         $i = 0
         foreach ($p in $Path) { 
@@ -172,6 +172,9 @@ function New-Zip {
             }
             $items = Get-FlatFileList -Path $p -Include $Include -IncludeRecurse:$IncludeRecurse -Exclude $Exclude -ExcludeRecurse:$ExcludeRecurse
             foreach ($item in $items) {
+                if ($item.FullName -ieq $outputFileResolved) {
+                    continue
+                }
                 if ($destBasePath) { 
                     $destPath = Join-Path -Path $destBasePath -ChildPath $item.RelativePath
                 } else {

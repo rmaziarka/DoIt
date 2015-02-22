@@ -67,7 +67,7 @@ function Build-MsBuildPackage {
         [string]
         $PackageName,
 
-        [Parameter(Mandatory=$true)]
+        [Parameter(Mandatory=$false)]
         [string]
         $ProjectPath,
 
@@ -95,6 +95,7 @@ function Build-MsBuildPackage {
     $params = $PSBoundParameters
 
     $configPaths = Get-ConfigurationPaths
+
     $OutputPath = Resolve-PathRelativeToProjectRoot `
                             -Path $OutputPath `
                             -DefaultPath (Join-Path -Path $configPaths.PackagesPath -ChildPath $PackageName) `

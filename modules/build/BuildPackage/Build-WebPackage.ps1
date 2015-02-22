@@ -69,7 +69,7 @@ function Build-WebPackage {
         [string]
         $PackageName,
 
-        [Parameter(Mandatory=$true)]
+        [Parameter(Mandatory=$false)]
         [string]
         $ProjectPath,
 

@@ -71,7 +71,7 @@ function Build-MsBuild {
         [string]
         $PackageName,
 
-        [Parameter(Mandatory=$true)]
+        [Parameter(Mandatory=$false)]
         [string]
         $ProjectPath,
 
@@ -100,8 +100,11 @@ function Build-MsBuild {
         $AssemblyInfoFilePaths
     )
 
+    $projectRootPath = (Get-ConfigurationPaths).ProjectRootPath
+
     $projectPath = Resolve-PathRelativeToProjectRoot `
                         -Path $projectPath `
+                        -DefaultPath (Join-Path -Path $projectRootPath -ChildPath "$packageName\${packageName}.sln") `
                         -ErrorMsg "Project file '$projectPath' does not exist (package '$packageName'). Tried following absolute path: '{0}'."
 
     if($Version) {

@@ -49,9 +49,20 @@ function Start-NugetRestore {
     }
 
     $projectDir = Split-Path -Parent $ProjectPath
-    $nugetPath = Join-Path -Path $projectDir -ChildPath ".nuget\nuget.exe"
-    if (!(Test-Path -Path $nugetPath)) {
-        Write-Log -Critical "Nuget.exe does not exist at '$nugetPath'. Please ensure it's present there or remove line 'Build.RestoreNuGetPackages' from topology config."
+
+    $currentPath = $projectDir
+    $nugetPath = ''
+    while (!$nugetPath -and $currentPath) {
+        $path = Join-Path -Path $currentPath -ChildPath '.nuget\nuget.exe'
+        if (Test-Path -Path $path) {
+            $nugetPath = $path
+        } else {
+            $currentPath = Split-Path -Path $currentPath -Parent
+        }
+    }
+
+    if (!$nugetPath) {
+        Write-Log -Critical "Nuget.exe does not exist at '$currentPath\.nuget\nuget.exe' or any parent directory. Please ensure it's present there or remove line 'Build.RestoreNuGetPackages' from topology config."
     }
 
     $cmd = Add-QuotesToPaths -Paths $nugetPath

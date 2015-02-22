@@ -8,3 +8,6 @@ Test.xml
 ScriptCop.txt
 _DscOutput
 tokensSensitive.ps1
+examples/**/obj
+examples/**/bin
+examples/**/packages

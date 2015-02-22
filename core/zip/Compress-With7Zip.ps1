@@ -109,7 +109,7 @@ function Compress-With7Zip {
     $cmdLine = New-Object System.Text.StringBuilder
 
     $7zipPath = Add-QuotesToPaths (Get-PathTo7Zip -FailIfNotFound)
-    $cmdLine.Append($7zipPath)
+    [void]($cmdLine.Append($7zipPath))
 
     if (([uri]$WorkingDirectory).IsUnc) {
         Write-Log -Critical "Working directory '$WorkingDirectory' is an unc path. 7-zip does not support that."
@@ -128,9 +128,9 @@ function Compress-With7Zip {
         "good" { "7" }
         "ultra" { "9" }
     }
-    $cmdLine.Append(" a $OutputFile ")
-    $cmdLine.Append(($PathsToCompress -join " "))
-    $cmdLine.Append(" -r -t$ArchiveFormat -mx$compressionSwitch")
+    [void]($cmdLine.Append(" a $OutputFile "))
+    [void]($cmdLine.Append(($PathsToCompress -join " ")))
+    [void]($cmdLine.Append(" -r -t$ArchiveFormat -mx$compressionSwitch"))
     if ($Password) {
         $cmdLine.Append(" -p$($Password.GetNetworkCredential().Password)")
     }
@@ -138,9 +138,9 @@ function Compress-With7Zip {
     if ($Include) {
         foreach ($wildcard in $Include) {
             if ($IncludeRecurse) {
-               $cmdLine.Append(" -ir!$wildcard")
+               [void]($cmdLine.Append(" -ir!$wildcard"))
             } else {
-               $cmdLine.Append(" -i!$wildcard")
+               [void]($cmdLine.Append(" -i!$wildcard"))
             }
         }
     }
@@ -148,9 +148,9 @@ function Compress-With7Zip {
     if ($Exclude) {
         foreach ($wildcard in $Exclude) {
             if ($ExcludeRecurse) {
-               $cmdLine.Append(" -xr!$wildcard")
+              [void]($cmdLine.Append(" -xr!$wildcard"))
             } else {
-               $cmdLine.Append(" -x!$wildcard")
+               [void]($cmdLine.Append(" -x!$wildcard"))
             }
         }
     }
