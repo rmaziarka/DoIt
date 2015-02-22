@@ -142,6 +142,10 @@ function New-DeploymentPlanEntry {
 		} else {
 			$dscNode = $Node
 		}
+
+        if (!$runOnNode -and $RemotingMode -ne 'PSRemoting') {
+            Write-Log -Critical "Cannot deploy DSC configurations from localhost when RemotingMode is not PSRemoting. Please either change it to PSRemoting or add '-RunRemotely' switch to the ServerRole or ConfigurationSettings (Environment '$Environment' / ServerRole '$($ServerRole.Name)' / Configuration '$($Configuration.Name)')."
+        }
     
         $mofDir = Invoke-ConfigurationOrFunction -ConfigurationName $Configuration.Name -OutputPath $DscOutputPath -Node $dscNode -Environment $Environment -ResolvedTokens $ResolvedTokens -ConnectionParams $connectionParamsObj
         if (!(Get-ChildItem -Path $mofDir -Filter "*.mof")) {

@@ -1,0 +1,17 @@
+﻿@{
+    ViewBag.Title = "Home Page";
+}
+
+<div class="jumbotron">
+    <h1>Test Application ver. @ViewBag.Version</h1>
+    <h2>Order from database: @if (ViewBag.Order != null) 
+                                  {
+                                  <span>id: @ViewBag.Order.OrderID, name: @ViewBag.Order.OrderName</span>
+                                  }
+                                  else
+                                  {
+                                  <span>null</span>
+                                  }
+    </h2>
+</div>
+
