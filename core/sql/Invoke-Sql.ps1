@@ -57,6 +57,9 @@ function Invoke-Sql {
     .PARAMETER Credential
     Credential to impersonate in Integrated Security mode.
 
+    .PARAMETER IgnoreInitialCatalog
+    If $true, InitialCatalog will be removed from ConnectionString (if present).
+
     .OUTPUTS
     String if Mode = sqlcmd.
     System.Data.DataSet if Mode = .net.
@@ -103,7 +106,11 @@ function Invoke-Sql {
 
         [Parameter(Mandatory=$false)]
         [PSCredential] 
-        $Credential
+        $Credential,
+
+        [Parameter(Mandatory=$false)]
+        [switch] 
+        $IgnoreInitialCatalog
     ) 
 
     if (!$Query -and !$InputFile) {
@@ -133,6 +140,10 @@ function Invoke-Sql {
     }
       
     $csb = New-Object -TypeName System.Data.SqlClient.SqlConnectionStringBuilder -ArgumentList $ConnectionString
+
+    if ($IgnoreInitialCatalog -and $csb.InitialCatalog) {
+        $csb.set_InitialCatalog('')
+    }
 
     $params = @{
         ConnectionStringBuilder = $csb

@@ -79,8 +79,5 @@ function Update-SqlLogin {
     $parameters += @{ "Password" = $Password }
     $parameters += @{ "WindowsAuthentication" = $WinAuth }
 
-    $result = Invoke-Sql -ConnectionString $connectionString -InputFile $sqlScript -SqlCmdVariables $parameters
-    if ($result) { 
-        Write-Log -Info $result
-    }
+    [void](Invoke-Sql -ConnectionString $connectionString -InputFile $sqlScript -SqlCmdVariables $parameters -IgnoreInitialCatalog)
 }

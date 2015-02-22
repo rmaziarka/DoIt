@@ -1,7 +1,5 @@
-/_buildTools/testproject/bin
-/_buildTools/testproject/deploy/build.log.txt
-/_buildTools/testproject/database/dbdeploy/DbDeploy2.log*
-/_buildTools/testproject/database/changes/ScriptList.txt
+bin/
+build.log.txt
 deploy.log.txt
 deploy_*.txt
 Test.xml
@@ -9,5 +7,4 @@ ScriptCop.txt
 _DscOutput
 tokensSensitive.ps1
 examples/**/obj
-examples/**/bin
 examples/**/packages

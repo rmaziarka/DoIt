@@ -30,8 +30,8 @@ function Publish-EntityFrameworkMigrate {
     .PARAMETER PackagePath
     Local path pointing to the Entity Framework migrate package.
 
-    .PARAMETER MigrateClass
-    Migrate class to pass to migrate.exe
+    .PARAMETER MigrateAssembly
+    Name of the migrations assembly (passed to migrate.exe).
 
     .PARAMETER DbConnectionString
     Connection string to database.
@@ -52,7 +52,7 @@ function Publish-EntityFrameworkMigrate {
         
         [Parameter(Mandatory=$true)]
         [string] 
-        $MigrateClass,
+        $MigrateAssembly,
 
         [Parameter(Mandatory=$true)]
         [string] 
@@ -68,7 +68,7 @@ function Publish-EntityFrameworkMigrate {
         Write-Log -Critical "No migrate.exe in '$PackagePath')"
     }
     Write-Log -Info "Running migrate.exe for package: '$PackagePath'"
-    $migrateCommand = ".\migrate.exe $MigrateClass /connectionString=`"$DbConnectionString`" /connectionProviderName=System.Data.SqlClient"
+    $migrateCommand = ".\migrate.exe $MigrateAssembly /connectionString=`"$DbConnectionString`" /connectionProviderName=System.Data.SqlClient"
     if ($StartupConfigurationFile) {
         $migrateCommand += " /startupConfigurationFile=`"$StartupConfigurationFile`""
     }

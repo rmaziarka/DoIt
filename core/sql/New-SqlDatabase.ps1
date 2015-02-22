@@ -69,6 +69,5 @@ function New-SqlDatabase {
 
     $sqlScript = Join-Path -Path $PSScriptRoot -ChildPath "New-SqlDatabase.sql"
     $parameters = @{ "DatabaseName" = $databaseName }
-    [void](Invoke-Sql -ConnectionString $ConnectionString -InputFile $sqlScript -SqlCmdVariables $parameters -Credential $Credential -QueryTimeoutInSeconds $QueryTimeoutInSeconds)
+    [void](Invoke-Sql -ConnectionString $ConnectionString -InputFile $sqlScript -SqlCmdVariables $parameters -Credential $Credential -QueryTimeoutInSeconds $QueryTimeoutInSeconds -IgnoreInitialCatalog)
 }
-

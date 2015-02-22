@@ -15,9 +15,8 @@ ELSE
 BEGIN
     --Orphaned users
     --http://www.mssqltips.com/sqlservertip/1590/understanding-and-dealing-with-orphaned-users-in-a-sql-server-database/
-    -- DEPRECATED EXEC sp_change_users_login 'Auto_Fix', '$(Username)'
     PRINT 'REMAPPING USER $(Username) TO LOGIN $(Username)'
-    ALTER USER $(Username) WITH LOGIN = $(Username);
+    ALTER USER [$(Username)] WITH LOGIN = [$(Username)]
 END
 
 

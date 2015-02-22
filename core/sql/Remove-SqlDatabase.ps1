@@ -69,9 +69,7 @@ function Remove-SqlDatabase {
 
     $sqlScript = Join-Path -Path $PSScriptRoot -ChildPath "Remove-SqlDatabase.sql"
     $parameters = @{ "DatabaseName" = $databaseName }
-    $result = Invoke-Sql -ConnectionString $ConnectionString -InputFile $sqlScript -SqlCmdVariables $parameters -Credential $Credential -QueryTimeoutInSeconds $QueryTimeoutInSeconds  
-    if ($result) {
-        Write-Log -Info $result
-    }
+    [void](Invoke-Sql -ConnectionString $ConnectionString -InputFile $sqlScript -SqlCmdVariables $parameters -Credential $Credential -QueryTimeoutInSeconds $QueryTimeoutInSeconds -IgnoreInitialCatalog)
+    
 }
 

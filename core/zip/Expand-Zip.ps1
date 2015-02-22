@@ -53,6 +53,7 @@ function Expand-Zip {
     $shell = New-Object -ComObject Shell.Application
     $zip = $shell.NameSpace($ArchiveFile)
     foreach ($item in $zip.items()) {
-        $shell.Namespace($OutputDirectory).CopyHere($item)
+        # 0x14 = overwrite and don't show dialogs
+        $shell.Namespace($OutputDirectory).CopyHere($item, 0x14)
     }
 }

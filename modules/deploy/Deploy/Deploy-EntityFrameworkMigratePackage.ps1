@@ -34,8 +34,8 @@ function Deploy-EntityFrameworkMigratePackage {
     .PARAMETER PackageName
     Name of the package. It determines PackagePath if it's not provided.
 
-    .PARAMETER MigrateClass
-    Name of the migrate class (passed to migrate.exe).
+    .PARAMETER MigrateAssembly
+    Name of the migrations assembly (passed to migrate.exe).
 
     .PARAMETER ConnectionString
     Connection string that will be used to connect to the destination database.
@@ -62,7 +62,7 @@ function Deploy-EntityFrameworkMigratePackage {
 
         [Parameter(Mandatory=$true)]
         [string] 
-        $MigrateClass,
+        $MigrateAssembly,
 
         [Parameter(Mandatory=$true)]
         [string] 
@@ -90,5 +90,5 @@ function Deploy-EntityFrameworkMigratePackage {
     }
 
     Write-Log -Info "Deploying Entity Framework migrations from package '$PackageName' using connectionString '$ConnectionString'" -Emphasize
-    Publish-EntityFrameworkMigrate -PackagePath $PackagePath -MigrateClass $MigrateClass -DbConnectionString $ConnectionString -StartupConfigurationFile $StartupConfigurationFile
+    Publish-EntityFrameworkMigrate -PackagePath $PackagePath -MigrateAssembly $MigrateAssembly -DbConnectionString $ConnectionString -StartupConfigurationFile $StartupConfigurationFile
 }

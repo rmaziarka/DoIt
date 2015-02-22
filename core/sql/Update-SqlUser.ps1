@@ -68,8 +68,5 @@ function Update-SqlUser {
     $parameters =  @{ "Username" = $Username }
     $parameters += @{ "DatabaseName" = $DatabaseName }
     $parameters += @{ "Role" = $DbRole }
-    $result = Invoke-Sql -ConnectionString $ConnectionString -InputFile $sqlScript -SqlCmdVariables $parameters
-    if ($result) { 
-        Write-Log -Info $result
-    }
+    [void](Invoke-Sql -ConnectionString $ConnectionString -InputFile $sqlScript -SqlCmdVariables $parameters)
 }
