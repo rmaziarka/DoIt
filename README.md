@@ -1,4 +1,4 @@
-PSCI
+PSCI - Powershell Continuous Integration (and Configuration as Code)
 =======
 PSCI is a build and deployment automation library, that provides a simple Powershell DSC-like language that allows to express configuration as code. It provides following features:
 - simple DSL to describe Environments, Server Roles, Server Connections, Configurations and Tokens (per-environment parameters), 
