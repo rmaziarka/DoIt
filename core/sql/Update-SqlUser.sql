@@ -37,7 +37,7 @@ BEGIN
     BEGIN
         SET @role = @roles
         SET @roles = NULL
-        PRINT 'ADDING' + @role + ' ROLE FOR $(Username)'
+        PRINT 'ADDING ROLE ' + @role + ' FOR $(Username)'
         EXEC sp_addrolemember @role, N'$(Username)'
         
     END
