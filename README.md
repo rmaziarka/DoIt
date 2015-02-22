@@ -95,12 +95,12 @@ Configuration WebServerProvision {
       # create site on IIS
       xWebsite MyWebsite { 
         Name   = $Tokens.WebConfig.WebsiteName
-			  ApplicationPool = $Tokens.WebConfig.AppPoolName 
-        Ensure = 'Present' 
+	ApplicationPool = $Tokens.WebConfig.AppPoolName 
         BindingInfo = MSFT_xWebBindingInformation { 
           Port = $Tokens.WebServerConfig.WebsitePort
         } 
         PhysicalPath = $Tokens.WebConfig.WebsitePhysicalPath
+        Ensure = 'Present' 
         State = 'Started' 
         DependsOn = @('[File]MyWebsiteDir')
       } 
