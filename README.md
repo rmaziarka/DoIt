@@ -12,7 +12,7 @@ PSCI is a build and deployment automation library, that provides a simple Powers
 
 Example - web application with database
 -------------
-topology.ps1 - defining what to deploy (Configurations), where and how (ServerConnections)
+topology.ps1 - defining what to deploy (Configurations), where and how (ServerConnections):
 
 ```powershell
 
@@ -25,8 +25,8 @@ Environment Default {
 }
 
 Environment Test {
-  ServerConnection WebServer -Nodes TestWeb.local.domain
-  ServerConnection DatabaseServer -Nodes TestDb.local.domain
+  ServerConnection WebServer -Nodes TestWeb.local.domain -RemotingMode PSRemoting
+  ServerConnection DatabaseServer -Nodes TestDb.local.domain -RemotingMode PSRemoting
 }
 
 Environment UAT {
@@ -35,7 +35,7 @@ Environment UAT {
 }
 
 ```
-tokens.ps1 - defining parameters for each environment
+tokens.ps1 - defining parameters for each environment (with inheritance):
 
 ```powershell
 
@@ -53,7 +53,7 @@ Environment Default {
   }
 }
 
-Environment UAT {
+Environment UAT -BasedOn Default {
   Tokens WebConfig @{
     AppPoolName = 'UATAppPool'
     WebsiteName = 'UATWebsite'
@@ -66,7 +66,7 @@ Environment UAT {
 }
 
 ```
-configurations.ps1 - defining what to actually deploy on remote servers
+configurations.ps1 - defining what to actually deploy on remote servers:
 
 ```powershell
 
