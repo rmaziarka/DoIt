@@ -75,8 +75,8 @@ function New-DeploymentPlan {
     .PARAMETER DeployType
     Deployment type:
     All       - deploy everything according to configuration files (= Provision + Deploy)
-    Provision - deploy only DSC configurations
-    Deploy    - deploy only non-DSC configurations
+    DSC       - deploy only DSC configurations
+    Functions - deploy only non-DSC configurations
     Adhoc     - override configurations and nodes with $ConfigurationsFilter and $NodesFilter (they don't have to be defined in ServerRoles - useful for adhoc deployments)
 
     .LINK
@@ -118,7 +118,7 @@ function New-DeploymentPlan {
         $DscOutputPath,
 
         [Parameter(Mandatory=$false)]
-        [ValidateSet('All', 'Provision', 'Deploy', 'Adhoc')]
+        [ValidateSet('All', 'DSC', 'Functions', 'Adhoc')]
 	    [string]
 	    $DeployType = 'All'
     )
@@ -164,7 +164,6 @@ function New-DeploymentPlan {
                             Node = $node
                             Configuration = $config
                             DscOutputPath = $DscOutputPath
-                            DeployType = $DeployType
                             ResolvedTokens = $resolvedTokens
                             TokensOverride = $TokensOverride
                         }

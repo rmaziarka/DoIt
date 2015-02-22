@@ -36,8 +36,8 @@ function Start-DeploymentPlanEntryRemotely {
     .PARAMETER DeployType
     Deployment type:
     All       - deploy everything according to configuration files (= Provision + Deploy)
-    Provision - deploy only DSC configurations
-    Deploy    - deploy only non-DSC configurations
+    DSC       - deploy only DSC configurations
+    Functions - deploy only non-DSC configurations
     Adhoc     - override configurations and nodes with $ConfigurationsFilter and $NodesFilter (they don't have to be defined in ServerRoles - useful for adhoc deployments)
 
     .EXAMPLE
@@ -56,7 +56,7 @@ function Start-DeploymentPlanEntryRemotely {
         $PackageCopiedToNodes,
 
         [Parameter(Mandatory=$false)]
-        [ValidateSet('All', 'Provision', 'Deploy', 'Adhoc')]
+        [ValidateSet('All', 'DSC', 'Functions', 'Adhoc')]
 	    [string]
 	    $DeployType = 'All'
     )    

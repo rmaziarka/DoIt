@@ -43,8 +43,8 @@ function Resolve-Configurations {
     .PARAMETER DeployType
     Deployment type:
     All       - deploy everything according to configuration files (= Provision + Deploy)
-    Provision - deploy only DSC configurations
-    Deploy    - deploy only non-DSC configurations
+    DSC       - deploy only DSC configurations
+    Functions - deploy only non-DSC configurations
     Adhoc     - override configurations and nodes with $ConfigurationsFilter and $NodesFilter (they don't have to be defined in ServerRoles - useful for adhoc deployments)
 
     .PARAMETER ServerRole
@@ -79,7 +79,7 @@ function Resolve-Configurations {
         $ConfigurationsSettings,
 
         [Parameter(Mandatory=$false)]
-        [ValidateSet('All', 'Provision', 'Deploy', 'Adhoc')]
+        [ValidateSet('All', 'DSC', 'Functions', 'Adhoc')]
 	    [string]
 	    $DeployType = 'All',
 
@@ -110,11 +110,11 @@ function Resolve-Configurations {
             Write-Log -Critical "Invalid Configuration reference ('$configName') - Environment '$Environment' / ServerRole '$($ServerRole.Name)'."
         }
         if ($cmd.CommandType -eq 'Configuration') {
-            if ($DeployType -eq 'Deploy') {
+            if ($DeployType -eq 'Functions') {
                 continue
             }
         } elseif ($cmd.CommandType -eq 'Function') {
-            if ($DeployType -eq 'Provision') {
+            if ($DeployType -eq 'DSC') {
                 continue
             }
         } else {

@@ -52,14 +52,6 @@ function New-DeploymentPlanEntry {
     .PARAMETER DscOutputPath
     Path where the .MOF files will be generated.
 
-    .PARAMETER DeployType
-    Deployment type:
-    All       - deploy everything according to configuration files (= Provision + Deploy)
-    Provision - deploy only DSC configurations
-    Deploy    - deploy only non-DSC configurations
-    Adhoc     - override configurations and nodes with $ConfigurationsFilter and $NodesFilter (they don't have to be defined in ServerRoles - useful for adhoc deployments)
-
-
     .PARAMETER ResolvedTokens
     Resolved tokens.
 
@@ -105,11 +97,6 @@ function New-DeploymentPlanEntry {
         [Parameter(Mandatory=$true)]
         [string]
         $DscOutputPath,
-
-        [Parameter(Mandatory=$false)]
-        [ValidateSet('All', 'Provision', 'Deploy', 'Adhoc')]
-	    [string]
-	    $DeployType = 'All',
 
         [Parameter(Mandatory=$true)]
         [hashtable]
