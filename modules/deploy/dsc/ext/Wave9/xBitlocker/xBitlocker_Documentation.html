@@ -15,16 +15,16 @@ and MOF class name (instructions below). As specified in the license, you may co
 <a href="http://blogs.msdn.com/b/powershell/"><span style="color:#0000ff">PowerShell Blog</span></a> (</span><a href="http://blogs.msdn.com/b/powershell/archive/2013/11/01/configuration-in-a-devops-world-windows-powershell-desired-state-configuration.aspx"><span style="color:#0000ff">this</span></a> is a good starting point). There are 
 also great community resources, such as <a href="http://powershell.org/wp/tag/dsc/"><span style="color:#0000ff">PowerShell.org</span></a>, or
 <a href="http://www.powershellmagazine.com/tag/dsc/"><span style="color:#0000ff">PowerShell Magazine</span></a>. For more information on the DSC Resource Kit, check out 
-<a href="http://go.microsoft.com/fwlink/?LinkID=389546"><span style="color:#0000ff">this blog post</span></a>.<br></p>
+<a href="http://go.microsoft.com/fwlink/?LinkID=389546"><span style="color:#0000ff">this blog post</span></a>.<br /></p>
 
 <h1 style="color:#2e74b5; font-family:Calibri Light; font-size:large">Installation</h1>
 <p>To install <strong >xBitlocker</strong> module </p>
 <ul style="list-style-type:disc; direction:ltr">
 <li>Unzip the content under $env:ProgramFiles\WindowsPowerShell\Modules folder</li>
 </ul>
-<p>To confirm installation:<br></p>
+<p>To confirm installation:<br /></p>
 <ul style="list-style-type:disc; direction:ltr">
-<li>Run <strong>Get-DSCResource</strong> to see that <strong>xBLAutoBitlocker, xBLBitlocker, xBLTpm</strong> are among the DSC Resources listed<br></li>
+<li>Run <strong>Get-DSCResource</strong> to see that <strong>xBLAutoBitlocker, xBLBitlocker, xBLTpm</strong> are among the DSC Resources listed<br /></li>
 </ul>
 
 <h1 style="color:#2e74b5; font-family:Calibri Light; font-size:large">Requirements</h1>
@@ -43,7 +43,7 @@ Module allows you to configure Bitlocker on a single disk, configure a TPM chip,
 	<span style="width: 250px; float: left; font-weight: bold;">*DriveType:</span>The type of volume, as reported by Get-Volume, to auto apply Bitlocker to
 </li>
 <li>
-	<span style="width: 250px; float: left; font-weight: bold;">*PrimaryProtector:</span>The primary protector type to be used for AutoBitlocker. Valid values are: "AdAccountOrGroupProtector", "PasswordProtector", "Pin", "RecoveryKeyProtector", "RecoveryPasswordProtector", "StartupKeyProtector", or "TpmProtector"
+	<span style="width: 250px; float: left; font-weight: bold;">*PrimaryProtector:</span>The primary protector type to be used for AutoBitlocker. Valid values are: &quot;PasswordProtector&quot;,&quot;RecoveryPasswordProtector&quot;,&quot;StartupKeyProtector&quot;,&quot;TpmProtector&quot;
 </li>
 <li>
 	<span style="width: 250px; float: left; font-weight: bold;">MinDiskCapacityGB:</span>If specified, only disks this size or greater will auto apply Bitlocker
@@ -107,7 +107,7 @@ Module allows you to configure Bitlocker on a single disk, configure a TPM chip,
 	<span style="width: 250px; float: left; font-weight: bold;">*MountPoint:</span>The MountPoint name as reported in Get-BitLockerVolume
 </li>
 <li>
-	<span style="width: 250px; float: left; font-weight: bold;">*PrimaryProtector:</span>The primary protector type to be used for AutoBitlocker. Valid values are: "AdAccountOrGroupProtector", "PasswordProtector", "Pin", "RecoveryKeyProtector", "RecoveryPasswordProtector", "StartupKeyProtector", or "TpmProtector"
+	<span style="width: 250px; float: left; font-weight: bold;">*PrimaryProtector:</span>The primary protector type to be used for AutoBitlocker. Valid values are: &quot;PasswordProtector&quot;,&quot;RecoveryPasswordProtector&quot;,&quot;StartupKeyProtector&quot;,&quot;TpmProtector&quot;
 </li>
 <li>
 	<span style="width: 250px; float: left; font-weight: bold;">AutoUnlock:</span>Whether volumes should be enabled for auto unlock using Enable-BitlockerAutoUnlock
@@ -220,6 +220,13 @@ Module allows you to configure Bitlocker on a single disk, configure a TPM chip,
 
 
 <h1 style="color:#2e74b5; font-family:Calibri Light; font-size:large">Versions</h1>
+<p>1.0.1.1</p>
+<ul style="list-style-type:disc; direction:ltr">
+<li>Reduced the number of acceptable values for <strong>PrimaryProtector</strong> in <strong>xBLAutoBitlocker</strong> and <strong>xBLBitlocker</strong></li>
+<li>Changed the properties that are returned by <strong>Get-TargetResource</strong> in <strong>xBLAutoBitlocker</strong>, <strong>xBLBitlocker</strong>, and <strong>xBLTpm</strong></li>
+<li>Fixed issue which caused protectors to be continually re-added</li>
+</ul>
+
 <p>1.0.0.0</p>
 <ul style="list-style-type:disc; direction:ltr">
 <li>

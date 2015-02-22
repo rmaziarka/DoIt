@@ -11,12 +11,26 @@ PowerShell Desired State Configuration (DSC) Resource Kit, which is a collection
 of DSC Resources produced by the PowerShell Team.        This module contains 
 the following resources for installation of System Center Service Provider 
 Foundation (SPF):     </P>
-<UL style="list-style-type: disc; direction: ltr;">
-  <LI><STRONG>xSCSPFServerSetup</STRONG> for installation of the SPF server.     
-      </LI>
-  <LI><STRONG>xSCSPFServerUpdate</STRONG> for updating and SPF server to Update 
-  Rollup 4.
-  <P></P></LI></UL>
+                       <ul style="list-style-type: disc; direction: ltr;">
+                           <li>
+                               <strong>xSCSPFServer</strong>  for adding a server in SPF.
+                           </li>
+                           <li>
+                               <strong>xSCSPFServerSetup</strong> for installation of the SPF server.
+                           </li>
+                           <li>
+                               <strong>xSCSPFServerUpdate</strong> for updating and SPF server to Update
+                               Rollup 4.
+                           </li>
+                           <li>
+                               <strong>xSCSPFSetting</strong> for adding a setting in SPF.
+                          </li>
+                           <li>
+                               <strong>xSCSPFStamp</strong> for adding a stamp in SPF.
+                               <p></p>
+                           </li>
+                       </ul>
+
 <P><STRONG>All of the resources in the DSC Resource Kit are provided AS IS, and 
 are not supported through any Microsoft standard support program  or service. 
 The ""x" in xSCSPF stands for experimental</STRONG>, which means that these 
@@ -48,7 +62,7 @@ style="color: rgb(0, 0, 255);">this blog post</SPAN></A>.<BR></P>
 <P>To confirm installation:<BR></P>
 <UL style="list-style-type: disc; direction: ltr;">
   <LI>    Run <STRONG>Get-DSCResource</STRONG> to see that 
-  <STRONG>xSCSPFServerSetup and xSCSPFServerUpdate</STRONG> are among the DSC 
+  <STRONG>xSCSPFServer, xSCSPFServerSetup, xSCSPFServerUpdate, xSCSPFSetting, and xSCSPFStamp</STRONG> are among the DSC 
   Resources listed.<BR></LI></UL>
 <H1 style="color: rgb(46, 116, 181); font-family: Calibri Light; font-size: large;">Requirements</H1>
 <P>This module requires at least the PowerShell v4.0, which ships in Windows 8.1 
@@ -59,96 +73,251 @@ style="color: rgb(0, 0, 255);">install WMF 4.0</SPAN></A>. Please read the
 installation instructions  that are present on both the download page and the 
 release notes for WMF 4.0.</P>
 <H1 style="color: rgb(46, 116, 181); font-family: Calibri Light; font-size: large;">Details</H1>
-<P>        The <STRONG>xSCSPF </STRONG> module contains the following DSC 
-resources:     </P>
-<P><STRONG>xSCSPFServerSetup</STRONG> is used for installation of the SPF 
-server, and has the following properties:</P>
-<UL style="list-style-type: disc; direction: ltr;">
-  <LI><SPAN style="width: 250px; font-weight: bold; float: left;">Ensure: 
-  </SPAN>KEY - An enumerated value (Present, Absent) that describes if the SPF 
-  server is expected to be installed on the machine.         </LI>
-  <LI><SPAN style="width: 250px; font-weight: bold; float: left;">SourcePath: 
-  </SPAN>REQUIRED - UNC path to the root of the source files for installation.   
-        </LI>
-  <LI><SPAN style="width: 250px; font-weight: bold; float: left;">SourceFolder: 
-  </SPAN>Folder within the source path containing the source files for 
-  installation.         </LI>
-  <LI><SPAN 
-  style="width: 250px; font-weight: bold; float: left;">SetupCredential: 
-  </SPAN>REQUIRED - Credential to be used to perform the installation.         
-  </LI>
-  <LI><SPAN 
-  style="width: 250px; font-weight: bold; float: left;">SendCEIPReports: 
-  </SPAN>Binary, indicating whether or not to participate in the Customer 
-  Experience Improvement Program.         </LI>
-  <LI><SPAN 
-  style="width: 250px; font-weight: bold; float: left;">UseMicrosoftUpdate: 
-  </SPAN>Binary, indicating whether or not to use Microsoft Update.         
-</LI>
-  <LI><SPAN 
-  style="width: 250px; font-weight: bold; float: left;">SpecifyCertificate: 
-  </SPAN>Use an existing certificate.         </LI>
-  <LI><SPAN 
-  style="width: 250px; font-weight: bold; float: left;">CertificateName: 
-  </SPAN>Name of existing certificate to use.         </LI>
-  <LI><SPAN 
-  style="width: 250px; font-weight: bold; float: left;">DatabaseServer: 
-  </SPAN>REQUIRED - Name of the database server.         </LI>
-  <LI><SPAN 
-  style="width: 250px; font-weight: bold; float: left;">DatabasePortNumber: 
-  </SPAN>Port of the database server instance.         </LI>
-  <LI><SPAN style="width: 250px; font-weight: bold; float: left;">DatabaseName: 
-  </SPAN>Name of the SPF database.         </LI>
-  <LI><SPAN 
-  style="width: 250px; font-weight: bold; float: left;">WebSitePortNumber: 
-  </SPAN>Port for the SPF web service.         </LI>
-  <LI><SPAN style="width: 250px; font-weight: bold; float: left;">SCVMM: 
-  </SPAN>Credential for the VMM application pool.         </LI>
-  <LI><SPAN style="width: 250px; font-weight: bold; float: left;">SCVMMUsername: 
-  </SPAN>Output username of the VMM application pool serivce.         </LI>
-  <LI><SPAN style="width: 250px; font-weight: bold; float: left;">SCAdmin: 
-  </SPAN>Credential for the Admin application pool.         </LI>
-  <LI><SPAN 
-  style="width: 250px; font-weight: bold; float: left;">SCAdminUsername: 
-  </SPAN>Output username of the Admin application pool serivce.         </LI>
-  <LI><SPAN style="width: 250px; font-weight: bold; float: left;">SCProvider: 
-  </SPAN>Credential for the Provider application pool.         </LI>
-  <LI><SPAN 
-  style="width: 250px; font-weight: bold; float: left;">SCProviderUsername: 
-  </SPAN>Output username of the Provider application pool serivce.         </LI>
-  <LI><SPAN style="width: 250px; font-weight: bold; float: left;">SCUsage: 
-  </SPAN>Credential for the Usage application pool.         </LI>
-  <LI><SPAN 
-  style="width: 250px; font-weight: bold; float: left;">SCUsageUsername: 
-  </SPAN>Output username of the Usage application pool serivce.         </LI>
-  <LI><SPAN 
-  style="width: 250px; font-weight: bold; float: left;">VMMSecurityGroupUsers: 
-  </SPAN>Administrator of the VMM application pool.         </LI>
-  <LI><SPAN 
-  style="width: 250px; font-weight: bold; float: left;">AdminSecurityGroupUsers: 
-  </SPAN>Administrator of the Admin application pool         </LI>
-  <LI><SPAN 
-  style="width: 250px; font-weight: bold; float: left;">ProviderSecurityGroupUsers: 
-  </SPAN>Administrator of the Provider application pool         </LI>
-  <LI><SPAN 
-  style="width: 250px; font-weight: bold; float: left;">UsageSecurityGroupUsers: 
-  </SPAN>Administrator of the Usage application pool         </LI></UL>
-<P><STRONG>xSCSPFServerUpdate</STRONG> has the following properties:</P>
-<UL style="list-style-type: disc; direction: ltr;">
-  <LI><SPAN style="width: 250px; font-weight: bold; float: left;">Ensure: 
-  </SPAN>KEY - An enumerated value that describes if the update is expected to 
-  be installed on the machine.         </LI>
-  <LI><SPAN style="width: 250px; font-weight: bold; float: left;">SourcePath: 
-  </SPAN>REQUIRED - UNC path to the root of the source files for installation.   
-        </LI>
-  <LI><SPAN style="width: 250px; font-weight: bold; float: left;">SourceFolder: 
-  </SPAN>Folder within the source path containing the source files for 
-  installation.         </LI>
-  <LI><SPAN style="width: 250px; font-weight: bold; float: left;">Credential: 
-  </SPAN>REQUIRED - Credential to be used to perform the installation.         
-  </LI>
-  <LI><SPAN style="width: 250px; font-weight: bold; float: left;">Update: 
-  </SPAN>Output display name of the update.         </LI></UL>
+                       <p>
+                           The <strong>xSCSPF </strong> module contains the following DSC
+                           resources:
+                       </p>
+                       <p><strong>xSCSPFServer</strong> has the following properties:</p>
+                       <ul style="list-style-type: disc; direction: ltr;">
+                           <li>
+                               <span style="width: 250px; font-weight: bold; float: left;">
+                                   Ensure:
+                               </span>An enumerated value that describes if the SPF server exists
+                           </li>
+                           <li>
+                               <span style="width: 250px; font-weight: bold; float: left;">
+                                   Name:
+                               </span>KEY - Specifies a name for the server.
+                           </li>
+                           <li>
+                               <span style="width: 250px; font-weight: bold; float: left;">
+                                   ServerType:
+                               </span>REQUIRED - Specifies the type of server. "VMM","OM","DPM","OMDW","RDGateway","Orchestrator","None"
+                           </li>
+                           <li>
+                               <span style="width: 250px; font-weight: bold; float: left;">
+                                   SCSPFAdminCredential:
+                               </span>REQUIRED - Credential with admin permissions to Service Provider Foundation.
+                           </li>
+                       </ul>
+                       <p>
+                           <strong>xSCSPFServerSetup</strong> is used for installation of the SPF
+                           server, and has the following properties:
+                       </p>
+                       <ul style="list-style-type: disc; direction: ltr;">
+                           <li>
+                               <span style="width: 250px; font-weight: bold; float: left;">
+                                   Ensure:
+                               </span>KEY - An enumerated value (Present, Absent) that describes if the SPF
+                               server is expected to be installed on the machine.
+                           </li>
+                           <li>
+                               <span style="width: 250px; font-weight: bold; float: left;">
+                                   SourcePath:
+                               </span>REQUIRED - UNC path to the root of the source files for installation.
+                           </li>
+                           <li>
+                               <span style="width: 250px; font-weight: bold; float: left;">
+                                   SourceFolder:
+                               </span>Folder within the source path containing the source files for
+                               installation.
+                           </li>
+                           <li>
+                               <span style="width: 250px; font-weight: bold; float: left;">
+                                   SetupCredential:
+                               </span>REQUIRED - Credential to be used to perform the installation.
+                           </li>
+                           <li>
+                               <span style="width: 250px; font-weight: bold; float: left;">
+                                   SendCEIPReports:
+                               </span>Binary, indicating whether or not to participate in the Customer
+                               Experience Improvement Program.
+                           </li>
+                           <li>
+                               <span style="width: 250px; font-weight: bold; float: left;">
+                                   UseMicrosoftUpdate:
+                               </span>Binary, indicating whether or not to use Microsoft Update.
+                           </li>
+                           <li>
+                               <span style="width: 250px; font-weight: bold; float: left;">
+                                   SpecifyCertificate:
+                               </span>Use an existing certificate.
+                           </li>
+                           <li>
+                               <span style="width: 250px; font-weight: bold; float: left;">
+                                   CertificateName:
+                               </span>Name of existing certificate to use.
+                           </li>
+                           <li>
+                               <span style="width: 250px; font-weight: bold; float: left;">
+                                   DatabaseServer:
+                               </span>REQUIRED - Name of the database server.
+                           </li>
+                           <li>
+                               <span style="width: 250px; font-weight: bold; float: left;">
+                                   DatabasePortNumber:
+                               </span>Port of the database server instance.
+                           </li>
+                           <li>
+                               <span style="width: 250px; font-weight: bold; float: left;">
+                                   DatabaseName:
+                               </span>Name of the SPF database.
+                           </li>
+                           <li>
+                               <span style="width: 250px; font-weight: bold; float: left;">
+                                   WebSitePortNumber:
+                               </span>Port for the SPF web service.
+                           </li>
+                           <li>
+                               <span style="width: 250px; font-weight: bold; float: left;">
+                                   SCVMM:
+                               </span>Credential for the VMM application pool.
+                           </li>
+                           <li>
+                               <span style="width: 250px; font-weight: bold; float: left;">
+                                   SCVMMUsername:
+                               </span>Output username of the VMM application pool service.
+                           </li>
+                           <li>
+                               <span style="width: 250px; font-weight: bold; float: left;">
+                                   SCAdmin:
+                               </span>Credential for the Admin application pool.
+                           </li>
+                           <li>
+                               <span style="width: 250px; font-weight: bold; float: left;">
+                                   SCAdminUsername:
+                               </span>Output username of the Admin application pool service.
+                           </li>
+                           <li>
+                               <span style="width: 250px; font-weight: bold; float: left;">
+                                   SCProvider:
+                               </span>Credential for the Provider application pool.
+                           </li>
+                           <li>
+                               <span style="width: 250px; font-weight: bold; float: left;">
+                                   SCProviderUsername:
+                               </span>Output username of the Provider application pool service.
+                           </li>
+                           <li>
+                               <span style="width: 250px; font-weight: bold; float: left;">
+                                   SCUsage:
+                               </span>Credential for the Usage application pool.
+                           </li>
+                           <li>
+                               <span style="width: 250px; font-weight: bold; float: left;">
+                                   SCUsageUsername:
+                               </span>Output username of the Usage application pool service.
+                           </li>
+                           <li>
+                               <span style="width: 250px; font-weight: bold; float: left;">
+                                   VMMSecurityGroupUsers:
+                               </span>Administrator of the VMM application pool.
+                           </li>
+                           <li>
+                               <span style="width: 250px; font-weight: bold; float: left;">
+                                   AdminSecurityGroupUsers:
+                               </span>Administrator of the Admin application pool
+                           </li>
+                           <li>
+                               <span style="width: 250px; font-weight: bold; float: left;">
+                                   ProviderSecurityGroupUsers:
+                               </span>Administrator of the Provider application pool
+                           </li>
+                           <li>
+                               <span style="width: 250px; font-weight: bold; float: left;">
+                                   UsageSecurityGroupUsers:
+                               </span>Administrator of the Usage application pool
+                           </li>
+                       </ul>
+                       <p><strong>xSCSPFServerUpdate</strong> has the following properties:</p>
+                       <ul style="list-style-type: disc; direction: ltr;">
+                           <li>
+                               <span style="width: 250px; font-weight: bold; float: left;">
+                                   Ensure:
+                               </span>KEY - An enumerated value that describes if the update is expected to
+                               be installed on the machine.
+                           </li>
+                           <li>
+                               <span style="width: 250px; font-weight: bold; float: left;">
+                                   SourcePath:
+                               </span>REQUIRED - UNC path to the root of the source files for installation.
+                           </li>
+                           <li>
+                               <span style="width: 250px; font-weight: bold; float: left;">
+                                   SourceFolder:
+                               </span>Folder within the source path containing the source files for
+                               installation.
+                           </li>
+                           <li>
+                               <span style="width: 250px; font-weight: bold; float: left;">
+                                   Credential:
+                               </span>REQUIRED - Credential to be used to perform the installation.
+                           </li>
+                           <li>
+                               <span style="width: 250px; font-weight: bold; float: left;">
+                                   Update:
+                               </span>Output display name of the update.
+                           </li>
+                       </ul>
+                       <p><strong>xSCSPFSetting</strong> has the following properties:</p>
+                       <ul style="list-style-type: disc; direction: ltr;">
+                           <li>
+                               <span style="width: 250px; font-weight: bold; float: left;">
+                                   Ensure:
+                               </span>An enumerated value that describes if the SPF setting exists.
+                           </li>
+                           <li>
+                               <span style="width: 250px; font-weight: bold; float: left;">
+                                   ServerName:
+                               </span>KEY - Specifies the name of the server the setting is associated with.
+                           </li>
+                           <li>
+                               <span style="width: 250px; font-weight: bold; float: left;">
+                                   SettingType:
+                               </span>REQUIRED - Specifies either DatabaseConnectionString or EndPointConnectionString.
+                           </li>
+                           <li>
+                               <span style="width: 250px; font-weight: bold; float: left;">
+                                   Name:
+                               </span>KEY - Specifies a friendly name for the setting.
+                           </li>
+                           <li>
+                               <span style="width: 250px; font-weight: bold; float: left;">
+                                   Value:
+                               </span>REQUIRED - Specifies the value for the setting.
+                           </li>
+                           <li>
+                               <span style="width: 250px; font-weight: bold; float: left;">
+                                   SCSPFAdminCredential:
+                               </span>REQUIRED - Credential with admin permissions to Service Provider Foundation.
+                           </li>
+                       </ul>
+
+                       <p><strong>xSCSPFStamp</strong> has the following properties:</p>
+                       <ul style="list-style-type: disc; direction: ltr;">
+                           <li>
+                               <span style="width: 250px; font-weight: bold; float: left;">
+                                   Ensure:
+                               </span>An enumerated value that describes if the SPF stamp exists.
+                           </li>
+                           <li>
+                               <span style="width: 250px; font-weight: bold; float: left;">
+                                   Name:
+                               </span>KEY - Specifies a name for the stamp.
+                           </li>
+                           <li>
+                               <span style="width: 250px; font-weight: bold; float: left;">
+                                   Servers:
+                               </span>REQUIRED - Specifies the name of one or more server objects to associate with the new stamp.
+                           </li>
+                           <li>
+                               <span style="width: 250px; font-weight: bold; float: left;">
+                                   SCSPFAdminCredential:
+                               </span>REQUIRED - Credential with admin permissions to Service Provider Foundation.
+                           </li>
+                       </ul>
+
+
 <H1 style="color: rgb(46, 116, 181); font-family: Calibri Light; font-size: large;">Renaming 
 Requirements</H1>
 <P>When making changes to these resources, we suggest the following 
@@ -183,18 +352,41 @@ version of Windows Server ships with "MSFT_SCSPFServerSetup" resources, we don't
 want to break any configurations that use any community modifications. Please 
 keep a prefix such as "c" on all community modifications.</EM></P>
 <H1 style="color: rgb(46, 116, 181); font-family: Calibri Light; font-size: large;">Versions</H1>
-<P>1.2.0.0</P>
-<UL style="list-style-type: disc; direction: ltr;">
-  <LI>            Updated with the following resources             
-  <UL style="list-style-type: circle;">
-    <LI>                    xSCSPFServerUpdate                 </LI></UL></LI></UL>
-<P>1.1.0.0</P>
-<UL style="list-style-type: disc; direction: ltr;">
-  <LI>                Initial release with the following resources               
-    
-  <UL style="list-style-type: circle;">
-    <LI>                        xSCSPFServerSetup                     
-  </LI></UL></LI></UL>
+
+                       <p>1.3.1.0</p>
+                       <ul style="list-style-type: disc; direction: ltr;">
+                           <li>
+                               Updated with the following resources
+                               <ul style="list-style-type: circle;">
+                                   <li>xSCSPFServer</li>
+                                   <li>xSCSPFSetting</li>
+                                   <li>xSCSPFStamp</li>
+                               </ul>
+                           </li>
+                       </ul>
+
+                       <p>1.2.0.0</p>
+                       <ul style="list-style-type: disc; direction: ltr;">
+                           <li>
+                               Updated with the following resources
+                               <ul style="list-style-type: circle;">
+                                   <li>                    xSCSPFServerUpdate                 </li>
+                               </ul>
+                           </li>
+                       </ul>
+                       <p>1.1.0.0</p>
+                       <ul style="list-style-type: disc; direction: ltr;">
+                           <li>
+                               Initial release with the following resources
+
+                               <ul style="list-style-type: circle;">
+                                   <li>
+                                       xSCSPFServerSetup
+                                   </li>
+                               </ul>
+                           </li>
+                       </ul>
+
 <H1 style="color: rgb(46, 116, 181); font-family: Calibri Light; font-size: large; margin-bottom: 0pt;">Examples</H1>
 <P>Three example configurations are included in the Examples folder.  All three 
 examples also use the xSQLServer and xSCVMM modules.</P>
@@ -204,7 +396,7 @@ Preview.</SPAN></A></P>
 <P><STRONG>Single Server Installation:</STRONG> SCSPF-SingleServer.ps1 installs 
 SPF including prerequisites and SQL on a single server.</P>
 <P><STRONG>Separate SQL:</STRONG> SCSPF-SeperateSQL.ps1 installs SPF on one 
-server and SQL on a seperate server.</P>
+server and SQL on a separate server.</P>
 <P><STRONG>Multiple Instances:</STRONG> SCSPF-MultiInstance.ps1 installs 
 multiple SPF servers each on their own server and SQL on a seperate server.</P>
 <P>Note that all three examples use the exact same Configuration and just modify 

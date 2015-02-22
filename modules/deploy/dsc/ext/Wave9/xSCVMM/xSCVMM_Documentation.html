@@ -20,6 +20,9 @@
         <li>
             <strong>xSCVMMAdmin: </strong> for adding VMM admins
         </li>
+        <li>
+            <strong>xSCVMMOperationsManagerServer: </strong> for connecting VMM to Operations Manager
+        </li>
     </ul>
 
 <p><strong>All of the resources in the DSC Resource Kit are provided AS IS, and are not supported through any Microsoft standard support program 
@@ -242,6 +245,34 @@ that are present on both the download page and the release notes for WMF 4.0.</p
         </li>
     </ul>
 
+    <p><strong>xSCVMMOperationsManagerServer</strong> has the following properties:</p>
+    <ul style="list-style-type:disc; direction:ltr">
+        <li>
+            <span style="width: 250px; float: left; font-weight: bold;">Ensure: </span>KEY - An enumerated value that describes if the Operations Manager connection exists.
+        </li>
+        <li>
+            <span style="width: 250px; float: left; font-weight: bold;">OpsMgrServer: </span>REQUIRED - Specifies the fully qualified domain name (FQDN) of the System Center Operations Manager management server to which VMM connects.
+        </li>
+        <li>
+            <span style="width: 250px; float: left; font-weight: bold;">EnablePRO: </span>Indicates whether PRO is enabled for this connection.
+        </li>
+        <li>
+            <span style="width: 250px; float: left; font-weight: bold;">EnableMaintenanceModeIntegration: </span>Indicates whether maintenance mode integration is enabled for this connection.
+        </li>
+        <li>
+            <span style="width: 250px; float: left; font-weight: bold;">VMMServerCredential: </span>Specifies the credentials that Operations Manager uses to connect with VMM.
+        </li>
+        <li>
+            <span style="width: 250px; float: left; font-weight: bold;">OpsMgrServerCredential: </span>Specifies the name of the VMM RunAs account that VMM uses to connect to the Operations Manager management group.
+        </li>
+        <li>
+            <span style="width: 250px; float: left; font-weight: bold;">UseVMMServerServiceAccount: </span>Specifies the service account that VMM uses to connect to Operations Manager.
+        </li>
+        <li>
+            <span style="width: 250px; float: left; font-weight: bold;">SCVMMAdminCredential: </span>Credential to be used to perform the operations.
+        </li>
+    </ul>
+
         <h1 style="color:#2e74b5; font-family:Calibri Light; font-size:large">Renaming Requirements</h1>
         <p>When making changes to these resources, we suggest the following practice:</p>
         <ol style="list-style-type:decimal; direction:ltr">
@@ -279,13 +310,31 @@ that are present on both the download page and the release notes for WMF 4.0.</p
 
 
         <h1 style="color:#2e74b5; font-family:Calibri Light; font-size:large">Versions</h1>
+    <p>1.2.4.0</p>
+    <ul style="list-style-type:disc; direction:ltr">
+        <li>
+            Updated release wich added the following resource
+            <ul style="list-style-type:circle">
+                <li>
+                    xSCVMMOperationsManagerServer
+                </li>
+            </ul>
+        </li>
+        <li>
+            Added /norestart to xSCVMMConsoleUpdate and xSCVMMManagementServerUpdate to allow DSC to control reboots
+        </li>
+        <li>
+            Increased timeout for setup process to start to 60 seconds
+        </li>
+    </ul>
+
     <p>1.2.0.0</p>
     <ul style="list-style-type:disc; direction:ltr">
         <li>
             Updated release wich added the following resources
             <ul style="list-style-type:circle">
                 <li>
-                    xSCVMManagementServerUpdate
+                    xSCVMMManagementServerUpdate
                 </li>
                 <li>
                     xSCVMMConsoleUpdate
