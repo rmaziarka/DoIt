@@ -32,8 +32,6 @@ Configuration can be one of the following:
 Configuration WebServerProvision {
     param ($NodeName, $Environment, $Tokens)
     
-    Import-DSCResource -Module xWebAdministration
-    Import-DSCResource -Module cWebAdministration
     Import-DSCResource -Module cIIS
 
     Node $NodeName {
@@ -52,7 +50,7 @@ Configuration WebServerProvision {
             DependsOn = @('[cAppPool]PSCITestAppPool')
         }
 
-        xWebsite PSCIWebsite { 
+        cWebsite PSCIWebsite { 
             Name   = $Tokens.WebServerProvision.WebsiteName
 			ApplicationPool = $Tokens.WebServerProvision.AppPoolName 
             Ensure = 'Present' 

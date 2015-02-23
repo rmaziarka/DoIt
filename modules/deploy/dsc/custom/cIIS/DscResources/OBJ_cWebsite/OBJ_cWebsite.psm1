@@ -12,8 +12,9 @@ WebsiteUpdateFailureError=Failure to successfully update the properties for webs
 WebsiteBindingUpdateFailureError=Failure to successfully update the bindings for website "{0}".
 WebsiteBindingInputInvalidationError=Desired website bindings not valid for website "{0}".
 WebsiteCompareFailureError=Failure to successfully compare properties for website "{0}".
-WebBindingCertifcateError=Failure to add certificate to web binding.
+WebBindingCertifcateError=Failure to add certificate to web binding. Please make sure that the certificate thumbprint "{0}" is valid.
 WebsiteStateFailureError=Failure to successfully set the state of the website {0}.
+WebsiteBindingConflictOnStartError = Website "{0}" could not be started due to binding conflict. Ensure that the binding information for this website does not conflict with any existing website's bindings before trying to start it.
 '@
 }
 
@@ -21,21 +22,12 @@ WebsiteStateFailureError=Failure to successfully set the state of the website {0
 # It gives the Website info of the requested role/feature on the target machine.  
 function Get-TargetResource 
 {
-    [OutputType([System.Collections.Hashtable])]
     param 
     (   
         [Parameter(Mandatory)]
         [ValidateNotNullOrEmpty()]
-        [string]$Name,
-
-        [Parameter(Mandatory)]
-        [ValidateNotNullOrEmpty()]
-        [string]$PhysicalPath
+        [string]$Name
     )
-        # The LCM requires Get-TargetResource to take all Key AND Required properties as parameters, even though
-        # the Required properties such as PhysicalPath are really part of Get-TargetResource's output, not its
-        # input.  This is probably an LCM bug.
-        # We're not actually doing anything with whatever value was passed in to $PhysicalPath here.
 
         $getTargetResourceResult = $null;
 
@@ -45,7 +37,10 @@ function Get-TargetResource
             Throw "Please ensure that WebAdministration module is installed."
         }
 
-        $Website = Get-Website -Name $Name
+        if (!(Get-Module -Name WebAdministration -ErrorAction SilentlyContinue)) {
+            Import-Module -Name WebAdministration -Verbose:$false
+        }
+        $Website = Get-Item "IIS:\sites\$Name" -ErrorAction SilentlyContinue
 
         if ($Website.count -eq 0) # No Website exists with this name.
         {
@@ -61,8 +56,11 @@ function Get-TargetResource
             $CimBindings = foreach ($binding in $bindings)
             {
                 $BindingObject = get-WebBindingObject -BindingInfo $binding
-                New-CimInstance -ClassName PSHOrg_cWebBindingInformation -Namespace root/microsoft/Windows/DesiredStateConfiguration -Property @{Port=[System.UInt16]$BindingObject.Port;Protocol=$BindingObject.Protocol;IPAddress=$BindingObject.IPaddress;HostName=$BindingObject.Hostname;CertificateThumbprint=$BindingObject.CertificateThumbprint;CertificateStoreName=$BindingObject.CertificateStoreName} -ClientOnly
+                New-CimInstance -ClassName MSFT_xWebBindingInformation -Namespace root/microsoft/Windows/DesiredStateConfiguration -Property @{Port=[System.UInt16]$BindingObject.Port;Protocol=$BindingObject.Protocol;IPAddress=$BindingObject.IPaddress;HostName=$BindingObject.Hostname;CertificateThumbprint=$BindingObject.CertificateThumbprint;CertificateStoreName=$BindingObject.CertificateStoreName} -ClientOnly
             }
+
+	   $allDefaultPage = @(Get-WebConfiguration //defaultDocument/files/*  -PSPath (Join-Path "IIS:\sites\" $Name) -ErrorAction SilentlyContinue |%{Write-Output $_.value})
+
         }
         else # Multiple websites with the same name exist. This is not supported and is an error
         {
@@ -84,6 +82,7 @@ function Get-TargetResource
                                         ID = $Website.id;
                                         ApplicationPool = $Website.applicationPool;
                                         BindingInfo = $CimBindings;
+					DefaultPage = $allDefaultPage
                                     }
         
         return $getTargetResourceResult;
@@ -112,7 +111,10 @@ function Set-TargetResource
 
         [string]$ApplicationPool,
 
-        [Microsoft.Management.Infrastructure.CimInstance[]]$BindingInfo
+        [Microsoft.Management.Infrastructure.CimInstance[]]$BindingInfo,
+
+  	[string[]]$DefaultPage
+
     )
  
     $getTargetResourceResult = $null;
@@ -128,12 +130,21 @@ function Set-TargetResource
         #Bindings will be added to site using separate cmdlet
         $Result = $psboundparameters.Remove("BindingInfo");
 
+        #Remove default pages from parameters if they exist
+        #Default Pages will be added to site using separate cmdlet
+        $Result = $psboundparameters.Remove("DefaultPage");
+
         # Check if WebAdministration module is present for IIS cmdlets
         if(!(Get-Module -ListAvailable -Name WebAdministration))
         {
             Throw "Please ensure that WebAdministration module is installed."
         }
-        $website = get-website $Name
+		
+		if (!(Get-Module -Name WebAdministration -ErrorAction SilentlyContinue)) {
+            # Without explicit Import-Module on 2008 R2, Get-Item "IIS:\..." sometimes returns "a drive with the name iis does not exist"
+            Import-Module -Name WebAdministration -Verbose:$false
+        }
+        $website = Get-Item "IIS:\sites\$Name" -ErrorAction SilentlyContinue
 
         if($website -ne $null)
         {
@@ -172,36 +183,91 @@ function Set-TargetResource
                 Write-Verbose("Application Pool for website $Name has been updated to $ApplicationPool")
             }
 
+	    #Update Default pages if required 
+	    if($DefaultPage -ne $null)
+            {
+	    	UpdateDefaultPages -Name $Name -DefaultPage $DefaultPage 
+	    }
+
             #Update State if required
             if($website.state -ne $State -and $State -ne "")
             {
-                try
+                $UpdateNotRequired = $false
+                if($State -eq "Started")
                 {
-                    $UpdateNotRequired = $false
-                    if($State -eq "Started")
+                    # Ensure that there are no other websites with binding information that will conflict with this site before starting
+                    $existingSites = Get-Website | Where Name -ne $Name
+
+                    foreach($site in $existingSites)
                     {
-                    
-                            Start-Website -Name $Name
-                    
-                    }
-                    else
-                    {
-                        Stop-Website -Name $Name
+                        $siteInfo = Get-TargetResource -Name $site.name
+                            
+                        foreach ($binding in $BindingInfo)
+                        {
+                            #Normalize empty IPAddress to "*"
+                            if($binding.IPAddress -eq "" -or $binding.IPAddress -eq $null)
+                            {
+                                $NormalizedIPAddress = "*"
+                            } 
+                            else
+                            {
+                                $NormalizedIPAddress = $binding.IPAddress
+                            }
+
+                            if( !(EnsurePortIPHostUnique -Port $Binding.Port -IPAddress $NormalizedIPAddress -HostName $binding.HostName -BindingInfo $siteInfo.BindingInfo -UniqueInstances 1))
+                            {
+                                #return error & Do not start Website
+                                $errorId = "WebsiteBindingConflictOnStart";
+                                $errorCategory = [System.Management.Automation.ErrorCategory]::InvalidResult
+                                $errorMessage = $($LocalizedData.WebsiteBindingConflictOnStartError) -f ${Name} 
+                                $exception = New-Object System.InvalidOperationException $errorMessage 
+                                $errorRecord = New-Object System.Management.Automation.ErrorRecord $exception, $errorId, $errorCategory, $null
+
+                                $PSCmdlet.ThrowTerminatingError($errorRecord);
+                            } 
+                        }
                     }
 
-                    Write-Verbose("State for website $Name has been updated to $State");
+                    try
+                    {
 
+                    Start-Website -Name $Name
+
+                    }
+                    catch
+                    {
+                        $errorId = "WebsiteStateFailure"; 
+                        $errorCategory = [System.Management.Automation.ErrorCategory]::InvalidOperation;
+                        $errorMessage = "$($_.Exception.Message) / $($_.ScriptStackTrace)"
+                        $exception = New-Object System.InvalidOperationException $errorMessage ;
+                        $errorRecord = New-Object System.Management.Automation.ErrorRecord $exception, $errorId, $errorCategory, $null
+
+                        $PSCmdlet.ThrowTerminatingError($errorRecord);
+                    }
+                    
                 }
-                catch
+                else
                 {
-                    $errorId = "WebsiteStateFailure"; 
-                    $errorCategory = [System.Management.Automation.ErrorCategory]::InvalidOperation;
-                    $errorMessage = $($LocalizedData.WebsiteStateFailureError) -f ${Name} ;
-                    $exception = New-Object System.InvalidOperationException $errorMessage ;
-                    $errorRecord = New-Object System.Management.Automation.ErrorRecord $exception, $errorId, $errorCategory, $null
+                    try
+                    {
 
-                    $PSCmdlet.ThrowTerminatingError($errorRecord);
+                    Stop-Website -Name $Name
+
+                    }
+                    catch
+                    {
+                        $errorId = "WebsiteStateFailure"; 
+                        $errorCategory = [System.Management.Automation.ErrorCategory]::InvalidOperation;
+                        $errorMessage = "$($_.Exception.Message) / $($_.ScriptStackTrace)"
+                        $exception = New-Object System.InvalidOperationException $errorMessage ;
+                        $errorRecord = New-Object System.Management.Automation.ErrorRecord $exception, $errorId, $errorCategory, $null
+
+                        $PSCmdlet.ThrowTerminatingError($errorRecord)
+                    }
                 }
+
+                Write-Verbose("State for website $Name has been updated to $State");
+
             }
 
             if($UpdateNotRequired)
@@ -215,7 +281,13 @@ function Set-TargetResource
         {
             try
             {
-                $Website = New-Website @psboundparameters
+                $newWebsiteParams = $PSBoundParameters
+                # this is a workaround for 2008 R2 - if there are no websites, a new website must be created with specific Id
+                if (!(Get-Website)) {
+                    $newWebsiteParams.Id = 1
+                }
+
+                $Website = New-Website @newWebsiteParams
                 $Result = Stop-Website $Website.name -ErrorAction Stop
             
                 #Clear default bindings if new bindings defined and are different
@@ -226,6 +298,12 @@ function Set-TargetResource
                         UpdateBindings -Name $Name -BindingInfo $BindingInfo
                     }
                 }
+
+		#Add Default pages for new created website  
+	        if($DefaultPage -ne $null)
+            	{
+	    		UpdateDefaultPages -Name $Name -DefaultPage $DefaultPage  
+		}
 
                 Write-Verbose("successfully created website $Name")
                 
@@ -239,16 +317,16 @@ function Set-TargetResource
                 }
 
                 Write-Verbose("successfully started website $Name")
+ 	 
             }
             catch
-            {
+           {
                 $errorId = "WebsiteCreationFailure"; 
                 $errorCategory = [System.Management.Automation.ErrorCategory]::InvalidOperation;
-                $errorMessage = $($LocalizedData.FeatureCreationFailureError) -f ${Name} ;
+                $errorMessage = "$($_.Exception.Message) / $($_.ScriptStackTrace)"
                 $exception = New-Object System.InvalidOperationException $errorMessage ;
                 $errorRecord = New-Object System.Management.Automation.ErrorRecord $exception, $errorId, $errorCategory, $null
-
-                $PSCmdlet.ThrowTerminatingError($errorRecord);
+                $PSCmdlet.ThrowTerminatingError($errorRecord);		
             }
         }    
     }
@@ -256,7 +334,11 @@ function Set-TargetResource
     { 
         try
         {
-            $website = get-website $Name
+            if (!(Get-Module -Name WebAdministration -ErrorAction SilentlyContinue)) {
+                Import-Module -Name WebAdministration -Verbose:$false
+            }
+            $website = Get-Item "IIS:\sites\$Name" -ErrorAction SilentlyContinue
+
             if($website -ne $null)
             {
                 Remove-website -name $Name
@@ -272,7 +354,7 @@ function Set-TargetResource
         {
             $errorId = "WebsiteRemovalFailure"; 
             $errorCategory = [System.Management.Automation.ErrorCategory]::InvalidOperation;
-            $errorMessage = $($LocalizedData.WebsiteRemovalFailureError) -f ${Name} ;
+            $errorMessage = "$($_.Exception.Message) / $($_.ScriptStackTrace)"
             $exception = New-Object System.InvalidOperationException $errorMessage ;
             $errorRecord = New-Object System.Management.Automation.ErrorRecord $exception, $errorId, $errorCategory, $null
 
@@ -286,7 +368,6 @@ function Set-TargetResource
 # The Test-TargetResource cmdlet is used to validate if the role or feature is in a state as expected in the instance document.
 function Test-TargetResource 
 {
-    [OutputType([System.Boolean])]
     param 
     (       
         [ValidateSet("Present", "Absent")]
@@ -305,7 +386,9 @@ function Test-TargetResource
 
         [string]$ApplicationPool,
 
-        [Microsoft.Management.Infrastructure.CimInstance[]]$BindingInfo
+        [Microsoft.Management.Infrastructure.CimInstance[]]$BindingInfo,
+
+	[string[]]$DefaultPage
     )
  
     $DesiredConfigurationMatch = $true;
@@ -316,7 +399,11 @@ function Test-TargetResource
         Throw "Please ensure that WebAdministration module is installed."
     }
 
-    $website = Get-Website -Name $Name
+    if (!(Get-Module -Name WebAdministration -ErrorAction SilentlyContinue)) {
+        Import-Module -Name WebAdministration -Verbose:$false
+    }
+    $website = Get-Item "IIS:\sites\$Name" -ErrorAction SilentlyContinue
+
     $Stop = $true
 
     Do
@@ -368,6 +455,32 @@ function Test-TargetResource
 
             }
         }
+
+   	    #Check Default Pages 
+            if($DefaultPage -ne $null)
+            {
+		$allDefaultPage = @(Get-WebConfiguration //defaultDocument/files/*  -PSPath (Join-Path "IIS:\sites\" $Name) |%{Write-Output $_.value})
+
+		$allDefaultPagesPresent = $true
+
+                foreach($page in $DefaultPage )
+                {
+                    if(-not ($allDefaultPage  -icontains $page))
+                    {   
+                        $DesiredConfigurationMatch = $false
+			Write-Verbose("Default Page for website $Name do not mach the desired state.");
+			$allDefaultPagesPresent = $false  
+			break
+                    }
+                }
+		
+ 		if($allDefaultPagesPresent -eq $false)
+            	{
+			# This is to break out from Test 
+			break 
+		}
+            }
+
 
         $Stop = $false
     }
@@ -479,10 +592,11 @@ function EnsurePortIPHostUnique
         [parameter(Mandatory=$true)]
         [ValidateNotNullOrEmpty()]
         [Microsoft.Management.Infrastructure.CimInstance[]]
-        $BindingInfo
-    )
+        $BindingInfo,
 
-    $UniqueInstances = 0
+        [parameter()]
+        $UniqueInstances = 0
+    )
 
     foreach ($Binding in $BindingInfo)
     {
@@ -523,7 +637,7 @@ function compareWebsiteBindings
     #check to see if actual settings have been passed in. If not get them from website
     if($ActualBindings -eq $null)
     {
-        $ActualBindings = Get-Website $Name | Get-WebBinding
+        $ActualBindings = Get-Item "IIS:\sites\$Name" -ErrorAction SilentlyContinue | Get-WebBinding
 
         #Format Binding information: Split BindingInfo into individual Properties (IPAddress:Port:HostName)
         $ActualBindingObjects = @()
@@ -602,7 +716,7 @@ function compareWebsiteBindings
     {
         $errorId = "WebsiteCompareFailure"; 
         $errorCategory = [System.Management.Automation.ErrorCategory]::InvalidResult
-        $errorMessage = $($LocalizedData.WebsiteCompareFailureError) -f ${Name} 
+        $errorMessage = "$($_.Exception.Message) / $($_.ScriptStackTrace)" 
         $exception = New-Object System.InvalidOperationException $errorMessage 
         $errorRecord = New-Object System.Management.Automation.ErrorRecord $exception, $errorId, $errorCategory, $null
 
@@ -672,7 +786,7 @@ function UpdateBindings
         {
             $errorId = "WebsiteBindingUpdateFailure"; 
             $errorCategory = [System.Management.Automation.ErrorCategory]::InvalidResult
-            $errorMessage = $($LocalizedData.WebsiteUpdateFailureError) -f ${Name} 
+			$errorMessage = "$($_.Exception.Message) / $($_.ScriptStackTrace)" 
             $exception = New-Object System.InvalidOperationException $errorMessage 
             $errorRecord = New-Object System.Management.Automation.ErrorRecord $exception, $errorId, $errorCategory, $null
 
@@ -691,7 +805,7 @@ function UpdateBindings
         {
             $errorId = "WebBindingCertifcateError"; 
             $errorCategory = [System.Management.Automation.ErrorCategory]::InvalidOperation;
-            $errorMessage = $($LocalizedData.WebBindingCertifcateError) -f ${Name} ;
+            $errorMessage = "$($_.Exception.Message) / $($_.ScriptStackTrace)" 
             $exception = New-Object System.InvalidOperationException $errorMessage ;
             $errorRecord = New-Object System.Management.Automation.ErrorRecord $exception, $errorId, $errorCategory, $null
 
@@ -729,6 +843,26 @@ function get-WebBindingObject
     return $WebBindingObject
 }
 
+# Helper function used to Update default pages of website 
+function UpdateDefaultPages
+{
+    param
+    (
+        [string] $Name,
+
+        [string[]] $DefaultPage
+    )
+
+	$allDefaultPage = @(Get-WebConfiguration //defaultDocument/files/*  -PSPath (Join-Path "IIS:\sites\" $Name) |%{Write-Output $_.value})
+
+        foreach($page in $DefaultPage )
+        {
+            if(-not ($allDefaultPage  -icontains $page))
+            {   
+		Write-Verbose("Deafult page for website $Name has been updated to $page");
+                Add-WebConfiguration //defaultDocument/files -PSPath (Join-Path "IIS:\sites\" $Name) -Value @{value = $page }
+            }
+        }
+}
+
 #endregion
-
-

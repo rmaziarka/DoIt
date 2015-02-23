@@ -25,9 +25,8 @@ SOFTWARE.
 Configuration WebServerProvision {
     param ($NodeName, $Environment, $Tokens)
 
+    Import-DSCResource -Module cIIS
     # DSC Wave resources are included in PSCI
-    Import-DSCResource -Module xWebAdministration
-    Import-DSCResource -Module cWebAdministration
     Import-DSCResource -Module xNetworking
 
     Node $NodeName {
@@ -52,7 +51,7 @@ Configuration WebServerProvision {
         }
 
         # create site on IIS
-        xWebsite MyWebsite { 
+        cWebsite MyWebsite { 
             Name   = $Tokens.WebConfig.WebsiteName
             ApplicationPool = $Tokens.WebConfig.AppPoolName 
             BindingInfo = MSFT_xWebBindingInformation { 

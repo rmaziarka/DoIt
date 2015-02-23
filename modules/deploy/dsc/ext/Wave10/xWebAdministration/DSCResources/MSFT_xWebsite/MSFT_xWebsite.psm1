@@ -37,10 +37,7 @@ function Get-TargetResource
             Throw "Please ensure that WebAdministration module is installed."
         }
 
-        if (!(Get-Module -Name WebAdministration -ErrorAction SilentlyContinue)) {
-            Import-Module -Name WebAdministration -Verbose:$false
-        }
-        $Website = Get-Item "IIS:\sites\$Name" -ErrorAction SilentlyContinue
+        $Website = Get-Website -Name $Name
 
         if ($Website.count -eq 0) # No Website exists with this name.
         {
@@ -59,7 +56,7 @@ function Get-TargetResource
                 New-CimInstance -ClassName MSFT_xWebBindingInformation -Namespace root/microsoft/Windows/DesiredStateConfiguration -Property @{Port=[System.UInt16]$BindingObject.Port;Protocol=$BindingObject.Protocol;IPAddress=$BindingObject.IPaddress;HostName=$BindingObject.Hostname;CertificateThumbprint=$BindingObject.CertificateThumbprint;CertificateStoreName=$BindingObject.CertificateStoreName} -ClientOnly
             }
 
-	   $allDefaultPage = @(Get-WebConfiguration //defaultDocument/files/*  -PSPath (Join-Path "IIS:\sites\" $Name) -ErrorAction SilentlyContinue |%{Write-Output $_.value})
+	   $allDefaultPage = @(Get-WebConfiguration //defaultDocument/files/*  -PSPath (Join-Path "IIS:\sites\" $Name) |%{Write-Output $_.value})
 
         }
         else # Multiple websites with the same name exist. This is not supported and is an error
@@ -139,12 +136,7 @@ function Set-TargetResource
         {
             Throw "Please ensure that WebAdministration module is installed."
         }
-		
-		if (!(Get-Module -Name WebAdministration -ErrorAction SilentlyContinue)) {
-            # Without explicit Import-Module on 2008 R2, Get-Item "IIS:\..." sometimes returns "a drive with the name iis does not exist"
-            Import-Module -Name WebAdministration -Verbose:$false
-        }
-        $website = Get-Item "IIS:\sites\$Name" -ErrorAction SilentlyContinue
+        $website = get-website $Name
 
         if($website -ne $null)
         {
@@ -238,7 +230,7 @@ function Set-TargetResource
                     {
                         $errorId = "WebsiteStateFailure"; 
                         $errorCategory = [System.Management.Automation.ErrorCategory]::InvalidOperation;
-                        $errorMessage = "$($_.Exception.Message) / $($_.ScriptStackTrace)"
+                        $errorMessage = $($LocalizedData.WebsiteStateFailureError) -f ${Name} ;
                         $exception = New-Object System.InvalidOperationException $errorMessage ;
                         $errorRecord = New-Object System.Management.Automation.ErrorRecord $exception, $errorId, $errorCategory, $null
 
@@ -258,7 +250,7 @@ function Set-TargetResource
                     {
                         $errorId = "WebsiteStateFailure"; 
                         $errorCategory = [System.Management.Automation.ErrorCategory]::InvalidOperation;
-                        $errorMessage = "$($_.Exception.Message) / $($_.ScriptStackTrace)"
+                        $errorMessage = $($LocalizedData.WebsiteStateFailureError) -f ${Name} ;
                         $exception = New-Object System.InvalidOperationException $errorMessage ;
                         $errorRecord = New-Object System.Management.Automation.ErrorRecord $exception, $errorId, $errorCategory, $null
 
@@ -281,13 +273,7 @@ function Set-TargetResource
         {
             try
             {
-                $newWebsiteParams = $PSBoundParameters
-                # this is a workaround for 2008 R2 - if there are no websites, a new website must be created with specific Id
-                if (!(Get-Website)) {
-                    $newWebsiteParams.Id = 1
-                }
-
-                $Website = New-Website @newWebsiteParams
+                $Website = New-Website @psboundparameters
                 $Result = Stop-Website $Website.name -ErrorAction Stop
             
                 #Clear default bindings if new bindings defined and are different
@@ -323,7 +309,7 @@ function Set-TargetResource
            {
                 $errorId = "WebsiteCreationFailure"; 
                 $errorCategory = [System.Management.Automation.ErrorCategory]::InvalidOperation;
-                $errorMessage = "$($_.Exception.Message) / $($_.ScriptStackTrace)"
+                $errorMessage = $($LocalizedData.FeatureCreationFailureError) -f ${Name} ;
                 $exception = New-Object System.InvalidOperationException $errorMessage ;
                 $errorRecord = New-Object System.Management.Automation.ErrorRecord $exception, $errorId, $errorCategory, $null
                 $PSCmdlet.ThrowTerminatingError($errorRecord);		
@@ -334,11 +320,7 @@ function Set-TargetResource
     { 
         try
         {
-            if (!(Get-Module -Name WebAdministration -ErrorAction SilentlyContinue)) {
-                Import-Module -Name WebAdministration -Verbose:$false
-            }
-            $website = Get-Item "IIS:\sites\$Name" -ErrorAction SilentlyContinue
-
+            $website = get-website $Name
             if($website -ne $null)
             {
                 Remove-website -name $Name
@@ -354,7 +336,7 @@ function Set-TargetResource
         {
             $errorId = "WebsiteRemovalFailure"; 
             $errorCategory = [System.Management.Automation.ErrorCategory]::InvalidOperation;
-            $errorMessage = "$($_.Exception.Message) / $($_.ScriptStackTrace)"
+            $errorMessage = $($LocalizedData.WebsiteRemovalFailureError) -f ${Name} ;
             $exception = New-Object System.InvalidOperationException $errorMessage ;
             $errorRecord = New-Object System.Management.Automation.ErrorRecord $exception, $errorId, $errorCategory, $null
 
@@ -399,11 +381,7 @@ function Test-TargetResource
         Throw "Please ensure that WebAdministration module is installed."
     }
 
-    if (!(Get-Module -Name WebAdministration -ErrorAction SilentlyContinue)) {
-        Import-Module -Name WebAdministration -Verbose:$false
-    }
-    $website = Get-Item "IIS:\sites\$Name" -ErrorAction SilentlyContinue
-
+    $website = Get-Website -Name $Name
     $Stop = $true
 
     Do
@@ -637,7 +615,7 @@ function compareWebsiteBindings
     #check to see if actual settings have been passed in. If not get them from website
     if($ActualBindings -eq $null)
     {
-        $ActualBindings = Get-Item "IIS:\sites\$Name" -ErrorAction SilentlyContinue | Get-WebBinding
+        $ActualBindings = Get-Website $Name | Get-WebBinding
 
         #Format Binding information: Split BindingInfo into individual Properties (IPAddress:Port:HostName)
         $ActualBindingObjects = @()
@@ -716,7 +694,7 @@ function compareWebsiteBindings
     {
         $errorId = "WebsiteCompareFailure"; 
         $errorCategory = [System.Management.Automation.ErrorCategory]::InvalidResult
-        $errorMessage = "$($_.Exception.Message) / $($_.ScriptStackTrace)" 
+        $errorMessage = $($LocalizedData.WebsiteCompareFailureError) -f ${Name} 
         $exception = New-Object System.InvalidOperationException $errorMessage 
         $errorRecord = New-Object System.Management.Automation.ErrorRecord $exception, $errorId, $errorCategory, $null
 
@@ -786,7 +764,7 @@ function UpdateBindings
         {
             $errorId = "WebsiteBindingUpdateFailure"; 
             $errorCategory = [System.Management.Automation.ErrorCategory]::InvalidResult
-			$errorMessage = "$($_.Exception.Message) / $($_.ScriptStackTrace)" 
+            $errorMessage = $($LocalizedData.WebsiteUpdateFailureError) -f ${Name} 
             $exception = New-Object System.InvalidOperationException $errorMessage 
             $errorRecord = New-Object System.Management.Automation.ErrorRecord $exception, $errorId, $errorCategory, $null
 
@@ -805,7 +783,7 @@ function UpdateBindings
         {
             $errorId = "WebBindingCertifcateError"; 
             $errorCategory = [System.Management.Automation.ErrorCategory]::InvalidOperation;
-            $errorMessage = "$($_.Exception.Message) / $($_.ScriptStackTrace)" 
+            $errorMessage = $($LocalizedData.WebBindingCertifcateError) -f ${CertificateThumbprint} ;
             $exception = New-Object System.InvalidOperationException $errorMessage ;
             $errorRecord = New-Object System.Management.Automation.ErrorRecord $exception, $errorId, $errorCategory, $null
 

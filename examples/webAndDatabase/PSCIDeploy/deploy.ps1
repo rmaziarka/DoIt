@@ -85,7 +85,7 @@ param(
 
 	[Parameter(Mandatory=$false)]
 	[string[]]
-	$Environment = 'Test',
+	$Environment = 'Default',
 
     [Parameter(Mandatory=$false)]
 	[hashtable]
