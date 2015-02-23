@@ -109,7 +109,7 @@ param(
 	$DeployType = 'All'
 )
 
-$global:ErrorActionPreference = "Stop"
+$global:ErrorActionPreference = 'Stop'
 
 try {
     ############# Initialization

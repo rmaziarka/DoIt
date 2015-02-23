@@ -67,7 +67,7 @@ param(
 	$Version = '1.0.0' # This should be passed from your CI server
 )
 
-$global:ErrorActionPreference = "Stop"
+$global:ErrorActionPreference = 'Stop'
 
 try { 
     ############# Initialization

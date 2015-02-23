@@ -67,7 +67,7 @@ param(
 	$Version = '1.0.0'
 )
 
-$global:ErrorActionPreference = "Stop"
+$global:ErrorActionPreference = 'Stop'
 
 try { 
     ############# Initialization

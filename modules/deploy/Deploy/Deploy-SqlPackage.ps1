@@ -52,6 +52,9 @@ function Deploy-SqlPackage {
     .PARAMETER QueryTimeoutInSeconds
     Sql query timeout in seconds.
 
+    .PARAMETER Mode
+    Determines how the sql is run - by sqlcmd.exe or .NET SqlCommand.
+
     .LINK
     Build-SqlScriptsPackage
 
@@ -88,7 +91,12 @@ function Deploy-SqlPackage {
 		
 		[Parameter(Mandatory=$false)]
         [int] 
-        $QueryTimeoutInSeconds
+        $QueryTimeoutInSeconds,
+
+        [Parameter(Mandatory=$false)] 
+        [string]
+        [ValidateSet($null, 'sqlcmd', '.net')]
+        $Mode
     )
 
     Write-Log -Info "Deploying SQL package '$PackageName' using connectionString '$ConnectionString'" -Emphasize
@@ -124,6 +132,7 @@ function Deploy-SqlPackage {
         $params = @{ 
             ConnectionString = $ConnectionString
             InputFile = $sqlPath
+            Mode = $Mode
         }
         if ($Credential) {
             $params.Credential = $Credential

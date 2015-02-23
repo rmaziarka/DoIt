@@ -109,7 +109,7 @@ param(
 	$DeployType = 'All'
 )
 
-$global:ErrorActionPreference = "Stop"
+$global:ErrorActionPreference = 'Stop'
 
 try {
     ############# Initialization
@@ -130,8 +130,6 @@ try {
     Initialize-ConfigurationPaths -ProjectRootPath $ProjectRootPath -PackagesPath $PackagesPath -DeployConfigurationPath $DeployConfigurationPath -ValidatePackagesPath
 	
     ############# Deployment - no custom code here, you need to put your configuration scripts under 'configuration' directory
-
-    # This will start the deployment according to configuration files from $DeployConfigurationPath
     Start-Deployment -Environment $Environment `
                      -ServerRolesFilter $ServerRolesFilter `
                      -ConfigurationsFilter $ConfigurationsFilter `

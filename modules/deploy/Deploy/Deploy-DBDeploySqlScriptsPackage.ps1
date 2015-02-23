@@ -45,6 +45,9 @@ function Deploy-DBDeploySqlScriptsPackage {
     .PARAMETER QueryTimeoutInSeconds
     Query timeout in seconds.
 
+    .PARAMETER Mode
+    Determines how the sql is run - by sqlcmd.exe or .NET SqlCommand.
+
     .EXAMPLE
     Deploy-DBDeploySqlScriptsPackage -PackageName "SqlScripts" -ConnectionString $Tokens.DatabaseConfig.DatabaseDeploymentConnectionString    
 
@@ -74,7 +77,13 @@ function Deploy-DBDeploySqlScriptsPackage {
 
         [Parameter(Mandatory=$false)]
         [int] 
-        $QueryTimeoutInSeconds = 600
+        $QueryTimeoutInSeconds = 600,
+
+        [Parameter(Mandatory=$false)] 
+        [string]
+        [ValidateSet($null, 'sqlcmd', '.net')]
+        $Mode
+
     )
 
     $configPaths = Get-ConfigurationPaths
@@ -104,6 +113,6 @@ function Deploy-DBDeploySqlScriptsPackage {
     Start-ExternalProcess -Command $DbDeployPath -ArgumentList $argumentList -Credential $Credential -FailOnStringPresence "ERROR"
 
     if (Test-Path($OutputScriptPath)) {
-        Invoke-Sql -ConnectionString $ConnectionString -InputFile $OutputScriptPath -QueryTimeoutInSeconds $QueryTimeoutInSeconds -Credential $Credential
+        Invoke-Sql -ConnectionString $ConnectionString -InputFile $OutputScriptPath -QueryTimeoutInSeconds $QueryTimeoutInSeconds -Credential $Credential -Mode $Mode
     }
 }
