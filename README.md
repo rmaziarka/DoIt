@@ -153,7 +153,7 @@ Starting the deployment to 'Test' environment:
 
 #### Where to start?
 -------------
-- Checkout the code and explore a little (note there are lot of files - [PsISEProjectExplorer](https://github.com/mgr32/PsISEProjectExplorer) might come handy).
+- Checkout the code and explore a little (note there are lot of files - [PsISEProjectExplorer](https://github.com/mgr32/PsISEProjectExplorer) might come in handy).
 - Go into `examples\webAndDatabase` directory - this is an example that builds and deploys a sample ASP.NET MVC application with Entity Framework Migrations. The application is in `SampleWebApplication` and PSCI configurations are in `PSCIDeploy`.
 - Run `.\PSCIDeploy\build.ps1` - this will create `examples\webAndDatabase\bin` directory with a package that is ready to be deployed to environments `Default` (local) or `Test`.
 - Run `.\bin\DeployScripts\deploy.ps1 -Environment Default` - this will deploy the application to localhost (will configure IIS, create and seed database and validate the application works).
