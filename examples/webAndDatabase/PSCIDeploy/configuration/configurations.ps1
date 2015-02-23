@@ -121,7 +121,7 @@ function ValidateDeploy {
 
     $url = "http://${NodeName}:$($Tokens.WebConfig.WebsitePort)"
     Write-Log -Info "Sending HTTP GET request to '$url'"
-    $result = Invoke-WebRequest -Uri $url
+    $result = Invoke-WebRequest -Uri $url -UseBasicParsing
     if ($result.StatusCode -ne 200) {
         Write-Log -Critical "Web page at $url is not available - response status code: $($result.StatusCode)."
     }
