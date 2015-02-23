@@ -50,7 +50,7 @@ function Sync-MsDeployDirectory {
         [string] 
         $SourcePath, 
 
-        [Parameter(Mandatory=$true)]
+        [Parameter(Mandatory=$false)]
         [string] 
         $DestinationDir, 
 
