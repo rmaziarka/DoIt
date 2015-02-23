@@ -8,7 +8,7 @@ PSCI is a build and deployment automation library, that provides a simple Powers
 - reliable logging mechanism throughout the whole build and deployment process - every step is logged to console, text file and event log (optionally), errors include full stack trace / script lines information and friendly messages,
 - building and deploying various types of packages (MsDeploy - e.g. ASP.NET MVC or WPF, SQL, DbDeploy, Entity Framework Migrations, SSRS, SSAS, SSIS), easily extensible with new types of packages,
 - supports several methods of tokenizing configuration files (e.g. Web.config) - directly replace tokens in files (using regex), transform using XDT (Web.<env_name>.config) or use Web Deploy parameterization,
-- supports Windows Server 2008 R2 SP1 / 7 and above (some Wave DSCs like xWebsite have been fixed to work with < Server 2012).
+- supports Windows Server 2008 R2 SP1 / 7 and above (some Wave DSCs like xWebsite have been fixed to work with < Server 2012),
 
 #### Example - web application with database
 -------------
@@ -20,7 +20,7 @@ Environment Default {
   ServerConnection WebServer -Nodes localhost
   ServerConnection DatabaseServer -Nodes localhost
   
-  ServerRole Web -Configurations WebServerProvision -ServerConnections WebServer
+  ServerRole Web -Configurations WebServerProvision,WebServerDeploy -ServerConnections WebServer
   ServerRole Database -Configurations DatabaseDeploy -ServerConnections DatabaseServer -RunRemotely
 }
 
@@ -106,9 +106,26 @@ Configuration WebServerProvision {
       } 
 }
 
-# this function will be run remotely on nodes defined in 'ServerConnection DatabaseServer' 
+# this function will be run locally (because related ServerRole has no -RunRemotely switch)
+function WebServerDeploy {
+  param ($NodeName, $Environment, $Tokens, $ConnectionParams)
+  
+  # we can run msdeploy manually from a function that is run locally
+  $msDeployParams = @{ PackageName = 'MyWebsite'
+                       PackageType = 'Web'
+                       Node = $NodeName
+                       MsDeployDestinationString = $ConnectionParams.MsDeployDestinationString
+                       Website = $Tokens.WebConfig.WebsiteName
+                       SkipDir = 'App_Data'
+                       Environment = $Environment
+					   }
+  
+   Deploy-MsDeployPackage @msdeployParams
+}
+
+# this function will be run remotely on nodes defined in 'ServerConnection DatabaseServer' (because related ServerRole has -RunRemotely switch)
 function DatabaseDeploy {
-  param ($NodeName, $Environment, $Tokens, $ConnectionParameters)
+  param ($NodeName, $Environment, $Tokens, $ConnectionParams)
   
     $databaseName = $Tokens.DatabaseConfig.DatabaseName
     $connectionString = $Tokens.DatabaseConfig.DatabaseDeploymentConnectionString
@@ -133,3 +150,11 @@ Starting the deployment to 'Test' environment:
 ```powershell
 .\deploy.ps1 -Environment Test
 ```
+
+#### Where to start?
+-------------
+- Checkout the code and explore a little (note there are lot of files - [PsISEProjectExplorer](https://github.com/mgr32/PsISEProjectExplorer) might come handy).
+- Go into `examples\webAndDatabase` directory - this is an example that builds and deploys a sample ASP.NET MVC application with Entity Framework Migrations. The application is in `SampleWebApplication` and PSCI configurations are in `PSCIDeploy`.
+- Run `.\PSCIDeploy\build.ps1` - this will create `examples\webAndDatabase\bin` directory with a package that is ready to be deployed to environments `Default` (local) or `Test`.
+- Run `.\bin\DeployScripts\deploy.ps1 -Environment Default` - this will deploy the application to localhost (will configure IIS, create and seed database and validate the application works).
+- Modify `tokensSensitive.ps1` and run `.\bin\DeployScripts\deploy.ps1 -Environment Test` - this will deploy the application to remote server.
