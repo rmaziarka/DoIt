@@ -17,21 +17,21 @@ topology.ps1 - defining what to deploy (Configurations), where and how (ServerCo
 ```powershell
 
 Environment Default {
-  ServerConnection WebServer -Nodes localhost
-  ServerConnection DatabaseServer -Nodes localhost
+    ServerConnection WebServer -Nodes localhost
+    ServerConnection DatabaseServer -Nodes localhost
   
-  ServerRole Web -Configurations WebServerProvision,WebServerDeploy -ServerConnections WebServer
-  ServerRole Database -Configurations DatabaseDeploy -ServerConnections DatabaseServer -RunRemotely
+    ServerRole Web -Configurations WebServerProvision,WebServerDeploy -ServerConnections WebServer
+    ServerRole Database -Configurations DatabaseDeploy -ServerConnections DatabaseServer -RunRemotely
 }
 
 Environment Test {
-  ServerConnection WebServer -Nodes TestWeb.local.domain -RemotingMode PSRemoting
-  ServerConnection DatabaseServer -Nodes TestDb.local.domain -RemotingMode PSRemoting
+    ServerConnection WebServer -Nodes TestWeb.local.domain -RemotingMode PSRemoting
+    ServerConnection DatabaseServer -Nodes TestDb.local.domain -RemotingMode PSRemoting
 }
 
 Environment UAT {
-  ServerConnection WebServer -Nodes UATWeb.remote.domain -RemotingMode WebDeployHandler
-  ServerConnection DatabaseServer -Nodes UATDB.remote.domain -Authentication CredSSP -Protocol HTTPS 
+    ServerConnection WebServer -Nodes UATWeb.remote.domain -RemotingMode WebDeployHandler
+    ServerConnection DatabaseServer -Nodes UATDB.remote.domain -Authentication CredSSP -Protocol HTTPS 
 }
 
 ```
@@ -40,29 +40,29 @@ tokens.ps1 - defining parameters for each environment (with inheritance):
 ```powershell
 
 Environment Default {
-  Tokens WebConfig @{
-    AppPoolName = 'TestAppPool'
-    WebsiteName = 'TestWebsite'
-    WebsitePort = 80
-    WebsitePhysicalPath = 'c:\inetpub\wwwroot\TestWebsite'
-  }
+    Tokens WebConfig @{
+      AppPoolName = 'TestAppPool'
+      WebsiteName = 'TestWebsite'
+      WebsitePort = 80
+      WebsitePhysicalPath = 'c:\inetpub\wwwroot\TestWebsite'
+    }
   
-  Tokens DatabaseConfig @{
-    ConnectionString = 'Server=${Node};Integrated Security=SSPI'
-    DropDatabase = $true
-  }
+    Tokens DatabaseConfig @{
+      ConnectionString = 'Server=${Node};Integrated Security=SSPI'
+      DropDatabase = $true
+    }
 }
 
 Environment UAT -BasedOn Default {
-  Tokens WebConfig @{
-    AppPoolName = 'UATAppPool'
-    WebsiteName = 'UATWebsite'
-    WebsitePort = 8080
-  }
+    Tokens WebConfig @{
+      AppPoolName = 'UATAppPool'
+      WebsiteName = 'UATWebsite'
+      WebsitePort = 8080
+    }
   
-  Tokens DatabaseConfig @{
-    DropDatabase = $false
-  }
+    Tokens DatabaseConfig @{
+      DropDatabase = $false
+    }
 }
 
 ```
@@ -72,60 +72,60 @@ configurations.ps1 - defining what to actually deploy on remote servers:
 
 # this DSC configuration will be applied on nodes defined in 'ServerConnection WebServer'
 Configuration WebServerProvision {
-  param ($NodeName, $Environment, $Tokens)
+    param ($NodeName, $Environment, $Tokens)
   
-  # DSC Wave resources are included in PSCI
-  Import-DSCResource -Module xWebAdministration
+    # DSC Wave resources are included in PSCI
+    Import-DSCResource -Module xWebAdministration
   
-  Node $NodeName {
-      # configure application pool
-      xWebAppPool MyWebAppPool { 
-        Name   = $Tokens.WebConfig.AppPoolName
-        Ensure = 'Present' 
-        State  = 'Started'
-      }
+    Node $NodeName {
+        # configure application pool
+        xWebAppPool MyWebAppPool { 
+            Name   = $Tokens.WebConfig.AppPoolName
+            Ensure = 'Present' 
+            State  = 'Started'
+        }
       
-      # create website directory
-      File MyWebsiteDir {
-        DestinationPath = $Tokens.WebConfig.WebsitePhysicalPath
-        Ensure = 'Present'
-        Type = 'Directory'
-      }
+        # create website directory
+        File MyWebsiteDir {
+            DestinationPath = $Tokens.WebConfig.WebsitePhysicalPath
+            Ensure = 'Present'
+            Type = 'Directory'
+        }
 
-      # create site on IIS
-      xWebsite MyWebsite { 
-        Name   = $Tokens.WebConfig.WebsiteName
-        ApplicationPool = $Tokens.WebConfig.AppPoolName 
-        BindingInfo = MSFT_xWebBindingInformation { 
-          Port = $Tokens.WebServerConfig.WebsitePort
-        } 
-        PhysicalPath = $Tokens.WebConfig.WebsitePhysicalPath
-        Ensure = 'Present' 
-        State = 'Started' 
-        DependsOn = @('[File]MyWebsiteDir')
+        # create site on IIS
+        xWebsite MyWebsite { 
+  	    Name   = $Tokens.WebConfig.WebsiteName
+            ApplicationPool = $Tokens.WebConfig.AppPoolName 
+            BindingInfo = MSFT_xWebBindingInformation { 
+                Port = $Tokens.WebServerConfig.WebsitePort
+            } 
+            PhysicalPath = $Tokens.WebConfig.WebsitePhysicalPath
+            Ensure = 'Present' 
+            State = 'Started' 
+            DependsOn = @('[File]MyWebsiteDir')
       } 
 }
 
 # this function will be run locally (because related ServerRole has no -RunRemotely switch)
 function WebServerDeploy {
-  param ($NodeName, $Environment, $Tokens, $ConnectionParams)
+    param ($NodeName, $Environment, $Tokens, $ConnectionParams)
   
-  # we can run msdeploy manually from a function that is run locally
-  $msDeployParams = @{ PackageName = 'MyWebsite'
-                       PackageType = 'Web'
-                       Node = $NodeName
-                       MsDeployDestinationString = $ConnectionParams.MsDeployDestinationString
-                       Website = $Tokens.WebConfig.WebsiteName
-                       SkipDir = 'App_Data'
-                       Environment = $Environment
-					   }
+    # we can run msdeploy manually from a function that is run locally
+    $msDeployParams = @{ PackageName = 'MyWebsite'
+                         PackageType = 'Web'
+                         Node = $NodeName
+                         MsDeployDestinationString = $ConnectionParams.MsDeployDestinationString
+                         Website = $Tokens.WebConfig.WebsiteName
+                         SkipDir = 'App_Data'
+                         Environment = $Environment
+                       }
   
-   Deploy-MsDeployPackage @msdeployParams
+    Deploy-MsDeployPackage @msdeployParams
 }
 
 # this function will be run remotely on nodes defined in 'ServerConnection DatabaseServer' (because related ServerRole has -RunRemotely switch)
 function DatabaseDeploy {
-  param ($NodeName, $Environment, $Tokens, $ConnectionParams)
+    param ($NodeName, $Environment, $Tokens, $ConnectionParams)
   
     $databaseName = $Tokens.DatabaseConfig.DatabaseName
     $connectionString = $Tokens.DatabaseConfig.DatabaseDeploymentConnectionString
