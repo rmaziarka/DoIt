@@ -67,14 +67,14 @@ Configuration WebServerProvision {
             WebsiteName =  $Tokens.WebServerProvision.WebsiteName
             Ensure = 'Present'
             AuthenticationMethod = 'Windows'
-            DependsOn = @('[xWebSite]PSCIWebsite')
+            DependsOn = @('[cWebsite]PSCIWebsite')
         }
 
         cIISWebsiteAuthentication PSCIWebsiteAnonymousAuth {
             WebsiteName =  $Tokens.WebServerProvision.WebsiteName
             Ensure = 'Present'
             AuthenticationMethod = 'Anonymous'
-            DependsOn = @('[xWebSite]PSCIWebsite')
+            DependsOn = @('[cWebsite]PSCIWebsite')
         }
 
     }
