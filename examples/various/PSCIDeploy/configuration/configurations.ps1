@@ -34,7 +34,7 @@ Configuration WebServerProvision {
     
     Import-DSCResource -Module xWebAdministration
     Import-DSCResource -Module cWebAdministration
-    Import-DSCResource -Module cPSCI
+    Import-DSCResource -Module cIIS
 
     Node $NodeName {
 

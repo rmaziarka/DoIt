@@ -24,12 +24,12 @@ SOFTWARE.
 
 @{
 ModuleVersion = '1.0.0'
-GUID = 'e9e42273-23e9-4435-b836-9e54cc66408b'
+GUID = '3D8E27FE-9B75-44D9-B9C4-C5B691DC9550'
 
 Author = 'mgrzywa'
 CompanyName = 'Objectivity Bespoke Software Specialists'
 Copyright = '(c) 2015 Objectivity Bespoke Software Specialists'
 
-Description = 'Module containing custom PSCI DSC resources.'
+Description = 'Module containing custom PSCI DSC resources for transforming machine.config file.'
 
 }
