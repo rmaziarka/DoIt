@@ -65,17 +65,26 @@ function Sync-MsDeployDirectory {
 
     $params = @(
         "-verb:sync",
-        "-dest:dirPath='$DestinationDir',$DestString",
         "-useCheckSum"
     )
 
     if (Test-Path -Path $SourcePath -PathType Leaf) {
         $params += "-source:package='$SourcePath'"
+        if ($DestinationDir) {
+            $params += "-dest:contentPath='$DestinationDir',$DestString"
+        }
     } else {
         $params += "-source:dirPath='$SourcePath'"
+        if ($DestinationDir) { 
+            $params += "-dest:dirPath='$DestinationDir',$DestString"
+        }
     }
+
+    if (!$DestinationDir) {
+        $params += @("-dest:auto,$DestString")
+    }
+
     if ($AddParameters) {
-        # SuppressScriptCop - adding small arrays is ok
         $params += $AddParameters
     }
     Start-MsDeploy -Params $params

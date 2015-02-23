@@ -131,7 +131,7 @@ function Start-DeploymentByMSDeploy {
 
     if (!$CopyPackages) {
         $postDeploymentScript = "-skip:Directory=`".`" "
-        $tempSrcPath = New-Item -Path (Join-Path -Path ([IO.Path]::GetTempPath()) -ChildPath 'MsDeployDummy') -ItemType Directory
+        $tempSrcPath = New-Item -Path (Join-Path -Path ([IO.Path]::GetTempPath()) -ChildPath 'MsDeployDummy') -ItemType Directory -Force
         Write-Log -Info "Running '$($PackageDirectory)\DeployScripts\deploy.ps1' at '$($RunOnConnectionParams.NodesAsString)' using $($RunOnConnectionParams.RemotingMode)" -Emphasize
     } else {
         $configPaths = Get-ConfigurationPaths
@@ -146,7 +146,7 @@ function Start-DeploymentByMSDeploy {
 
     $postDeploymentScript += "-PostSync:runCommand='powershell -Command `"Set-Location -Path '{0}'; `$Global:PSCIRemotingMode = '{1}'; & {2}`"',dontUseCommandExe=true,waitInterval=2147483647,waitAttempts=1" -f $PackageDirectory, $RunOnConnectionParams.RemotingMode, $deployScript
 
-    Sync-MsDeployWebPackage -PackagePath $tempSrcPath -DestinationDir $PackageDirectory -DestString $msDeployDestinationString -AddParameters @($postDeploymentScript)
+    Sync-MsDeployDirectory -SourcePath $tempSrcPath -DestinationDir $PackageDirectory -DestString $msDeployDestinationString -AddParameters @($postDeploymentScript)
                     
-    [void](Remove-Item -Path $tempSrcPath -Force -ErrorAction SilentlyContinue)
+    [void](Remove-Item -Path $tempSrcPath -Force -Recurse -ErrorAction SilentlyContinue)
 }

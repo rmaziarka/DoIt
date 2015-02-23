@@ -50,7 +50,6 @@ Export-ModuleMember -Function `
     Update-TokensInAllFiles, `
     Update-TokensInZipFile, `
     Sync-MsDeployDirectory, `
-    Sync-MsDeployWebPackage, `
     Get-SSRSProjectConfiguration, `
     New-SSRSDataSet, `
     New-SSRSDataSource, `

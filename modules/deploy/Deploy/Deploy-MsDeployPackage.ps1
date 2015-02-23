@@ -227,7 +227,7 @@ function Deploy-MsDeployPackage {
         }
 
         Write-Log -Info "Deploying web package '$PackageName' to server '$Node'" -Emphasize
-        Sync-MsDeployWebPackage -PackagePath $packageCopyPath -DestString $MsDeployDestinationString -AddParameters $MsDeployAddParameters
+        Sync-MsDeployDirectory -SourcePath $packageCopyPath -DestString $MsDeployDestinationString -AddParameters $MsDeployAddParameters
     } elseif ($PackageType -eq "Dir") {
         Write-Log -Info "Deploying directory package '$PackageName' to server '$Node'" -Emphasize
         $tempDir = New-TempDirectory
