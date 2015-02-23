@@ -48,7 +48,7 @@ Describe -Tag "PSCI.unit" "Get-DscResourcesPaths" {
 
         Context "when supplied with some ModuleNames" {
 
-            $moduleNames = @('xWebAdministration', 'cPSCI', 'cWebAdministration') | Sort
+            $moduleNames = @('xWebAdministration', 'cIIS', 'cWebAdministration') | Sort
             $result = Get-DscResourcesPaths -ModuleNames $moduleNames
 
             It "should return proper paths" {

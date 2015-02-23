@@ -34,7 +34,7 @@ function Get-DscResourcesPaths {
     Array of objects containing Name, SrcPath and DstPath properties.
 
     .EXAMPLE
-    $dscModulesInfo = Get-DscResourcesPaths -ModuleNames @('xWebAdministration', 'cPSCI')
+    $dscModulesInfo = Get-DscResourcesPaths -ModuleNames @('xWebAdministration', 'cIIS')
     #>
 
 	[CmdletBinding()]

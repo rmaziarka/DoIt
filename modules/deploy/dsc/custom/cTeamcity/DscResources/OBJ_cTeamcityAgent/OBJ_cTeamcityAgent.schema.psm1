@@ -75,7 +75,8 @@ Configuration cTeamCityAgent {
 
     )
 
-    Import-DSCResource -Module cPsci -Name OBJ_cTeamcityAgentSettings, OBJ_cArchive7zip
+    Import-DSCResource -Module cTeamcity -Name OBJ_cTeamcityAgentSettings
+    Import-DSCResource -Module c7zip -Name OBJ_cArchive7zip
     #Import-DSCResource -Module PowershellAccessControl -Name PowerShellAccessControl_cAccessControlEntry
     Import-DSCResource -Module xNetworking -Name MSFT_xFirewall
     Import-DSCResource -Module xPSDesiredStateConfiguration -Name MSFT_xServiceResource
