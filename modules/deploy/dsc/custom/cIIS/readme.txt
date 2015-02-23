@@ -1,4 +1,6 @@
-OBJ_cWebsite - copied from xWebsite (wave 10 - https://gallery.technet.microsoft.com/scriptcenter/DSC-Resource-Kit-All-c449312d), with following modifications:
+OBJ_cWebApplication - copied from xWebApplication (wave 10 - https://gallery.technet.microsoft.com/scriptcenter/DSC-Resource-Kit-All-c449312d),
+
+OBJ_cWebsite - copied from xWebsite with following modifications:
     - Each "Get-Website $Name" invocation replaced with "Get-Item "IIS:\sites\$Name" due to known IIS7 Get-Website bug where parameter -Name is ignored, see http://forums.iis.net/p/1167298/1943273.aspxm
     - New-Website workaround for Windows 2008 R2 - see comment 'this is a workaround for 2008 R2'
     - Fixed exception messages - if $PSCmdlet.ThrowTerminatingError is invoked from 'catch' block, its error message is "$($_.Exception.Message) / $($_.ScriptStackTrace)" instead of a generic message without any information about the original exception.
