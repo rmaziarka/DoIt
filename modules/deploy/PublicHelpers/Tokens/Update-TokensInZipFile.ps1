@@ -55,6 +55,9 @@ function Update-TokensInZipFile {
     .PARAMETER TokenRegex
     Regex to use for searching tokens in the found files.
 
+    .PARAMETER PreserveTransformFiles
+    If $true, transform files will not be deleted from archive.
+
     .EXAMPLE
     Update-TokensInZipFile -ZipFile $packageZipPath -Tokens $Tokens
     #>
@@ -96,7 +99,11 @@ function Update-TokensInZipFile {
 
         [Parameter(Mandatory=$false)]
         [string] 
-        $TokenRegex = '\$\{(\w+)\}'
+        $TokenRegex = '\$\{(\w+)\}',
+
+        [Parameter(Mandatory=$false)]
+        [switch] 
+        $PreserveTransformFiles
     )
 
     if (!(Test-Path -Path $ZipFile -PathType Leaf)) {
@@ -132,29 +139,30 @@ function Update-TokensInZipFile {
         }
 
         # Run XDT transform where applicable
-        if ($Environment) {
-            $xdtTransformConfigs = $configFileEntries | Where-Object { $_.Name -imatch $TokenEnvironmentRegex }
-            Write-Log -Info "Found $($xdtTransformConfigs.Count) XDT transform files."
+        $xdtTransformConfigs = $configFileEntries | Where-Object { $_.Name -imatch $TokenEnvironmentRegex } | Sort-Object -Property { $_.Name -imatch '\.Default\.' }, { $_.Name }
+        Write-Log -Info "Found $($xdtTransformConfigs.Count) XDT transform files."
             
-            foreach ($xdtTransformConfig in $xdtTransformConfigs) {
-                $xdtTransformConfig.Name -imatch $TokenEnvironmentRegex
-                $fileName = $Matches[0]
-                $envName = $Matches[1]
+        foreach ($xdtTransformConfig in $xdtTransformConfigs) {
+            $xdtTransformConfig.Name -imatch $TokenEnvironmentRegex
+            $fileName = $Matches[0]
+            $envName = $Matches[1]
 
-                if ($envName -ieq $Environment) {
-                    $fileToTransformName = $fileName -ireplace "$envName\.", ''
-                    $fileToTransformFullName = Join-Path -Path (Split-Path -Parent $xdtTransformConfig.FullName) -ChildPath $fileToTransformName
-                    $fileToTransformFullName = $fileToTransformFullName -replace '\\', '/'
-                    $fileToTransform = $configFileEntries | Where-Object { $_.FullName -ieq $fileToTransformFullName }
-                    if (!$fileToTransform) {
-                        Write-Log -Critical "Can't find file '$fileToTransformFullName' in the archive - required for XDT transform '$($xdtTransformConfig.FullName)'"
-                    }
-                    Convert-XmlUsingXdtInArchive -ZipArchive $zipArchive -EntryToTransform $fileToTransform -EntryXdt $xdtTransformConfig 
-                } 
+            if ($envName -ieq 'Default' -or $envName -ieq $Environment) {
+                $fileToTransformName = $fileName -ireplace "$envName\.", ''
+                $fileToTransformFullName = Join-Path -Path (Split-Path -Parent $xdtTransformConfig.FullName) -ChildPath $fileToTransformName
+                $fileToTransformFullName = $fileToTransformFullName -replace '\\', '/'
+                $fileToTransform = $configFileEntries | Where-Object { $_.FullName -ieq $fileToTransformFullName }
+                if (!$fileToTransform) {
+                    Write-Log -Critical "Can't find file '$fileToTransformFullName' in the archive - required for XDT transform '$($xdtTransformConfig.FullName)'"
+                }
+                Convert-XmlUsingXdtInArchive -ZipArchive $zipArchive -EntryToTransform $fileToTransform -EntryXdt $xdtTransformConfig 
+            } 
+            if (!$PreserveTransformFiles) {
                 Write-Log -Info "Removing XDT transform file '$($xdtTransformConfig.FullName)'"
                 $xdtTransformConfig.Delete()
             }
         }
+        
 
     } finally {
         

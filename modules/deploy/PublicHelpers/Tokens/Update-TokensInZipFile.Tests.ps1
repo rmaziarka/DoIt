@@ -22,7 +22,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 #>
 
-Import-Module -Name "$PSScriptRoot\..\..\..\..\PSCI.psm1"
+Import-Module -Name "$PSScriptRoot\..\..\..\..\PSCI.psm1" -Force
 
 Describe -Tag "PSCI.unit" "Update-TokensInZipFile" {
     InModuleScope PSCI.deploy {
@@ -65,10 +65,29 @@ Describe -Tag "PSCI.unit" "Update-TokensInZipFile" {
             }
         }
 
-        Context "when invoked for .zip with 4 .config files inside and no Environment" {
+        Context "when invoked with no Environment for .zip with 4 .config files inside" {
             
             $global:deletedFiles = @()
             Update-TokensInZipFile -ZipFile 'test.zip' -OutputFile 'test_out.zip' -Tokens @{ }
+
+            It "Update-TokensInStream should be invoked 4 times" {
+                Assert-MockCalled Update-TokensInStream -Exactly 4
+            }
+
+            It "It should not run Convert-XmlUsingXdtInArchive" {
+                Assert-MockCalled Convert-XmlUsingXdtInArchive -Exactly 0
+            }
+
+             It "It should delete 2 files from archive" {
+                # x.DEV.config, x.TEST.config
+                $global:deletedFiles.Count | Should Be 2
+            }
+        }
+
+        Context "when invoked with no Environment and -PreserveTransformFiles for .zip with 4 .config files inside" {
+            
+            $global:deletedFiles = @()
+            Update-TokensInZipFile -ZipFile 'test.zip' -OutputFile 'test_out.zip' -Tokens @{ } -PreserveTransformFiles
 
             It "Update-TokensInStream should be invoked 4 times" {
                 Assert-MockCalled Update-TokensInStream -Exactly 4

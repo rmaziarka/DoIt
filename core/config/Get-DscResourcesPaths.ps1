@@ -56,8 +56,13 @@ function Get-DscResourcesPaths {
     # note: $Env:ProgramFiles gives Program Files (x86) if running Powershell x86...
     $baseDestPath = Join-Path -Path 'C:\Program Files' -ChildPath 'WindowsPowerShell\Modules'
 
-    $modulesExternal = @(Join-Path -Path $baseDscDir -ChildPath 'ext\*\*' | Get-ChildItem -Directory | Where-Object { $ModuleNames -icontains $_.Name })
-    $modulesCustom = @(Join-Path -Path $baseDscDir -ChildPath 'custom' | Get-ChildItem -Directory | Where-Object { $ModuleNames -icontains $_.Name })
+    
+    if ((Test-Path -Path (Join-Path -Path $baseDscDir -ChildPath 'ext'))) { 
+        $modulesExternal = @(Join-Path -Path $baseDscDir -ChildPath 'ext\*\*' | Get-ChildItem -Directory | Where-Object { $ModuleNames -icontains $_.Name })
+    }
+    if ((Test-Path -Path (Join-Path -Path $baseDscDir -ChildPath 'custom'))) {
+        $modulesCustom = @(Join-Path -Path $baseDscDir -ChildPath 'custom' | Get-ChildItem -Directory | Where-Object { $ModuleNames -icontains $_.Name })
+    }
 
     $foundModules = ($modulesExternal + $modulesCustom) | Sort -Property Name
     if ($foundModules.Count -lt $ModuleNames.Count) {

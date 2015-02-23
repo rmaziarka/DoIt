@@ -49,11 +49,11 @@ Environment Test {
     ServerConnection WebServer -Nodes { $Tokens.Topology.Nodes } -RemotingMode WebDeployHandler
     ServerConnection DatabaseServer -BasedOn WebServer
 
-    ConfigurationSettings WebServerProvision -RunRemotely
+    ServerRole Web -RunRemotely
 }
 
-Environment UAT {
-    # this server just as an example
+Environment UAT -BasedOn Test {
+    # this serves just as an example
     ServerConnection DatabaseServer -Nodes UATDB.remote.domain -Authentication CredSSP -Protocol HTTPS 
 }
 

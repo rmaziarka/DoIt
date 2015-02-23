@@ -33,6 +33,12 @@ Describe -Tag "PSCI.unit" "New-DeploymentPlan" {
         function config4 {}
 
         Mock Get-ConfigurationPaths { return @{ PackagesPath = '.' } }
+        Mock Write-Log { 
+            Write-Host $Message
+            if ($Critical) {
+                throw $Message
+            }
+        }
 
         Configuration dsc1 {
             param ($NodeName, $Environment, $Tokens)
@@ -381,6 +387,29 @@ Describe -Tag "PSCI.unit" "New-DeploymentPlan" {
                     $deploymentPlan[1].ConnectionParams.Nodes[0] | Should Be 'node2'
                     $deploymentPlan[1].RunOnConnectionParams | Should Be $null
                     $deploymentPlan[1].IsLocalRun | Should Be $false
+                }
+            } finally {
+                Remove-Item -Path 'dscOutput' -Force -Recurse -ErrorAction SilentlyContinue
+            }
+        }
+
+         Context "when used with DSC configuration and WebDeploy handler" {
+            try { 
+                Initialize-Deployment
+
+                Environment Test1 {
+                    ServerRole Web -Configurations 'dsc1' -ServerConnections (ServerConnection WebServers -Nodes @('node1', 'node2') -RemotingMode WebDeployHandler)
+                }
+                
+                $fail = $false
+                try { 
+                    $deploymentPlan = New-DeploymentPlan -AllEnvironments $Global:Environments -Environment 'Test1' -DscOutputPath 'dscOutput'
+                } catch {
+                    $fail = $true
+                }
+
+                It "should throw exception" {
+                    $fail | Should Be $true
                 }
             } finally {
                 Remove-Item -Path 'dscOutput' -Force -Recurse -ErrorAction SilentlyContinue
