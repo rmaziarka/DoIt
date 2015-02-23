@@ -66,7 +66,7 @@ function Initialize-ConfigurationPaths {
     $configPaths = [PSCustomObject]@{
         ProjectRootPath = $null
         PackagesPath = $null
-        PackagesExist = $false
+        PackagesContainDeployScripts = $false
         DeployConfigurationPath = $null
         DeployScriptsPath = (Get-Location).Path
     }
@@ -87,7 +87,7 @@ function Initialize-ConfigurationPaths {
     } 
 
     # PackagesPath - if not empty validate it exists (if -ValidatePackagesPath), then check if DeployScripts/PSCI subdirectories exist
-    $packagesValidLog = ''
+    $packagesLog = ''
     if ($PackagesPath) {
         if (![System.IO.Path]::IsPathRooted($PackagesPath)) {
             $configPaths.PackagesPath = Join-Path -Path ($configPaths.ProjectRootPath) -ChildPath $PackagesPath
@@ -109,16 +109,16 @@ function Initialize-ConfigurationPaths {
                 $packagesNotExisting += 'PSCI'
             }
             if (!$packagesNotExisting) {
-                $packagesValidLog = '[valid]'
+                $packagesLog = '[full]'
             } else {
-                Write-Log -Critical ("Packages directory '$($configPaths.PackagesPath)' does not contain {0}. Please ensure it's a valid PSCI package." -f ($packagesNotExisting -join ' and '))
+                $packagesLog = '[without {0}]' -f ($packagesNotExisting -join ' and ')
             }
-            $configPaths.PackagesExist = !$packagesNotExisting
+            $configPaths.PackagesContainDeployScripts = !$packagesNotExisting
         }
     } else {
         $configPaths.PackagesPath = (Get-Location).Path
         if ($ValidatePackagesPath) {
-            $packagesValidLog = '[packageless mode]'
+            $packagesLog = '[packageless mode]'
         }
     }
 
@@ -150,5 +150,5 @@ function Initialize-ConfigurationPaths {
     $Global:PSCIGlobalConfiguration.ConfigurationPaths = $configPaths
 
     Write-Log -Info -Message ("Using following configuration paths: `nProjectRootPath         = {0}`nPackagesPath            = {1} {2}`nDeployConfigurationPath = {3}" -f `
-        $configPaths.ProjectRootPath, $configPaths.PackagesPath, $packagesValidLog, $configPaths.DeployConfigurationPath)
+        $configPaths.ProjectRootPath, $configPaths.PackagesPath, $packagesLog, $configPaths.DeployConfigurationPath)
 }

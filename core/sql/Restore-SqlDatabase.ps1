@@ -78,4 +78,3 @@ function Restore-SqlDatabase {
     $parameters += @{ "Path" = $Path }
     [void](Invoke-Sql -ConnectionString $ConnectionString -InputFile $sqlScript -SqlCmdVariables $parameters -Credential $Credential -QueryTimeoutInSeconds $QueryTimeoutInSeconds -IgnoreInitialCatalog)
 }
-

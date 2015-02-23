@@ -44,7 +44,7 @@ param(
 <# Get-ConfigurationPaths returns an object with the following properties:
    ProjectRootPath         - base directory of the project, relative to the directory where this script resides (it is used as a base directory for other directories)
    PackagesPath            - path to directory with packages
-   PackagesExist           - $true if $PackagesPath exists and is valid PSCI package
+   PackagesContainDeployScripts - $true if $PackagesPath exists and contains DeployScripts / PSCI
    DeployConfigurationPath - path to directory with configuration files
    DeployScriptsPath       - path to directory with deploy.ps1
 #>
