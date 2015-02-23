@@ -56,7 +56,7 @@ function Get-TargetResource
             $CimBindings = foreach ($binding in $bindings)
             {
                 $BindingObject = get-WebBindingObject -BindingInfo $binding
-                New-CimInstance -ClassName MSFT_xWebBindingInformation -Namespace root/microsoft/Windows/DesiredStateConfiguration -Property @{Port=[System.UInt16]$BindingObject.Port;Protocol=$BindingObject.Protocol;IPAddress=$BindingObject.IPaddress;HostName=$BindingObject.Hostname;CertificateThumbprint=$BindingObject.CertificateThumbprint;CertificateStoreName=$BindingObject.CertificateStoreName} -ClientOnly
+                New-CimInstance -ClassName OBJ_cWebBindingInformation -Namespace root/microsoft/Windows/DesiredStateConfiguration -Property @{Port=[System.UInt16]$BindingObject.Port;Protocol=$BindingObject.Protocol;IPAddress=$BindingObject.IPaddress;HostName=$BindingObject.Hostname;CertificateThumbprint=$BindingObject.CertificateThumbprint;CertificateStoreName=$BindingObject.CertificateStoreName} -ClientOnly
             }
 
 	   $allDefaultPage = @(Get-WebConfiguration //defaultDocument/files/*  -PSPath (Join-Path "IIS:\sites\" $Name) -ErrorAction SilentlyContinue |%{Write-Output $_.value})

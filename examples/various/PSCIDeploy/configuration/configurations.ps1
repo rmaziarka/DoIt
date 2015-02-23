@@ -54,7 +54,7 @@ Configuration WebServerProvision {
             Name   = $Tokens.WebServerProvision.WebsiteName
 			ApplicationPool = $Tokens.WebServerProvision.AppPoolName 
             Ensure = 'Present' 
-            BindingInfo = MSFT_xWebBindingInformation { 
+            BindingInfo = OBJ_cWebBindingInformation { 
                             Port = $Tokens.WebServerProvision.WebsitePort
                         } 
             PhysicalPath = $Tokens.WebServerProvision.WebsitePhysicalPath
