@@ -113,6 +113,10 @@ function Invoke-Sql {
         $IgnoreInitialCatalog
     ) 
 
+    if (!$Mode) {
+        $Mode = '.net'
+    }
+
     if (!$Query -and !$InputFile) {
         Write-Log -Critical 'Missing -Query or -InputFile parameter'
     }
