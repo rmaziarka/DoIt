@@ -28,6 +28,7 @@ Configuration WebServerProvision {
     # DSC Wave resources are included in PSCI
     Import-DSCResource -Module xWebAdministration
     Import-DSCResource -Module cWebAdministration
+    Import-DSCResource -Module xNetworking
 
     Node $NodeName {
 
@@ -37,7 +38,7 @@ Configuration WebServerProvision {
         cAppPool $Tokens.WebConfig.AppPoolName { 
             Name   = $Tokens.WebConfig.AppPoolName
             Ensure = 'Present'
-            AutoStart  = $true
+            AutoStart = $true
             StartMode = 'AlwaysRunning'
             ManagedRuntimeVersion = 'v4.0'
             IdentityType = 'ApplicationPoolIdentity'
@@ -61,6 +62,22 @@ Configuration WebServerProvision {
             Ensure = 'Present' 
             State = 'Started' 
             DependsOn = @('[File]MyWebsiteDir')
+        }
+
+        # you can write normal statements inside Configuration - for instance if you want to conditionally include a resource
+        if ($Environment -ine 'Default' -and $Environment -ine 'Local') {
+            xFirewall MyWebsiteFirewall {
+                Name = 'MyWebsite'
+                DisplayName = 'MyWebsite' 
+                Ensure = 'Present' 
+                Access = 'Allow' 
+                State = 'Enabled'
+                LocalPort = "$($Tokens.WebConfig.WebsitePort)"
+                RemotePort = 'Any'
+                Profile = 'Any'
+                Direction = 'InBound'
+                Protocol = 'TCP'
+            }
         }
     }
 }
