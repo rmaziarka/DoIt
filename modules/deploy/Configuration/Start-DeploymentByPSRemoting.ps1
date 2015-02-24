@@ -166,7 +166,7 @@ function Start-DeploymentByPSRemoting {
     Write-Log -Info "Running `"$deployScript`" using $($RunOnConnectionParams.RemotingMode) on `"$($RunOnConnectionParams.NodesAsString)`""
     $psSessionParams = $RunOnConnectionParams.PSSessionParams
     $result = Invoke-Command @psSessionParams -ScriptBlock $scriptBlock -ArgumentList $PackageDirectory, $deployScript, $RunOnConnectionParams.RemotingMode
-    if ($result -ne 'success') {
+    if ($result -inotmatch 'success$') {
         Write-Log -Critical "Remote invocation failed: $result"
     }
 }
