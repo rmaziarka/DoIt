@@ -144,6 +144,7 @@ function Start-DeploymentByPSRemoting {
        $tokensOverrideString = Convert-HashtableToString -Hashtable $TokensOverride
        $deployScript += " -TokensOverride {0}" -f $tokensOverrideString
     }
+    $deployScript += ' -ProjectRootPath .. -PSCILibraryPath PSCI -PackagesPath .'
 
     $scriptBlock = {
         param(
@@ -164,8 +165,8 @@ function Start-DeploymentByPSRemoting {
 
     Write-Log -Info "Running `"$deployScript`" using $($RunOnConnectionParams.RemotingMode) on `"$($RunOnConnectionParams.NodesAsString)`""
     $psSessionParams = $RunOnConnectionParams.PSSessionParams
-    $success = Invoke-Command @psSessionParams -ScriptBlock $scriptBlock -ArgumentList $PackageDirectory, $deployScript, $RunOnConnectionParams.RemotingMode
-    if (!$success) {
-        Write-Log -Critical 'Remote invocation failed.'
+    $result = Invoke-Command @psSessionParams -ScriptBlock $scriptBlock -ArgumentList $PackageDirectory, $deployScript, $RunOnConnectionParams.RemotingMode
+    if ($result -ne 'success') {
+        Write-Log -Critical "Remote invocation failed: $result"
     }
 }

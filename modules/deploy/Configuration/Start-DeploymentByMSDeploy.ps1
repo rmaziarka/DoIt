@@ -126,6 +126,7 @@ function Start-DeploymentByMSDeploy {
        $tokensOverrideString = Convert-HashtableToString -Hashtable $TokensOverride
        $deployScript += " -TokensOverride {0}" -f $tokensOverrideString
     }
+    $deployScript += ' -ProjectRootPath .. -PSCILibraryPath PSCI -PackagesPath .'
   
     $msDeployDestinationString = $RunOnConnectionParams.MsDeployDestinationString
 

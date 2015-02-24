@@ -52,7 +52,7 @@ function Clear-DscCache {
         $DscNamespace = 'root/Microsoft/Windows/DesiredStateConfiguration'
         Get-Process -Name WmiPrvSE -erroraction SilentlyContinue | Stop-Process -force 
 
-        Get-WmiObject -Namespace $DscNamespace -List -Class tmp* | ForEach-Object { (Get-wmiobject -Namespace $DscNamespace -list -Class $_).psbase.delete() }
+        Get-WmiObject -Namespace $DscNamespace -List -Class tmp* | ForEach-Object { (Get-wmiobject -Namespace $DscNamespace -list -Class $_.Name).psbase.delete() }
     }
 
     if (!$ConnectionParams) { 
