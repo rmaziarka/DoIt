@@ -137,25 +137,6 @@ function Resolve-Tokens {
     $resolvedTokens.Common.Node = $Node
     $resolvedTokens.Common.Environment = $Environment
 
-    # resolve each string token    
-    foreach ($category in $resolvedTokens.Keys) {
-        $tokensCatKeys = @()
-        # SuppressScriptCop - adding small arrays is ok
-        $resolvedTokens[$category].Keys | Foreach-Object { $tokensCatKeys += $_ }
-
-        foreach ($tokenKey in $tokensCatKeys) {
-            $tokenValue = $resolvedTokens[$category][$tokenKey]
-
-            if ($tokenValue -and $tokenValue.GetType().FullName -eq "System.String") {
-                $newValue = Resolve-Token -Name $tokenKey -Value $tokenValue -ResolvedTokens $resolvedTokens -Category $category
-
-                if ($newValue -ne $tokenValue) {
-                    $resolvedTokens[$category][$tokenKey] = $newValue
-                }
-            }
-        }
-    }
-
     # resolve each scriptblock token
     foreach ($category in $resolvedTokens.Keys) {
         $tokensCatKeys = @()
@@ -172,6 +153,24 @@ function Resolve-Tokens {
                     Write-Log -Critical ("Cannot evaluate token '$Environment / $category / $tokenKey'. Error message: {0} / token value: {{ {1} }}" -f $_.Exception.Message, $tokenValue)
                 }
                 $resolvedTokens[$category][$tokenKey] = $newValue
+            }
+        }
+    }
+
+    # resolve each string token    
+    foreach ($category in $resolvedTokens.Keys) {
+        $tokensCatKeys = @()
+        $resolvedTokens[$category].Keys | Foreach-Object { $tokensCatKeys += $_ }
+
+        foreach ($tokenKey in $tokensCatKeys) {
+            $tokenValue = $resolvedTokens[$category][$tokenKey]
+
+            if ($tokenValue -and $tokenValue.GetType().FullName -eq "System.String") {
+                $newValue = Resolve-Token -Name $tokenKey -Value $tokenValue -ResolvedTokens $resolvedTokens -Category $category
+
+                if ($newValue -ne $tokenValue) {
+                    $resolvedTokens[$category][$tokenKey] = $newValue
+                }
             }
         }
     }
