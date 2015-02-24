@@ -137,6 +137,26 @@ function Resolve-Tokens {
     $resolvedTokens.Common.Node = $Node
     $resolvedTokens.Common.Environment = $Environment
 
+    # TODO: we need to first resolve each string token, then each scriptblock token, and then string token again
+    # (consider { '${tokenName}' }. This is copy-pasted now... fix me! 
+    # resolve each string token    
+    foreach ($category in $resolvedTokens.Keys) {
+        $tokensCatKeys = @()
+        $resolvedTokens[$category].Keys | Foreach-Object { $tokensCatKeys += $_ }
+
+        foreach ($tokenKey in $tokensCatKeys) {
+            $tokenValue = $resolvedTokens[$category][$tokenKey]
+
+            if ($tokenValue -and $tokenValue.GetType().FullName -eq "System.String") {
+                $newValue = Resolve-Token -Name $tokenKey -Value $tokenValue -ResolvedTokens $resolvedTokens -Category $category
+
+                if ($newValue -ne $tokenValue) {
+                    $resolvedTokens[$category][$tokenKey] = $newValue
+                }
+            }
+        }
+    }
+
     # resolve each scriptblock token
     foreach ($category in $resolvedTokens.Keys) {
         $tokensCatKeys = @()
