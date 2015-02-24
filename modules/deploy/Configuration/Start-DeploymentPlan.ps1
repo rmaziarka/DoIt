@@ -83,7 +83,15 @@ function Start-DeploymentPlan {
     if (!$PSCIGlobalConfiguration.RemotingMode) {
         Write-Log -Info '[START] ACTUAL DEPLOYMENT' -Emphasize
     }
+
+    $configPaths = Get-ConfigurationPaths
     
+    # When 'DeployScripts' and 'PSCI' directories are not found in the package, and there is at least one RunOn/RunRemotely in deployment plan,
+    # we need to create a temporary package and copy configuration files to 'DeployScripts' and PSCI to PSCI.
+    if (!$configPaths.PackagesContainDeployScripts -and !$PSCIGlobalConfiguration.RemotingMode -and ($DeploymentPlan | Where { $_.RunOnConnectionParams })) {
+        Build-TemporaryPackage
+    }
+
     # Group deployment plan entries by RunOnConnectionParams and PackageDirectory
     if (!$PSCIGlobalConfiguration.RemotingMode) { 
         $planByRunOn = Group-DeploymentPlan -DeploymentPlan $DeploymentPlan -GroupByRunOnConnectionParamsAndPackage -PreserveOrder

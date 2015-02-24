@@ -156,11 +156,6 @@ function Start-Deployment {
     }
 
     if (!$ValidateOnly) {
-        # When 'DeployScripts' and 'PSCI' directories are not found in the package, and there is at least one RunOn/RunRemotely in deployment plan,
-        # we need to create a temporary package and copy configuration files to 'DeployScripts' and PSCI to PSCI.
-        if (!$configPaths.PackagesContainDeployScripts -and !$PSCIGlobalConfiguration.RemotingMode -and ($DeploymentPlan | Where { $_.RunOnConnectionParams })) {
-            Build-TemporaryPackage
-        }
         Start-DeploymentPlan -DeploymentPlan $Global:DeploymentPlan -DscForce:$DscForce -DeployType $DeployType -AutoInstallDscResources:$AutoInstallDscResources -DscModuleNames $configInfo.RequiredDSCModules
     }
 
