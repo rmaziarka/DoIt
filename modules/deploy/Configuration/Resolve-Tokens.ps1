@@ -137,7 +137,26 @@ function Resolve-Tokens {
     $resolvedTokens.Common.Node = $Node
     $resolvedTokens.Common.Environment = $Environment
 
-    # resolve each scriptblock token
+    # 1st pass resolve each string token (apart from ones with [scriptblock] value).
+    # TODO: this is ugly copy-paste (minus -ValidateExistence)!
+    foreach ($category in $resolvedTokens.Keys) {
+        $tokensCatKeys = @()
+        $resolvedTokens[$category].Keys | Foreach-Object { $tokensCatKeys += $_ }
+
+        foreach ($tokenKey in $tokensCatKeys) {
+            $tokenValue = $resolvedTokens[$category][$tokenKey]
+
+            if ($tokenValue -and $tokenValue.GetType().FullName -eq "System.String") {
+                $newValue = Resolve-Token -Name $tokenKey -Value $tokenValue -ResolvedTokens $resolvedTokens -Category $category -ValidateExistence:$false
+
+                if ($newValue -ne $tokenValue) {
+                    $resolvedTokens[$category][$tokenKey] = $newValue
+                }
+            }
+        }
+    }
+
+    # 2st pass - resolve each scriptblock token
     foreach ($category in $resolvedTokens.Keys) {
         $tokensCatKeys = @()
         # SuppressScriptCop - adding small arrays is ok
@@ -157,7 +176,7 @@ function Resolve-Tokens {
         }
     }
 
-    # resolve each string token    
+    # 3st pass - resolve each string token again
     foreach ($category in $resolvedTokens.Keys) {
         $tokensCatKeys = @()
         $resolvedTokens[$category].Keys | Foreach-Object { $tokensCatKeys += $_ }

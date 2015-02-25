@@ -22,7 +22,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 #>
 
-Import-Module -Name "$PSScriptRoot\..\..\..\PSCI.psm1"
+Import-Module -Name "$PSScriptRoot\..\..\..\PSCI.psm1" -Force
 
 Describe -Tag "PSCI.unit" "Resolve-Tokens" {
 
@@ -76,60 +76,60 @@ Describe -Tag "PSCI.unit" "Resolve-Tokens" {
                 $resolvedTokens = Resolve-Tokens -AllEnvironments $Global:Environments -Environment Default -Node 's01'
 
                 $resolvedTokens.Count | Should Be 3
-                $resolvedTokens['WebConfig'] | Should Not Be $null
-                $resolvedTokens['WebConfig'].Count | Should Be 3
+                $resolvedTokens.WebConfig | Should Not Be $null
+                $resolvedTokens.WebConfig.Count | Should Be 3
 
-                $resolvedTokens['WebConfig']['SessionTimeout'] | Should Be 30
-                $resolvedTokens['WebConfig']['NLogLevels'] | Should Be 'Error,Fatal'
-                $resolvedTokens['WebConfig']['DatabaseName'] | Should Be 'Test'
+                $resolvedTokens.WebConfig.SessionTimeout | Should Be 30
+                $resolvedTokens.WebConfig.NLogLevels | Should Be 'Error,Fatal'
+                $resolvedTokens.WebConfig.DatabaseName | Should Be 'Test'
             }
 
             It "Resolve-Tokens: should properly resolve tokens for Live environment and node 's02'" {
                 $resolvedTokens = Resolve-Tokens -AllEnvironments $Global:Environments -Environment Live -Node 's02'
 
                 $resolvedTokens.Count | Should Be 3
-                $resolvedTokens['WebConfig'] | Should Not Be $null
-                $resolvedTokens['WebConfig'].Count | Should Be 3
+                $resolvedTokens.WebConfig | Should Not Be $null
+                $resolvedTokens.WebConfig.Count | Should Be 3
 
-                $resolvedTokens['WebConfig']['SessionTimeout'] | Should Be 40
-                $resolvedTokens['WebConfig']['NLogLevels'] | Should Be 'Fatal'
-                $resolvedTokens['WebConfig']['DatabaseName'] | Should Be 'Test'
+                $resolvedTokens.WebConfig.SessionTimeout | Should Be 40
+                $resolvedTokens.WebConfig.NLogLevels | Should Be 'Fatal'
+                $resolvedTokens.WebConfig.DatabaseName | Should Be 'Test'
             }
 
             It "Resolve-Tokens: should properly resolve tokens for Live environment and node 's01'" {
                 $resolvedTokens = Resolve-Tokens -AllEnvironments $Global:Environments -Environment Live -Node 's01'
 
                 $resolvedTokens.Count | Should Be 3
-                $resolvedTokens['WebConfig'] | Should Not Be $null
-                $resolvedTokens['WebConfig'].Count | Should Be 3
+                $resolvedTokens.WebConfig | Should Not Be $null
+                $resolvedTokens.WebConfig.Count | Should Be 3
 
-                $resolvedTokens['WebConfig']['SessionTimeout'] | Should Be 35
-                $resolvedTokens['WebConfig']['NLogLevels'] | Should Be 'Fatal'
-                $resolvedTokens['WebConfig']['DatabaseName'] | Should Be 'Test'
+                $resolvedTokens.WebConfig.SessionTimeout | Should Be 35
+                $resolvedTokens.WebConfig.NLogLevels | Should Be 'Fatal'
+                $resolvedTokens.WebConfig.DatabaseName | Should Be 'Test'
             }
 
             It "Resolve-Tokens: should properly resolve tokens for Live_Perf environment and node 's01'" {
                 $resolvedTokens = Resolve-Tokens -AllEnvironments $Global:Environments -Environment Live_Perf -Node 's01'
 
                 $resolvedTokens.Count | Should Be 3
-                $resolvedTokens['WebConfig'] | Should Not Be $null
-                $resolvedTokens['WebConfig'].Count | Should Be 3
+                $resolvedTokens.WebConfig | Should Not Be $null
+                $resolvedTokens.WebConfig.Count | Should Be 3
 
-                $resolvedTokens['WebConfig']['SessionTimeout'] | Should Be 70
-                $resolvedTokens['WebConfig']['NLogLevels'] | Should Be 'Info'
-                $resolvedTokens['WebConfig']['DatabaseName'] | Should Be 'Test'
+                $resolvedTokens.WebConfig.SessionTimeout | Should Be 70
+                $resolvedTokens.WebConfig.NLogLevels | Should Be 'Info'
+                $resolvedTokens.WebConfig.DatabaseName | Should Be 'Test'
             }
 
             It "Resolve-Tokens: should properly resolve tokens for Live_Perf environment and node 's02'" {
                 $resolvedTokens = Resolve-Tokens -AllEnvironments $Global:Environments -Environment Live_Perf -Node 's02'
 
                 $resolvedTokens.Count | Should Be 3
-                $resolvedTokens['WebConfig'] | Should Not Be $null
-                $resolvedTokens['WebConfig'].Count | Should Be 3
+                $resolvedTokens.WebConfig | Should Not Be $null
+                $resolvedTokens.WebConfig.Count | Should Be 3
 
-                $resolvedTokens['WebConfig']['SessionTimeout'] | Should Be 55
-                $resolvedTokens['WebConfig']['NLogLevels'] | Should Be 'Info'
-                $resolvedTokens['WebConfig']['DatabaseName'] | Should Be 'Test'
+                $resolvedTokens.WebConfig.SessionTimeout | Should Be 55
+                $resolvedTokens.WebConfig.NLogLevels | Should Be 'Info'
+                $resolvedTokens.WebConfig.DatabaseName | Should Be 'Test'
             }
         }
 
@@ -169,28 +169,28 @@ Describe -Tag "PSCI.unit" "Resolve-Tokens" {
                 $resolvedTokens = Resolve-Tokens -AllEnvironments $Global:Environments -Environment Live_Perf -Node 's01'
 
                 $resolvedTokens.Count | Should Be 3
-                $resolvedTokens['WebConfig'] | Should Not Be $null
-                $resolvedTokens['WebConfig'].Count | Should Be 5
+                $resolvedTokens.WebConfig | Should Not Be $null
+                $resolvedTokens.WebConfig.Count | Should Be 5
 
-                $resolvedTokens['WebConfig']['SessionTimeout'] | Should Be 30
-                $resolvedTokens['WebConfig']['NLogLevels'] | Should Be 'Info'
-                $resolvedTokens['WebConfig']['DatabaseName'] | Should Be 'Live'
-                $resolvedTokens['WebConfig']['Impersonate'] | Should Be 'true'
-                $resolvedTokens['WebConfig']['LogDir'] | Should Be 'C:\Logs'
+                $resolvedTokens.WebConfig.SessionTimeout | Should Be 30
+                $resolvedTokens.WebConfig.NLogLevels | Should Be 'Info'
+                $resolvedTokens.WebConfig.DatabaseName | Should Be 'Live'
+                $resolvedTokens.WebConfig.Impersonate | Should Be 'true'
+                $resolvedTokens.WebConfig.LogDir | Should Be 'C:\Logs'
             }
 
             It "Resolve-Tokens: should properly resolve tokens for granchildren environment" {
                 $resolvedTokens = Resolve-Tokens -AllEnvironments $Global:Environments -Environment Live_Perf2 -Node 's01'
 
                 $resolvedTokens.Count | Should Be 3
-                $resolvedTokens['WebConfig'] | Should Not Be $null
-                $resolvedTokens['WebConfig'].Count | Should Be 5
+                $resolvedTokens.WebConfig | Should Not Be $null
+                $resolvedTokens.WebConfig.Count | Should Be 5
 
-                $resolvedTokens['WebConfig']['SessionTimeout'] | Should Be 100
-                $resolvedTokens['WebConfig']['NLogLevels'] | Should Be 'Info'
-                $resolvedTokens['WebConfig']['DatabaseName'] | Should Be 'Live'
-                $resolvedTokens['WebConfig']['Impersonate'] | Should Be 'true'
-                $resolvedTokens['WebConfig']['LogDir'] | Should Be 'C:\Logs'
+                $resolvedTokens.WebConfig.SessionTimeout | Should Be 100
+                $resolvedTokens.WebConfig.NLogLevels | Should Be 'Info'
+                $resolvedTokens.WebConfig.DatabaseName | Should Be 'Live'
+                $resolvedTokens.WebConfig.Impersonate | Should Be 'true'
+                $resolvedTokens.WebConfig.LogDir | Should Be 'C:\Logs'
             }
         }
     
@@ -208,13 +208,13 @@ Describe -Tag "PSCI.unit" "Resolve-Tokens" {
                 $resolvedTokens = Resolve-Tokens -AllEnvironments $Global:Environments -Environment Default -Node 's01'
 
                 $resolvedTokens.Count | Should Be 3
-                $resolvedTokens['WebConfig'] | Should Not Be $null
-                $resolvedTokens['WebConfig'].Count | Should Be 2
+                $resolvedTokens.WebConfig | Should Not Be $null
+                $resolvedTokens.WebConfig.Count | Should Be 2
 
-                $resolvedTokens['WebConfig']['Credentials'] | Should Not Be $null
-                $resolvedTokens['WebConfig']['Credentials'].GetType() | Should Be PSCredential
-                $resolvedTokens['WebConfig']['Timeout'] | Should Be 60
-                $resolvedTokens['WebConfig']['Timeout'].GetType() | Should Be int
+                $resolvedTokens.WebConfig.Credentials | Should Not Be $null
+                $resolvedTokens.WebConfig.Credentials.GetType() | Should Be PSCredential
+                $resolvedTokens.WebConfig.Timeout | Should Be 60
+                $resolvedTokens.WebConfig.Timeout.GetType() | Should Be int
             }
         }
 
@@ -271,13 +271,13 @@ Describe -Tag "PSCI.unit" "Resolve-Tokens" {
             It "Resolve-Tokens: should properly substitute tokens" {
                 $resolvedTokens = Resolve-Tokens -AllEnvironments $Global:Environments -Environment Default -Node 's01'
 
-                $resolvedTokens['Common'] | Should Not Be $null
-                $resolvedTokens['Common']['ConnectionString'] | Should Not Be $null
-                $resolvedTokens['Common']['ConnectionString'].StartsWith('Server=s01;') | Should Be $true
+                $resolvedTokens.Common | Should Not Be $null
+                $resolvedTokens.Common.ConnectionString | Should Not Be $null
+                $resolvedTokens.Common.ConnectionString.StartsWith('Server=s01;') | Should Be $true
 
-                $resolvedTokens['WebDeployConfig'] | Should Not Be $null
-                $resolvedTokens['WebDeployConfig']['Some-Web.config Connection String'] | Should Not Be $null
-                $resolvedTokens['WebDeployConfig']['Some-Web.config Connection String'] | Should Be $resolvedTokens['Common']['ConnectionString']
+                $resolvedTokens.WebDeployConfig | Should Not Be $null
+                $resolvedTokens.WebDeployConfig['Some-Web.config Connection String'] | Should Not Be $null
+                $resolvedTokens.WebDeployConfig['Some-Web.config Connection String'] | Should Be $resolvedTokens.Common.ConnectionString
             }
         }
 
@@ -299,23 +299,23 @@ Describe -Tag "PSCI.unit" "Resolve-Tokens" {
             It "Resolve-Tokens: should properly evaluate scriptblock" {
                 $resolvedTokens = Resolve-Tokens -AllEnvironments $Global:Environments -Environment Default -Node 's01'
 
-                $resolvedTokens['Common'] | Should Not Be $null
-                $resolvedTokens['Common']['Credentials'] | Should Not Be $null
-                $resolvedTokens['Common']['Credentials'].GetType().FullName | Should Be 'System.Management.Automation.PSCredential'
-                $resolvedTokens['Common']['Credentials'].UserName | Should Be 'Domain\User'
-                $resolvedTokens['Common']['Credentials'].GetNetworkCredential().Password | Should Be 'Pass'
+                $resolvedTokens.Common | Should Not Be $null
+                $resolvedTokens.Common.Credentials | Should Not Be $null
+                $resolvedTokens.Common.Credentials.GetType().FullName | Should Be 'System.Management.Automation.PSCredential'
+                $resolvedTokens.Common.Credentials.UserName | Should Be 'Domain\User'
+                $resolvedTokens.Common.Credentials.GetNetworkCredential().Password | Should Be 'Pass'
 
-                $resolvedTokens['All'] | Should Not Be $null
-                $resolvedTokens['All']['Credentials'] | Should Not Be $null
-                $resolvedTokens['All']['Credentials'].GetType().FullName | Should Be 'System.Management.Automation.PSCredential'
-                $resolvedTokens['All']['Credentials'].UserName | Should Be 'Domain\User'
-                $resolvedTokens['All']['Credentials'].GetNetworkCredential().Password | Should Be 'Pass'
+                $resolvedTokens.All | Should Not Be $null
+                $resolvedTokens.All.Credentials | Should Not Be $null
+                $resolvedTokens.All.Credentials.GetType().FullName | Should Be 'System.Management.Automation.PSCredential'
+                $resolvedTokens.All.Credentials.UserName | Should Be 'Domain\User'
+                $resolvedTokens.All.Credentials.GetNetworkCredential().Password | Should Be 'Pass'
 
-                $resolvedTokens['Common']['NodeTest'] | Should Be 's01'
-                $resolvedTokens['Common']['EnvironmentTest'] | Should Be 'Default'
+                $resolvedTokens.Common.NodeTest | Should Be 's01'
+                $resolvedTokens.Common.EnvironmentTest | Should Be 'Default'
 
-                $resolvedTokens['All']['NodeTest'] | Should Be 's01'
-                $resolvedTokens['All']['EnvironmentTest'] | Should Be 'Default'
+                $resolvedTokens.All.NodeTest | Should Be 's01'
+                $resolvedTokens.All.EnvironmentTest | Should Be 'Default'
             }
         }
 
@@ -342,16 +342,16 @@ Describe -Tag "PSCI.unit" "Resolve-Tokens" {
             It "Resolve-Tokens: should properly evaluate scriptblock" {
                 $resolvedTokens = Resolve-Tokens -AllEnvironments $Global:Environments -Environment Default -Node 's01'
 
-                $resolvedTokens['Common'] | Should Not Be $null
-                $resolvedTokens['Common']['CredentialsSecondHop'] | Should Not Be $null
-                $resolvedTokens['Common']['CredentialsSecondHop'].GetType().FullName | Should Be 'System.Management.Automation.PSCredential'
-                $resolvedTokens['Common']['CredentialsSecondHop'].UserName | Should Be 'Domain\User'
-                $resolvedTokens['Common']['CredentialsSecondHop'].GetNetworkCredential().Password | Should Be 'Pass'
+                $resolvedTokens.Common | Should Not Be $null
+                $resolvedTokens.Common.CredentialsSecondHop | Should Not Be $null
+                $resolvedTokens.Common.CredentialsSecondHop.GetType().FullName | Should Be 'System.Management.Automation.PSCredential'
+                $resolvedTokens.Common.CredentialsSecondHop.UserName | Should Be 'Domain\User'
+                $resolvedTokens.Common.CredentialsSecondHop.GetNetworkCredential().Password | Should Be 'Pass'
 
-                $resolvedTokens['All']['CredentialsSecondHop'] | Should Not Be $null
-                $resolvedTokens['All']['CredentialsSecondHop'].GetType().FullName | Should Be 'System.Management.Automation.PSCredential'
-                $resolvedTokens['All']['CredentialsSecondHop'].UserName | Should Be 'Domain\User'
-                $resolvedTokens['All']['CredentialsSecondHop'].GetNetworkCredential().Password | Should Be 'Pass'
+                $resolvedTokens.All.CredentialsSecondHop | Should Not Be $null
+                $resolvedTokens.All.CredentialsSecondHop.GetType().FullName | Should Be 'System.Management.Automation.PSCredential'
+                $resolvedTokens.All.CredentialsSecondHop.UserName | Should Be 'Domain\User'
+                $resolvedTokens.All.CredentialsSecondHop.GetNetworkCredential().Password | Should Be 'Pass'
             }
         }
         #>
@@ -371,13 +371,38 @@ Describe -Tag "PSCI.unit" "Resolve-Tokens" {
                 $resolvedTokens = Resolve-Tokens -AllEnvironments $Global:Environments -Environment Default -Node 's01' -TokensOverride $tokensOverride
 
                 $resolvedTokens.Count | Should Be 3
-                $resolvedTokens['WebConfig'] | Should Not Be $null
-                $resolvedTokens['WebConfig'].Count | Should Be 2
+                $resolvedTokens.WebConfig | Should Not Be $null
+                $resolvedTokens.WebConfig.Count | Should Be 2
 
-                $resolvedTokens['WebConfig']['Credentials'] | Should Not Be $null
-                $resolvedTokens['WebConfig']['Credentials'].GetType() | Should Be PSCredential
-                $resolvedTokens['WebConfig']['Timeout'] | Should Be 60
-                $resolvedTokens['WebConfig']['Timeout'].GetType() | Should Be int
+                $resolvedTokens.WebConfig.Credentials | Should Not Be $null
+                $resolvedTokens.WebConfig.Credentials.GetType() | Should Be PSCredential
+                $resolvedTokens.WebConfig.Timeout | Should Be 60
+                $resolvedTokens.WebConfig.Timeout.GetType() | Should Be int
+            }
+        }
+
+        Context "when used in more complex scenarios" {
+            Initialize-Deployment
+
+		    Environment Default {
+			    Tokens Credentials @{
+                    User = 'user1' 
+                    User2 = '${User}'
+                    PSCredential = { ConvertTo-PSCredential -User $Tokens.Credentials.User2 -Password 'test' } 
+                    User3 = { $Tokens.Credentials.User2 }
+                    User4 = '${User3}'
+	            }
+            }
+
+            $resolvedTokens = Resolve-Tokens -AllEnvironments $Global:Environments -Environment Default -Node 's01'
+
+            It "Should properly resolve tokens" {
+                $resolvedTokens.Count | Should Be 3
+                $resolvedTokens.Credentials.User | should Be 'user1'
+                $resolvedTokens.Credentials.User2 | should Be 'user1'
+                $resolvedTokens.Credentials.User3 | should Be 'user1'
+                $resolvedTokens.Credentials.User4 | should Be 'user1'
+                $resolvedTokens.Credentials.PSCredential.UserName | should Be 'user1'
             }
         }
     }

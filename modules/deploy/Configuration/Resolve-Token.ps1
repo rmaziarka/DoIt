@@ -74,7 +74,7 @@ function Resolve-Token {
         $Category,
 
         [Parameter(Mandatory=$false)]
-        [string] 
+        [switch] 
         $ValidateExistence = $true,
 
         [Parameter(Mandatory=$false)]
@@ -95,7 +95,12 @@ function Resolve-Token {
             $ResolvedTokens.Keys | Where-Object { $_ -ne $Category } | Foreach-Object { $allCategories += $_ }
             foreach ($cat in $allCategories) {               
                 if ($ResolvedTokens[$cat].ContainsKey($key)) {
-                    $Value = $Value -replace $strToReplace, $ResolvedTokens[$cat][$Key]
+                    $newValue = $ResolvedTokens[$cat][$Key]
+                    # if newValue is scriptblock, it means this is first pass of Resolve-tokens - we need to ignore it (will be resolved in 3rd pass)
+                    if ($newValue -is [scriptblock]) {
+                        break
+                    }
+                    $Value = $Value -replace $strToReplace, $newValue
                     $substituted = $true
                     break
                 }
