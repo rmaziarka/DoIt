@@ -76,7 +76,7 @@ try {
     	$PSCILibraryPath = Join-Path -Path $ProjectRootPath -ChildPath $PSCILibraryPath
     }
     if (!(Test-Path "$PSCILibraryPath\PSCI.psm1")) {
-        Write-Output -InputObject "Cannot find PSCI library at '$PSCILibraryPath'. Please ensure your ProjectRootPath and PSCILibraryPath parameters are correct."
+        Write-Output -InputObject "Cannot find PSCI library at '$PSCILibraryPath' (current dir: '$PSScriptRoot'). Please ensure your ProjectRootPath and PSCILibraryPath parameters are correct."
     	exit 1
     }
     Import-Module "$PSCILibraryPath\PSCI.psm1" -Force 
