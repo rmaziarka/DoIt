@@ -99,7 +99,7 @@ function Start-DeploymentPlanEntryRemotely {
         $runOnConnectionParams.Authentication, `
         $userName, `
         $runOnConnectionParams.Protocol) -Emphasize
-    Write-ProgressExternal -Message ('Deploying {0} to {1}' -f ($configInfo.Name -join "','"), $runOnNode) `
+    Write-ProgressExternal -Message ("Deploying '{0}' to {1}" -f ($configInfo.Name -join "','"), $runOnNode) `
         -ErrorMessage ('Deploy error - node {0}, conf {1}' -f $runOnNode, ($configInfo.Name -join "','"))
 
     if ($remotingMode -eq 'WebDeployHandler' -or $remotingMode -eq 'WebDeployAgentService') {
