@@ -66,7 +66,7 @@ function Install-DscResources {
     $baseDscDir = Resolve-Path -Path (Join-Path -Path $PSScriptRoot -ChildPath '..\..\dsc')
 
     $dscModulesInfo = Get-DscResourcesPaths -ModuleNames $ModuleNames
-    Write-Log -Info ("Installing following DSC modules from '$baseDscDir' to {0}: {1}" -f ($nodes -join ', '), ($dscModulesInfo.Name -join ', '))
+    Write-Log -Info ("Installing following DSC modules from '$baseDscDir' to {0}: {1} (total {2})" -f ($nodes -join ', '), ($dscModulesInfo.Name -join ', '), $dscModulesInfo.Count)
 
     $isLocalhostDone = $false
     $dscExclude = @('Docs', 'Examples', 'Samples')

@@ -55,21 +55,29 @@ function Get-DscResourcesPaths {
     $baseDscDir = Join-Path -Path $modulePath -ChildPath 'dsc'
     # note: $Env:ProgramFiles gives Program Files (x86) if running Powershell x86...
     $baseDestPath = Join-Path -Path 'C:\Program Files' -ChildPath 'WindowsPowerShell\Modules'
-
+    $isAll = ($ModuleNames.Count -eq 1 -and $ModuleNames[0] -ieq 'all')
     
     if ((Test-Path -Path (Join-Path -Path $baseDscDir -ChildPath 'ext'))) { 
-        $modulesExternal = @(Join-Path -Path $baseDscDir -ChildPath 'ext\*\*' | Get-ChildItem -Directory | Where-Object { $ModuleNames -icontains $_.Name })
+        $modulesExternal = @(Join-Path -Path $baseDscDir -ChildPath 'ext\*\*' | Get-ChildItem -Directory)
+        if (!$isAll) {
+            $modulesExternal = @($modulesExternal | Where-Object { $ModuleNames -icontains $_.Name })
+        }
     }
     if ((Test-Path -Path (Join-Path -Path $baseDscDir -ChildPath 'custom'))) {
-        $modulesCustom = @(Join-Path -Path $baseDscDir -ChildPath 'custom' | Get-ChildItem -Directory | Where-Object { $ModuleNames -icontains $_.Name })
+        $modulesCustom = @(Join-Path -Path $baseDscDir -ChildPath 'custom' | Get-ChildItem -Directory)
+        if (!$isAll) {
+            $modulesCustom = @($modulesCustom | Where-Object { $ModuleNames -icontains $_.Name })
+        }
     }
 
     $foundModules = ($modulesExternal + $modulesCustom) | Sort -Property Name
-    if ($foundModules.Count -lt $ModuleNames.Count) {
-        $missingModules = ($ModuleNames | Where { $foundModules.Name -inotcontains $_ }) -join ', '
-        Write-Log -Critical "Cannot find following modules under '$baseDscDir': $missingModules."
-    } elseif ($foundModules.Count -gt $ModuleNames.Count) {
-        Write-Log -Critical "Found modules with duplicated name under '$baseDscDir' - this is one of $($ModuleNames -split ',')."
+    if (!$isAll) { 
+        if ($foundModules.Count -lt $ModuleNames.Count) {
+            $missingModules = ($ModuleNames | Where { $foundModules.Name -inotcontains $_ }) -join ', '
+            Write-Log -Critical "Cannot find following modules under '$baseDscDir': $missingModules."
+        } elseif ($foundModules.Count -gt $ModuleNames.Count) {
+            Write-Log -Critical "Found modules with duplicated name under '$baseDscDir' - this is one of $($ModuleNames -split ',')."
+        }
     }
 
     foreach ($module in $foundModules) {
