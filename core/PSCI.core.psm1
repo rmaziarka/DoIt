@@ -84,4 +84,5 @@ Export-ModuleMember -Function `
     Initialize-ConfigurationPaths, `
     Resolve-PathRelativeToProjectRoot, `
     Connect-Share, `
-    Disconnect-Share
+    Disconnect-Share, `
+    Set-SimpleAcl

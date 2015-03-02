@@ -43,6 +43,5 @@ function Disconnect-Share {
     )
 
     $cmd = "net use `"$Path`" /DELETE"
-    Write-Log -Info "Disconnecting from share '$Path'"
     [void](Invoke-ExternalCommand -Command $cmd)
 }

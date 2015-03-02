@@ -42,6 +42,10 @@ function Restore-SqlDatabase {
     .PARAMETER Credential
     Credential to impersonate in Integrated Security mode.
 
+    .PARAMETER RemoteShareCredential
+    Remote share credential to use if $Path is an UNC path. Note the file will be copied to localhost if this set, and this will work only if 
+    you're connecting to local database.
+
     .PARAMETER QueryTimeoutInSeconds
     Timeout for executing sql restore command.
 
@@ -67,14 +71,36 @@ function Restore-SqlDatabase {
         [Parameter(Mandatory=$false)]
         [PSCredential] 
         $Credential,
+
+        [Parameter(Mandatory=$false)]
+        [PSCredential] 
+        $RemoteShareCredential,
             
         [Parameter(Mandatory=$false)] 
         [int]
         $QueryTimeoutInSeconds = 600
     )
 
-    $sqlScript = Join-Path -Path $PSScriptRoot -ChildPath "Restore-SqlDatabase.sql"
-    $parameters =  @{ "DatabaseName" = $DatabaseName }
-    $parameters += @{ "Path" = $Path }
-    [void](Invoke-Sql -ConnectionString $ConnectionString -InputFile $sqlScript -SqlCmdVariables $parameters -Credential $Credential -QueryTimeoutInSeconds $QueryTimeoutInSeconds -IgnoreInitialCatalog)
+    try { 
+        if ($RemoteShareCredential) {
+            $shareDir = Split-Path -Path $Path -Parent
+            Connect-Share -Path $shareDir -Credential $RemoteShareCredential
+            $tempDir = New-TempDirectory
+            Write-Log -Info "Copying '$Path' to '$tempDir'"
+            Copy-Item -Path $Path -Destination $tempDir -Force
+            #TODO: unhardcode this user
+            Set-SimpleAcl -Path $tempDir -User 'NT Service\MSSQLSERVER' -Permission 'Read' -Type 'Allow'
+            $Path = Join-Path -Path $tempDir -ChildPath (Split-Path -Path $Path -Leaf)
+        }
+
+        $sqlScript = Join-Path -Path $PSScriptRoot -ChildPath "Restore-SqlDatabase.sql"
+        $parameters =  @{ "DatabaseName" = $DatabaseName }
+        $parameters += @{ "Path" = $Path }
+        [void](Invoke-Sql -ConnectionString $ConnectionString -InputFile $sqlScript -SqlCmdVariables $parameters -Credential $Credential -QueryTimeoutInSeconds $QueryTimeoutInSeconds -IgnoreInitialCatalog)
+    } finally {
+        if ($RemoteShareCredential) {
+            Disconnect-Share -Path $shareDir
+            Remove-TempDirectory
+        }
+    }
 }

@@ -53,6 +53,5 @@ function Connect-Share {
     $password = $Credential.GetNetworkCredential().Password
 
     $cmd = "net use `"$Path`" `"$password`" /user:`"$username`""
-    Write-Log -Info "Connecting to share '$Path' with user '$username'"
     [void](Invoke-ExternalCommand -Command $cmd)
 }
