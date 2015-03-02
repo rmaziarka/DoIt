@@ -35,6 +35,9 @@ function New-MsBuildOptions {
 
     .PARAMETER MsBuildProperties
     List of additional properties to pass to msbuild.
+    
+    .PARAMETER MsBuildCmdLineParameters
+    Additional parameters to pass to msbuild command line.
 
     .PARAMETER VisualStudioVersion
     Can be used to select specific Visual Studio version. The newest available in the system will be used if not provided.
@@ -58,7 +61,7 @@ function New-MsBuildOptions {
     param(
         [Parameter(Mandatory=$false)]
         [string[]]
-        $Targets = "Rebuild",
+        $Targets,
 
         [Parameter(Mandatory=$false)]
         [string]
@@ -67,6 +70,10 @@ function New-MsBuildOptions {
         [Parameter(Mandatory=$false)]
         [hashtable]
         $MsBuildProperties = @{},
+
+        [Parameter(Mandatory=$false)]
+        [string[]]
+        $MsBuildCmdLineArguments,
 
         [Parameter(Mandatory=$false)]
         [string]
@@ -81,15 +88,21 @@ function New-MsBuildOptions {
         [Parameter(Mandatory=$false)]
         [string]
         [ValidateSet("x86","x64","")]
-        $MsBuildForceArchitecture
+        $MsBuildForceArchitecture,
+
+        [Parameter(Mandatory=$false)]
+        [switch]
+        $Quiet
 
     )
     return [PSObject]@{
-        Targets = $Targets;
-        Configuration = $Configuration;
-        MsBuildProperties = $MsBuildProperties;
-        VisualStudioVersion = $VisualStudioVersion;
+        Targets = $Targets
+        Configuration = $Configuration
+        MsBuildProperties = $MsBuildProperties
+        MsBuildCmdLineArguments = $MsBuildCmdLineArguments
+        VisualStudioVersion = $VisualStudioVersion
         MsBuildVersion = $MsBuildVersion
-        MsBuildForceArchitecture = $MsBuildForceArchitecture;
+        MsBuildForceArchitecture = $MsBuildForceArchitecture
+        Quiet = $Quiet
     }
 }
