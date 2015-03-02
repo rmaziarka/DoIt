@@ -82,4 +82,6 @@ Export-ModuleMember -Function `
     Copy-Directory, `
     Get-ConfigurationPaths, `
     Initialize-ConfigurationPaths, `
-    Resolve-PathRelativeToProjectRoot
+    Resolve-PathRelativeToProjectRoot, `
+    Connect-Share, `
+    Disconnect-Share

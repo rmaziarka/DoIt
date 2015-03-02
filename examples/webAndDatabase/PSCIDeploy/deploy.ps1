@@ -65,6 +65,9 @@ All       - deploy everything according to configuration files (= Provision + De
 DSC       - deploy only DSC configurations
 Functions - deploy only non-DSC configurations
 Adhoc     - don't use configuration files, but deploy configurations $ConfigurationsFilter to nodes $NodesFilter
+
+.PARAMETER ValidateOnly
+If true, deployment plan will be created but actual deployment will not run.
 #>
 param(
 	[Parameter(Mandatory=$false)]
@@ -106,7 +109,11 @@ param(
     [Parameter(Mandatory=$false)]
     [ValidateSet('All', 'DSC', 'Functions', 'Adhoc')]
 	[string]
-	$DeployType = 'All'
+	$DeployType = 'All',
+
+    [Parameter(Mandatory=$false)]
+    [switch]
+    $ValidateOnly
 )
 
 $global:ErrorActionPreference = 'Stop'
@@ -135,7 +142,8 @@ try {
                      -ConfigurationsFilter $ConfigurationsFilter `
                      -NodesFilter $NodesFilter `
                      -TokensOverride $TokensOverride `
-                     -DeployType $DeployType            
+                     -DeployType $DeployType `
+                     -ValidateOnly:$ValidateOnly     
     
 } catch {
     Write-ErrorRecord -ErrorRecord $_
