@@ -36,8 +36,8 @@ function New-MsBuildOptions {
     .PARAMETER MsBuildProperties
     List of additional properties to pass to msbuild.
     
-    .PARAMETER MsBuildCmdLineParameters
-    Additional parameters to pass to msbuild command line.
+    .PARAMETER MsBuildCmdLineArguments
+    Additional arguments to pass to msbuild command line.
 
     .PARAMETER VisualStudioVersion
     Can be used to select specific Visual Studio version. The newest available in the system will be used if not provided.
@@ -51,6 +51,9 @@ function New-MsBuildOptions {
 
     .PARAMETER MsBuildForceArchitecture
     If specified, the provided architecture will be forced (e.g. msbuild x86 will be used even though msbuild x64 is available).
+
+    .PARAMETER Quiet
+    If true, only errors will be reported (/v:q /clp:Errors;Summary)
 
     .EXAMPLE
     New-MsBuildOptions -Targets "Build" -Configuration "Release"
