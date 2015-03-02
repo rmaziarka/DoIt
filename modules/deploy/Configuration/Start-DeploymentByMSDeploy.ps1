@@ -39,6 +39,9 @@ function Start-DeploymentByMSDeploy {
     .PARAMETER PackageDirectory
     Defines location on remote machine where deployment package will be copied to.
 
+    .PARAMETER PackageDirectoryAutoRemove
+    If $true, PackageDirectory will be removed after scripts run.
+
     .PARAMETER DeployType
     Deployment type:
     All       - deploy everything according to configuration files (= Provision + Deploy)
@@ -86,6 +89,10 @@ function Start-DeploymentByMSDeploy {
         [Parameter(Mandatory=$true)]
         [string]
         $PackageDirectory,
+
+        [Parameter(Mandatory=$false)]
+        [switch]
+        $PackageDirectoryAutoRemove,
 
         [Parameter(Mandatory=$false)]
         [string[]]
@@ -145,7 +152,14 @@ function Start-DeploymentByMSDeploy {
         Write-Log -Info "Sending package to '$($PackageDirectory)' at '$($RunOnConnectionParams.NodesAsString)' and running '$($PackageDirectory)\DeployScripts\deploy.ps1' using $($RunOnConnectionParams.RemotingMode)" -Emphasize
     }
 
-    $postDeploymentScript += "-PostSync:runCommand='powershell -Command `"Set-Location -Path '{0}'; `$Global:PSCIRemotingMode = '{1}'; & {2}`"',dontUseCommandExe=true,waitInterval=2147483647,waitAttempts=1" -f $PackageDirectory, $RunOnConnectionParams.RemotingMode, $deployScript
+    $powershellCmd = @"
+Set-Location -Path '$PackageDirectory'; `$Global:PSCIRemotingMode = '$($RunOnConnectionParams.RemotingMode)'; & '$deployScript'; 
+"@
+    if ($PackageDirectoryAutoRemove) {
+        $powershellCmd += "Set-Location -Path (Split-Path -Path '$PackageDirectory' -Parent);  Remove-Item -Path '$PackageDirectory' -Force -Recurse"
+    }
+
+    $postDeploymentScript += "-PostSync:runCommand='powershell -Command `"$powershellCmd`"',dontUseCommandExe=true,waitInterval=2147483647,waitAttempts=1"
 
     Sync-MsDeployDirectory -SourcePath $tempSrcPath -DestinationDir $PackageDirectory -DestString $msDeployDestinationString -AddParameters @($postDeploymentScript)
                     

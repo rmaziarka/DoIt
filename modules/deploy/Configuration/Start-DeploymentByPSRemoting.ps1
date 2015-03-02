@@ -39,6 +39,9 @@ function Start-DeploymentByPSRemoting {
     .PARAMETER PackageDirectory
     Defines location on remote machine where deployment package will be copied to.
 
+    .PARAMETER PackageDirectoryAutoRemove
+    If $true, PackageDirectory will be removed after scripts run.
+
     .PARAMETER RequiredPackages
     List of packages that will be copied to the remote server.
 
@@ -86,6 +89,10 @@ function Start-DeploymentByPSRemoting {
         [Parameter(Mandatory=$true)]
         [string]
         $PackageDirectory,
+
+        [Parameter(Mandatory=$false)]
+        [switch]
+        $PackageDirectoryAutoRemove,
 
         [Parameter(Mandatory=$false)]
         [string[]]
@@ -151,6 +158,9 @@ function Start-DeploymentByPSRemoting {
             [string]
             $PackageDirectory,
 
+            [boolean]
+            $PackageDirectoryAutoRemove,
+
             [string]
             $DeployScript,
 
@@ -161,11 +171,15 @@ function Start-DeploymentByPSRemoting {
         Set-Location -Path $PackageDirectory
         $Global:PSCIRemotingMode = $RemotingMode
         Invoke-Expression -Command "& $DeployScript"
+        if ($PackageDirectoryAutoRemove) {
+            Set-Location -Path (Split-Path -Path $PackageDirectory -Parent)
+            Remove-Item -Path $PackageDirectory -Force -Recurse
+        }
     }
 
     Write-Log -Info "Running `"$deployScript`" using $($RunOnConnectionParams.RemotingMode) on `"$($RunOnConnectionParams.NodesAsString)`""
     $psSessionParams = $RunOnConnectionParams.PSSessionParams
-    $result = Invoke-Command @psSessionParams -ScriptBlock $scriptBlock -ArgumentList $PackageDirectory, $deployScript, $RunOnConnectionParams.RemotingMode
+    $result = Invoke-Command @psSessionParams -ScriptBlock $scriptBlock -ArgumentList $PackageDirectory, $PackageDirectoryAutoRemove, $deployScript, $RunOnConnectionParams.RemotingMode
     if ($result -inotcontains 'success' -and $result -inotmatch 'success') {
         Write-Log -Critical "Remote invocation failed: $result"
     }

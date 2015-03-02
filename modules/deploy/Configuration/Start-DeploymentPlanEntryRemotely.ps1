@@ -66,6 +66,11 @@ function Start-DeploymentPlanEntryRemotely {
     $packageDirectory = $configInfo[0].PackageDirectory
     $remotingMode = $runOnConnectionParams.RemotingMode
 
+    # need to do it here (not in New-DeploymentPlanEntry), because we don't want to affect grouping
+    if ($packageDirectory -ieq 'auto') {
+        $packageDirectory = 'c:\PSCIPackage_{0}_{1}' -f (Get-Date -Format 'yyyyMMdd_HHmmss'), (([guid]::NewGuid()).Guid -split '-')[0]
+        $packageDirectoryAutoRemove = $true
+    }
     
     $params = 
         @{ 
@@ -73,6 +78,7 @@ function Start-DeploymentPlanEntryRemotely {
             ServerRole = $configInfo.ServerRole | Select-Object -Unique
             RunOnConnectionParams = $runOnConnectionParams
             PackageDirectory = $packageDirectory
+            PackageDirectoryAutoRemove = $packageDirectoryAutoRemove
             RequiredPackages = $DeploymentPlanGroupedEntry.RequiredPackages
             DeployType = $DeployType
             ConfigurationsFilter = $configInfo.Name
