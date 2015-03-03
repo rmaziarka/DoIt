@@ -128,19 +128,17 @@ function Build-MsBuild {
         Start-NugetRestore -ProjectPath $projectPath
     }
 
-    if (!$MsBuildOptions) {
-        $MsBuildOptions = New-MsBuildOptions
-    }
+    $newMsBuildOptions = New-MsBuildOptions -BasedOn $MsBuildOptions
 
     foreach ($defaultProp in $MsBuildPackageOptions.GetEnumerator()) {
-        if (!$MsBuildOptions.MsBuildProperties.ContainsKey($defaultProp.Key)) {
-            $MsBuildOptions.MsBuildProperties.Add($defaultProp.Key, $defaultProp.Value)
+        if (!$newMsBuildOptions.MsBuildProperties.ContainsKey($defaultProp.Key)) {
+            $newMsBuildOptions.MsBuildProperties.Add($defaultProp.Key, $defaultProp.Value)
         }
     }
 
     Write-Log -Info "Packaging '$PackageName'." -Emphasize
 
-    Invoke-MsBuild -ProjectPath $projectPath -MsBuildOptions $MsBuildOptions
+    Invoke-MsBuild -ProjectPath $projectPath -MsBuildOptions $newMsBuildOptions
 
     if($Version) {
         foreach ($info in $AssemblyInfoFilePaths) {

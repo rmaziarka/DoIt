@@ -39,6 +39,9 @@ function Build-EntityFrameworkMigratePackage {
     .PARAMETER MigrationsDir
     Path to the directory containing the compiled migrations. They must already exist if $ProjectPat is not specified.
 
+    .PARAMETER MigrationsFileWildcard
+    Wildcard for migrations assembly. If not specified, *.dll.
+
     .PARAMETER EntityFrameworkDir
     Path to the directory containing Entity Framework dlls.
 
@@ -77,7 +80,11 @@ function Build-EntityFrameworkMigratePackage {
         [string]
         $MigrationsDir,
 
-        [Parameter(Mandatory=$true)]
+        [Parameter(Mandatory=$false)]
+        [string]
+        $MigrationsFileWildcard,
+
+        [Parameter(Mandatory=$false)]
         [string]
         $EntityFrameworkDir,
 
@@ -125,21 +132,32 @@ function Build-EntityFrameworkMigratePackage {
     if (![string]::IsNullOrEmpty($ProjectPath) -and !(Test-Path -Path $ProjectPath)) {
         Write-Log -Critical "Given project file '$ProjectPath' does not exist for '$PackageName'."
     }
-    
-    #Check if migrate.exe exists in output folder
-    $migrateExePath = Join-Path -Path $MigrationsDir -ChildPath "migrate.exe"
 
-    if (!(Test-Path -Path $migrateExePath)) {
-        $migrateExePath = Join-Path -Path $EntityFrameworkDir -ChildPath "tools\migrate.exe"
-        if (!(Test-Path -Path $migrateExePath)) {
-            Write-Log -Critical "Migrate.exe does not exist at '$migrateExePath' or '$migrationsDir\migrate.exe' (package '$PackageName')."
-        }
+    $requiredTools = @('EntityFramework*.dll', 'migrate.exe')
+    $pathsToCheck = @($MigrationsDir)
+    if ($EntityFrameworkDir) {
+        $pathsToCheck += Join-Path -Path $EntityFrameworkDir -ChildPath 'lib\net45'
+        $pathsToCheck += Join-Path -Path $EntityFrameworkDir -ChildPath 'tools'
     }
-
+    $requiredToolsPaths = @()
+    foreach ($toolName in $requiredTools) {
+        $found = $false
+        foreach ($basePath in $pathsToCheck) {
+            $path = Join-Path -Path $basePath -ChildPath $toolName
+            if (Test-Path -Path $path) {
+                $requiredToolsPaths += $path
+                $found = $true
+                break
+            }
+        }
+        if (!$found) {
+            Write-Log -Critical "$toolName cannot be found - tried $($pathsToCheck -join ', ') (package '$PackageName')."
+        }
+    }  
+    
     $resolvedAddFilesToPackage = @()
     if ($AddFilesToPackage) {
         foreach ($addFileToPackage in $AddFilesToPackage.GetEnumerator()) {
-            # SuppressScriptCop - adding small arrays is ok
             $resolvedAddFilesToPackage += Resolve-PathRelativeToProjectRoot -Path ($addFileToPackage.Value) -ErrorMsg "Additional file to package '$addFileToPackage' does not exist (package '$packageName')."
         }
     }
@@ -152,14 +170,22 @@ function Build-EntityFrameworkMigratePackage {
         Invoke-MsBuild -ProjectPath $ProjectPath -MsBuildOptions $MsBuildOptions
     }
 
-    if (!(Test-Path -Path "$migrationsDir\*.dll")) {
-        Write-Log -Critical "There are no .dll files at '$migrationsDir' - please ensure `$migrationsDir points to the directory with compiled migrations."
+    if (!$MigrationsFileWildcard) {
+        $MigrationsFileWildcard = '*.dll'
+    }
+
+    if (!(Test-Path -Path "$migrationsDir\$MigrationsFileWildcard")) {
+        Write-Log -Critical "There are no $MigrationsFileWildcard file(s) at '$migrationsDir' - please ensure `$migrationsDir points to the directory with compiled migrations."
     }
 
     Write-Log -Info "Packaging '$PackageName'." -Emphasize
     [void](New-Item -Path $OutputPath -ItemType Directory -Force)
-    [void](Copy-Item -Path "$migrationsDir\*.dll" -Destination $OutputPath)
-    [void](Copy-Item -Path "$migrateExePath" -Destination $OutputPath)
+
+    [void](Copy-Item -Path "$migrationsDir\$MigrationsFileWildcard" -Destination $OutputPath)
+    foreach ($path in $requiredToolsPaths) {
+        [void](Copy-Item -Path $path -Destination $OutputPath)
+    }
+    
     if ($resolvedAddFilesToPackage) {
         Copy-Item -Path $resolvedAddFilesToPackage -Destination $OutputPath
     }

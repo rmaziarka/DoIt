@@ -40,6 +40,12 @@ function Build-MsBuildPackage {
     .PARAMETER OutputPath
     Output path where the package will be created. If not provided, $OutputPath = $PackagesPath\$PackageName, where $PackagesPath is taken from global variable.
 
+    .PARAMETER Zip
+    If true, package will be compressed.
+
+    .PARAMETER AdditionalFilesToPackage
+    List of additional files to add to package (can be wildcards).
+
     .PARAMETER RestoreNuGet
     If true, 'nuget restore' will be explicitly run before building the project file.
 
@@ -77,6 +83,14 @@ function Build-MsBuildPackage {
 
         [Parameter(Mandatory=$false)]
         [switch]
+        $Zip,
+
+        [Parameter(Mandatory=$false)]
+        [string[]]
+        $AdditionalFilesToPackage,
+
+        [Parameter(Mandatory=$false)]
+        [switch]
         $RestoreNuGet,
 
         [Parameter(Mandatory=$false)]
@@ -101,9 +115,32 @@ function Build-MsBuildPackage {
                             -DefaultPath (Join-Path -Path $configPaths.PackagesPath -ChildPath $PackageName) `
                             -CheckExistence:$false
 
+    if ($OutputPath.ToLower().EndsWith('zip')) {
+        $zipPath = $OutputPath
+        $OutputPath = Split-Path -Path $OutputPath -Parent
+    } elseif ($Zip) {
+        $zipPath = Join-Path -Path $OutputPath -ChildPath "${PackageName}.zip"
+    }
+   
     $params.MsBuildPackageOptions = @{ 
         "OutputPath" = $OutputPath
     }
+
+    [void]($params.Remove('Zip'))
+    [void]($params.Remove('AdditionalFilesToPackage'))
    
     Build-MSBuild @params
+
+    if ($AdditionalFilesToPackage) {
+        foreach ($path in $AdditionalFilesToPackage) {
+            $path = Resolve-PathRelativeToProjectRoot -Path $path -CheckExistence -ErrorMsg "Additional item '{0}' does not exist."
+            Write-Log -Info "Copying additional item '$path' to '$OutputPath'"
+            [void](Copy-Item -Path $path -Destination $OutputPath -Force -Recurse)
+        }
+    }
+
+    if ($zipPath) {
+        New-Zip -Path $OutputPath -OutputFile $zipPath -Try7Zip -Exclude "*.zip"
+        Remove-Item -Path "$OutputPath\*" -Exclude "*.zip" -Force -Recurse
+    }
 }

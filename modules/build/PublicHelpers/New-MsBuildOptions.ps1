@@ -27,6 +27,9 @@ function New-MsBuildOptions {
 	.SYNOPSIS
 	Creates a new object containing options for Invoke-MsBuild.
 
+    .PARAMETER BasedOn
+    Another MsBuildOptions object - if specified, properties of this object will be copied to the new MsBuildOptions object.
+
     .PARAMETER Targets
     List of msbuild targets to invoke.
 
@@ -63,6 +66,10 @@ function New-MsBuildOptions {
     [OutputType([PSObject])]
     param(
         [Parameter(Mandatory=$false)]
+        [object]
+        $BasedOn,
+
+        [Parameter(Mandatory=$false)]
         [string[]]
         $Targets,
 
@@ -98,14 +105,55 @@ function New-MsBuildOptions {
         $Quiet
 
     )
-    return [PSObject]@{
-        Targets = $Targets
-        Configuration = $Configuration
-        MsBuildProperties = $MsBuildProperties
-        MsBuildCmdLineArguments = $MsBuildCmdLineArguments
-        VisualStudioVersion = $VisualStudioVersion
-        MsBuildVersion = $MsBuildVersion
-        MsBuildForceArchitecture = $MsBuildForceArchitecture
-        Quiet = $Quiet
+
+    if ($BasedOn) {
+        $newObject = [PSObject]@{
+            Targets = $BasedOn.Targets
+            Configuration = $BasedOn.Configuration
+            MsBuildProperties = $BasedOn.MsBuildProperties.Clone()
+            MsBuildCmdLineArguments = $BasedOn.MsBuildCmdLineArguments
+            VisualStudioVersion = $BasedOn.VisualStudioVersion
+            MsBuildVersion = $BasedOn.MsBuildVersion
+            MsBuildForceArchitecture = $BasedOn.MsBuildForceArchitecture
+            Quiet = $BasedOn.Quiet
+        }
+
+        if ($PSBoundParameters.ContainsKey('Targets')) {
+            $newObject.Targets = $Targets
+        }
+        if ($PSBoundParameters.ContainsKey('Configuration')) {
+            $newObject.Configuration = $Configuration
+        }
+        if ($PSBoundParameters.ContainsKey('MsBuildProperties')) {
+            $newObject.MsBuildProperties = $MsBuildProperties
+        }
+        if ($PSBoundParameters.ContainsKey('MsBuildCmdLineArguments')) {
+            $newObject.MsBuildCmdLineArguments = $MsBuildCmdLineArguments
+        }
+        if ($PSBoundParameters.ContainsKey('VisualStudioVersion')) {
+            $newObject.VisualStudioVersion = $VisualStudioVersion
+        }
+        if ($PSBoundParameters.ContainsKey('MsBuildVersion')) {
+            $newObject.MsBuildVersion = $MsBuildVersion
+        }
+        if ($PSBoundParameters.ContainsKey('MsBuildForceArchitecture')) {
+            $newObject.MsBuildForceArchitecture = $MsBuildForceArchitecture
+        }
+        if ($PSBoundParameters.ContainsKey('Quiet')) {
+            $newObject.Quiet = $Quiet
+        }
+
+    } else {
+        $newObject = [PSObject]@{
+            Targets = $Targets
+            Configuration = $Configuration
+            MsBuildProperties = $MsBuildProperties
+            MsBuildCmdLineArguments = $MsBuildCmdLineArguments
+            VisualStudioVersion = $VisualStudioVersion
+            MsBuildVersion = $MsBuildVersion
+            MsBuildForceArchitecture = $MsBuildForceArchitecture
+            Quiet = $Quiet
+        }
     }
+    return $newObject
 }
