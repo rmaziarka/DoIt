@@ -33,6 +33,9 @@ function Get-IncludePackageList {
     .PARAMETER RequiredPackages
     List of required packages.
 
+    .PARAMETER AddDeployPackages
+    If true, deploy packages (DeployScripts / PSCI) will be added.
+
     .EXAMPLE
     $includePackages = Get-IncludePackageList -AllPackagesPath $configPaths.PackagesPath -RequiredPackages $RequiredPackages
     #>
@@ -45,12 +48,18 @@ function Get-IncludePackageList {
 
         [Parameter(Mandatory=$false)]
         [string[]]
-        $RequiredPackages
+        $RequiredPackages,
+
+        [Parameter(Mandatory=$false)]
+        [switch]
+        $AddDeployPackages = $true
     )
 
     $requiredAllPackages = $RequiredPackages -icontains 'all'
 
-    $RequiredPackages = @('DeployScripts', 'PSCI') + @($RequiredPackages)
+    if ($AddDeployPackages) { 
+        $RequiredPackages = @('DeployScripts', 'PSCI') + @($RequiredPackages)
+    }
     $packages = Get-ChildItem -Path $AllPackagesPath -Directory | Where-Object { $RequiredPackages -icontains $_.Name -or $requiredAllPackages }
     return $packages.Name
 }

@@ -637,8 +637,7 @@ function compareWebsiteBindings
     #check to see if actual settings have been passed in. If not get them from website
     if($ActualBindings -eq $null)
     {
-        $ActualBindings = Get-Item "IIS:\sites\$Name" -ErrorAction SilentlyContinue | Get-WebBinding
-
+        $ActualBindings = (Get-ItemProperty -Path "IIS:\Sites\$Name" -Name Bindings).Collection       
         #Format Binding information: Split BindingInfo into individual Properties (IPAddress:Port:HostName)
         $ActualBindingObjects = @()
         foreach ($ActualBinding in $ActualBindings)
@@ -653,11 +652,16 @@ function compareWebsiteBindings
         if($BindingInfo.Count -le $ActualBindingObjects.Count)
         {
             foreach($Binding in $BindingInfo)
-            {
+            { 
                 $ActualBinding = $ActualBindingObjects | ?{$_.Port -eq $Binding.CimInstanceProperties["Port"].Value}
                 if ($ActualBinding -ne $null)
                 {
-                    if([string]$ActualBinding.Protocol -ne [string]$Binding.CimInstanceProperties["Protocol"].Value)
+
+                    $protocol = [string]$Binding.CimInstanceProperties["Protocol"].Value
+                    if (!$protocol) {
+                        $protocol = 'http'
+                    }
+                    if([string]$ActualBinding.Protocol -ne $protocol)
                     {
                         $BindingNeedsUpdating = $true
                         break
@@ -682,17 +686,28 @@ function compareWebsiteBindings
                         $BindingNeedsUpdating = $true
                         break
                     }
-
-                    if([string]$ActualBinding.CertificateThumbprint -ne [string]$Binding.CimInstanceProperties["CertificateThumbprint"].Value)
+                    if ($Binding.CimInstanceProperties["SelfSignedCertificate"].Value) 
                     {
-                        $BindingNeedsUpdating = $true
-                        break
-                    }
-
-                    if([string]$ActualBinding.CertificateStoreName -ne [string]$Binding.CimInstanceProperties["CertificateStoreName"].Value)
-                    {
-                        $BindingNeedsUpdating = $true
-                        break
+                        if ([string]$ActualBinding.CertificateStoreName -ine 'MY') 
+                        {
+                            $BindingNeedsUpdating = $true
+                            break
+                        }
+                    } 
+                    else 
+                    { 
+                    
+                        if([string]$ActualBinding.CertificateThumbprint -ne [string]$Binding.CimInstanceProperties["CertificateThumbprint"].Value)
+                        {
+                            $BindingNeedsUpdating = $true
+                            break
+                        }
+                    
+                        if([string]$ActualBinding.CertificateStoreName -ne [string]$Binding.CimInstanceProperties["CertificateStoreName"].Value)
+                        {
+                            $BindingNeedsUpdating = $true
+                            break
+                        }
                     }
                 }
                 else 
@@ -750,6 +765,7 @@ function UpdateBindings
         $HostHeader = $Binding.CimInstanceProperties["HostName"].Value
         $CertificateThumbprint = $Binding.CimInstanceProperties["CertificateThumbprint"].Value
         $CertificateStoreName = $Binding.CimInstanceProperties["CertificateStoreName"].Value
+        $SelfSignedCertificate = $Binding.CimInstanceProperties["SelfSignedCertificate"].Value
                     
         $bindingParams = @{}
         $bindingParams.Add('-Name', $Name)
@@ -797,8 +813,24 @@ function UpdateBindings
         {
             if($CertificateThumbprint -ne $null)
             {
-                $NewWebbinding = get-WebBinding -name $Name -Port $Port
-                $newwebbinding.AddSslCertificate($CertificateThumbprint, $CertificateStoreName)
+                $newWebBinding = get-WebBinding -name $Name -Port $Port
+                $newWebBinding.AddSslCertificate($CertificateThumbprint, $CertificateStoreName)
+            } elseif ($SelfSignedCertificate) {
+                if (!$HostName) {
+                    $dnsName = (hostname)
+                } else {
+                    $dnsName = $HostName
+                }
+                $cert = Get-ChildItem -Path 'cert:\LocalMachine\My' | Where-Object { $_.Subject -imatch "CN=$dnsName" } | Select-Object -First 1
+                
+                if ($cert) { 
+                    Write-Verbose("Using existing certificate: $($cert.Name)")
+                } else {
+                    Write-Verbose("Creating new self-signed certificate for '$dnsName'")
+                    $cert = New-SelfSignedCertificate -DnsName $dnsName -CertStoreLocation cert:\LocalMachine\My
+                }
+                $newWebBinding = get-WebBinding -name $Name -Port $Port
+                $newWebBinding.AddSslCertificate($cert.Thumbprint, 'My')
             }
         }
         catch
