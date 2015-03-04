@@ -116,5 +116,10 @@ function Start-Build {
         Invoke-Command -ScriptBlock ($cmd.ScriptBlock) -ArgumentList $invokeArgs
      }
 
-     Write-Log -Info 'Build finished successfully.' -Emphasize
+     $packagePath = (Get-ConfigurationPaths).PackagesPath
+     if ((Test-Path -Path $packagePath)) {
+       Write-Log -Info "Build finished successfully. Package has been created at '$packagePath'." -Emphasize
+     } else {
+       Write-Log -Info "Build finished successfully. " -Emphasize
+     }
 }
