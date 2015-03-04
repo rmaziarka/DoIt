@@ -46,7 +46,7 @@ function Build-DirPackage {
     If true, package will be compressed.
 
     .EXAMPLE
-
+    Build-DirPackage -PackageName 'TestsPerformance' -SourcePath 'Performance\JMeter'
     #>
     [CmdletBinding()]
     [OutputType([void])]
