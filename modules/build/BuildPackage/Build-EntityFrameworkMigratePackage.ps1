@@ -61,6 +61,9 @@ function Build-EntityFrameworkMigratePackage {
     .PARAMETER RestoreNuGet
     If true and $ProjectFile is provided, 'nuget restore' will be explicitly run before building the project file.
 
+    .PARAMETER Zip
+    If true, package will be compressed.
+
     .LINK
     Deploy-EntityFrameworkMigratePackage
     New-MsBuildOptions
@@ -106,7 +109,11 @@ function Build-EntityFrameworkMigratePackage {
 
         [Parameter(Mandatory=$false)]
         [switch]
-        $RestoreNuGet 
+        $RestoreNuGet,
+
+        [Parameter(Mandatory=$false)]
+        [switch]
+        $Zip
     )
 
     $configPaths = Get-ConfigurationPaths
@@ -133,6 +140,13 @@ function Build-EntityFrameworkMigratePackage {
 
     if (![string]::IsNullOrEmpty($ProjectPath) -and !(Test-Path -Path $ProjectPath)) {
         Write-Log -Critical "Given project file '$ProjectPath' does not exist for '$PackageName'."
+    }
+
+    if ($OutputPath.ToLower().EndsWith('zip')) {
+        $zipPath = $OutputPath
+        $OutputPath = Split-Path -Path $OutputPath -Parent
+    } elseif ($Zip) {
+        $zipPath = Join-Path -Path $OutputPath -ChildPath "${PackageName}.zip"
     }
 
     $requiredTools = @('EntityFramework*.dll', 'migrate.exe')
@@ -190,10 +204,11 @@ function Build-EntityFrameworkMigratePackage {
     
     if ($resolvedAddFilesToPackage) {
         Copy-Item -Path $resolvedAddFilesToPackage -Destination $OutputPath
-    }
+    }  
 
-    $outputFile = Join-Path -Path $OutputPath -ChildPath "$packageName.zip"
-    New-Zip -Path $OutputPath -OutputFile $outputFile -Try7Zip
-    Remove-Item -Path "$OutputPath\*" -Exclude "*.zip" -Force
+    if ($zipPath) {
+        New-Zip -Path $OutputPath -OutputFile $zipPath -Try7Zip -Exclude "*.zip"
+        Remove-Item -Path "$OutputPath\*" -Exclude "*.zip" -Force -Recurse
+    }
 
 }

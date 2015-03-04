@@ -42,4 +42,5 @@ Export-ModuleMember -Function `
     Build-SSRSReportsPackage, `
     Remove-PackagesDir, `
     New-MsBuildOptions, `
-    Invoke-MsBuild
+    Invoke-MsBuild, `
+    Start-Build
