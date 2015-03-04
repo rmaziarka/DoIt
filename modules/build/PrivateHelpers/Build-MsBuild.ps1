@@ -100,6 +100,8 @@ function Build-MsBuild {
         $AssemblyInfoFilePaths
     )
 
+    Write-ProgressExternal -Message "Building package $PackageName"
+
     $projectRootPath = (Get-ConfigurationPaths).ProjectRootPath
 
     $projectPath = Resolve-PathRelativeToProjectRoot `
@@ -136,7 +138,7 @@ function Build-MsBuild {
         }
     }
 
-    Write-Log -Info "Packaging '$PackageName'." -Emphasize
+    Write-Log -Info "Building package '$PackageName'." -Emphasize
 
     Invoke-MsBuild -ProjectPath $projectPath -MsBuildOptions $newMsBuildOptions
 
@@ -150,4 +152,6 @@ function Build-MsBuild {
             [void](Move-Item -Path "$info.bak" -Destination $info -Force)
         }
     }
+
+    Write-ProgressExternal -Message ""
 }

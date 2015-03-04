@@ -82,6 +82,8 @@ function Build-SSRSReportsPackage {
         [string]
         $NameSpace
     )
+
+    Write-ProgressExternal -Message "Building package $PackageName"
     
     $configPaths = Get-ConfigurationPaths
 
@@ -108,5 +110,7 @@ function Build-SSRSReportsPackage {
 
         Get-ChildItem -Path "$OutputPath\*.rdl" | foreach { Set-ReportVersion -FilePath $_.FullName -Version $Version -VersionPlaceHolderXpath $VersionPlaceHolderXpath -NameSpace $NameSpace }
     }
+
+    Write-ProgressExternal -Message ''
 
 }

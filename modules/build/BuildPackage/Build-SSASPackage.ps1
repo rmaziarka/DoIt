@@ -64,6 +64,8 @@ function Build-SSASPackage {
         $Version
     )
 
+    Write-ProgressExternal -Message "Building package $PackageName"
+
     $configPaths = Get-ConfigurationPaths
 
     $CubeProject = Resolve-PathRelativeToProjectRoot `
@@ -86,4 +88,6 @@ function Build-SSASPackage {
     Write-Log -Info "Copying SSAS build results..."
     Copy-Item -Path "$SourceDir\bin\*.asdatabase" -Destination $OutputPath
     Copy-Item -Path "$SourceDir\bin\*.deploymentoptions" -Destination $OutputPath
+
+    Write-ProgressExternal -Message ''
 }

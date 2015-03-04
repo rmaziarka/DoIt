@@ -75,6 +75,8 @@ function Build-SSRSModulePackage {
         [PSObject]
         $MsBuildOptions
     )
+
+    Write-ProgressExternal -Message "Building package $PackageName"
     
     $configPaths = Get-ConfigurationPaths
 
@@ -97,4 +99,5 @@ function Build-SSRSModulePackage {
     $projectName = [System.IO.Path]::GetFileNameWithoutExtension($projectFile)
     Copy-Item -Path "$DllPath/$projectName.dll" -Destination $OutputPath -Recurse
 
+    Write-ProgressExternal -Message ''
 }

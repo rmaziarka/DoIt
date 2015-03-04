@@ -74,6 +74,8 @@ function Build-SSISPackage {
         $Version
     )
 
+    Write-ProgressExternal -Message "Building package $PackageName"
+
     $configPaths = Get-ConfigurationPaths
 
     $ProjectPath = Resolve-PathRelativeToProjectRoot `
@@ -106,5 +108,7 @@ function Build-SSISPackage {
 
         Get-ChildItem -Path "$OutputPath\Package" | foreach { Set-SSISVersion -FilePath $_.FullName -Version $Version }
     }
+
+    Write-ProgressExternal -Message ''
 
 }

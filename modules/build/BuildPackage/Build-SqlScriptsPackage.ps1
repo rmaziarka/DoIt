@@ -79,6 +79,8 @@ function Build-SqlScriptsPackage {
         $Exclude = $null
     )
 
+    Write-ProgressExternal -Message "Building package $PackageName"
+
     $configPaths = Get-ConfigurationPaths
 
     $ScriptsPath = Resolve-PathRelativeToProjectRoot `
@@ -96,4 +98,5 @@ function Build-SqlScriptsPackage {
 
     [void](Copy-Item -Path "$ScriptsPath\*.*" -Include $Include -Exclude $Exclude -Destination $OutputPath)
 
+    Write-ProgressExternal -Message ''
 }

@@ -63,6 +63,8 @@ function Build-DBDeployPackage {
         [string]
         $OutputPath
     )
+
+    Write-ProgressExternal -Message "Building package $PackageName"
     
     $configPaths = Get-ConfigurationPaths
 
@@ -80,4 +82,5 @@ function Build-DBDeployPackage {
     Write-Log -Info "Copying Package."
     Copy-Item -Path "$DBDeployPath/*" -Destination $OutputPath -Recurse
 
+    Write-ProgressExternal -Message ''
 }

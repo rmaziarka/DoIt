@@ -54,6 +54,10 @@ function Build-WebPackage {
     .PARAMETER AssemblyInfoFilePaths
     Paths to AssemblyInfo files which will have their version numbers updated.
 
+    .PARAMETER AutoParameterizeConnectionStrings
+    Specifies whether msbuild should automatically parameterize connection string (default behavior).
+    This is not desired when using custom tokenization mechanism (not msbuild's parameters.xml).
+
     .LINK
     Deploy-MsDeployPackage
     New-MsBuildOptions
@@ -91,7 +95,11 @@ function Build-WebPackage {
 
         [Parameter(Mandatory=$false)]
         [string[]]
-        $AssemblyInfoFilePaths
+        $AssemblyInfoFilePaths,
+
+        [Parameter(Mandatory=$false)]
+        [switch]
+        $AutoParameterizeConnectionStrings = $false
     )
 
     $params = $PSBoundParameters
@@ -101,12 +109,14 @@ function Build-WebPackage {
                             -Path $OutputPath `
                             -DefaultPath (Join-Path -Path (Join-Path -Path $configPaths.PackagesPath -ChildPath $PackageName) -ChildPath "${PackageName}.zip") `
                             -CheckExistence:$false
+    
+    $params.Remove('AutoParameterizeConnectionStrings')
 
     $params.MsBuildPackageOptions = @{ 
         "DeployOnBuild" = "True"
         "DeployTarget" = "Package"
         "PackageLocation" = $OutputPath
-        "AutoParameterizationWebConfigConnectionStrings" = "false"
+        "AutoParameterizationWebConfigConnectionStrings" = $AutoParameterizeConnectionStrings.ToString().ToLowerInvariant()
     }
    
     Build-MSBuild @params

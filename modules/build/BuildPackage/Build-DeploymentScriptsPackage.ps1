@@ -82,6 +82,8 @@ function Build-DeploymentScriptsPackage {
 
     )
 
+    Write-ProgressExternal -Message 'Building DeployScripts'
+
     $configPaths = Get-ConfigurationPaths
        
     $OutputPathPsci = Resolve-PathRelativeToProjectRoot `
@@ -107,5 +109,7 @@ function Build-DeploymentScriptsPackage {
     if ($ReplaceDeployScriptParameters) {
         Set-PackageDeployScriptParameters -DeployScriptToUpdatePath (Join-Path -Path $OutputPathDeploymentScripts -ChildPath 'deploy.ps1')
     }
+
+    Write-ProgressExternal -Message ''
    
 }

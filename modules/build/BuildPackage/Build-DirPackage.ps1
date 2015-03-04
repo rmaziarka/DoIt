@@ -76,6 +76,8 @@ function Build-DirPackage {
         $Zip
     )
 
+    Write-ProgressExternal -Message "Building package $PackageName"
+
     $configPaths = Get-ConfigurationPaths
 
     $SourcePath = Resolve-PathRelativeToProjectRoot `
@@ -106,5 +108,7 @@ function Build-DirPackage {
         New-Zip -Path $OutputPath -OutputFile $zipPath -Try7Zip -Exclude "*.zip"
         Remove-Item -Path "$OutputPath\*" -Exclude "*.zip" -Force -Recurse
     }
+
+    Write-ProgressExternal -Message ''
 
 }

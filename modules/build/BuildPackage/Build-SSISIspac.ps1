@@ -74,6 +74,8 @@ function Build-SSISIspac {
         $OutputPath
     )
 
+    Write-ProgressExternal -Message "Building package $PackageName"
+
     $configPaths = Get-ConfigurationPaths
     $projectRootPath = (Get-ConfigurationPaths).ProjectRootPath
 
@@ -149,4 +151,6 @@ function Build-SSISIspac {
     Write-Log -Info "Copying .ispac files to '$OutputPath': $($ispacFiles.FullName -join ', ')"
     [void](New-Item -Path $OutputPath -ItemType Directory -Force)
     Copy-Item -Path ($ispacFiles.FullName) -Destination $OutputPath
+
+    Write-ProgressExternal -Message ''
 }

@@ -116,6 +116,8 @@ function Build-EntityFrameworkMigratePackage {
         $Zip
     )
 
+    Write-ProgressExternal -Message "Building package $PackageName"
+
     $configPaths = Get-ConfigurationPaths
 
     if ($ProjectPath) {
@@ -210,5 +212,7 @@ function Build-EntityFrameworkMigratePackage {
         New-Zip -Path $OutputPath -OutputFile $zipPath -Try7Zip -Exclude "*.zip"
         Remove-Item -Path "$OutputPath\*" -Exclude "*.zip" -Force -Recurse
     }
+
+    Write-ProgressExternal -Message ''
 
 }
