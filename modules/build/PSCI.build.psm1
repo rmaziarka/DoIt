@@ -30,6 +30,7 @@ Get-ChildItem -Recurse $curDir -Include *.ps1 | Where-Object { $_ -notmatch ".Te
 Export-ModuleMember -Function `
     Build-SSASPackage, `
     Build-DeploymentScriptsPackage, `
+    Build-DirPackage, `
     Build-EntityFrameworkMigratePackage, `
     Build-MsBuildPackage, `
     Build-WebPackage, `

@@ -120,9 +120,11 @@ function Build-EntityFrameworkMigratePackage {
                         -Path $MigrationsDir `
                         -ErrorMsg "Directory that should contain migration dlls '$migrationsDir' does not exist (package '$PackageName'). Tried following absolute path: '{0}'."
 
-    $EntityFrameworkDir = Resolve-PathRelativeToProjectRoot `
-                             -Path $EntityFrameworkDir `
-                             -ErrorMsg "Directory that should contain Entity Framework '$entityFrameworkDir' does not exist (package '$packageName'). Tried following absolute path: '{0}'."
+    if ($EntityFrameworkDir) { 
+        $EntityFrameworkDir = Resolve-PathRelativeToProjectRoot `
+                                -Path $EntityFrameworkDir `
+                                -ErrorMsg "Directory that should contain Entity Framework '$entityFrameworkDir' does not exist (package '$packageName'). Tried following absolute path: '{0}'."
+    }
 
     $OutputPath = Resolve-PathRelativeToProjectRoot `
                             -Path $OutputPath `
