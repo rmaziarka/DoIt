@@ -52,7 +52,7 @@ function Start-Build {
     [OutputType([void])]
     param(
         [Parameter(Mandatory=$true)]
-        [hashtable]
+        [object[]]
         $BuildParams,
 
         [Parameter(Mandatory=$true)]
@@ -64,12 +64,9 @@ function Start-Build {
         $DefaultTask
      )  
 
-     $resolvedBuildParams = @{}
-     foreach ($buildParamKey in $BuildParams.Keys) {
-        $value = Get-Variable -Name ($buildParams[$buildParamKey].Name) -ErrorAction SilentlyContinue
-        if ($value) { 
-            $resolvedBuildParams[$buildParamKey] = $value.Value
-        }
+     $buildParamsHash = @{}
+     foreach ($param in $BuildParams) {
+        $buildParamsHash[$param.Name] = $param.Value
      }
 
      if (!(Test-Path -Path $ScriptsDirectory -PathType Container)) {
@@ -82,14 +79,14 @@ function Start-Build {
         . $script
      }
 
-     if (!$resolvedBuildParams.Tasks) {
+     if (!$buildParamsHash.Tasks) {
         Write-Log -Info "No tasks specified - running default task '$DefaultTask'" -Emphasize
-        $resolvedBuildParams.Tasks = @($DefaultTask)
+        $buildParamsHash.Tasks = @($DefaultTask)
      }
 
      $tasksMissing = @()
 
-     foreach ($task in $resolvedBuildParams.Tasks) {
+     foreach ($task in $buildParamsHash.Tasks) {
         if (!(Get-Command -Name $task -ErrorAction SilentlyContinue)) {
             $tasksMissing += $task
         }
@@ -99,18 +96,18 @@ function Start-Build {
         Write-Log -Critical "Missing following functions: $($tasksMissing -join ', '). Please ensure they're available at '$ScriptsDirectory'."
      }
 
-     foreach ($task in $resolvedBuildParams.Tasks) {
+     foreach ($task in $buildParamsHash.Tasks) {
         $cmd = Get-Command -Name $task
         $cmdParams = $cmd.ParameterSets[0].Parameters | Where-Object { $_.Position -ge 0 } | Sort-Object -Property Position | Select-Object -ExpandProperty Name
         
         $invokeArgs = @()
         $logInvocation = "$($cmd.Name) "
         foreach ($param in $cmdParams) {
-            if (!$resolvedBuildParams.ContainsKey($param)) {
+            if (!$buildParamsHash.ContainsKey($param)) {
                 Write-Log -Critical "Function '$task' takes parameter '$param', which is not defined in main build script. Please add it to build.ps1'"
             }
-            $invokeArgs += $resolvedBuildParams[$param]
-            $logInvocation += "-$param $($resolvedBuildParams[$param]) "
+            $invokeArgs += $buildParamsHash[$param]
+            $logInvocation += "-$param $($buildParamsHash[$param]) "
         }
         Write-Log -Info "Running task: $logInvocation" -Emphasize
         Invoke-Command -ScriptBlock ($cmd.ScriptBlock) -ArgumentList $invokeArgs
