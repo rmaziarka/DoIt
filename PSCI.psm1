@@ -53,7 +53,7 @@ if (Test-Path -Path "$curDir\modules") {
 		Import-Module -Name $modulePath -Force -Global 3>$null
 	}
 	
-	Write-Log -Info ("PSCI (build #{0}) started with modules: {1}" -f $buildNumber, ($modulesToImport.Name -replace 'PSCI.(.*).psm1', '$1' -join ", " ))
+	Write-Log -Info ("PSCI (build #{0}) started with modules: {1}. Path: '{2}'." -f $buildNumber, ($modulesToImport.Name -replace 'PSCI.(.*).psm1', '$1' -join ", " ), $PSScriptRoot)
 }
 
 Export-ModuleMember -Variable `
