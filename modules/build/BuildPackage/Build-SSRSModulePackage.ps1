@@ -89,7 +89,7 @@ function Build-SSRSModulePackage {
                             -DefaultPath (Join-Path -Path $configPaths.PackagesPath -ChildPath $PackageName)  `
                             -CheckExistence:$false
    
-    Invoke-MsBuild -ProjectPath $ProjectPath -MsBuildOptions $MsBuildOptions
+    Invoke-MsBuild -ProjectPath $ProjectPath -MsBuildOptions $MsBuildOptions -LogExternalMessage:$false
 
     $DllPath = Join-Path -Path (Split-Path -Parent -Path $ProjectPath) -ChildPath "bin\Release"
     [void](New-Item -Path $OutputPath -ItemType Directory -Force)

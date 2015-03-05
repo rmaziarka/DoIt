@@ -185,7 +185,7 @@ function Build-EntityFrameworkMigratePackage {
             Write-Log -Info "Restoring nuget packages for package '$PackageName'." -Emphasize
             Start-NugetRestore -ProjectPath $ProjectPath
         }
-        Invoke-MsBuild -ProjectPath $ProjectPath -MsBuildOptions $MsBuildOptions
+        Invoke-MsBuild -ProjectPath $ProjectPath -MsBuildOptions $MsBuildOptions -LogExternalMessage:$false
     }
 
     if (!$MigrationsFileWildcard) {
@@ -196,7 +196,7 @@ function Build-EntityFrameworkMigratePackage {
         Write-Log -Critical "There are no $MigrationsFileWildcard file(s) at '$migrationsDir' - please ensure `$migrationsDir points to the directory with compiled migrations."
     }
 
-    Write-Log -Info "Packaging '$PackageName'." -Emphasize
+    Write-Log -Info "Building package '$PackageName'." -Emphasize
     [void](New-Item -Path $OutputPath -ItemType Directory -Force)
 
     [void](Copy-Item -Path "$migrationsDir\$MigrationsFileWildcard" -Destination $OutputPath)

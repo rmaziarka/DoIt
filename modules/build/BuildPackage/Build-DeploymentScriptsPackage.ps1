@@ -81,6 +81,7 @@ function Build-DeploymentScriptsPackage {
         $ExternalLibsToInclude
 
     )
+    Write-Log -Info 'Building DeployScripts and PSCI packages' -Emphasize
 
     Write-ProgressExternal -Message 'Building DeployScripts'
 

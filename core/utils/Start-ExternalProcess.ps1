@@ -135,7 +135,7 @@ function Start-ExternalProcess {
     }
 
     if (!$Quiet) {
-        Write-Log -Info "Running external process using following command line: $Command $ArgumentList"
+        Write-Log -Info "Running external process: $Command $ArgumentList"
     }
 
 	$process = New-Object -TypeName System.Diagnostics.Process

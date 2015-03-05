@@ -140,7 +140,7 @@ function Build-MsBuild {
 
     Write-Log -Info "Building package '$PackageName'." -Emphasize
 
-    Invoke-MsBuild -ProjectPath $projectPath -MsBuildOptions $newMsBuildOptions
+    Invoke-MsBuild -ProjectPath $projectPath -MsBuildOptions $newMsBuildOptions -LogExternalMessage:$false
 
     if($Version) {
         foreach ($info in $AssemblyInfoFilePaths) {

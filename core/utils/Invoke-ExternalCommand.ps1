@@ -131,7 +131,7 @@ function Invoke-ExternalCommand {
 
     $oldErrorActionPreference = $ErrorActionPreference
     if (!$Quiet) {
-        Write-Log -Info "Running external command using following command line: $Command"
+        Write-Log -Info "Running external command: $Command"
     }
 
     $stdErrOutputPresent = $false

@@ -34,6 +34,9 @@ function Invoke-MsBuild {
     An object created by New-MsBuildOptions function, which specifies msbuild options.
     If not provided, default msbuild options will be used.
 
+    .PARAMETER LogExternalMessage
+    If true, external progress message will be logged (this needs to be set to false when invoked internally).
+
     .EXAMPLE
     Invoke-MsBuild -ProjectPath $projectPath -MsBuildOptions $MsBuildOptions
     #>
@@ -47,10 +50,16 @@ function Invoke-MsBuild {
 
         [Parameter(Mandatory=$false)]
         [PSObject]
-        $MsBuildOptions
+        $MsBuildOptions,
+
+        [Parameter(Mandatory=$false)]
+        [switch]
+        $LogExternalMessage = $true
     )
 
-    Write-ProgressExternal -Message 'Running msbuild' -ErrorMessage 'Msbuild error'
+    if ($LogExternalMessage) { 
+        Write-ProgressExternal -Message 'Running msbuild' -ErrorMessage 'Msbuild error'
+    }
 
     # Take default MsBuildOptions if not provided
     if (!$MsBuildOptions) {
@@ -120,6 +129,8 @@ function Invoke-MsBuild {
 
     # note: don't put [void] / Out-Null here as we need to write output
     Invoke-ExternalCommand -Command $cmd -DontCatchOutputStreams -ReturnLastExitCode:$false
-
-    Write-ProgressExternal -Message '' -ErrorMessage ''
+    
+    if ($LogExternalMessage) { 
+        Write-ProgressExternal -Message '' -ErrorMessage ''
+    }
 }
