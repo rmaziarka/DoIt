@@ -61,9 +61,11 @@ function Get-PreCopyScriptBlock {
             $ClearDestination
         )
         $Global:ErrorActionPreference = 'Stop'
+        $Global:VerbosePreference = 'Continue'
 
         if ($BlueGreenEnvVariableName) {
             $currentDest = [Environment]::GetEnvironmentVariable($BlueGreenEnvVariableName, 'Machine')
+            Write-Verbose -Message "Current env variable '$BlueGreenEnvVariableName': '$currentDest'"
             $destPath = $Destination[0]
             if ($currentDest -ieq $destPath) {
                 $destPath = $Destination[1]

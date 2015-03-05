@@ -116,7 +116,7 @@ function Get-PostCopyScriptBlock {
             if ($oldPath) {
                 [void](Remove-Item -Path (Join-Path -Path $oldPath -ChildPath '.currentLive') -Force -ErrorAction SilentlyContinue)
             }
-            
+            Write-Verbose -Message "Setting env variable '$BlueGreenEnvVariableName' to '$destPath'"
             [Environment]::SetEnvironmentVariable($BlueGreenEnvVariableName, $destPath, 'Machine')
             [void](New-Item -Path (Join-Path -Path $Destination -ChildPath '.currentLive') -Force -ItemType File)
         }
