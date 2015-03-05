@@ -172,7 +172,7 @@ function Invoke-Sql {
 
         $params.Remove('Query')
         foreach ($file in $InputFile) {
-            $file = Resolve-Path -Path $file
+            $file = (Resolve-Path -Path $file).ProviderPath
             $params['InputFile'] = $file
             Write-Log -Info "Running sql file '$file' at $($csb.DataSource) / $($csb.InitialCatalog) using sqlcmd"
             Invoke-SqlSqlcmd @params
@@ -191,7 +191,7 @@ function Invoke-Sql {
         }
 
         foreach ($file in $InputFile) {
-            $file = Resolve-Path -Path $file
+            $file = (Resolve-Path -Path $file).ProviderPath
             Write-Log -Info "Running sql file '$file' at $($csb.DataSource) / $($csb.InitialCatalog) using .Net"
             $params['Query'] = Get-Content -Path $file -ReadCount 0 | Out-String
             Invoke-SqlDotNet @params

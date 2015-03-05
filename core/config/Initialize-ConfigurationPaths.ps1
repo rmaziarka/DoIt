@@ -81,7 +81,7 @@ function Initialize-ConfigurationPaths {
         if (!(Test-Path -Path $ProjectRootPath -PathType Container)) {
             Write-Log -Critical "Project root directory '$ProjectRootPath' does not exist. Please ensure you have passed valid 'ProjectRootPath' argument to Initialize-ConfigurationPaths."
         }
-        $configPaths.ProjectRootPath = Resolve-Path -Path $ProjectRootPath
+        $configPaths.ProjectRootPath = (Resolve-Path -Path $ProjectRootPath).ProviderPath
     } else {
         $configPaths.ProjectRootPath = $configPaths.DeployScriptsPath
     } 
@@ -95,7 +95,7 @@ function Initialize-ConfigurationPaths {
             $configPaths.PackagesPath = $PackagesPath
         }
         if ((Test-Path -Path $configPaths.PackagesPath -PathType Container)) {
-            $configPaths.PackagesPath = Resolve-Path -Path $configPaths.PackagesPath
+            $configPaths.PackagesPath = (Resolve-Path -Path $configPaths.PackagesPath).ProviderPath
         } elseif ($ValidatePackagesPath) {
             Write-Log -Critical "Packages directory '$($configPaths.PackagesPath)' does not exist. Please ensure you have packages available in this location (do you need to run the build?)."  
         }
@@ -139,7 +139,7 @@ function Initialize-ConfigurationPaths {
 
     foreach ($path in $pathsToCheck) {
         if ((Test-Path -Path "$path\*.ps*1")) {
-            $configPaths.DeployConfigurationPath = Resolve-Path -Path $path
+            $configPaths.DeployConfigurationPath = (Resolve-Path -Path $path).ProviderPath
             break
         }
     }

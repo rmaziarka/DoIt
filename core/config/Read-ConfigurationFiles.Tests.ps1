@@ -66,7 +66,7 @@ Describe -Tag "PSCI.unit" "Read-ConfigurationFiles" {
                     $result = Read-ConfigurationFiles
                 
                     $result | Should Not Be $null
-                    $result.Files | Should Be (Resolve-Path -Path $testFileFunc).Path
+                    $result.Files | Should Be (Resolve-Path -Path $testFileFunc).ProviderPath
                     $result.RequiredDSCModules.Count | Should Be 0
                 } finally {
                     Remove-Item -Path $testConfigDir -Force -Recurse

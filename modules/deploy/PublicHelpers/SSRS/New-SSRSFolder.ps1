@@ -51,7 +51,7 @@ function New-SSRSFolder {
         $Name
     ) 
 
-    Write-Log -Info "New-SSRSFolder -Name $Name"
+    Write-Log -Info "Creating SSRS folder '$Name'"
 
     $Name = Format-SSRSFolder -Folder $Name
 

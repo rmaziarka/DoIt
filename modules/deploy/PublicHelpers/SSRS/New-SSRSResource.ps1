@@ -65,7 +65,7 @@ function New-SSRSResource {
         $MimeType
     ) 
     
-    Write-Log -_debug "New-SSRSResource -FilePath $FilePath -Folder $Folder"
+    Write-Log -_debug "Creating SSRS resource '$FilePath' at '$Folder'"
     $Path = $Folder | Join-Path -ChildPath $FilePath
 
     $RawDefinition = Get-AllBytes -Path $Path

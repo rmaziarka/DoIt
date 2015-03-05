@@ -60,6 +60,8 @@ function New-SSRSWebServiceProxy {
         $Uri += 'ReportService2010.asmx'
     }
 
+    Write-Log -Info "Accessing SSRS at '$uri'"
+
     $Assembly = [AppDomain]::CurrentDomain.GetAssemblies() |
         Where-Object {
             $_.GetType('SSRS.ReportingService2010.ReportingService2010')

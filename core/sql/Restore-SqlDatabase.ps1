@@ -84,6 +84,7 @@ function Restore-SqlDatabase {
     try { 
         if ($RemoteShareCredential) {
             $shareDir = Split-Path -Path $Path -Parent
+            #TODO: disconnect-share by prefix
             Connect-Share -Path $shareDir -Credential $RemoteShareCredential
             $tempDir = New-TempDirectory
             Write-Log -Info "Copying '$Path' to '$tempDir'"

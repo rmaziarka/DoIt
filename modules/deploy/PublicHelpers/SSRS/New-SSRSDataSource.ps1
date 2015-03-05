@@ -70,7 +70,7 @@ function New-SSRSDataSource {
         $Overwrite = $true
     )
     
-    Write-Log -Info "New-SSRSDataSource -RdsPath $RdsPath -Folder $Folder -Overwrite $Overwrite"
+    Write-Log -Info "Creating SSRS data source '$RdsPath' at '$Folder', overwrite '$Overwrite'"
 
     $Folder = Format-SSRSFolder -Folder $Folder
 

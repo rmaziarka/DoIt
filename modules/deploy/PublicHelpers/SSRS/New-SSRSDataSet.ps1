@@ -77,7 +77,7 @@ function New-SSRSDataSet {
         $Overwrite = $true
     ) 
     
-    Write-Log -Info "New-SSRSDataSet -RsdPath $RsdPath -Folder $Folder"
+    Write-Log -Info "Creating SSRS dataset '$RsdPath' at '$Folder'"
 
     $Folder = Format-SSRSFolder -Folder $Folder
 
