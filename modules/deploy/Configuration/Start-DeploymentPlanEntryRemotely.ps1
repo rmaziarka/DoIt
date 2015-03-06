@@ -30,9 +30,6 @@ function Start-DeploymentPlanEntryRemotely {
     .PARAMETER DeploymentPlanGroupedEntry
     Deployment plan entry to deploy (grouped).
 
-    .PARAMETER PackageCopiedToNodes
-    Defines array with node names where the package was already copied to.
-
     .PARAMETER DeployType
     Deployment type:
     All       - deploy everything according to configuration files (= Provision + Deploy)
@@ -50,10 +47,6 @@ function Start-DeploymentPlanEntryRemotely {
         [Parameter(Mandatory=$true)]
         [PSCustomObject]
         $DeploymentPlanGroupedEntry,
-
-        [Parameter(Mandatory=$true)]
-        [ref]
-        $PackageCopiedToNodes,
 
         [Parameter(Mandatory=$false)]
         [ValidateSet('All', 'DSC', 'Functions', 'Adhoc')]
@@ -84,13 +77,10 @@ function Start-DeploymentPlanEntryRemotely {
             ConfigurationsFilter = $configInfo.Name
             NodesFilter = $configInfo.ConnectionParams.Nodes | Select-Object -Unique
             TokensOverride = $DeploymentPlanGroupedEntry.TokensOverride
+            CopyPackages = $true
         }
         
     $runOnNode = $runOnConnectionParams.Nodes[0]
-    if ($PackageCopiedToNodes.Value -notcontains $runOnNode) {
-        $PackageCopiedToNodes.Value += @($runOnNode)
-        $params.CopyPackages = $true
-    }
 
     if ($runOnConnectionParams.Credential) {
         $userName = $runOnConnectionParams.Credential.UserName

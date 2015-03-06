@@ -135,10 +135,9 @@ function Start-DeploymentPlan {
         }
     }
 
-    $packageCopiedToNodes = @()
     foreach ($entry in $planByRunOn) {
         if ($entry.GroupedConfigurationInfo[0].RunOnConnectionParams -and !$PSCIGlobalConfiguration.RemotingMode) {   
-            Start-DeploymentPlanEntryRemotely -DeploymentPlanGroupedEntry $entry -DeployType $DeployType -PackageCopiedToNodes ([ref]$packageCopiedToNodes)            
+            Start-DeploymentPlanEntryRemotely -DeploymentPlanGroupedEntry $entry -DeployType $DeployType           
         } else {
             Start-DeploymentPlanEntryLocally -DeploymentPlanGroupedEntry $entry -DscForce:$DscForce
         }
