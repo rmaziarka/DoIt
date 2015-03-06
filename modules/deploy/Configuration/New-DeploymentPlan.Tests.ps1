@@ -138,7 +138,7 @@ Describe -Tag "PSCI.unit" "New-DeploymentPlan" {
                 $deploymentPlan[4].ConnectionParams.Nodes[0] | Should Be 'machine2'
                 $deploymentPlan[4].ConnectionParams.RemotingMode | Should Be 'PSRemoting'
                 $deploymentPlan[4].RunOnConnectionParams | Should Be $null
-                $deploymentPlan[4].PackageDirectory | Should Be 'c:\PSCIPackage'
+                $deploymentPlan[4].PackageDirectory | Should Be 'auto'
                 $deploymentPlan[4].IsLocalRun | Should Be $false
 
             }
