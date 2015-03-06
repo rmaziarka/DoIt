@@ -76,9 +76,13 @@ function Publish-EntityFrameworkMigrate {
     # checking for 'error' is a workaround for a bug in some EF versions (https://entityframework.codeplex.com/workitem/1859)
     try {
         $output = ''     
-        [void](Start-ExternalProcess -Command "$PackagePath\migrate.exe" -ArgumentList $migrateArgs -Output ([ref]$output))
+        $exitCode = Start-ExternalProcess -Command "$PackagePath\migrate.exe" -ArgumentList $migrateArgs -Output ([ref]$output) -CheckLastExitCode:$false
         if ($output -imatch 'error:(.*)') {
             $errorMsg = "EF migration error:$($Matches[1])"
+            Write-ProgressExternal -ErrorMessage $errorMsg
+            Write-Log -Critical $errorMsg
+        } elseif ($exitCode -ne 0) {
+            $errorMsg = "EF migration error - exit code $exitCode"
             Write-ProgressExternal -ErrorMessage $errorMsg
             Write-Log -Critical $errorMsg
         }
