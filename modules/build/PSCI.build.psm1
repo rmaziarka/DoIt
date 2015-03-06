@@ -40,7 +40,9 @@ Export-ModuleMember -Function `
     Build-SSISPackage, `
     Build-SSRSModulePackage, `
     Build-SSRSReportsPackage, `
+    Get-AssemblyVersion, `
     Remove-PackagesDir, `
     New-MsBuildOptions, `
     Invoke-MsBuild, `
+    Set-AssemblVersion, `
     Start-Build

@@ -121,7 +121,7 @@ function Build-MsBuild {
 
             # back up AssemblyInfo.cs in order to restore that after build
             [void](Copy-Item -Path $info -Destination "$info.bak" -Force)
-            Set-AssemblyVersion -FilePath $info -Version $Version
+            Set-AssemblyVersion -Path $info -Version $Version -VersionAttribute AssemblyVersion,AssemblyFileVersion
         }
     }
 

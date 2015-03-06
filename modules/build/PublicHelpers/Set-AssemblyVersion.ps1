@@ -33,11 +33,11 @@ function Set-AssemblyVersion {
     .PARAMETER Version
     Version number
 
-    .LINK
-    Set-AssemblyVersion
+    .PARAMETER VersionAttribute
+    Version attribute to set - see http://stackoverflow.com/questions/64602/what-are-differences-between-assemblyversion-assemblyfileversion-and-assemblyin.
 
     .EXAMPLE
-    Set-AssemblyVersion -FilePath 'C:\Projects\MyProjectName\trunk\Src\CSProjectName\Properties\AssemblyInfo.cs' -Version '1.0.1.2'
+    Set-AssemblyVersion -Path 'C:\Projects\MyProjectName\trunk\Src\CSProjectName\Properties\AssemblyInfo.cs' -Version '1.0.1.2'
 
     #>
 
@@ -46,25 +46,40 @@ function Set-AssemblyVersion {
     param(
         [Parameter(Mandatory=$true)]
         [string]
-        $FilePath,
-        
+        $Path,
+
         [Parameter(Mandatory=$true)]
         [string]
-        $Version
+        $Version,
+
+        [Parameter(Mandatory=$false)]
+        [string[]]
+        [ValidateSet($null, 'AssemblyVersion', 'AssemblyFileVersion', 'AssemblyInformationalVersion')]
+        $VersionAttribute = 'AssemblyVersion'
     )
-    
-    # regex	
-	[regex] $assemblyVersion = 'AssemblyVersion\(\".*?\"\)'
-	$assemblyERVersion = 'AssemblyVersion("' + $Version + '")'
-		 
-	[regex]$assemblyFileVersion = 'AssemblyFileVersion\(\".*?\"\)'
-	$assemblyERFileVersion = 'AssemblyFileVersion("' + $Version + '")'
-	
-	Disable-ReadOnlyFlag -Path $FilePath
-	# update cs files
-	(Get-Content -Path $FilePath -Encoding UTF8 -ReadCount 0) | Foreach-Object {
-			$csline = $_ -Replace $assemblyVersion, $assemblyERVersion 
-			$csline = $csline -Replace $assemblyFileVersion, $assemblyERFileVersion
-			$csline 
-		} | Set-Content -Encoding UTF8 -Path $FilePath
+
+    if (!(Test-Path -Path $Path)) {
+        Write-Log -Critical "Path '$Path' does not exist."
+    }
+
+    if (!$VersionAttribute) {
+        $VersionAttribute = 'AssemblyVersion'
+    }
+
+    Write-Log -Info "Setting $($VersionAttribute -join ', ')='$Version' in file '$Path'"
+
+    $regexes = @()
+    foreach ($attr in $VersionAttribute) { 
+        $regexes += ('({0})\(\"([^\"]*)\"\)' -f $attr)
+    }
+    $regexReplace = '$1("{0}")' -f $Version    
+
+	Disable-ReadOnlyFlag -Path $Path
+	(Get-Content -Path $Path -Encoding UTF8 -ReadCount 0) | Foreach-Object {
+            $line = $_
+            foreach ($regex in $regexes) {
+                $line = $line -ireplace $regex, $regexReplace
+            }
+			$line
+	} | Set-Content -Encoding UTF8 -Path $Path
 }
