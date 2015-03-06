@@ -54,9 +54,17 @@ $Global:PSCIGlobalConfiguration = [PSCustomObject]@{
     # DeployConfigurationPath - path to directory with configuration files
     # DeployScriptsPath       - path to directory with deploy.ps1
     ConfigurationPaths = $null
+
+    # If not $null, it means deployment runs under CI Server (currently supported: TeamCity)
+    CIServer = $null
 }
 
 if (Test-Path -Path Variable:Global:PSCIRemotingMode) {
     $Global:PSCIGlobalConfiguration.RemotingMode = $Global:PSCIRemotingMode
 }
 
+if (Test-Path -Path Variable:Global:PSCICIServer) {
+    $Global:PSCIGlobalConfiguration.CIServer = $Global:PSCICIServer
+} elseif ($env:TEAMCITY_VERSION) {
+    $Global:PSCIGlobalConfiguration.CIServer = 'TeamCity'
+}

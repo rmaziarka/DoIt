@@ -165,11 +165,16 @@ function Start-DeploymentByPSRemoting {
             $DeployScript,
 
             [string]
-            $RemotingMode
+            $RemotingMode,
+
+            [string]
+            $CIServer
+
         )
 
         Set-Location -Path $PackageDirectory
         $Global:PSCIRemotingMode = $RemotingMode
+        $Global:PSCICIServer = $CIServer
         Invoke-Expression -Command "& $DeployScript"
         if ($PackageDirectoryAutoRemove) {
             Set-Location -Path (Split-Path -Path $PackageDirectory -Parent)
@@ -179,7 +184,7 @@ function Start-DeploymentByPSRemoting {
 
     Write-Log -Info "Running `"$deployScript`" using $($RunOnConnectionParams.RemotingMode) on `"$($RunOnConnectionParams.NodesAsString)`""
     $psSessionParams = $RunOnConnectionParams.PSSessionParams
-    $result = Invoke-Command @psSessionParams -ScriptBlock $scriptBlock -ArgumentList $PackageDirectory, $PackageDirectoryAutoRemove, $deployScript, $RunOnConnectionParams.RemotingMode
+    $result = Invoke-Command @psSessionParams -ScriptBlock $scriptBlock -ArgumentList $PackageDirectory, $PackageDirectoryAutoRemove, $deployScript, $RunOnConnectionParams.RemotingMode, ($Global:PSCIGlobalConfiguration.CIServer)
     if ($result -inotcontains 'success' -and $result -inotmatch 'success') {
         Write-Log -Critical "Remote invocation failed: $result"
     }

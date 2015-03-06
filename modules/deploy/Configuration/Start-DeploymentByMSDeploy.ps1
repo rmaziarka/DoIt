@@ -153,7 +153,7 @@ function Start-DeploymentByMSDeploy {
     }
 
     $powershellCmd = @"
-Set-Location -Path '$PackageDirectory'; `$Global:PSCIRemotingMode = '$($RunOnConnectionParams.RemotingMode)'; & $deployScript; 
+Set-Location -Path '$PackageDirectory'; `$Global:PSCIRemotingMode = '$($RunOnConnectionParams.RemotingMode)'; `$Global:PSCICIServer = '$($Global:PSCIGlobalConfiguration.CIServer)'; & $deployScript; 
 "@
     if ($PackageDirectoryAutoRemove) {
         $powershellCmd += "Set-Location -Path (Split-Path -Path '$PackageDirectory' -Parent);  Remove-Item -Path '$PackageDirectory' -Force -Recurse"

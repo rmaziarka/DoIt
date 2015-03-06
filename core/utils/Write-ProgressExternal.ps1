@@ -57,7 +57,7 @@ Function Write-ProgressExternal {
         $MessageType
     )
 
-    if (!$env:TEAMCITY_VERSION) {
+    if (!($Global:PSCIGlobalConfiguration.CIServer)) {
         return
     }
 

@@ -73,9 +73,16 @@ function Publish-EntityFrameworkMigrate {
         $migrateCommand += " /startupConfigurationFile=`"$StartupConfigurationFile`""
     }
     Push-Location -Path $PackagePath
-    # failOnStringPresence is a workaround for a bug in some EF versions (https://entityframework.codeplex.com/workitem/1859)
-    try { 
-        [void](Invoke-ExternalCommand -Command $migrateCommand -FailOnStringPresence "ERROR")
+    # checking for 'error' is a workaround for a bug in some EF versions (https://entityframework.codeplex.com/workitem/1859)
+    try {
+        $output = ''     
+        [void](Invoke-ExternalCommand -Command $migrateCommand -Output ([ref]$output))
+        if ($output -imatch 'error:(.*)') {
+            $errorMsg = "EF migration error:$($Matches[1])"
+            Write-ProgressExternal -ErrorMessage $errorMsg
+            Write-Log -Critical $errorMsg
+        }
+
     } finally {
         Pop-Location
     }
