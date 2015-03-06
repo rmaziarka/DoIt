@@ -170,7 +170,7 @@ function Invoke-Sql {
             Invoke-SqlSqlcmd @params
         }
 
-        $params.Remove('Query')
+        [void]($params.Remove('Query'))
         foreach ($file in $InputFile) {
             $file = (Resolve-Path -Path $file).ProviderPath
             $params['InputFile'] = $file

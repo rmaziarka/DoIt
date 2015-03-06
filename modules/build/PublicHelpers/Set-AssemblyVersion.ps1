@@ -28,13 +28,22 @@ function Set-AssemblyVersion {
     Sets version in the assembly info file.
 
     .PARAMETER Path
-    Path to the assembly info file.
+    Paths to the assembly info files or directory that contains $FileMask in one of its subdirectories.
 
     .PARAMETER Version
     Version number to set.
 
     .PARAMETER VersionAttribute
     Version attribute to set - see http://stackoverflow.com/questions/64602/what-are-differences-between-assemblyversion-assemblyfileversion-and-assemblyin.
+
+    .PARAMETER CreateBackup
+    If true, backup files will be created (.bak files next to files specified in $Path).
+
+    .PARAMETER AppendVersionAttributeIfNotExists
+    If true and version attribute does not exist in file, it will be appended to the file.
+
+    .PARAMETER FileMask
+    File mask to use if $Path is a directory (by default 'AssemblyInfo.cs')
 
     .EXAMPLE
     Set-AssemblyVersion -Path 'C:\Projects\MyProjectName\trunk\Src\CSProjectName\Properties\AssemblyInfo.cs' -Version '1.0.1.2'
@@ -45,7 +54,7 @@ function Set-AssemblyVersion {
     [OutputType([void])]
     param(
         [Parameter(Mandatory=$true)]
-        [string]
+        [string[]]
         $Path,
 
         [Parameter(Mandatory=$true)]
@@ -55,31 +64,83 @@ function Set-AssemblyVersion {
         [Parameter(Mandatory=$false)]
         [string[]]
         [ValidateSet($null, 'AssemblyVersion', 'AssemblyFileVersion', 'AssemblyInformationalVersion')]
-        $VersionAttribute = 'AssemblyVersion'
-    )
+        $VersionAttribute = 'AssemblyVersion',
 
-    if (!(Test-Path -Path $Path)) {
-        Write-Log -Critical "Path '$Path' does not exist."
-    }
+        [Parameter(Mandatory=$false)]
+        [switch]
+        $CreateBackup,
+
+        [Parameter(Mandatory=$false)]
+        [switch]
+        $AppendVersionAttributeIfNotExists,
+
+        [Parameter(Mandatory=$false)]
+        [string]
+        $FileMask = 'AssemblyInfo.cs'
+    )
 
     if (!$VersionAttribute) {
         $VersionAttribute = 'AssemblyVersion'
     }
+    if (!$FileMask) {
+        $FileMask = 'AssemblyInfo.cs'
+    }
 
-    Write-Log -Info "Setting $($VersionAttribute -join ', ')='$Version' in file '$Path'"
+    $resolvedPaths = @()
+    foreach ($p in $Path) { 
+        $resolvedPath = Resolve-PathRelativeToProjectRoot -Path $p
+        if (Test-Path -Path $resolvedPath -PathType Leaf) {
+            $resolvedPaths += $resolvedPath
+        } else {
+            $files = @(Get-ChildItem -Path $resolvedPath -File -Filter $FileMask -Recurse | Select-Object -ExpandProperty FullName)
+            if (!$files) {
+                Write-Log -Critical "Cannot find any '$FileMask' files at '$resolvedPath'."
+            }
+            $resolvedPaths += $files
+        }
+    }
 
-    $regexes = @()
+    <#if ($CreateBackup) { 
+        foreach ($p in $resolvedPaths) {
+            if (Test-Path -Path "${p}.bak") {
+                Write-Log -Critical "Backup file '${p}.bak' already exists. Please ensure you run Set-AssemblyVersion exactly once for each assembly info file."
+            }
+        }
+    }#>
+
+    $replaceInfo = @{}
     foreach ($attr in $VersionAttribute) { 
-        $regexes += ('({0})\(\"([^\"]*)\"\)' -f $attr)
+        $replaceInfo[$attr] = ('({0})\(\"([^\"]*)\"\)' -f $attr)
     }
     $regexReplace = '$1("{0}")' -f $Version    
 
-	Disable-ReadOnlyFlag -Path $Path
-	(Get-Content -Path $Path -Encoding UTF8 -ReadCount 0) | Foreach-Object {
+    foreach ($p in $resolvedPaths) {
+        if ($CreateBackup) { 
+            $backupPath = "${p}.bak"
+            [void](Copy-Item -Path $p -Destination $backupPath -Force)
+        }
+
+        Write-Log -Info "Setting $($VersionAttribute -join ', ')='$Version' in file '$p'"
+    	Disable-ReadOnlyFlag -Path $p
+        
+        $toReplace = New-Object System.Collections.ArrayList(,$VersionAttribute)
+    	(Get-Content -Path $p -Encoding UTF8 -ReadCount 0) | Foreach-Object {
             $line = $_
-            foreach ($regex in $regexes) {
-                $line = $line -ireplace $regex, $regexReplace
+            foreach ($info in $replaceInfo.GetEnumerator()) {
+                $regex = $info.Value
+                if ($line -imatch $regex) { 
+                    $line = $line -ireplace $regex, $regexReplace
+                    [void]($toReplace.Remove($info.Key))
+                }
             }
 			$line
-	} | Set-Content -Encoding UTF8 -Path $Path
+	    } | Set-Content -Encoding UTF8 -Path $p
+             
+        if ($AppendVersionAttributeIfNotExists) { 
+            foreach ($attr in $toReplace) {
+                [IO.File]::AppendAllText($p, "[assembly: ${attr}(`"$Version`")]$([Environment]::NewLine)")
+            }  
+        }
+    }
+    
 }

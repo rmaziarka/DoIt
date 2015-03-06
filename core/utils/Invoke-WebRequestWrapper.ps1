@@ -121,7 +121,7 @@ function Invoke-WebRequestWrapper {
         Write-Log -_debug "Body: $Body"
     }
 
-    $PSBoundParameters.Remove('FailOnErrorResponse')
+    [void]($PSBoundParameters.Remove('FailOnErrorResponse'))
 
     try { 
         Invoke-WebRequest @PSBoundParameters

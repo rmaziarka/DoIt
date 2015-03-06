@@ -110,7 +110,7 @@ function Build-WebPackage {
                             -DefaultPath (Join-Path -Path (Join-Path -Path $configPaths.PackagesPath -ChildPath $PackageName) -ChildPath "${PackageName}.zip") `
                             -CheckExistence:$false
     
-    $params.Remove('AutoParameterizeConnectionStrings')
+    [void]($params.Remove('AutoParameterizeConnectionStrings'))
 
     $params.MsBuildPackageOptions = @{ 
         "DeployOnBuild" = "True"

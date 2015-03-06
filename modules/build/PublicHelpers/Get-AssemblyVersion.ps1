@@ -61,15 +61,15 @@ function Get-AssemblyVersion {
     if (!$VersionAttribute) {
         $VersionAttribute = 'AssemblyVersion'
     }
-
-    if (!(Test-Path -Path $Path)) {
-        Write-Log -Critical "Path '$Path' does not exist."
+    if (!$FileMask) {
+        $FileMask = 'AssemblyInfo.cs'
     }
 
+    $Path = Resolve-PathRelativeToProjectRoot -Path $Path
     if (Test-Path -Path $Path -PathType Leaf) {
         $file = $Path
     } else {
-        $file = @(Get-ChildItem -Path $Path -File -Filter $FileMask -Recurse| Select-Object -ExpandProperty FullName)
+        $file = @(Get-ChildItem -Path $Path -File -Filter $FileMask -Recurse | Select-Object -ExpandProperty FullName)
         if (!$file) {
             Write-Log -Critical "Cannot find any '$FileMask' files at '$Path'."
         }
@@ -77,10 +77,9 @@ function Get-AssemblyVersion {
             Write-Log -Critical "Found more than one '$FileMask' files at '$Path': $($file -join ', ')"
         }
         $file = $file[0]
-
     }
-    $regex = '{0}\(\"([^\"]*)\"\)' -f $VersionAttribute
 
+    $regex = '{0}\(\"([^\"]*)\"\)' -f $VersionAttribute
     $match = Select-String -Path $file -Encoding UTF8 -Pattern $regex
     if (!$match) {
         Write-Log -Critical "Cannot find following regex: '$regex' in file '$file'. Please ensure it's valid AssemblyInfo file."

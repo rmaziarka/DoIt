@@ -48,7 +48,7 @@ function Disable-ReadOnlyFlag {
     }
 
     # remove IsReadOnly attribute in order to edit file
-    $isReadOnly = Get-ItemProperty -Path $Path -Name IsReadOnly
+    $isReadOnly = (Get-ItemProperty -Path $Path -Name IsReadOnly).IsReadOnly
     if ($isReadOnly) {
         Set-ItemProperty -Path $Path -Name IsReadOnly -Value $false
         Write-Log -_Debug "'IsReadOnly' flag was disabled on '$Path'"

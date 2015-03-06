@@ -45,4 +45,5 @@ Export-ModuleMember -Function `
     New-MsBuildOptions, `
     Invoke-MsBuild, `
     Set-AssemblVersion, `
+    Restore-AssemblyVersionBackups, `
     Start-Build

@@ -114,15 +114,7 @@ function Build-MsBuild {
             Write-Log -Critical "If version is set, the AssemblyInfoFiles parameter is required"
         }
 
-        foreach ($info in $AssemblyInfoFilePaths) {
-            $info = Resolve-PathRelativeToProjectRoot `
-                    -Path $info `
-                    -ErrorMsg "Project file '$projectPath' does not exist (package '$packageName'). Tried following absolute path: '{0}'."
-
-            # back up AssemblyInfo.cs in order to restore that after build
-            [void](Copy-Item -Path $info -Destination "$info.bak" -Force)
-            Set-AssemblyVersion -Path $info -Version $Version -VersionAttribute AssemblyVersion,AssemblyFileVersion
-        }
+        Set-AssemblyVersion -Path $AssemblyInfoFilePaths -Version $Version -VersionAttribute AssemblyVersion,AssemblyFileVersion -CreateBackup
     }
 
     if ($restoreNuGet) {
@@ -143,14 +135,7 @@ function Build-MsBuild {
     Invoke-MsBuild -ProjectPath $projectPath -MsBuildOptions $newMsBuildOptions -LogExternalMessage:$false
 
     if($Version) {
-        foreach ($info in $AssemblyInfoFilePaths) {
-            $info = Resolve-PathRelativeToProjectRoot `
-                    -Path $info `
-                    -ErrorMsg "Project file '$projectPath' does not exist (package '$packageName')."
-
-            # restore AssemblyInfo.cs file
-            [void](Move-Item -Path "$info.bak" -Destination $info -Force)
-        }
+        Restore-AssemblyVersionBackups -Path $AssemblyInfoFilePaths
     }
 
     Write-ProgressExternal -Message ""

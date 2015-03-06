@@ -116,7 +116,7 @@ function Write-DscErrorsFromEventLog {
 
         if (!$events) {
             Write-Log -Info 'Events with id = 4103 not found at this time, searching for other ids'
-            $filter.Remove('ID')
+            [void]($filter.Remove('ID'))
             $waitedSeconds = 0
             while (!($events = Get-WinEvent @getWinEventParams)) {
                 Start-Sleep -Seconds 1
