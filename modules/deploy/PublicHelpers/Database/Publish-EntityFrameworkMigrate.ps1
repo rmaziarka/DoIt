@@ -68,15 +68,15 @@ function Publish-EntityFrameworkMigrate {
         Write-Log -Critical "No migrate.exe in '$PackagePath')"
     }
     Write-Log -Info "Running migrate.exe for package: '$PackagePath'"
-    $migrateCommand = ".\migrate.exe $MigrateAssembly /connectionString=`"$DbConnectionString`" /connectionProviderName=System.Data.SqlClient"
+    $migrateArgs = "$MigrateAssembly /connectionString=`"$DbConnectionString`" /connectionProviderName=System.Data.SqlClient"
     if ($StartupConfigurationFile) {
-        $migrateCommand += " /startupConfigurationFile=`"$StartupConfigurationFile`""
+        $migrateArgs += " /startupConfigurationFile=`"$StartupConfigurationFile`""
     }
     Push-Location -Path $PackagePath
     # checking for 'error' is a workaround for a bug in some EF versions (https://entityframework.codeplex.com/workitem/1859)
     try {
         $output = ''     
-        [void](Invoke-ExternalCommand -Command $migrateCommand -Output ([ref]$output))
+        [void](Start-ExternalProcess -Command "$PackagePath\migrate.exe" -ArgumentList $migrateArgs -Output ([ref]$output))
         if ($output -imatch 'error:(.*)') {
             $errorMsg = "EF migration error:$($Matches[1])"
             Write-ProgressExternal -ErrorMessage $errorMsg
