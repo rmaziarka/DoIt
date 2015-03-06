@@ -158,7 +158,7 @@ function New-DeploymentPlanEntry {
 
     $packageDirectory = (Resolve-ScriptedToken -ScriptedToken $ServerConnection.PackageDirectory -ResolvedTokens $ResolvedTokens -Environment $Environment -Node $Node)
     if (!$packageDirectory) {
-        $packageDirectory = "c:\PSCIPackage"
+        $packageDirectory = 'auto'
     }
 
     $requiredPackages = @((Resolve-ScriptedToken -ScriptedToken $Configuration.RequiredPackages -ResolvedTokens $ResolvedTokens -Environment $Environment -Node $Node))
