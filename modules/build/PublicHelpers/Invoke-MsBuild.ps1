@@ -58,7 +58,8 @@ function Invoke-MsBuild {
     )
 
     if ($LogExternalMessage) { 
-        Write-ProgressExternal -Message 'Running msbuild' -ErrorMessage 'Msbuild error'
+        $projectFile = Split-Path -Path $ProjectPath -Leaf
+        Write-ProgressExternal -Message "Running msbuild - $projectFile" -ErrorMessage 'Msbuild error'
     }
 
     # Take default MsBuildOptions if not provided
