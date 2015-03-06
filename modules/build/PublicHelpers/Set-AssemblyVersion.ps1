@@ -27,11 +27,11 @@ function Set-AssemblyVersion {
     .SYNOPSIS
     Sets version in the assembly info file.
 
-    .PARAMETER FilePath
-    Full Path to the assembly info file
+    .PARAMETER Path
+    Path to the assembly info file.
 
     .PARAMETER Version
-    Version number
+    Version number to set.
 
     .PARAMETER VersionAttribute
     Version attribute to set - see http://stackoverflow.com/questions/64602/what-are-differences-between-assemblyversion-assemblyfileversion-and-assemblyin.
