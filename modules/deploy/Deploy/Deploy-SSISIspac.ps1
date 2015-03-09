@@ -47,16 +47,34 @@ function Deploy-SSISIspac {
     Description of SSIS folder (when creating a new Folder). If not specified, 'Project folder' will be used'.
 
     .PARAMETER EnvironmentsDefinition
+    SSIS environments to create, in following format:
+    @{ 'Local' = @{
+            ServerName = '${DatabaseNode}'
+            DatabaseName = '${DatabaseName}'
+        }
+       'Dev' = @{
+            ServerName = 'dev.local'
+            DatabaseName = 'db.local'
+        }
+    }
+    Values can be tokenized if $Tokens is supplied.
 
     .PARAMETER PackagesParameters
+    SSIS parameters to override in specific packages in following format (only parameters referencing environment variables are currently supported):
+    @{ 'mypackage.dtsx' = @{
+            'mypackage.ServerName' = 'ServerName'
+            'mypackage.DatabaseName' = 'DatabaseName'
+    }}
+    Values can be tokenized if $Tokens is supplied.
 
     .PARAMETER Tokens
+    Hashtable containing resolved tokens (required only if $EnvironmentsDefinition or $PackagesParameters reference tokenized values).
 
     .PARAMETER PackagePath
     Path to the package containing sql files. If not provided, $PackagePath = $PackagesPath\$PackageName, where $PackagesPath is taken from global variable.
    
     .EXAMPLE
-    Deploy-SSSISIspac -PackageName 'MySSIS' -ConnectionString $connectionString -Catalog '
+    Deploy-SSISIspac -PackageName 'MySSIS' -ConnectionString $connectionString -Folder 'MyFolder'
     #>
     [CmdletBinding()]
     [OutputType([void])]
