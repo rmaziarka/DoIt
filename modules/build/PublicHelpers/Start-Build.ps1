@@ -110,6 +110,7 @@ function Start-Build {
             $logInvocation += "-$param $($buildParamsHash[$param]) "
         }
         Write-Log -Info "Running task: $logInvocation" -Emphasize
+        Write-ProgressExternal -Message "Running task $($cmd.Name)" -ErrorMessage "Task $($cmd.Name) failed"
         Invoke-Command -ScriptBlock ($cmd.ScriptBlock) -ArgumentList $invokeArgs
      }
 

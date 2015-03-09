@@ -90,7 +90,10 @@ function Resolve-Token {
             $key = $matches[1]
             # search in all categories, but first in '$Category'
 
-            $allCategories = @($Category)
+            $allCategories = @()
+            if ($Category) {
+                $allCategories += $Category
+            }
             # SuppressScriptCop - adding small arrays is ok
             $ResolvedTokens.Keys | Where-Object { $_ -ne $Category } | Foreach-Object { $allCategories += $_ }
             foreach ($cat in $allCategories) {               
