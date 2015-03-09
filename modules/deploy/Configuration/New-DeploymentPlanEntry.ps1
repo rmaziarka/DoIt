@@ -186,7 +186,7 @@ function New-DeploymentPlanEntry {
         Tokens = $ResolvedTokens; 
         TokensOverride = $TokensOverride;
         RequiredPackages = $requiredPackages
-        RebootHandlingMode = $RebootHandlingMode
+        RebootHandlingMode = $Configuration.RebootHandlingMode
     }
 }
 
