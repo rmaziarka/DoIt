@@ -8,7 +8,7 @@ PSCI is a build and deployment automation library, that provides a simple Powers
 - reliable logging mechanism throughout the whole build and deployment process - every step is logged to console, text file and event log (optionally), errors include full stack trace / script lines information and friendly messages,
 - building and deploying various types of packages (MsDeploy - e.g. ASP.NET MVC or WPF, SQL, DbDeploy, Entity Framework Migrations, SSRS, SSAS, SSIS), easily extensible with new types of packages,
 - supports several methods of tokenizing configuration files (e.g. Web.config) - directly replace tokens in files (using regex), transform using XDT (Web.<env_name>.config) or use Web Deploy parameterization,
-- supports Windows Server 2008 R2 SP1 / 7 and above (some Wave DSCs like xWebsite have been fixed to work with < Server 2012),
+- supports Windows Server 2008 R2 SP1 / 7 and above (some Wave DSCs like xWebsite have been fixed to work with pre-Server 2012),
 
 #### Example - web application with database
 -------------
@@ -94,7 +94,7 @@ Configuration WebServerProvision {
 
         # create site on IIS
         xWebsite MyWebsite { 
-  	    Name   = $Tokens.WebConfig.WebsiteName
+  	        Name = $Tokens.WebConfig.WebsiteName
             ApplicationPool = $Tokens.WebConfig.AppPoolName 
             BindingInfo = MSFT_xWebBindingInformation { 
                 Port = $Tokens.WebServerConfig.WebsitePort
@@ -154,7 +154,9 @@ Starting the deployment to 'Test' environment:
 #### Where to start?
 -------------
 - Checkout the code and explore a little (note there are lot of files - [PsISEProjectExplorer](https://github.com/mgr32/PsISEProjectExplorer) might come in handy).
-- Go into `examples\webAndDatabase` directory - this is an example that builds and deploys a sample ASP.NET MVC application with Entity Framework Migrations. The application is in `SampleWebApplication` and PSCI configurations are in `PSCIDeploy`.
-- Run `.\PSCIDeploy\build.ps1` - this will create `examples\webAndDatabase\bin` directory with a package that is ready to be deployed to environments `Default` (local) or `Test`.
-- Run `.\bin\DeployScripts\deploy.ps1 -Environment Default` - this will deploy the application to localhost (will configure IIS, create and seed database and validate the application works).
-- Modify `tokensSensitive.ps1` and run `.\bin\DeployScripts\deploy.ps1 -Environment Test` - this will deploy the application to remote server.
+- Ensure Powershell remoting is enabled on your local machine (check by running `Invoke-Command -ComputerName localhost -ScriptBlock { Write-Host 'test' }`). If not, run `Enable-PSRemoting`.
+- Go into `examples\simple` directory and run deploy.ps1. This will create 'c:\test1' directory using a DSC configuration from `configuration.ps1` and write greetings using a Powershell function from the same file. The 'c:\test1' is a variable defined in `tokens.ps1`,
+- Look into `topology.ps1` - this is where you configure what should be deployed where. Note there are three environments defined - `Default`, `SecondEnv` and `RemoteRun`. 
+- Go into `deploy.ps1`, change parameter value `$Environment = 'Default'` to  `$Environment = 'SecondEnv'` and run the file. It will create 'c:\test2' (thanks to different variable value for `SecondEnv` in `tokens.ps1`).
+- Set `$Environment = 'RemoteRun'` and run it again. This time, PSCI will firstly copy itself to the remote server (`localhost` in our case) and then run the configurations remotely (using PSRemoting). This is thanks to `-RunRemotely` flag in `topology.ps1`.
+- Look at more complex `examples`.
