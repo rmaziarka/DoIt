@@ -7,7 +7,7 @@ PSCI is a build and deployment automation library, that provides a simple Powers
 - agentless architecture - deployment to remote environments pushes packages and execute code remotely using Powershell Remoting (WinRM) or Web Deploy, 
 - reliable logging mechanism throughout the whole build and deployment process - every step is logged to console, text file and event log (optionally), errors include full stack trace / script lines information and friendly messages,
 - building and deploying various types of packages (MsDeploy - e.g. ASP.NET MVC or WPF, SQL, DbDeploy, Entity Framework Migrations, SSRS, SSAS, SSIS), easily extensible with new types of packages,
-- supports several methods of tokenizing configuration files (e.g. Web.config) - directly replace tokens in files (using regex), transform using XDT (Web.<env_name>.config) or use Web Deploy parameterization,
+- supports several methods of tokenizing configuration files (e.g. Web.config) - directly replace tokens in files (using regex), transform using XDT (Web.\<env_name\>.config) or use Web Deploy parameterization,
 - supports Windows Server 2008 R2 SP1 / 7 and above (some Wave DSCs like xWebsite have been fixed to work with pre-Server 2012),
 
 #### Example - web application with database
