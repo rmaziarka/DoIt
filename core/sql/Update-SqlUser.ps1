@@ -25,26 +25,22 @@ SOFTWARE.
 function Update-SqlUser {
     <# 
     .SYNOPSIS 
-    Update User on given database.
-
-    .DESCRIPTION 
-    Uses Invoke-CreateSqlUser.sql sql script to create login for user to specific database. If user exists then it is remapped to current login.
-    DbRoles should be given in pipe-separated format
+    Creates or updates user on given database. It also remaps user to the login.
 
     .PARAMETER ConnectionString
-    Connection String
+    Connection string.
 
     .PARAMETER DatabaseName
-    Database name
+    Database name.
 
     .PARAMETER Username
-    Username
+    Username.
 
-    .PARAMETER DbRole
-    Db roles to apply
+    .PARAMETER DbRoles
+    Database roles to assign to the user.
 
     .EXAMPLE
-    Update-SqlUser -ConnectionString $connectionString -DatabaseName "database" -Username "username"  -DbRole "db_owner|db_datareader"
+    Update-SqlUser -ConnectionString $connectionString -DatabaseName "database" -Username "username" -DbRole "db_owner|db_datareader"
     #> 
     
     [CmdletBinding()]
@@ -59,14 +55,22 @@ function Update-SqlUser {
         $DatabaseName,
     
         [Parameter(Mandatory=$true)]
-        [string]$Username,
+        [string]
+        $Username,
     
         [Parameter(Mandatory=$false)]
-        [string]$DbRole
+        [string[]]
+        $DbRoles
     )
     $sqlScript = Join-Path -Path $PSScriptRoot -ChildPath "Update-SqlUser.sql"
-    $parameters =  @{ "Username" = $Username }
-    $parameters += @{ "DatabaseName" = $DatabaseName }
-    $parameters += @{ "Role" = $DbRole }
-    [void](Invoke-Sql -ConnectionString $ConnectionString -InputFile $sqlScript -SqlCmdVariables $parameters)
+    $parameters =  @{ 
+        Username = $Username 
+        DatabaseName = $DatabaseName
+    }
+    [void](Invoke-Sql -ConnectionString $ConnectionString -InputFile $sqlScript -SqlCmdVariables $parameters -IgnoreInitialCatalog)
+
+    $sqlScript = Join-Path -Path $PSScriptRoot -ChildPath 'Update-SqlUserRole.sql'
+    foreach ($role in $DbRoles) {
+        [void](Invoke-Sql -ConnectionString $connectionString -InputFile $sqlScript -SqlCmdVariables @{ Username = $Username; DatabaseName = $DatabaseName; Role = $role } -IgnoreInitialCatalog)
+    }
 }

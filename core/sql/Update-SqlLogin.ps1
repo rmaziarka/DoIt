@@ -25,22 +25,22 @@ SOFTWARE.
 function Update-SqlLogin {
     <# 
     .SYNOPSIS 
-    Update database Login on MSSQL Server.
-
-    .DESCRIPTION 
-    Uses Invoke-CreateSqlLogin.sql sql script to create new login on database. When Login exists then altering login.
+    Creates or updates database login on MSSQL Server.
 
     .PARAMETER ConnectionString
-    Connection string
+    Connection string.
 
     .PARAMETER Username
-    Username
+    Username.
 
     .PARAMETER Password
-    Password
+    Password.
 
     .PARAMETER WindowsAuthentication
-    If user should be windows authenticated set this parameter
+    Whether this login uses Windows Authentication (if not set, it will use SQL Server Authentication).
+
+    .PARAMETER ServerRoles
+    List of server roles to assign to the user. Note roles are only added, not removed.
 
     .EXAMPLE
     Update-SqlLogin -ConnectionString "data source=localhost;integrated security=True" -Username "username" -Password "password"
@@ -57,13 +57,19 @@ function Update-SqlLogin {
         [string]
         $Username,
         
+        [Parameter(Mandatory=$false)]
         [string]
         $Password,
         
+        [Parameter(Mandatory=$false)]
         [switch]
-        $WindowsAuthentication
+        $WindowsAuthentication,
+
+        [Parameter(Mandatory=$false)]
+        [string[]]
+        $ServerRoles
     )
-    $sqlScript = Join-Path -Path $PSScriptRoot -ChildPath "Update-SqlLogin.sql"
+    $sqlScript = Join-Path -Path $PSScriptRoot -ChildPath 'Update-SqlLogin.sql'
 
     if ([string]::IsNullOrEmpty($Password) -and !$WindowsAuthentication) {
         Write-Log -Critical "Empty password when WindowsAuthentication is set to false"
@@ -75,9 +81,16 @@ function Update-SqlLogin {
         $WinAuth = "0"
     }
     
-    $parameters =  @{ "Username" = $Username }
-    $parameters += @{ "Password" = $Password }
-    $parameters += @{ "WindowsAuthentication" = $WinAuth }
+    $parameters =  @{ 
+        Username = $Username 
+        Password = $Password 
+        WindowsAuthentication = $WinAuth
+    }
 
-    [void](Invoke-Sql -ConnectionString $connectionString -InputFile $sqlScript -SqlCmdVariables $parameters -IgnoreInitialCatalog)
+   [void](Invoke-Sql -ConnectionString $connectionString -InputFile $sqlScript -SqlCmdVariables $parameters -IgnoreInitialCatalog)
+
+   $sqlScript = Join-Path -Path $PSScriptRoot -ChildPath 'Update-SqlLoginRole.sql'
+   foreach ($role in $ServerRoles) {
+     [void](Invoke-Sql -ConnectionString $connectionString -InputFile $sqlScript -SqlCmdVariables @{ Username = $Username; Role = $role } -IgnoreInitialCatalog)
+   }
 }

@@ -86,10 +86,20 @@ function Start-DeploymentPlan {
 
     $configPaths = Get-ConfigurationPaths
     
-    # When 'DeployScripts' and 'PSCI' directories are not found in the package, and there is at least one RunOn/RunRemotely in deployment plan,
-    # we need to create a temporary package and copy configuration files to 'DeployScripts' and PSCI to PSCI.
-    if (!$configPaths.PackagesContainDeployScripts -and !$PSCIGlobalConfiguration.RemotingMode -and ($DeploymentPlan | Where { $_.RunOnConnectionParams })) {
-        Build-TemporaryPackage
+    $psciPath = Get-PSCIModulePath
+    $packagesPath = $configPaths.PackagesPath
+    $deployConfigurationPath = $configPaths.DeployConfigurationPath
+    
+    # When there is at least one RunOn/RunRemotely in deployment plan, and ('DeployScripts' and 'PSCI' directories are not found in the package) or
+    # PSCI/DeployScripts are included from different location than $packagesPath, we need to build temporary package
+    if (!$PSCIGlobalConfiguration.RemotingMode -and ($DeploymentPlan | Where { $_.RunOnConnectionParams })) {
+        if (!$configPaths.PackagesContainDeployScripts) {
+            Write-Log -Info "'DeployScripts' and 'PSCI' directories have not been found in the package - creating temporary package."
+            Build-TemporaryPackage
+        } elseif (!$psciPath.ToLower().StartsWith($packagesPath.ToLower()) -or !$deployConfigurationPath.ToLower().StartsWith($packagesPath.ToLower())) {
+            Write-Log -Info "Imported PSCI or DeployScripts are not the one in the package - creating temporary package to include PSCI at '$psciPath'."
+            Build-TemporaryPackage
+        }
     }
 
     # Group deployment plan entries by RunOnConnectionParams and PackageDirectory

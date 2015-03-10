@@ -36,23 +36,25 @@ if ($PSVersionTable.PSVersion.Major -lt 3) {
 }
 Set-StrictMode -Version Latest
 
+$importedPsciModules = Get-Module | Where-Object { $_.Name.StartsWith('PSCI') }
+if ($importedPsciModules) { 
+    Remove-Module -Name $importedPsciModules.Name -Force -ErrorAction SilentlyContinue
+}
+
 $curDir = Split-Path -Parent $MyInvocation.MyCommand.Definition
 . "$curDir\PSCI.classes.ps1"
 . "$curDir\PSCI.globalObjects.ps1"
 
-Import-Module -Name "$curDir\core\PSCI.core.psm1" -Force -Global
+# 3>$null suppresses warning messages (appearing due to usage of unapproved verbs)
+Import-Module -Name "$curDir\core\PSCI.core.psm1" -Force -Global 3>$null
 
 $buildNumber = Get-PSCIBuildNumber -Path $curDir
 
 if (Test-Path -Path "$curDir\modules") {
 	$modulesToImport = Get-ChildItem -Path "$curDir\modules\*\*.psm1"
-
 	foreach ($modulePath in $modulesToImport.FullName) {
-		# Write-Host -Object ("Importing module {0}" -f $_)
-		# 3>$null suppresses warning messages (appearing due to usage of unapproved verbs)
 		Import-Module -Name $modulePath -Force -Global 3>$null
 	}
-	
 	Write-Log -Info ("PSCI (build #{0}) started with modules: {1}. Path: '{2}'." -f $buildNumber, ($modulesToImport.Name -replace 'PSCI.(.*).psm1', '$1' -join ", " ), $PSScriptRoot)
 }
 

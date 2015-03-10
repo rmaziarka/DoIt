@@ -3,7 +3,7 @@ BEGIN
     IF ($(WindowsAuthentication) = 0)
     BEGIN
         PRINT 'CREATING USER $(Username) WITH PASSWORD'
-        CREATE LOGIN [$(Username)] WITH PASSWORD=N'$(Password)', DEFAULT_DATABASE=[master] , CHECK_POLICY=OFF
+        CREATE LOGIN [$(Username)] WITH PASSWORD=N'$(Password)', DEFAULT_DATABASE=[master], CHECK_POLICY=OFF, CHECK_EXPIRATION=OFF
     END
     ELSE
     BEGIN
@@ -16,6 +16,6 @@ BEGIN
     IF ($(WindowsAuthentication) = 0)
      BEGIN
         PRINT 'ALTERING USER $(Username). Setting new password'
-        ALTER LOGIN [$(Username)] WITH PASSWORD=N'$(Password)'
+        ALTER LOGIN [$(Username)] WITH PASSWORD=N'$(Password)', CHECK_POLICY=OFF, CHECK_EXPIRATION=OFF
     END
 END

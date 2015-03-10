@@ -56,7 +56,9 @@ function Send-FileStream {
         $DestinationPath
     )
 
-    Write-Log -Info "Copying '$ItemToCopy' to remote node '$($session.ComputerName)' / '$DestinationPath'"
+    $itemSize = Convert-BytesToSize -Size $ItemToCopy.Length
+
+    Write-Log -Info "Copying '$($ItemToCopy.FullName)' ($itemSize) to remote node '$($session.ComputerName)' / '$DestinationPath'"
 
     $writeBytesRemoteScript = Get-WriteBytesScriptBlock
     $streamSize = 1MB

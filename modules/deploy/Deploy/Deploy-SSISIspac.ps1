@@ -145,11 +145,17 @@ function Deploy-SSISIspac {
 
     $csb = New-Object -TypeName System.Data.SqlClient.SqlConnectionStringBuilder -ArgumentList $ConnectionString
     $csb.set_InitialCatalog('master')
+    
+    if ($csb.UserID) {
+        $username = $csb.UserID
+    } else {
+        $username = (Get-CurrentUser)
+    }
 
     $sqlConnection = New-Object -TypeName System.Data.SqlClient.SqlConnection
     $sqlConnection.ConnectionString = $csb.ConnectionString
 
-    Write-Log -Info "Connecting to SQL Server at $($sqlConnection.DataSource)"
+    Write-Log -Info "Connecting to SQL Server at $($sqlConnection.DataSource) (user $username)."
     $integrationServices = New-Object -TypeName Microsoft.SqlServer.Management.IntegrationServices.IntegrationServices
     $integrationServices.Connection = $sqlConnection
 

@@ -22,26 +22,31 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 #>
 
-function Build-TemporaryPackage {
+Function Convert-BytesToSize {
     <#
     .SYNOPSIS
-    Creates a temporary package with 'DeployScripts' and 'PSCI'.
+    Converts size in bytes to user-friendly format (MB/GB etc.)
+
+    .PARAMETER Size
+    Input size.
 
     .EXAMPLE
-    Build-TemporaryPackage
+    Convert-BytesToSize -Size 1024
     #>
+  
     [CmdletBinding()]
     [OutputType([void])]
-    param()
+    param(
+        [Parameter(Mandatory=$true)]
+        [int64] 
+        $Size
+    )
 
-    $configPaths = Get-ConfigurationPaths
-    $packageTempDir = New-TempDirectory -DirName 'PSCI.temporaryPackage'
-                                
-    # TODO: take only required packages
-    if ($configPaths.PackagesPath) { 
-        Copy-Item -Path "$($configPaths.PackagesPath)\*" -Destination $packageTempDir -Recurse
+    switch ($Size) {
+        {$Size -ge 1TB} { return ('{0:n1} TB' -f ($_ / 1TB)) }
+        {$Size -ge 1GB} { return ('{0:n1} GB' -f ($_ / 1GB)) }
+        {$Size -ge 1MB} { return ('{0:n1} MB' -f ($_ / 1MB)) }
+        {$Size -ge 1KB} { return ('{0:n1} kB' -f ($_ / 1KB)) }
+        default { return ('{0} B' -f $_) }
     }
-    $configPaths.PackagesPath = $packageTempDir
-    Build-DeploymentScriptsPackage
-
 }

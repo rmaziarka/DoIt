@@ -58,7 +58,8 @@ function Copy-DeploymentScripts {
     [void](Copy-Item -Path "${deployScriptsPath}\*.bat" -Destination $OutputDeployScriptsPath -Force)
 
     Write-Log -Info "Copying deployment configuration from '$deployConfigurationPath' to '$OutputDeployConfigurationPath'"
-    [void](Copy-Item -Path $deployConfigurationPath -Destination $OutputDeployConfigurationPath -Recurse -Force)
+    [void](New-Item -Path $OutputDeployConfigurationPath -ItemType Directory -Force)
+    [void](Copy-Item -Path "${deployConfigurationPath}\*" -Destination $OutputDeployConfigurationPath -Recurse -Force)
 
     # make sure that deployment and configuration scripts are editable inside of the package
     Get-ChildItem -Path $OutputDeployScriptsPath -Recurse -File | ForEach-Object {

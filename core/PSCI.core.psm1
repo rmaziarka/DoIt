@@ -85,4 +85,6 @@ Export-ModuleMember -Function `
     Resolve-PathRelativeToProjectRoot, `
     Connect-Share, `
     Disconnect-Share, `
-    Set-SimpleAcl
+    Set-SimpleAcl, `
+    Convert-BytesToSize, `
+    Build-DeploymentScriptsPackage

@@ -172,13 +172,16 @@ function Start-DeploymentByPSRemoting {
 
         )
 
-        Set-Location -Path $PackageDirectory
-        $Global:PSCIRemotingMode = $RemotingMode
-        $Global:PSCICIServer = $CIServer
-        Invoke-Expression -Command "& $DeployScript"
-        if ($PackageDirectoryAutoRemove) {
-            Set-Location -Path (Split-Path -Path $PackageDirectory -Parent)
-            Remove-Item -Path $PackageDirectory -Force -Recurse
+        try { 
+            Set-Location -Path $PackageDirectory
+            $Global:PSCIRemotingMode = $RemotingMode
+            $Global:PSCICIServer = $CIServer
+            Invoke-Expression -Command "& $DeployScript"
+        } finally {
+            if ($PackageDirectoryAutoRemove) {
+                Set-Location -Path (Split-Path -Path $PackageDirectory -Parent)
+                Remove-Item -Path $PackageDirectory -Force -Recurse
+            }
         }
     }
 
