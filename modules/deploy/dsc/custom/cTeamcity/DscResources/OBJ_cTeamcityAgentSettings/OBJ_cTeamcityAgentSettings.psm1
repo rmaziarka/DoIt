@@ -72,7 +72,7 @@ function Test-TargetResource {
     )
 
     if (!$AgentName) {
-        $AgentName = hostname
+        $AgentName = [system.environment]::MachineName
     }
     $currentSettings = Get-TargetResource -TeamcityAgentPath $TeamcityAgentPath
 
@@ -118,7 +118,7 @@ function Set-TargetResource {
     }
 
     if (!$AgentName) {
-        $AgentName = hostname
+        $AgentName = [system.environment]::MachineName
     }
 
     $buildAgentPropFile = [System.IO.Path]::Combine($TeamcityAgentPath, 'conf', 'buildAgent.properties')

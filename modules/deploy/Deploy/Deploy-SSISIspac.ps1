@@ -140,7 +140,7 @@ function Deploy-SSISIspac {
     # Load the IntegrationServices Assembly
     $assembly = [System.Reflection.Assembly]::LoadWithPartialName("Microsoft.SqlServer.Management.IntegrationServices");
     if (!$assembly) {
-        Write-Log -Critical "Microsoft.SqlServer.Management.IntegrationServices assembly has not been found at $(hostname). Please ensure you have installed SSIS or 'SQL Server Data Tools - Business Intelligence for Visual Studio'."
+        Write-Log -Critical "Microsoft.SqlServer.Management.IntegrationServices assembly has not been found at $([system.environment]::MachineName). Please ensure you have installed SSIS or 'SQL Server Data Tools - Business Intelligence for Visual Studio'."
     }
 
     $csb = New-Object -TypeName System.Data.SqlClient.SqlConnectionStringBuilder -ArgumentList $ConnectionString

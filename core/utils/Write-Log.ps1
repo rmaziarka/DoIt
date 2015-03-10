@@ -135,7 +135,7 @@ Function Write-Log {
         if ($NoHeader) {
             $outputHeader = ""
         } else {
-            $currentHostname = hostname
+            $currentHostname = [system.environment]::MachineName
             $currentUsername = $env:USERNAME    
             if ($PSCIGlobalConfiguration.RemotingMode) {
                 $remotingFlag = '[R] '

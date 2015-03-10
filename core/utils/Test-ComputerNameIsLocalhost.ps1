@@ -51,7 +51,7 @@ function Test-ComputerNameIsLocalhost {
         $ComputerName
     )
 
-    $localhostNames = @('localhost', (hostname), '127.0.0.1', '.')
+    $localhostNames = @('localhost', ([system.environment]::MachineName), '127.0.0.1', '.')
 
     try {
         if (Get-Command -Name Get-NetIPAddress -ErrorAction SilentlyContinue) { 

@@ -107,7 +107,7 @@ function Resolve-Configurations {
     foreach ($configName in $Configurations) {
         $cmd = Get-Command -Name $configName -ErrorAction SilentlyContinue
         if (!$cmd) {
-            Write-Log -Critical "Invalid Configuration reference ('$configName') - Environment '$Environment' / ServerRole '$($ServerRole.Name)'."
+            Write-Log -Critical "Invalid Configuration reference ('$configName') - Environment '$Environment' / ServerRole '$($ServerRole.Name)'. Please ensure there is a DSC configuration or Powershell function named '$configName'."
         }
         if ($cmd.CommandType -eq 'Configuration') {
             if ($DeployType -eq 'Functions') {
