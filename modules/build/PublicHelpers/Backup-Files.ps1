@@ -69,10 +69,12 @@ function Backup-Files {
         } else {
             $toCopy = Get-ChildItem -Path $p -Recurse | Select-Object -ExpandProperty FullName
         }
-        Copy-Item -Path $p -Destination $DestinationPath -Force
-        $result += [PSCustomObject]@{
-            SourcePath = $p
-            BackupPath = (Join-Path -Path $DestinationPath -ChildPath (Split-Path -Path $p -Leaf))
+        foreach ($file in $toCopy) { 
+            Copy-Item -Path $file -Destination $DestinationPath -Force
+            $result += [PSCustomObject]@{
+                SourcePath = $file
+                BackupPath = (Join-Path -Path $DestinationPath -ChildPath (Split-Path -Path $file -Leaf))
+            }
         }
     }
     return $result
