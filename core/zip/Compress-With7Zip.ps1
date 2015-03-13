@@ -92,14 +92,14 @@ function Compress-With7Zip {
         $WorkingDirectory, 
 
         [Parameter(Mandatory=$false)]
-        [ValidateSet("zip", "gzip", "bzip2", "7z", "xz")]
+        [ValidateSet($null, 'zip', 'gzip', 'bzip2', '7z', 'xz')]
         [string] 
-        $ArchiveFormat = "zip", 
+        $ArchiveFormat, 
 
         [Parameter(Mandatory=$false)]
-        [ValidateSet("copy", "fast", "medium", "good", "ultra")]
+        [ValidateSet($null, 'copy', 'fast', 'medium', 'good', 'ultra')]
         [string] 
-        $CompressionLevel = "good",
+        $CompressionLevel,
 
         [Parameter(Mandatory=$false)]
         [System.Management.Automation.PSCredential]
@@ -108,8 +108,7 @@ function Compress-With7Zip {
 
     $cmdLine = New-Object System.Text.StringBuilder
 
-    $7zipPath = Add-QuotesToPaths (Get-PathTo7Zip -FailIfNotFound)
-    [void]($cmdLine.Append($7zipPath))
+    $7zipPath = Get-PathTo7Zip -FailIfNotFound
 
     if (([uri]$WorkingDirectory).IsUnc) {
         Write-Log -Critical "Working directory '$WorkingDirectory' is an unc path. 7-zip does not support that."
@@ -120,17 +119,34 @@ function Compress-With7Zip {
 
     # wrap in quotes if needed
     $OutputFile = Add-QuotesToPaths $OutputFile
-    $PathsToCompress = Add-QuotesToPaths $PathsToCompress
-    $compressionSwitch = switch ($CompressionLevel) {
-        "copy" { "0" }
-        "fast" { "3" }
-        "medium" { "5" }
-        "good" { "7" }
-        "ultra" { "9" }
+
+    [void]($cmdLine.Append("a $OutputFile "))
+
+    if ($PathsToCompress.Length -lt 10) {
+        $PathsToCompress = Add-QuotesToPaths $PathsToCompress
+        [void]($cmdLine.Append(($PathsToCompress -join " ")))
+        [void]($cmdLine.Append(' -r'))
+    } else {
+        # for many files we need to create a file containing list of files (or we can get 'command line is too long')
+        $fileList = New-Item -Path ([System.IO.Path]::GetTempFileName()) -ItemType File -Value ($PathsToCompress -join "`r`n") -Force
+        [void]($cmdLine.Append("-i@`"$($fileList.FullName)`""))
     }
-    [void]($cmdLine.Append(" a $OutputFile "))
-    [void]($cmdLine.Append(($PathsToCompress -join " ")))
-    [void]($cmdLine.Append(" -r -t$ArchiveFormat -mx$compressionSwitch"))
+
+    if ($ArchiveFormat) {
+        [void]($cmdLine.Append(" -t$ArchiveFormat"))
+    }
+
+    if ($CompressionLevel) {
+        $compressionSwitch = switch ($CompressionLevel) {
+            "copy" { "0" }
+            "fast" { "3" }
+            "medium" { "5" }
+            "good" { "7" }
+            "ultra" { "9" }
+        }
+        [void]($cmdLine.Append(" -mx$compressionSwitch"))
+    }
+    
     if ($Password) {
         $cmdLine.Append(" -p$($Password.GetNetworkCredential().Password)")
     }
@@ -157,9 +173,12 @@ function Compress-With7Zip {
 
     try { 
         Push-Location -Path $WorkingDirectory
-        Write-Log -_Debug "Invoking 7zip at directory '$WorkingDirectory'"
-        [void](Invoke-ExternalCommand -Command ($cmdLine.ToString()) -Quiet)
+        Write-Log -_Debug "Invoking 7zip at directory '$WorkingDirectory' ($($PathsToCompress.Count) path(s))."
+        [void](Start-ExternalProcess -Command $7zipPath -ArgumentList ($cmdLine.ToString()) -Quiet)
     } finally {
+        if ($fileList -and (Test-Path -Path $fileList)) {
+            Remove-Item -Path $fileList -Force
+        }
         Pop-Location
     }
     
