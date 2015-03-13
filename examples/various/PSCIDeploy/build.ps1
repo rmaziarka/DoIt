@@ -81,7 +81,7 @@ try {
     }
     Import-Module "$PSCILibraryPath\PSCI.psm1" -Force 
 
-    $PSCIGlobalConfiguration.LogFile = 'build.log.txt'
+    $PSCIGlobalConfiguration.LogFile = "$PSScriptRoot\build.log.txt"
     Remove-Item -Path $PSCIGlobalConfiguration.LogFile -ErrorAction SilentlyContinue
 
     Initialize-ConfigurationPaths -ProjectRootPath $ProjectRootPath -PackagesPath $PackagesPath -DeployConfigurationPath $DeployConfigurationPath

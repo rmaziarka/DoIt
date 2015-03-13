@@ -88,7 +88,7 @@ param(
 
 	[Parameter(Mandatory=$false)]
 	[string[]]
-	$Environment = 'Default',
+	$Environment = 'RemoteRun',
 
     [Parameter(Mandatory=$false)]
 	[hashtable]
@@ -131,7 +131,7 @@ try {
     }
     Import-Module "$PSCILibraryPath\PSCI.psm1" -Force
 
-    $PSCIGlobalConfiguration.LogFile = 'deploy.log.txt'
+    $PSCIGlobalConfiguration.LogFile = "$PSScriptRoot\deploy.log.txt"
     Remove-Item -Path $PSCIGlobalConfiguration.LogFile -ErrorAction SilentlyContinue
 
     Initialize-ConfigurationPaths -ProjectRootPath $ProjectRootPath -PackagesPath $PackagesPath -DeployConfigurationPath $DeployConfigurationPath -ValidatePackagesPath
