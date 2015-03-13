@@ -174,7 +174,7 @@ function Compress-With7Zip {
     try { 
         Push-Location -Path $WorkingDirectory
         Write-Log -_Debug "Invoking 7zip at directory '$WorkingDirectory' ($($PathsToCompress.Count) path(s))."
-        [void](Start-ExternalProcess -Command $7zipPath -ArgumentList ($cmdLine.ToString()) -Quiet)
+        [void](Start-ExternalProcess -Command $7zipPath -ArgumentList ($cmdLine.ToString()) -WorkingDirectory $WorkingDirectory)
     } finally {
         if ($fileList -and (Test-Path -Path $fileList)) {
             Remove-Item -Path $fileList -Force
