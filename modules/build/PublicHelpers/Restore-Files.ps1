@@ -22,29 +22,43 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 #>
 
-function Stop-Execution {
+function Restore-Files { 
     <#
     .SYNOPSIS
-    Stops execution of the script. 
+    Restores list of files/directories prepared by Backup-Files.
 
-    .DESCRIPTION
-    In console it will run 'exit 1' to ensure proper exit code is returned. In other environments (e.g. ISE) it will just throw an exception.
+    .PARAMETER BackupList
+    Backup list created by Backup-Files.
+
+    .PARAMETER RemoveDestinationPath
+    Whether to remove base destination path.
 
     .EXAMPLE
-    Stop-Execution
+    Restore-Files -BackupList $backupList
     #>
 
     [CmdletBinding()]
-    [OutputType([void])]
-    param()
+    [OutputType([object[]])]
+    param(
+        [Parameter(Mandatory=$true)]
+        [object[]]
+        $BackupList,
 
-    if ($Global:ProgressErrorMessage) {
-        Write-ProgressExternal -Message $Global:ProgressErrorMessage -MessageType Problem
+        [Parameter(Mandatory=$false)]
+        [switch]
+        $RemoveDestinationPath = $true
+    )
+
+    if (!$BackupList) {
+        return
+    }
+    Write-Log -Info "Restoring backup list"
+    foreach ($entry in $BackupList) {
+        Move-Item -Path $entry.BackupPath -Destination $entry.SourcePath -Force
     }
 
-    if ($Global:PSCIGlobalConfiguration.ExitImmediatelyOnError) {
-        exit 1
-    } else {
-        throw "Execution stopped due to an error or on demand."
+    if ($RemoveDestinationPath) {
+        $destinationPath = Split-Path -Path ($BackupList[0].BackupPath) -Parent
+        Remove-Item -Path $destinationPath -Force -Recurse
     }
 }
