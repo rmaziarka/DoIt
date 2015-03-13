@@ -41,7 +41,7 @@ function Remove-TempDirectory {
     #>
 
     [CmdletBinding()]
-    [OutputType([void])]
+    [OutputType([string])]
     param(
         [Parameter(Mandatory=$false)]
         [string] 

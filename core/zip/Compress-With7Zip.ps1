@@ -148,7 +148,7 @@ function Compress-With7Zip {
     }
     
     if ($Password) {
-        $cmdLine.Append(" -p$($Password.GetNetworkCredential().Password)")
+        [void]($cmdLine.Append(" -p$($Password.GetNetworkCredential().Password)"))
     }
         
     if ($Include) {
@@ -164,7 +164,7 @@ function Compress-With7Zip {
     if ($Exclude) {
         foreach ($wildcard in $Exclude) {
             if ($ExcludeRecurse) {
-              [void]($cmdLine.Append(" -xr!$wildcard"))
+               [void]($cmdLine.Append(" -xr!$wildcard"))
             } else {
                [void]($cmdLine.Append(" -x!$wildcard"))
             }
