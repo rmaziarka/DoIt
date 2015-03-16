@@ -79,7 +79,7 @@ function Build-DBDeployPackage {
     
     [void](New-Item -Path $OutputPath -ItemType Directory -Force)
 
-    Write-Log -Info "Copying Package."
+    Write-Log -Info "Copying DBDeploy package from '$DBDeployPath'"
     Copy-Item -Path "$DBDeployPath/*" -Destination $OutputPath -Recurse
 
     Write-ProgressExternal -Message ''

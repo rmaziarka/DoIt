@@ -82,7 +82,7 @@ function Invoke-SqlDotNet {
         $ConnectTimeoutInSeconds,
 
         [Parameter(Mandatory=$false)]
-        [ValidateSet($null, 'NonQuery', 'Dataset')]
+        [ValidateSet($null, 'NonQuery', 'Scalar', 'Dataset')]
         [string]
         $Mode = 'Dataset',
     
@@ -137,10 +137,10 @@ function Invoke-SqlDotNet {
             $connection.add_InfoMessage($infoEventHandler)
             $connection.Open()
 
-            if ($Mode -eq 'Dataset') { 
-                $command = New-Object -TypeName System.Data.SqlClient.SqlCommand -ArgumentList $q, $connection
-                $command.CommandTimeout = $QueryTimeoutInSeconds
+            $command = New-Object -TypeName System.Data.SqlClient.SqlCommand -ArgumentList $q, $connection
+            $command.CommandTimeout = $QueryTimeoutInSeconds
 
+            if ($Mode -eq 'Dataset') { 
                 $dataset = New-Object -TypeName System.Data.DataSet 
                 $dataAdapter = New-Object -TypeName System.Data.SqlClient.SqlDataAdapter -ArgumentList $command
             
@@ -149,6 +149,8 @@ function Invoke-SqlDotNet {
                 $dataset
             } elseif ($Mode -eq 'NonQuery') {
                 [void]($command.ExecuteNonQuery())
+            } elseif ($Mode -eq 'Scalar') {
+                $command.ExecuteScalar()
             } else {
                 Write-Log -Critical "Unsupported mode: ${Mode}."
             }

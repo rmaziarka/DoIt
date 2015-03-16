@@ -41,6 +41,9 @@ function Invoke-Sql {
 
     .PARAMETER Mode
     Determines how the sql is run - by sqlcmd.exe or .NET SqlCommand.
+
+    .PARAMETER SqlCommandMode
+    Sql command mode to use if Mode = .net (NonQuery / Scalar / Dataset). Ignored if mode is different than .net.
     
     .PARAMETER IgnoreErrors
     If set ignore errors when sqlcmd.exe is running
@@ -87,6 +90,11 @@ function Invoke-Sql {
         [string]
         [ValidateSet($null, 'sqlcmd', '.net')]
         $Mode = '.net',
+
+        [Parameter(Mandatory=$false)] 
+        [string]
+        [ValidateSet($null, 'NonQuery', 'Scalar', 'Dataset')]
+        $SqlCommandMode = 'Dataset',
     
         [Parameter(Mandatory=$false)] 
         [bool]
@@ -162,11 +170,11 @@ function Invoke-Sql {
         foreach ($q in $Query) { 
             $params['Query'] = $q
             if ($q.Length -gt 40) {
-                $qLog = $q.Substring(0, 40) + '...'
+                $qLog = ($q.Substring(0, 40) -replace "`r", '' -replace "`n", '; ') + '...'
             } else {
                 $qLog = $q
             }
-            Write-Log -Info "Running custom query at $($csb.DataSource) / $($csb.InitialCatalog) using sqlcmd (${qLog}...)"
+            Write-Log -_Debug "Running custom query at $($csb.DataSource) / $($csb.InitialCatalog) using sqlcmd (${qLog}...)"
             Invoke-SqlSqlcmd @params
         }
 
@@ -174,25 +182,26 @@ function Invoke-Sql {
         foreach ($file in $InputFile) {
             $file = (Resolve-Path -Path $file).ProviderPath
             $params['InputFile'] = $file
-            Write-Log -Info "Running sql file '$file' at $($csb.DataSource) / $($csb.InitialCatalog) using sqlcmd"
+            Write-Log -_Debug "Running sql file '$file' at $($csb.DataSource) / $($csb.InitialCatalog) using sqlcmd"
             Invoke-SqlSqlcmd @params
         }
 
     } elseif ($Mode -eq '.net') {
+        $params['Mode'] = $SqlCommandMode
         foreach ($q in $Query) { 
             $params['Query'] = $q
             if ($q.Length -gt 40) {
-                $qLog = $q.Substring(0, 40) + '...'
+                $qLog = ($q.Substring(0, 40) -replace "`r", '' -replace "`n", '; ') + '...'
             } else {
                 $qLog = $q
             }
-            Write-Log -Info "Running custom query at $($csb.DataSource) / $($csb.InitialCatalog) using .Net (${qLog})"
+            Write-Log -_Debug "Running custom query at $($csb.DataSource) / $($csb.InitialCatalog) using .Net (${qLog})"
             Invoke-SqlDotNet @params
         }
 
         foreach ($file in $InputFile) {
             $file = (Resolve-Path -Path $file).ProviderPath
-            Write-Log -Info "Running sql file '$file' at $($csb.DataSource) / $($csb.InitialCatalog) using .Net"
+            Write-Log -_Debug "Running sql file '$file' at $($csb.DataSource) / $($csb.InitialCatalog) using .Net"
             $params['Query'] = Get-Content -Path $file -ReadCount 0 | Out-String
             Invoke-SqlDotNet @params
         }

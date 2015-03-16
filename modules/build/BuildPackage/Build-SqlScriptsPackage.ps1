@@ -94,7 +94,7 @@ function Build-SqlScriptsPackage {
     
     [void](New-Item -Path $OutputPath -ItemType Directory)
 
-    Write-Log -Info "Copying Scripts from $ScriptsPath.."
+    Write-Log -Info "Copying SQL scripts from $ScriptsPath."
 
     [void](Copy-Item -Path "$ScriptsPath\*.*" -Include $Include -Exclude $Exclude -Destination $OutputPath)
 
