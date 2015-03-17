@@ -119,7 +119,7 @@ function Start-SqlServerAgentJob {
         Write-Log -Critical "Cannot find job named '$JobName' in msdb.dbo.sysjobs table."
     }
 
-    $beforeRunMaxInstanceId = Invoke-Sql @sqlParams -Query "select max(instance_id) from msdb.dbo.sysjobhistory where job_id = '$jobId'"
+    $beforeRunMaxInstanceId = Invoke-Sql @sqlParams -Query "select max(isnull(instance_id, 0)) from msdb.dbo.sysjobhistory where job_id = '$jobId'"
     if (!$beforeRunMaxInstanceId) {
         $beforeRunMaxInstanceId = 0
     }
