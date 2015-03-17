@@ -103,6 +103,8 @@ function Start-SqlServerAgentJob {
         $syncLog = 'asynchronously'
     }
 
+    Write-ProgressExternal -Message "Running SQL Server Agent job $JobName" -ErrorMessage 'SQL Server Agent job $JobName failed'
+
     Write-Log -Info "Running SQL Server Agent job named '$JobName' $syncLog using connectionString '$ConnectionString'" -Emphasize
 
     $sqlParams = @{ 
@@ -135,6 +137,7 @@ function Start-SqlServerAgentJob {
 
     if (!$Synchronous) {
         Write-Log -Info "Job '$JobName' has been started successfully."
+        Write-ProgressExternal -Message ''
         return
     }
 
@@ -151,6 +154,7 @@ function Start-SqlServerAgentJob {
     } while (!$TimeoutInSeconds -or $runningSeconds -lt $TimeoutInSeconds)
 
     if (!$ValidateRunOutcome) {
+        Write-ProgressExternal -Message ''
         Write-Log -Info "Job '$JobName' has finished. Run outcome has not been checked."
         return
     }
@@ -183,5 +187,6 @@ function Start-SqlServerAgentJob {
         Write-Log -Warn $log
         Write-Log -Critical "Job '$JobName' has failed - see messages above for details."
     }
+    Write-ProgressExternal -Message ''
     Write-Log -Info "Job '$JobName' has finished successfully."
 }
