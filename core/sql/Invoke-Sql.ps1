@@ -166,6 +166,11 @@ function Invoke-Sql {
         Credential = $Credential
     }
 
+    $targetLog = "$($csb.DataSource)"
+    if ($csb.InitialCatalog) {
+        $targetLog += " / $($csb.InitialCatalog)"
+    }
+
     if ($Mode -eq 'sqlcmd') {
         foreach ($q in $Query) { 
             $params['Query'] = $q
@@ -174,7 +179,7 @@ function Invoke-Sql {
             } else {
                 $qLog = $q
             }
-            Write-Log -_Debug "Running custom query at $($csb.DataSource) / $($csb.InitialCatalog) using sqlcmd (${qLog}...)"
+            Write-Log -_Debug "Running custom query at $targetLog using sqlcmd (${qLog}...)"
             Invoke-SqlSqlcmd @params
         }
 
@@ -182,7 +187,7 @@ function Invoke-Sql {
         foreach ($file in $InputFile) {
             $file = (Resolve-Path -Path $file).ProviderPath
             $params['InputFile'] = $file
-            Write-Log -_Debug "Running sql file '$file' at $($csb.DataSource) / $($csb.InitialCatalog) using sqlcmd"
+            Write-Log -_Debug "Running sql file '$file' at $targetLog using sqlcmd"
             Invoke-SqlSqlcmd @params
         }
 
@@ -195,13 +200,13 @@ function Invoke-Sql {
             } else {
                 $qLog = $q
             }
-            Write-Log -_Debug "Running custom query at $($csb.DataSource) / $($csb.InitialCatalog) using .Net (${qLog})"
+            Write-Log -_Debug "Running custom query at $targetLog using .Net (${qLog})"
             Invoke-SqlDotNet @params
         }
 
         foreach ($file in $InputFile) {
             $file = (Resolve-Path -Path $file).ProviderPath
-            Write-Log -_Debug "Running sql file '$file' at $($csb.DataSource) / $($csb.InitialCatalog) using .Net"
+            Write-Log -_Debug "Running sql file '$file' at $targetLog using .Net"
             $params['Query'] = Get-Content -Path $file -ReadCount 0 | Out-String
             Invoke-SqlDotNet @params
         }

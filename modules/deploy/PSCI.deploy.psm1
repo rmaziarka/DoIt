@@ -58,6 +58,7 @@ Export-ModuleMember -Function `
     New-SSRSResource, `
     New-SSRSFolder, `
     New-SSRSWebServiceProxy, `
+    Start-SqlServerAgentJob, `
     Write-DscErrorsFromEventLog
 
     

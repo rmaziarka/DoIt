@@ -181,10 +181,13 @@ function Deploy-SqlServerAgentPackage {
             }
 
             Write-Log -Info "Deleting job '$jobName' (guid $jobId)"
-            Invoke-Sql @sqlParams -Query "EXEC msdb.dbo.sp_delete_job @job_id=N'$jobId', @delete_unused_schedule=1"
+            $result = Invoke-Sql @sqlParams -Query "DECLARE @output int; EXEC @output = msdb.dbo.sp_delete_job @job_id=N'$jobId', @delete_unused_schedule=1; SELECT @output"
+            if ($result -ne 0) {
+                Write-Log "Deleting job '$jobName' failed with result code $result"
+            }
         }
 
-        if ($ReplaceOwnerLoginName) {
+        if ($PSBoundParameters.ContainsKey('ReplaceOwnerLoginName')) {
             Write-Log -_Debug "Replacing @owner_login_name with '$ReplaceOwnerLoginName'"
             $sqlContent = $sqlContent -ireplace $ownerLoginRegex, "`$1$ReplaceOwnerLoginName'"
         }
