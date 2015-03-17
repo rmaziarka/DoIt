@@ -94,7 +94,7 @@ function Build-SSISIspac {
         $wildcard = "$baseVsDir\Microsoft Visual Studio*"
         $vsDirs = Get-ChildItem -Path $wildcard -Directory | Sort -Descending
         if (!$vsDirs) {
-            Write-Log -Critical "Cannot find Visual Studio directory at '$wildcard'."
+            Write-Log -Critical "Cannot find Visual Studio directory at '$wildcard'. You probably don't have 'Microsoft SQL Server Data Tools - Business Intelligence for Visual Studio'. Please install it and try again."
         }
         $vsDir = $vsDirs[0]
     } else {
@@ -105,7 +105,7 @@ function Build-SSISIspac {
         }
         $vsDir = "$baseVsDir\Microsoft Visual Studio {0}" -f $vsVersionMap[$VisualStudioVersion]
         if (!(Test-Path -Path $vsDir)) {
-            Write-Log -Critical "Cannot find Visual Studio directory at '$vsDir'."
+            Write-Log -Critical "Cannot find Visual Studio directory at '$vsDir'. you probably don't have 'Microsoft SQL Server Data Tools - Business Intelligence for Visual Studio $VisualStudioVersion'. Please install it and try again."
         }
     }
 
