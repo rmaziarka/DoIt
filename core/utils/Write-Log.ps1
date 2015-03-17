@@ -150,6 +150,9 @@ Function Write-Log {
         }
     }
     Process { 
+        if (!$severityNotSet -and [int]$Severity -lt [int]$PSCIGlobalConfiguration.LogLevel) {
+            return
+        }
         Write-LogMessage -Header (" " * $Indent + $outputHeader) -Message $Message -Severity $Severity -Emphasize:$Emphasize
     }
     End {

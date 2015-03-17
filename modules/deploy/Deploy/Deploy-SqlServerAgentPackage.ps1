@@ -196,7 +196,11 @@ function Deploy-SqlServerAgentPackage {
         $sqlParams.SqlCommandMode = 'NonQuery'
         $sqlParams.Query = $sqlContent
         $sqlParams.Mode = $Mode
-        Write-Log -Info "Creating SQL Server job '$jobName' by running '$sqlPathLeaf'"
+        $log = "Creating SQL Server job '$jobName' by running '$sqlPathLeaf'"
+        if ($SqlCmdVariables) {
+            $log += " with following variables defined: $($SqlCmdVariables.Keys -join ', ')"
+        }
+        Write-Log -Info $log
         Invoke-Sql @sqlParams
 
         $sqlParams.SqlCmdVariables = $null

@@ -78,7 +78,7 @@ function Start-SqlServerAgentJob {
 
         [Parameter(Mandatory=$false)]
         [int] 
-        $SleepIntervalInSeconds = 1,
+        $SleepIntervalInSeconds = 5,
 
         [Parameter(Mandatory=$false)]
         [int] 
@@ -117,6 +117,11 @@ function Start-SqlServerAgentJob {
         Write-Log -Critical "Cannot find job named '$JobName' in msdb.dbo.sysjobs table."
     }
 
+    $beforeRunMaxInstanceId = Invoke-Sql @sqlParams -Query "select max(instance_id) from msdb.dbo.sysjobhistory where job_id = '$jobId'"
+    if (!$beforeRunMaxInstanceId) {
+        $beforeRunMaxInstanceId = 0
+    }
+
     $sql = "DECLARE @output int; EXEC @output = msdb.dbo.sp_start_job @job_name=N'$JobName'"
     if ($StepName) {
         $sql += ", @step_name=N'$StepName'"
@@ -129,41 +134,18 @@ function Start-SqlServerAgentJob {
     }
 
     if (!$Synchronous) {
-        Write-Log -Info "Job '$JobName' has been started."
+        Write-Log -Info "Job '$JobName' has been started successfully."
         return
     }
 
-    $sqlParams.SqlCommandMode = 'Dataset'
     $runningSeconds = 0
     do {
 
-        $statusDataSet = (Invoke-Sql @sqlParams -Query "exec msdb.dbo.sp_help_job @job_name = '$JobName', @job_aspect = 'job'").Tables[0]
-        if (!$statusDataSet) {
-            Write-Log -Critical "sp_help_job did not return a dataset for job '$JobName'. Please investigate."
-        }
-        $status = $statusDataSet.current_execution_status
-        $runOutcome = $statusDataSet.last_run_outcome
-        $runDate = $statusDataset.last_run_date
-        $runTime = $statusDataset.last_run_time
-        $statusName = switch ($status) {
-            1 { 'executing'; break; }
-            2 { 'waiting for thread'; break; }
-            3 { 'between retries'; break; }
-            4 { 'idle'; break; }
-            5 { 'suspended'; break; }
-            7 { 'performing completion actions'; break; }
-            default { 'unknown' }
-        }
-        $runOutcomeName = switch ($runOutcome) {
-            0 { 'failed'; break; }
-            1 { 'succeeded'; break; }
-            3 { 'canceled'; break; }
-            default { 'unknown' }
-        }
-        if ($status -eq 4) {
+        $maxInstanceId = Invoke-Sql @sqlParams -Query "select max(instance_id) from msdb.dbo.sysjobhistory where job_id = '$jobId'"
+        if ($maxInstanceId -gt $beforeRunMaxInstanceId) {
             break
         }
-        Write-Log -_Debug "Job '$JobName' is running with status '$statusName'."
+        Write-Log -Info "Job '$JobName' is still running."
         Start-Sleep -Seconds $SleepIntervalInSeconds
         $runningSeconds += $SleepIntervalInSeconds
     } while (!$TimeoutInSeconds -or $runningSeconds -lt $TimeoutInSeconds)
@@ -172,10 +154,29 @@ function Start-SqlServerAgentJob {
         Write-Log -Info "Job '$JobName' has finished. Run outcome has not been checked."
         return
     }
+
+    if ($TimeoutInSeconds -and $runningSeconds -ge $TimeoutInSeconds) {
+        Write-Log -Warn "Timeout occurred ($TimeoutInSeconds s)."
+    }
+    
+    $sqlParams.SqlCommandMode = 'Dataset'
+
+    $statusDataSet = (Invoke-Sql @sqlParams -Query "exec msdb.dbo.sp_help_job @job_name = '$JobName', @job_aspect = 'job'").Tables[0]
+    $runDate = $statusDataSet.last_run_date
+    $runTime = $statusDataSet.last_run_time
+    $runOutcome = $statusDataSet.last_run_outcome
+    $runOutcomeName = switch ($runOutcome) {
+        0 { 'failed'; break; }
+        1 { 'succeeded'; break; }
+        3 { 'canceled'; break; }
+        default { 'unknown' }
+    }
+
     if ($runOutcome -ne 1) {
+        Write-Log -Info "History $jobId / $runDate / $runTime"
         $historyInfo = Invoke-Sql @sqlParams -Query "select step_id, step_name, message from msdb.dbo.sysjobhistory where job_id = '$jobId' and run_date = $runDate and run_time = $runTime order by step_id"
 
-        $log = "Job '$JobName' has failed (outcome '$runOutcomeName'). Run history:`r`n"
+        $log = "Job '$JobName' has failed (outcome $runOutcome = '$runOutcomeName'). Run history:`r`n"
         foreach ($historyEntry in $historyInfo.Tables[0]) {
             $log += "Step $($historyEntry.step_id). '$($historyEntry.step_name)': $($historyEntry.message)`r`n"
         }
