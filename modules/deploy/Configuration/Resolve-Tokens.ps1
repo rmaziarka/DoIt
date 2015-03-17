@@ -245,6 +245,11 @@ function Resolve-TokensForEnvironment {
         foreach ($token in $tokens[$category].GetEnumerator()) {
             if ($TokensOverride -and $TokensOverride.ContainsKey($token.Key)) {
                 $val = $TokensOverride[$token.Key]
+                if ($val -ieq '$true') {
+                    $val = $true
+                } elseif ($val -ieq '$false') {
+                    $val = $false
+                }
             } else {
                 $val = $token.Value
             }

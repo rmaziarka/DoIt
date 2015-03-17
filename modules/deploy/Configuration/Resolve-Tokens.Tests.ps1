@@ -379,6 +379,34 @@ Describe -Tag "PSCI.unit" "Resolve-Tokens" {
                 $resolvedTokens.WebConfig.Timeout | Should Be 60
                 $resolvedTokens.WebConfig.Timeout.GetType() | Should Be int
             }
+
+            It "Resolve-Tokens: should resolve tokens as bool for $true / $false" {
+                $tokensOverride = @{ 'Credentials' = '$true'; Timeout = '$false' }
+                $resolvedTokens = Resolve-Tokens -AllEnvironments $Global:Environments -Environment Default -Node 's01' -TokensOverride $tokensOverride
+
+                $resolvedTokens.Count | Should Be 3
+                $resolvedTokens.WebConfig | Should Not Be $null
+                $resolvedTokens.WebConfig.Count | Should Be 2
+
+                $resolvedTokens.WebConfig.Credentials | Should Be $true
+                $resolvedTokens.WebConfig.Credentials.GetType() | Should Be bool
+                $resolvedTokens.WebConfig.Timeout | Should Be $false
+                $resolvedTokens.WebConfig.Timeout.GetType() | Should Be bool
+            }
+
+            It "Resolve-Tokens: should resolve tokens as string for true / false" {
+                $tokensOverride = @{ 'Credentials' = 'true'; Timeout = 'false' }
+                $resolvedTokens = Resolve-Tokens -AllEnvironments $Global:Environments -Environment Default -Node 's01' -TokensOverride $tokensOverride
+
+                $resolvedTokens.Count | Should Be 3
+                $resolvedTokens.WebConfig | Should Not Be $null
+                $resolvedTokens.WebConfig.Count | Should Be 2
+
+                $resolvedTokens.WebConfig.Credentials | Should Be 'true'
+                $resolvedTokens.WebConfig.Credentials.GetType() | Should Be string
+                $resolvedTokens.WebConfig.Timeout | Should Be 'false'
+                $resolvedTokens.WebConfig.Timeout.GetType() | Should Be string
+            }
         }
 
         Context "when used in more complex scenarios" {
