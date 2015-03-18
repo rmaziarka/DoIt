@@ -126,10 +126,12 @@ function Invoke-SqlSqlcmd {
 
     $output = ''
 
-    $startSqlCmdParams = @{ Command=$sqlcmd;
-             ArgumentList="-S $serverAddress -t $QueryTimeoutInSeconds -l $ConnectTimeoutInSeconds $params -w 65535 -h -1 -W -s "",""";
-             Output=([ref]$output);
-             Credential=$Credential;
+    $sqlCmdPath = Get-CurrentSqlCmdPath
+
+    $startSqlCmdParams = @{ Command=$sqlcmdPath
+             ArgumentList="-S $serverAddress -t $QueryTimeoutInSeconds -l $ConnectTimeoutInSeconds $params -w 65535 -h -1 -W -s "","""
+             Output=([ref]$output)
+             Credential=$Credential
              }
 
     if ($Credential) {

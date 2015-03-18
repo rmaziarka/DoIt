@@ -134,12 +134,6 @@ function Invoke-Sql {
         if (!$sqlCmdPath) {
             Write-Log -Warn 'Cannot find sqlcmd.exe - falling back to .NET'
             $Mode = '.net'
-        } else { 
-            $sqlcmd = Join-Path -Path $sqlCmdPath -ChildPath 'sqlcmd.exe'
-            if (!(Test-Path -Path $sqlcmd)) {
-                Write-Log -Warn 'Cannot find sqlcmd.exe - falling back to .NET'
-                $Mode = '.net'
-            }
         }
     }
 

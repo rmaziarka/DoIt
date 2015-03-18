@@ -28,7 +28,7 @@ function Get-CurrentSqlCmdPath {
     Returns sqlcmd.exe folder path
 
     .DESCRIPTION 
-    Search for sqlcmd bin path in system registry. First founded version will be returned.
+    Search for sqlcmd bin path in system registry. First found version will be returned.
 
     .EXAMPLE
     Get-CurrentSqlCmdPath
@@ -44,17 +44,27 @@ function Get-CurrentSqlCmdPath {
         if (Test-Path -Path $regKey) {
             $path = (Get-ItemProperty -Path $regKey).Path
             if ($path) {
-                return $path
+                $path = Join-Path -Path $path -ChildPath 'sqlcmd.exe'
+                if (Test-Path -Path $path) {
+                    return $path
+                }
             }
-            return (Get-ItemProperty -Path $regKey).ODBCToolsPath
+            $path = (Get-ItemProperty -Path $regKey).ODBCToolsPath
+            if ($path) {
+                $path = Join-Path -Path $path -ChildPath 'sqlcmd.exe'
+                if (Test-Path -Path $path) {
+                    return $path
+                }
+            }
         }
         # registry not found - try directory instead
-        $path = "$($env:ProgramFiles)\Microsoft SQL Server\$version\Tools\Binn\"
+        $path = "$($env:ProgramFiles)\Microsoft SQL Server\$version\Tools\Binn\sqlcmd.exe"
         if (Test-Path -Path $path) {
             return $path
         }
     }
 
+    return $null
 }
 
 
