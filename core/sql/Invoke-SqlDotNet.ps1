@@ -107,7 +107,7 @@ function Invoke-SqlDotNet {
                 $value = $var.Value
             }
             Write-Log -_Debug "Key: $($var.Key), value: $($var.Value)"
-            $Query = [System.Text.RegularExpressions.Regex]::Replace($Query, $regex, $var.Value, `
+            $Query = [System.Text.RegularExpressions.Regex]::Replace($Query, $regex, $value, `
                         [System.Text.RegularExpressions.RegexOptions]::IgnoreCase)
         }
     }
