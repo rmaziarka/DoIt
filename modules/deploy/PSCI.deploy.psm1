@@ -53,6 +53,7 @@ Export-ModuleMember -Function `
     Update-TokensInZipFile, `
     Sync-MsDeployDirectory, `
     Get-SSRSProjectConfiguration, `
+    New-EventLogSource, `
     New-SSRSDataSet, `
     New-SSRSDataSource, `
     New-SSRSResource, `

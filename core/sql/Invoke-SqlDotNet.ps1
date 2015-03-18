@@ -101,6 +101,12 @@ function Invoke-SqlDotNet {
     if ($SqlCmdVariables) {
         foreach ($var in $SqlCmdVariables.GetEnumerator()) {
             $regex = '\$\({0}\)' -f $var.Key
+            if (!$var.Value) {
+                $value = ''
+            } else {
+                $value = $var.Value
+            }
+            Write-Log -_Debug "Key: $($var.Key), value: $($var.Value)"
             $Query = [System.Text.RegularExpressions.Regex]::Replace($Query, $regex, $var.Value, `
                         [System.Text.RegularExpressions.RegexOptions]::IgnoreCase)
         }
