@@ -50,14 +50,14 @@ function New-EventLogSource {
 
     if (!([System.Diagnostics.EventLog]::SourceExists($SourceName))) {
         if ($LogName) { 
-            Write-Log -Info "Creating event source $SourceName, log $LogName."
+            Write-Log -Info "Creating event source '$SourceName', log '$LogName'."
             [System.Diagnostics.EventLog]::CreateEventSource($SourceName, $LogName)
         } else {
-            Write-Log -Info "Creating event source $SourceName."
+            Write-Log -Info "Creating event source '$SourceName'."
             [System.Diagnostics.EventLog]::CreateEventSource($SourceName, '')
         }
     } else {
-        Write-Log -Info "Event source $SourceName already exists."
+        Write-Log -Info "Event source '$SourceName' already exists."
     }
 
 }

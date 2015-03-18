@@ -95,14 +95,14 @@ function Set-TargetResource {
     
     if ($Ensure -eq 'Present') {
         if ($LogName) { 
-            Write-Verbose -Message "Creating event source $SourceName, log $LogName."
+            Write-Verbose -Message "Creating event source '$SourceName', log '$LogName'."
             [System.Diagnostics.EventLog]::CreateEventSource($SourceName, $LogName)
         } else {
-            Write-Verbose -Message "Creating event source $SourceName."
+            Write-Verbose -Message "Creating event source '$SourceName'."
             [System.Diagnostics.EventLog]::CreateEventSource($SourceName, '')
         }
     } else {
-        Write-Verbose -Message "Deleting event source $SourceName."
+        Write-Verbose -Message "Deleting event source '$SourceName'."
         [System.Diagnostics.EventLog]::DeleteEventSource($SourceName)
     }
 }
