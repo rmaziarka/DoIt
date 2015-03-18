@@ -38,7 +38,7 @@ function Get-CurrentSqlCmdPath {
     [OutputType([string])]
     param()
 
-    $sqlServerVersions = @('110', '100', '90')
+    $sqlServerVersions = @('120', '110', '100', '90')
     foreach ($version in $sqlServerVersions) {
         $regKey = "HKLM:\SOFTWARE\Microsoft\Microsoft SQL Server\$version\Tools\ClientSetup"
         if (Test-Path -Path $regKey) {
