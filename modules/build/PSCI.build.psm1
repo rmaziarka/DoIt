@@ -36,6 +36,7 @@ Export-ModuleMember -Function `
     Build-WebPackage, `
     Build-DBDeployPackage, `
     Build-SqlScriptsPackage, `
+    Build-SSDTDacpac, `
     Build-SSISIspac, `
     Build-SSISPackage, `
     Build-SSRSModulePackage, `
