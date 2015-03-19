@@ -41,6 +41,9 @@ Path to the directory where packages will be created, relative to $ProjectRootPa
 .PARAMETER DeployConfigurationPath
 Path to the directory where configuration files reside, relative to $ProjectRootPath. By default '<script directory>\configuration'.
 
+.PARAMETER Tasks
+List of tasks (function names) to invoke for this build. If this is not specified, default task will be invoked (Build-All).
+
 .PARAMETER Version
 Version number of the current build.
 #>
@@ -63,9 +66,15 @@ param(
 	$DeployConfigurationPath = '', # Modify this path according to your project structure. This is absolute or relative to $ProjectRootPath (by default '<script directory>\configuration').
 
     [Parameter(Mandatory=$false)]
+	[string[]]
+	$Tasks,
+    
+    [Parameter(Mandatory=$false)]
 	[string]
 	$Version = '1.0.0'
 )
+
+$global:ErrorActionPreference = 'Stop'
 
 $global:ErrorActionPreference = 'Stop'
 
@@ -87,13 +96,17 @@ try {
     Initialize-ConfigurationPaths -ProjectRootPath $ProjectRootPath -PackagesPath $PackagesPath -DeployConfigurationPath $DeployConfigurationPath
     Remove-PackagesDir
 
-    ############# Actual build steps are in build\buildPackage.ps1.
-    ############# Feel free to add additional parameters to build.ps1 and buildPackage.ps1.
+    <# 
+      All powershell files available at 'build' directory will be included and custom functions will be invoked based on $Tasks variable.
+      For example if $Tasks = 'Build-Package1', 'Build-Package2', functions 'Build-Package1' and 'Build-Package2' will be invoked.
+      If $Tasks is null, default task will be invoked (Build-All).
+      Any additional parameters in build.ps1 will be automatically passed to custom build functions.
+    #>
+    $cmdName = $PSCmdlet.MyInvocation.MyCommand.Path
+    Write-Log -Info "Starting build at '$cmdName'" -Emphasize
+    $buildParams = (Get-Command -Name $cmdName).ParameterSets[0].Parameters | Where-Object { $_.Position -ge 0 } | Foreach-Object { Get-Variable -Name $_.Name }
 
-    $buildPackageScript = Resolve-Path -Path 'build\buildPackage.ps1'
-    Write-Log -Info "Running $buildPackageScript" -Emphasize
-    . $buildPackageScript -Version $Version
-    Write-Log -Info 'Build finished successfully.' -Emphasize
+    Start-Build -BuildParams $buildParams -ScriptsDirectory 'build' -DefaultTask 'Build-All'
 } catch {
     Write-ErrorRecord -ErrorRecord $_
 } finally {

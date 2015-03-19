@@ -25,36 +25,34 @@ SOFTWARE.
 
 <#
 .SYNOPSIS
-Starts the build process. 
-
-.DESCRIPTION
-This is project-specific file that contains custom build steps.
+Builds all packages.
 
 .PARAMETER Version
 Version number of the current build.
 #>
 
-param(
-    [Parameter(Mandatory=$false)]
-	[string]
-	$Version
-)
+function Build-All {
+    param(
+        [Parameter(Mandatory=$false)]
+        [string]
+        $Version
+    )
+
+    <# Get-ConfigurationPaths returns an object with the following properties:
+       ProjectRootPath         - base directory of the project, relative to the directory where this script resides (it is used as a base directory for other directories)
+       PackagesPath            - path to directory with packages
+       PackagesContainDeployScripts - $true if $PackagesPath exists and contains DeployScripts / PSCI
+       DeployConfigurationPath - path to directory with configuration files
+       DeployScriptsPath       - path to directory with deploy.ps1
+    #>
+
+    $configPaths = Get-ConfigurationPaths
+    $projectRootPath = $configPaths.ProjectRootPath
+    $packagesPath = $configPaths.PackagesPath
 
 
-<# Get-ConfigurationPaths returns an object with the following properties:
-   ProjectRootPath         - base directory of the project, relative to the directory where this script resides (it is used as a base directory for other directories)
-   PackagesPath            - path to directory with packages
-   PackagesContainDeployScripts - $true if $PackagesPath exists and contains DeployScripts / PSCI
-   DeployConfigurationPath - path to directory with configuration files
-   DeployScriptsPath       - path to directory with deploy.ps1
-#>
+    Build-DeploymentScriptsPackage 
 
-$configPaths = Get-ConfigurationPaths
-$projectRootPath = $configPaths.ProjectRootPath
-$packagesPath = $configPaths.PackagesPath
-
-
-Build-DeploymentScriptsPackage 
-
-Build-SqlScriptsPackage -PackageName 'sql' -ScriptsPath 'packages\sql'
-Copy-Item -Path "$projectRootPath\packages\RemotingTest" -Destination "$packagesPath\RemotingTest" -Recurse
+    Build-SqlScriptsPackage -PackageName 'sql' -ScriptsPath 'packages\sql'
+    Copy-Item -Path "$projectRootPath\packages\RemotingTest" -Destination "$packagesPath\RemotingTest" -Recurse
+}
