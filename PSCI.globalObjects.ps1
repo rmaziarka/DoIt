@@ -24,7 +24,7 @@ SOFTWARE.
 
 $Global:PSCIGlobalConfiguration = [PSCustomObject]@{
     # Logging level threshold - available values: DEBUG, INFO, WARN, ERROR, CRITICAL
-    LogLevel = [PSCI.LogSeverity]::INFO;
+    LogLevel = [PSCI.LogSeverity]::DEBUG;
 
     # Path to file log or $null if shouldn't log to file. 
     LogFile = $null;

@@ -22,57 +22,33 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 #>
 
-function Get-VisualStudioCommandPromptPath {
+function ConvertTo-Integer {
     <#
     .SYNOPSIS
-	Gets the path to the given version of Visual Studio Command Prompt (or the latest one if not specified).
+    Converts string to int or 0 if conversion fails.
     
-    .DESCRIPTION
-    If Visual Studio Command Prompt cannot be found, returns null.
-	
-    .PARAMETER VisualStudioVersion
-    Visual Studio version.
+    .PARAMETER Value
+    String to convert.
 
     .EXAMPLE
-    Get-VisualStudioCommandPromptPath
-    #>
-
+    $sqlServerVersions = Get-ChildItem -Path $sqlServerPath | Sort-Object { ConvertTo-Integer -Value $_.Name } -Descending
+    #>   
+     
     [CmdletBinding()]
-    [OutputType([string])]
+    [OutputType([bool])]
     param(
         [Parameter(Mandatory=$false)]
         [string] 
-        [ValidateSet($null, '2013', '2012', '2010')]
-        $VisualStudioVersion
+        $Value
     )
 
-    $envVars = @{
-        '2010' = $env:VS100COMNTOOLS
-        '2012' = $env:VS110COMNTOOLS
-        '2013' = $env:VS120COMNTOOLS
+    if (!$Value) {
+        return 0
     }
-
-    $cmdPromptFileNames = @{
-        '2010' = 'vcvarsall.bat'
-        '2012' = 'vsdevcmd.bat'
-        '2013' = 'vsdevcmd.bat'
+    $out = 0
+    $result = [System.Int32]::TryParse($value, [ref]$out)
+    if (!$result) {
+        return 0
     }
-
-    if (!$VisualStudioVersion) {
-        $versions = $envVars.Keys | Sort-Object -Descending
-    } else {
-        $versions = @($VisualStudioVersion)
-    }
-
-    foreach ($version in $versions) {
-        $cmdPromptPath = $envVars[$version]
-        if (!$cmdPromptPath) {
-            continue
-        }
-        $cmdPromptFullPath = (Join-Path -Path $cmdPromptPath -ChildPath $cmdPromptFileNames[$version])
-        if (Test-Path -Path $cmdPromptFullPath) {
-            return $cmdPromptFullPath
-        }
-    }
-    return $null
+    return $out
 }

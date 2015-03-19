@@ -22,27 +22,27 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 #>
 
-function Get-VisualStudioCommandPromptPath {
+function Get-VisualStudioPath {
     <#
     .SYNOPSIS
-	Gets the path to the given version of Visual Studio Command Prompt (or the latest one if not specified).
+	Gets the path to the given version of Visual Studio (or all of them in descending order if $VisualStudioVersion is not specified).
     
     .DESCRIPTION
-    If Visual Studio Command Prompt cannot be found, returns null.
+    If Visual Studio cannot be found, returns empty array.
 	
     .PARAMETER VisualStudioVersion
     Visual Studio version.
 
     .EXAMPLE
-    Get-VisualStudioCommandPromptPath
+    Get-VisualStudioPath
     #>
 
     [CmdletBinding()]
-    [OutputType([string])]
+    [OutputType([string[]])]
     param(
         [Parameter(Mandatory=$false)]
         [string] 
-        [ValidateSet($null, '2013', '2012', '2010')]
+        [ValidateSet($null, '2013','2012','2010')]
         $VisualStudioVersion
     )
 
@@ -52,27 +52,21 @@ function Get-VisualStudioCommandPromptPath {
         '2013' = $env:VS120COMNTOOLS
     }
 
-    $cmdPromptFileNames = @{
-        '2010' = 'vcvarsall.bat'
-        '2012' = 'vsdevcmd.bat'
-        '2013' = 'vsdevcmd.bat'
-    }
-
     if (!$VisualStudioVersion) {
         $versions = $envVars.Keys | Sort-Object -Descending
     } else {
         $versions = @($VisualStudioVersion)
     }
 
+    $result = @()
     foreach ($version in $versions) {
         $cmdPromptPath = $envVars[$version]
         if (!$cmdPromptPath) {
             continue
         }
-        $cmdPromptFullPath = (Join-Path -Path $cmdPromptPath -ChildPath $cmdPromptFileNames[$version])
-        if (Test-Path -Path $cmdPromptFullPath) {
-            return $cmdPromptFullPath
+        if (Test-Path -Path $cmdPromptPath) {
+            $result += (Resolve-Path -Path "$cmdPromptPath\..\..").ProviderPath
         }
     }
-    return $null
+    return ,($result)
 }

@@ -43,6 +43,7 @@ Export-ModuleMember -Function `
     Deploy-SqlPackage, `
     Deploy-SqlProjectPackage, `
     Deploy-SqlServerAgentPackage, `
+    Deploy-SSDTDacpac, `
     Deploy-SSISIspac, `
     Deploy-SSISPackage, `
     Deploy-SSRSModule, `

@@ -87,4 +87,7 @@ Export-ModuleMember -Function `
     Disconnect-Share, `
     Set-SimpleAcl, `
     Convert-BytesToSize, `
-    Build-DeploymentScriptsPackage
+    Build-DeploymentScriptsPackage, `
+    Test-Integer, `
+    ConvertTo-Integer, `
+    Get-VisualStudioPath

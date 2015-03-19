@@ -242,6 +242,6 @@ function Deploy-SSISIspac {
         }
     }
 
-    Write-Log -Info "SSIS package '$packageName' deployed successfully."
+    Write-Log -Info "SSIS package '$packageName' has been deployed successfully."
 
 }
