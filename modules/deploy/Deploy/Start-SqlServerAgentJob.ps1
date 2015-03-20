@@ -144,7 +144,7 @@ function Start-SqlServerAgentJob {
     $runningSeconds = 0
     do {
 
-        $maxInstanceId = Invoke-Sql @sqlParams -Query "select max(instance_id) from msdb.dbo.sysjobhistory where job_id = '$jobId'"
+        $maxInstanceId = Invoke-Sql @sqlParams -Query "select max(isnull(instance_id, 0)) from msdb.dbo.sysjobhistory where job_id = '$jobId'"
         if ($maxInstanceId -gt $beforeRunMaxInstanceId) {
             break
         }
