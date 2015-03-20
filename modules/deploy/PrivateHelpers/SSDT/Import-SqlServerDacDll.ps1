@@ -72,9 +72,9 @@ function Import-SqlServerDacDll {
             '2012' = '11'
             '2014' = '12'
         }
-        $potentialDacDllPathsVer = Get-ChildItem -Path $potentialDacDllPaths -Filter $sqlServerVersionMap[$SqlServerVersion]
+        $potentialDacDllPathsVer = Get-ChildItem -Path $potentialDacDllPaths -Filter $sqlServerVersionMap[$SqlServerVersion] -Directory
     } else { 
-        $potentialDacDllPathsVer = Get-ChildItem -Path $potentialDacDllPaths | Sort-Object { ConvertTo-Integer -Value $_.Name } -Descending
+        $potentialDacDllPathsVer = Get-ChildItem -Path $potentialDacDllPaths -Directory | Sort-Object { ConvertTo-Integer -Value $_.Name } -Descending
     }
 
     if (!$potentialDacDllPathsVer) {

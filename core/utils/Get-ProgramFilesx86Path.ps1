@@ -37,11 +37,10 @@ function Get-ProgramFilesx86Path {
     [CmdletBinding()]
     [OutputType([string])]
     param()
-  
-    $is64bit = (Get-WmiObject Win32_Processor).AddressWidth -eq 64
-    $programFiles = $env:programfiles
-    if ($is64bit) {
-        $programFiles = ${env:ProgramFiles(x86)}
+
+    if (${env:ProgramFiles(x86)}) {
+        return ${env:ProgramFiles(x86)}
     }
-    return $programFiles
+
+    return $env:programfiles
 }
