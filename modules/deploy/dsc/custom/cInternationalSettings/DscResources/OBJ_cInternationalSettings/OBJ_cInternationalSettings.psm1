@@ -163,7 +163,7 @@ function Run-AsDifferentUser {
     $fileName = "$PSHOME\powershell.exe"
     $arguments = ('-NoProfile -NoLogo -NonInteractive -Command "{0}"' -f $ScriptBlock)
     CallPInvoke
-    [Source.NativeMethods]::CreateProcessAsUser("""" + $fileName + """ " + $arguments, `
+    [Source.NativeMethods_cInternationalSettings]::CreateProcessAsUser("""" + $fileName + """ " + $arguments, `
                         $networkCred.Domain, $networkCred.UserName, $networkCred.Password, [ref] $exitCode)
     if ($exitCode) {
         throw "Failed to run scriptblock '$ScriptBlock'. Exit code: $exitCode"
@@ -187,7 +187,7 @@ using System.IO;
 namespace Source
 {
     [SuppressUnmanagedCodeSecurity]
-    public static class NativeMethods
+    public static class NativeMethods_cInternationalSettings
     {
         //The following structs and enums are used by the various Win32 API's that are used in the code below
         
