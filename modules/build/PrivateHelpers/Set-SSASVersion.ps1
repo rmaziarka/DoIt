@@ -33,9 +33,6 @@ function Set-SSASVersion {
     .PARAMETER Version
     Version number
 
-    .LINK
-    Set-SSASVersion
-
     .EXAMPLE
     Set-SSASVersion -FilePath 'C:\Projects\Myproject\trunk\Cube\project.cube' -Version '1.0.1.2'
 

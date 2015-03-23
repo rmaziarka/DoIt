@@ -54,7 +54,7 @@ function Build-MsBuildPackage {
     If not provided, default msbuild options will be used.
 
     .PARAMETER Version
-    Version number which will be written to the AssemblyInfo files.
+    Version number that will be written to the AssemblyInfo files.
 
     .PARAMETER AssemblyInfoFilePaths
     Paths to AssemblyInfo files which will have their version numbers updated.

@@ -44,6 +44,9 @@ function Build-SSDTDacpac {
     An object created by New-MsBuildOptions function, which specifies msbuild options.
     If not provided, default msbuild options will be used.
 
+    .PARAMETER Version
+    Version number that will be written to the AssemblyInfo files.
+
     .LINK
     Deploy-SSDTDacpac
 
@@ -67,19 +70,56 @@ function Build-SSDTDacpac {
 
         [Parameter(Mandatory=$false)]
         [PSObject]
-        $MsBuildOptions
+        $MsBuildOptions,
+
+        [Parameter(Mandatory=$false)]
+        [string]
+        $Version
     )
 
-    $params = $PSBoundParameters
-
     $configPaths = Get-ConfigurationPaths
+    $projectRootPath = (Get-ConfigurationPaths).ProjectRootPath
+
+    $projectPath = Resolve-PathRelativeToProjectRoot `
+                        -Path $projectPath `
+                        -DefaultPath (Join-Path -Path $projectRootPath -ChildPath "$packageName\${packageName}.sln") `
+                        -ErrorMsg "Project file '$projectPath' does not exist (package '$packageName'). Tried following absolute path: '{0}'."
+
     $OutputPath = Resolve-PathRelativeToProjectRoot `
                             -Path $OutputPath `
                             -DefaultPath (Join-Path -Path $configPaths.PackagesPath -ChildPath $PackageName) `
                             -CheckExistence:$false
-    $params.MsBuildPackageOptions = @{ 
-        "OutputPath" = $OutputPath
+
+    if ($Version) {
+        $sqlProjRoot = Split-Path -Path $ProjectPath
+        $sqlProjs = Get-ChildItem -Path $sqlProjRoot -Filter '*.sqlproj' -Recurse
+
+        if (!$sqlProjs) {
+            Write-Log -Critical "Cannot find any *.sqlproj file under '$sqlProjRoot'."
+        }
+        Write-Log -Info "Setting version = '$Version' in files $($sqlProjs.Name -join ', ')."
+        foreach ($sqlProj in $sqlProjs) {
+            Copy-Item -Path $sqlProj.FullName -Destination "$($sqlProj.FullName).bak" -Force
+            Set-SSDTVersion -Path $sqlProj.FullName -Version $Version
+        }
+    }
+
+    $msBuildParams = @{
+        PackageName = $PackageName
+        ProjectPath = $projectPath
+        OutputPath = $OutputPath
+        MsBuildOptions = $MsBuildOptions
+        MsBuildPackageOptions = @{ OutputPath = $OutputPath }
     }
    
-    Build-MSBuild @params
+    Build-MSBuild @msBuildParams
+
+    if ($Version) {
+        Write-Log -_Debug "Restoring files $($sqlProjs.Name -join ', ')."
+        foreach ($sqlProj in $sqlProjs) {
+            Copy-Item -Path "$($sqlProj.FullName).bak" -Destination $sqlProj.FullName -Force
+        }
+    }
+
+
 }

@@ -22,19 +22,19 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 #>
 
-function Set-SSISVersion { 
+function Set-SSDTVersion { 
     <#
     .SYNOPSIS
-    Sets version in packages.
+    Sets version in SSDT's .sqlproj file.
 
-    .PARAMETER FilePath
-    Full Path to the package file
+    .PARAMETER Path
+    Full Path to the .sqlproj file.
 
     .PARAMETER Version
-    Version number
+    Version number.
     
     .EXAMPLE
-    Set-SSISVersion -FilePath 'C:\Projects\MyProject\trunk\bin\SSISFoler\Package\packagename.dtsx' -Version '1.0.1.2'
+    Set-SSDTVersion -Path 'c:\test\test.sqlproj' -Version '1.0.1.2'
 
     #>
     [CmdletBinding()]
@@ -42,30 +42,21 @@ function Set-SSISVersion {
     param(
         [Parameter(Mandatory=$true)]
         [string]
-        $FilePath,
+        $Path,
         
         [Parameter(Mandatory=$true)]
         [string]
         $Version
-
     )
 
-    $vNumbers = $Version.Split('.')
-
-    $versionTable = @(
-						("VersionMajor",$vNumbers[0]), 
-						("VersionMinor", $vNumbers[1]), 
-						("VersionComments", $vNumbers[2]),
-						("VersionBuild", $vNumbers[3])
-					 )
-    
-    [xml] $packageXml = Get-Content -Path $FilePath -ReadCount 0
-    
-    $packageXml.PreserveWhitespace = $true
-
-    ForEach($versionNumber in $versionTable) { 
-        $packageXml.Executable.Property | Where-Object { $_.Name -eq $versionNumber[0] } | ForEach-Object { $_.InnerText = $versionNumber[1] }
+    [xml]$sqlProjXml = Get-Content -Path $Path -ReadCount 0
+    $sqlProjXml.PreserveWhitespace = $true
+    if (!$sqlProjXml.Project.PropertyGroup[0].DacVersion) {
+        $newDacVersion = $sqlProjXml.CreateElement('DacVersion', $sqlProjXml.DocumentElement.NamespaceURI)
+        [void]($newDacVersion.set_InnerXML($Version))
+        [void]($sqlProjXml.Project.PropertyGroup[0].AppendChild($newDacVersion))
+    } else {
+        $sqlProjXml.Project.PropertyGroup[0].DacVersion = $Version 
     }
-
-    $packageXml.Save($FilePath)
+    $sqlProjXml.Save($Path)
 }
