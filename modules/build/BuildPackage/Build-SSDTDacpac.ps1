@@ -117,7 +117,7 @@ function Build-SSDTDacpac {
     if ($Version) {
         Write-Log -_Debug "Restoring files $($sqlProjs.Name -join ', ')."
         foreach ($sqlProj in $sqlProjs) {
-            Copy-Item -Path "$($sqlProj.FullName).bak" -Destination $sqlProj.FullName -Force
+            Move-Item -Path "$($sqlProj.FullName).bak" -Destination $sqlProj.FullName -Force
         }
     }
 

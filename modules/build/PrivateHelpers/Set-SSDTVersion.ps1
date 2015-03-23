@@ -49,7 +49,7 @@ function Set-SSDTVersion {
         $Version
     )
 
-    [xml]$sqlProjXml = Get-Content -Path $Path -ReadCount 0
+    [xml]$sqlProjXml = [System.IO.File]::ReadAllText($Path)
     $sqlProjXml.PreserveWhitespace = $true
     if (!$sqlProjXml.Project.PropertyGroup[0].DacVersion) {
         $newDacVersion = $sqlProjXml.CreateElement('DacVersion', $sqlProjXml.DocumentElement.NamespaceURI)
