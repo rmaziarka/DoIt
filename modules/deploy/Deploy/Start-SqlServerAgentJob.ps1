@@ -120,7 +120,7 @@ function Start-SqlServerAgentJob {
     }
 
     $beforeRunMaxInstanceId = Invoke-Sql @sqlParams -Query "select max(isnull(instance_id, 0)) from msdb.dbo.sysjobhistory where job_id = '$jobId'"
-    if (!$beforeRunMaxInstanceId) {
+    if (!$beforeRunMaxInstanceId -or $beforeRunMaxInstanceId -is [System.DBNull]) {
         $beforeRunMaxInstanceId = 0
     }
 
@@ -145,7 +145,7 @@ function Start-SqlServerAgentJob {
     do {
 
         $maxInstanceId = Invoke-Sql @sqlParams -Query "select max(isnull(instance_id, 0)) from msdb.dbo.sysjobhistory where job_id = '$jobId'"
-        if ($maxInstanceId -gt $beforeRunMaxInstanceId) {
+        if ($maxInstanceId -isnot [System.DBNull] -and $maxInstanceId -gt $beforeRunMaxInstanceId) {
             break
         }
         Write-Log -Info "Job '$JobName' is still running."
