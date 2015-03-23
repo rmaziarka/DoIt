@@ -97,7 +97,7 @@ function Build-SSDTDacpac {
         if (!$sqlProjs) {
             Write-Log -Critical "Cannot find any *.sqlproj file under '$sqlProjRoot'."
         }
-        Write-Log -Info "Setting version = '$Version' in files $($sqlProjs.Name -join ', ')."
+        Write-Log -Info "Setting version = '$Version' in file(s) $($sqlProjs.Name -join ', ')."
         foreach ($sqlProj in $sqlProjs) {
             Copy-Item -Path $sqlProj.FullName -Destination "$($sqlProj.FullName).bak" -Force
             Set-SSDTVersion -Path $sqlProj.FullName -Version $Version
@@ -115,7 +115,7 @@ function Build-SSDTDacpac {
     Build-MSBuild @msBuildParams
 
     if ($Version) {
-        Write-Log -_Debug "Restoring files $($sqlProjs.Name -join ', ')."
+        Write-Log -_Debug "Restoring file(s) $($sqlProjs.Name -join ', ')."
         foreach ($sqlProj in $sqlProjs) {
             Move-Item -Path "$($sqlProj.FullName).bak" -Destination $sqlProj.FullName -Force
         }
