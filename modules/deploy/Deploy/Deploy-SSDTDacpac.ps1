@@ -53,6 +53,9 @@ function Deploy-SSDTDacpac {
     https://msdn.microsoft.com/en-us/library/microsoft.sqlserver.dac.dacdeployoptions.aspx
     https://msdn.microsoft.com/en-us/library/hh550080%28v=vs.103%29.aspx
 
+    .PARAMETER SqlCmdVariables
+    Hashtable containing sqlcmd variables.
+
     .PARAMETER PackagePath
     Path to the package containing dacpac file(s). If not provided, $PackagePath = $PackagesPath\$PackageName, where $PackagesPath is taken from global variable.
 
@@ -93,6 +96,10 @@ function Deploy-SSDTDacpac {
         [Parameter(Mandatory=$false)]
         [object] 
         $DacDeployOptions,
+
+        [Parameter(Mandatory=$false)] 
+        [hashtable]
+        $SqlCmdVariables,
 
         [Parameter(Mandatory=$false)]
         [string] 
@@ -153,7 +160,6 @@ function Deploy-SSDTDacpac {
         Write-Log -Critical "TargetDatabase has not been specified. Please either pass `$TargetDatabase parameter or supply Initial Catalog in `$ConnectionString."
     }
 
-
     if (!$DacDeployOptions) {
         if ($PublishProfile) {
             Write-Log -Info "Using publish profile '$PublishProfile'."
@@ -162,9 +168,7 @@ function Deploy-SSDTDacpac {
             }
             $dacProfile = [Microsoft.SqlServer.Dac.DacProfile]::Load($PublishProfile)
             $DacDeployOptions = $dacProfile.DeployOptions
-            
         }
-
         $DacDeployOptions = New-Object -TypeName Microsoft.SqlServer.Dac.DacDeployOptions
     } elseif ($DacDeployOptions -is [hashtable]) {
         $newDacDeployOptions = New-Object -TypeName Microsoft.SqlServer.Dac.DacDeployOptions
@@ -174,6 +178,12 @@ function Deploy-SSDTDacpac {
         $DacDeployOptions = $newDacDeployOptions
     } elseif ($DacDeployOptions -isnot [Microsoft.SqlServer.Dac.DacDeployOptions]) {
         Write-Log -Critical "Unrecognized type of `$DacDeployOptions - $($DacDeployOptions.GetType())."
+    }
+
+    if ($SqlCmdVariables) {
+        foreach ($cmdVar in $SqlCmdVariables.GetEnumerator()) {
+            $DacDeployOptions.SqlCommandVariableValues[$cmdVar.Key] = $cmdVar.Value
+        }
     }
 
     $dacServices = New-Object -TypeName Microsoft.SqlServer.Dac.DacServices -ArgumentList $ConnectionString
