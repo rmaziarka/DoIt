@@ -53,6 +53,11 @@ function Deploy-SSDTDacpac {
     https://msdn.microsoft.com/en-us/library/microsoft.sqlserver.dac.dacdeployoptions.aspx
     https://msdn.microsoft.com/en-us/library/hh550080%28v=vs.103%29.aspx
 
+    .PARAMETER ForceRegisterDataTierApplication
+    Whether to register this .dacpac as data-tier application - see https://msdn.microsoft.com/en-us/library/ee210546.aspx.
+    When it's on, you can see deployed version of .dacpac in table msdb.dbo.sysdac_instances.
+    Note this is a convenience switch only - you could also switch it on by passing DacDeployOptions = { RegisterDataTierApplication = $true }.
+
     .PARAMETER SqlCmdVariables
     Hashtable containing sqlcmd variables.
 
@@ -96,6 +101,10 @@ function Deploy-SSDTDacpac {
         [Parameter(Mandatory=$false)]
         [object] 
         $DacDeployOptions,
+
+        [Parameter(Mandatory=$false)] 
+        [switch]
+        $ForceRegisterDataTierApplication = $true,
 
         [Parameter(Mandatory=$false)] 
         [hashtable]
@@ -173,7 +182,7 @@ function Deploy-SSDTDacpac {
     } elseif ($DacDeployOptions -is [hashtable]) {
         $newDacDeployOptions = New-Object -TypeName Microsoft.SqlServer.Dac.DacDeployOptions
         foreach ($option in $DacDeployOptions.GetEnumerator()) {
-            $newDacDeployOptions[$option.Key] = $option.Value
+            $newDacDeployOptions."$($option.Key)" = $option.Value
         }
         $DacDeployOptions = $newDacDeployOptions
     } elseif ($DacDeployOptions -isnot [Microsoft.SqlServer.Dac.DacDeployOptions]) {
@@ -184,6 +193,10 @@ function Deploy-SSDTDacpac {
         foreach ($cmdVar in $SqlCmdVariables.GetEnumerator()) {
             $DacDeployOptions.SqlCommandVariableValues[$cmdVar.Key] = $cmdVar.Value
         }
+    }
+
+    if ($ForceRegisterDataTierApplication) {
+        $DacDeployOptions.RegisterDataTierApplication = $true
     }
 
     $dacServices = New-Object -TypeName Microsoft.SqlServer.Dac.DacServices -ArgumentList $ConnectionString
