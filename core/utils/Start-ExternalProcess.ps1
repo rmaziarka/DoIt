@@ -119,19 +119,26 @@ function Start-ExternalProcess {
         $IgnoreOutputRegex
 	)
 
-    if ($WorkingDirectory -and ![System.IO.Path]::IsPathRooted($Command)) {
-        $commandPath = Join-Path -Path $WorkingDirectory -ChildPath $Command
-    } else {
-        $commandPath = $Command
-    }
+    $commandPath = $Command
+    if (!(Test-Path -Path $Command)) {
+        $exists = $false
 
-    if (!(Test-Path -Path $commandPath)) {
-        # check if $commandPath exist in PATH
-        $existsInPath = $env:PATH.Split(";") | Where-Object { $_ -and (Test-Path (Join-Path -Path $_ -ChildPath $commandPath)) }
+        if (![System.IO.Path]::IsPathRooted($commandPath)) {
+            # check if $Command exist in PATH
+            $exists = $env:PATH.Split(";") | Where-Object { $_ -and (Test-Path (Join-Path -Path $_ -ChildPath $commandPath)) }
 
-        if (!$existsInPath) {
+            if (!$exists -and $WorkingDirectory) {
+                $commandPath = Join-Path -Path $WorkingDirectory -ChildPath $commandPath
+                $exists = Test-Path -Path $commandPath
+                $commandPath = (Resolve-Path -Path $commandPath).Path
+            }
+        } 
+        
+        if (!$exists) {
             Write-Log -Critical "'$commandPath' cannot be found."
         }
+    } else {
+        $commandPath = (Resolve-Path -Path $commandPath).Path
     }
 
     if (!$Quiet) {
@@ -140,7 +147,7 @@ function Start-ExternalProcess {
 
 	$process = New-Object -TypeName System.Diagnostics.Process
 	$process.StartInfo.CreateNoWindow = $true
-	$process.StartInfo.FileName = $Command
+	$process.StartInfo.FileName = $commandPath
 	$process.StartInfo.UseShellExecute = $false
     $process.StartInfo.RedirectStandardOutput = $true
 	$process.StartInfo.RedirectStandardError = $true
