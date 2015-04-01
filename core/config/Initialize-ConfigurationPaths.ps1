@@ -144,7 +144,7 @@ function Initialize-ConfigurationPaths {
         }
     }
     if (!$configPaths.DeployConfigurationPath) {
-        Write-Log -Critical "Cannot find configuration scripts - tried following locations: $($pathsToCheck -join ', ')."
+        Write-Log -Warn "Cannot find configuration scripts - tried following locations: $($pathsToCheck -join ', ')."
     }
 
     $Global:PSCIGlobalConfiguration.ConfigurationPaths = $configPaths

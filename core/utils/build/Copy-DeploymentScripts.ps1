@@ -57,12 +57,14 @@ function Copy-DeploymentScripts {
     [void](Copy-Item -Path "${deployScriptsPath}\deploy.ps1" -Destination $OutputDeployScriptsPath -Force)
     [void](Copy-Item -Path "${deployScriptsPath}\*.bat" -Destination $OutputDeployScriptsPath -Force)
 
-    Write-Log -Info "Copying deployment configuration from '$deployConfigurationPath' to '$OutputDeployConfigurationPath'"
-    [void](New-Item -Path $OutputDeployConfigurationPath -ItemType Directory -Force)
-    [void](Copy-Item -Path "${deployConfigurationPath}\*" -Destination $OutputDeployConfigurationPath -Recurse -Force)
+    if ($deployConfigurationPath) {
+        Write-Log -Info "Copying deployment configuration from '$deployConfigurationPath' to '$OutputDeployConfigurationPath'"
+        [void](New-Item -Path $OutputDeployConfigurationPath -ItemType Directory -Force)
+        [void](Copy-Item -Path "${deployConfigurationPath}\*" -Destination $OutputDeployConfigurationPath -Recurse -Force)
 
-    # make sure that deployment and configuration scripts are editable inside of the package
-    Get-ChildItem -Path $OutputDeployScriptsPath -Recurse -File | ForEach-Object {
-        Disable-ReadOnlyFlag -Path $_.FullName
+        # make sure that deployment and configuration scripts are editable inside of the package
+        Get-ChildItem -Path $OutputDeployScriptsPath -Recurse -File | ForEach-Object {
+            Disable-ReadOnlyFlag -Path $_.FullName
+        }
     }
 }

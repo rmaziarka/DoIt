@@ -30,9 +30,18 @@ function Invoke-MsBuild {
     .PARAMETER ProjectPath
     Path to the project to build.
 
+    .PARAMETER RestoreNuGet
+    If true, 'nuget restore' will be explicitly run before building the project file.
+
     .PARAMETER MsBuildOptions
     An object created by New-MsBuildOptions function, which specifies msbuild options.
     If not provided, default msbuild options will be used.
+
+    .PARAMETER Version
+    Version number that will be written to the AssemblyInfo files.
+
+    .PARAMETER AssemblyInfoFilePaths
+    Paths to AssemblyInfo files which will have their version numbers updated.
 
     .PARAMETER LogExternalMessage
     If true, external progress message will be logged (this needs to be set to false when invoked internally).
@@ -49,8 +58,20 @@ function Invoke-MsBuild {
         $ProjectPath,
 
         [Parameter(Mandatory=$false)]
+        [switch]
+        $RestoreNuGet,
+
+        [Parameter(Mandatory=$false)]
         [PSObject]
         $MsBuildOptions,
+
+        [Parameter(Mandatory=$false)]
+        [string]
+        $Version,
+
+        [Parameter(Mandatory=$false)]
+        [string[]]
+        $AssemblyInfoFilePaths,
 
         [Parameter(Mandatory=$false)]
         [switch]
@@ -68,7 +89,20 @@ function Invoke-MsBuild {
     }
 
     $ProjectPath = Resolve-PathRelativeToProjectRoot -Path $ProjectPath
-                        
+
+    if ($Version) {
+        if (!$AssemblyInfoFilePaths) {
+            Write-Log -Critical "If version is set, the AssemblyInfoFiles parameter is required"
+        }
+
+        Set-AssemblyVersion -Path $AssemblyInfoFilePaths -Version $Version -VersionAttribute AssemblyVersion,AssemblyFileVersion -CreateBackup
+    }
+
+    if ($RestoreNuGet) {
+        Write-Log -Info "Restoring nuget packages for project '$ProjectPath'." -Emphasize
+        Start-NugetRestore -ProjectPath $ProjectPath
+    }
+         
     $Targets = $MsBuildOptions.Targets
     $Configuration = $MsBuildOptions.Configuration
     $MsBuildProperties = $MsBuildOptions.MsBuildProperties
@@ -131,7 +165,13 @@ function Invoke-MsBuild {
     # note: don't put [void] / Out-Null here as we need to write output
     Invoke-ExternalCommand -Command $cmd -DontCatchOutputStreams -ReturnLastExitCode:$false
     
+    if ($Version) {
+        Restore-AssemblyVersionBackups -Path $AssemblyInfoFilePaths
+    }
+
     if ($LogExternalMessage) { 
         Write-ProgressExternal -Message '' -ErrorMessage ''
     }
+
+    
 }

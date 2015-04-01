@@ -47,7 +47,7 @@ function Start-NugetRestore {
     if (!(Test-Path -Path $ProjectPath)) {
         Write-Log -Critical "Project file does not exist at '$ProjectPath'."
     }
-
+    
     $projectDir = Split-Path -Parent $ProjectPath
 
     $currentPath = $projectDir
@@ -62,7 +62,8 @@ function Start-NugetRestore {
     }
 
     if (!$nugetPath) {
-        Write-Log -Critical "Nuget.exe does not exist at '$currentPath\.nuget\nuget.exe' or any parent directory. Please ensure it's present there or remove line 'Build.RestoreNuGetPackages' from topology config."
+        Write-Log -Warn "Nuget.exe does not exist at '$projectDir\.nuget\nuget.exe' or any parent directory - using nuget distributed with PSCI."
+        $nugetPath = Get-PathToExternalLib -ModulePath 'nuget\nuget.exe'
     }
 
     $cmd = Add-QuotesToPaths -Paths $nugetPath
