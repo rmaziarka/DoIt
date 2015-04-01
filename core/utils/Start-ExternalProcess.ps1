@@ -120,7 +120,7 @@ function Start-ExternalProcess {
 	)
 
     $commandPath = $Command
-    if (!(Test-Path -Path $Command)) {
+    if (!(Test-Path -Path $commandPath)) {
         $exists = $false
 
         if (![System.IO.Path]::IsPathRooted($commandPath)) {
@@ -130,7 +130,7 @@ function Start-ExternalProcess {
             if (!$exists -and $WorkingDirectory) {
                 $commandPath = Join-Path -Path $WorkingDirectory -ChildPath $commandPath
                 $exists = Test-Path -Path $commandPath
-                $commandPath = (Resolve-Path -Path $commandPath).Path
+                $commandPath = (Resolve-Path -Path $commandPath).ProviderPath
             }
         } 
         
@@ -138,7 +138,7 @@ function Start-ExternalProcess {
             Write-Log -Critical "'$commandPath' cannot be found."
         }
     } else {
-        $commandPath = (Resolve-Path -Path $commandPath).Path
+        $commandPath = (Resolve-Path -Path $commandPath).ProviderPath
     }
 
     if (!$Quiet) {
