@@ -46,6 +46,9 @@ function Build-SqlScriptsPackage {
     .PARAMETER Exclude
     The files to be excluded from the package.
 
+    .PARAMETER Zip
+    If true, package will be compressed.
+
     .LINK
     Deploy-DBDeploySqlScriptsPackage
     Deploy-SqlPackage
@@ -72,31 +75,16 @@ function Build-SqlScriptsPackage {
 
         [Parameter(Mandatory=$false)]
         [string]
-        $Include = "*.sql",
+        $Include,
 
         [Parameter(Mandatory=$false)]
         [string]
-        $Exclude = $null
+        $Exclude,
+
+        [Parameter(Mandatory=$false)]
+        [switch]
+        $Zip
     )
 
-    Write-ProgressExternal -Message "Building package $PackageName"
-
-    $configPaths = Get-ConfigurationPaths
-
-    $ScriptsPath = Resolve-PathRelativeToProjectRoot `
-                    -Path $ScriptsPath `
-                    -ErrorMsg "Sql scripts directory '$ScriptsPath' does not exist (package '$PackageName'). Tried following absolute path: '{0}'."
-
-    $OutputPath = Resolve-PathRelativeToProjectRoot `
-                            -Path $OutputPath `
-                            -DefaultPath (Join-Path -Path $configPaths.PackagesPath -ChildPath $PackageName) `
-                            -CheckExistence:$false
-    
-    [void](New-Item -Path $OutputPath -ItemType Directory)
-
-    Write-Log -Info "Copying SQL scripts from $ScriptsPath."
-
-    [void](Copy-Item -Path "$ScriptsPath\*.*" -Include $Include -Exclude $Exclude -Destination $OutputPath)
-
-    Write-ProgressExternal -Message ''
+    Build-DirPackage -PackageName $PackageName -SourcePath $ScriptsPath -OutputPath $OutputPath -Include $Include -Exclude $Exclude -Zip:$Zip
 }

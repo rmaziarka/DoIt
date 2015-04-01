@@ -88,6 +88,6 @@ function Get-DscResourcesPaths {
         }))
     }
 
-    return $result
+    return ,($result)
    
 }
