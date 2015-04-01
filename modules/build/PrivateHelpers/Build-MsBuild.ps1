@@ -109,19 +109,6 @@ function Build-MsBuild {
                         -DefaultPath (Join-Path -Path $projectRootPath -ChildPath "$packageName\${packageName}.sln") `
                         -ErrorMsg "Project file '$projectPath' does not exist (package '$packageName'). Tried following absolute path: '{0}'."
 
-    if($Version) {
-        if (!$AssemblyInfoFilePaths) {
-            Write-Log -Critical "If version is set, the AssemblyInfoFiles parameter is required"
-        }
-
-        Set-AssemblyVersion -Path $AssemblyInfoFilePaths -Version $Version -VersionAttribute AssemblyVersion,AssemblyFileVersion -CreateBackup
-    }
-
-    if ($restoreNuGet) {
-        Write-Log -Info "Restoring nuget packages for package '$packageName'." -Emphasize
-        Start-NugetRestore -ProjectPath $projectPath
-    }
-
     $newMsBuildOptions = New-MsBuildOptions -BasedOn $MsBuildOptions
 
     foreach ($defaultProp in $MsBuildPackageOptions.GetEnumerator()) {
@@ -132,11 +119,7 @@ function Build-MsBuild {
 
     Write-Log -Info "Building package '$PackageName'." -Emphasize
 
-    Invoke-MsBuild -ProjectPath $projectPath -MsBuildOptions $newMsBuildOptions -LogExternalMessage:$false
-
-    if($Version) {
-        Restore-AssemblyVersionBackups -Path $AssemblyInfoFilePaths
-    }
+    Invoke-MsBuild -ProjectPath $projectPath -RestoreNuGet:$RestoreNuGet -MsBuildOptions $newMsBuildOptions -Version $Version -AssemblyInfoFilePaths $AssemblyInfoFilePaths -LogExternalMessage:$false
 
     Write-ProgressExternal -Message ""
 }
