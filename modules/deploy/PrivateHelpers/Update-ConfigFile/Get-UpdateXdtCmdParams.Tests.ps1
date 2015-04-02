@@ -25,7 +25,7 @@ SOFTWARE.
 Import-Module -Name "$PSScriptRoot\..\..\..\..\PSCI.psm1"
 
 Describe -Tag "PSCI.unit" "Get-UpdateXdtCmdParams" {
-    InModuleScope PSCI.teamcityExtensions {
+    InModuleScope PSCI.deploy {
 
         $testFileName = 'Get-UpdateXdtCmdParams.test'
 

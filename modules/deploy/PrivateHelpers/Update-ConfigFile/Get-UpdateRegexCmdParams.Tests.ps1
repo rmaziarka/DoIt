@@ -25,7 +25,7 @@ SOFTWARE.
 Import-Module -Name "$PSScriptRoot\..\..\..\..\PSCI.psm1"
 
 Describe -Tag "PSCI.unit" "Get-UpdateRegexCmdParams" {
-    InModuleScope PSCI.teamcityExtensions {
+    InModuleScope PSCI.deploy {
     
         $testFileName = 'Get-UpdateRegexCmdParams.test'
 
