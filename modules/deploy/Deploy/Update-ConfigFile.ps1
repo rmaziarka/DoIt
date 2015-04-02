@@ -102,8 +102,6 @@ function Update-ConfigFile {
         $ConnectionParameters
     )
 
-    $configPaths = Get-ConfigurationPaths
-
     $resolvedConfigFiles = @()
     foreach ($configFile in $ConfigFiles) { 
         $resolvedConfigFiles += Resolve-PathRelativeToProjectRoot -Path $configFile -ErrorMsg "Cannot find config file '{0}'."
