@@ -49,6 +49,7 @@ Export-ModuleMember -Function `
     Deploy-SSRSReportsByVisualStudio, `
     Deploy-SSRSReportsByWebService, `
     Install-DscResources, `
+    Update-ConfigFile, `
     Update-TokensInAllFiles, `
     Update-TokensInZipFile, `
     Sync-MsDeployDirectory, `
