@@ -22,14 +22,14 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 #>
 
-Import-Module -Name "$PSScriptRoot\..\..\..\..\PSCI.psm1"
+Import-Module -Name "$PSScriptRoot\..\..\..\..\PSCI.psm1" -Force
 
 Describe -Tag "PSCI.unit" "Get-UpdateXmlAppKeyCmdParams" {
     InModuleScope PSCI.deploy {
 
         $testFileName = 'Get-UpdateXmlAppKeyCmdParams.test'
 
-        function New-TestFile {
+        function New-TestFileAppSettings {
             Set-Content -Path $testFileName -Value @'
 <?xml version="1.0"?>
 <configuration>
@@ -44,14 +44,30 @@ Describe -Tag "PSCI.unit" "Get-UpdateXmlAppKeyCmdParams" {
 '@
         }
 
-        Context "when supplied a file with multiple keys" {
-            It "should properly update the file" {
+       function New-TestFileConnectionStrings {
+            Set-Content -Path $testFileName -Value @'
+<?xml version="1.0"?>
+<configuration>
+  <connectionStrings>
+    <add name="key1" connectionString="value1" providerName="System.Data.SqlClient" />
+    <add name="key2" connectionString="&amp;" />
+    <add name="key3" connectionString="" />
+    <add name="key4" connectionString="value4" />
+    <add name="key5" connectionString="value5" />
+  </connectionStrings>
+</configuration>
+'@
+        }
 
+        Context "when ConfigType = XmlAppKey and supplied a file with multiple keys" {
+            It "should properly update the file" {
+                    
                 try { 
-                    New-TestFile
+                    New-TestFileAppSettings
+                    $testFileName = (Resolve-Path -Path $testFileName).ProviderPath
                     $configValues = @('key1=newValue1', 'key2=c:\x\z', 'key3=&', 'key4=value4', 'keyNew=newValue')
 
-                    $params = Get-UpdateXmlAppKeyCmdParams -ConfigFiles $testFileName -ConfigValues $configValues
+                    $params = Get-UpdateXmlAppKeyCmdParams -ConfigType 'XmlAppKey' -ConfigFiles $testFileName -ConfigValues $configValues
                     $result = Invoke-Command @params
                     Write-Host $result
 
@@ -76,7 +92,7 @@ Describe -Tag "PSCI.unit" "Get-UpdateXmlAppKeyCmdParams" {
                     $result[1] | Should Match "Key 'key2' - value set to 'c:\\x\\z'"
                     $result[2] | Should Match "Key 'key3' - value set to '&'"
                     $result[3] | Should Match "Key 'key4' - value is already 'value4'"
-                    $result[4] | Should Match "Key 'keyNew' not found - adding with value 'newValue'"
+                    $result[4] | Should Match "Key 'keyNew' not found under /configuration/appSettings - adding with value 'newValue'"
 
                 } finally {
                     Remove-Item -Path $testFileName -Force -ErrorAction SilentlyContinue
@@ -85,12 +101,74 @@ Describe -Tag "PSCI.unit" "Get-UpdateXmlAppKeyCmdParams" {
             }
         }
 
-        Context "when FailIfCannotMatch=true and cannot match" {
+        Context "when when ConfigType = XmlAppKey and FailIfCannotMatch=true and cannot match" {
 
             It "should fail" {
                 try {
-                    New-TestFile
-                    $params = Get-UpdateXmlAppKeyCmdParams -ConfigFiles $testFileName -ConfigValues 'keyNotFound=test' -FailIfCannotMatch
+                    New-TestFileAppSettings
+                    $params = Get-UpdateXmlAppKeyCmdParams -ConfigType 'XmlAppKey' -ConfigFiles $testFileName -ConfigValues 'keyNotFound=test' -FailIfCannotMatch
+                    try { 
+                        Invoke-Command @params 
+                    } catch {
+                        Write-Host $_
+                        return
+                    }
+                    0 | Should Be 1
+                } finally {
+                    Remove-Item -Path $testFileName -Force -ErrorAction SilentlyContinue
+                }
+            }
+        }
+
+        Context "when ConfigType = XmlConnectionString and supplied a file with multiple keys" {
+            It "should properly update the file" {
+
+                try { 
+                    New-TestFileConnectionStrings
+                    $testFileName = (Resolve-Path -Path $testFileName).ProviderPath
+                    $configValues = @('key1=newValue1', 'key2=c:\x\z', 'key3=&', 'key4=value4', 'keyNew=newValue')
+
+                    $params = Get-UpdateXmlAppKeyCmdParams -ConfigType 'XmlConnectionString' -ConfigFiles $testFileName -ConfigValues $configValues
+                    $result = Invoke-Command @params
+                    Write-Host $result
+
+
+                    $content = [IO.File]::ReadAllText($testFileName)
+                        $content | Should Be @'
+<?xml version="1.0"?>
+<configuration>
+  <connectionStrings>
+    <add name="key1" connectionString="newValue1" providerName="System.Data.SqlClient" />
+    <add name="key2" connectionString="c:\x\z" />
+    <add name="key3" connectionString="&amp;" />
+    <add name="key4" connectionString="value4" />
+    <add name="key5" connectionString="value5" />
+    <add name="keyNew" connectionString="newValue" />
+  </connectionStrings>
+</configuration>
+'@
+
+                    $result | Should Not Be $null
+                    $result.Count | Should Be 6
+                    $result[0] | Should Match "name 'key1' - connectionString set to 'newValue1'"
+                    $result[1] | Should Match "name 'key2' - connectionString set to 'c:\\x\\z'"
+                    $result[2] | Should Match "name 'key3' - connectionString set to '&'"
+                    $result[3] | Should Match "name 'key4' - connectionString is already 'value4'"
+                    $result[4] | Should Match "name 'keyNew' not found under /configuration/connectionStrings - adding with connectionString 'newValue'"
+
+                } finally {
+                    Remove-Item -Path $testFileName -Force -ErrorAction SilentlyContinue
+                }
+
+            }
+        }
+
+        Context "when when ConfigType = XmlConnectionString and FailIfCannotMatch=true and cannot match" {
+
+            It "should fail" {
+                try {
+                    New-TestFileConnectionStrings
+                    $params = Get-UpdateXmlAppKeyCmdParams -ConfigType 'XmlConnectionString' -ConfigFiles $testFileName -ConfigValues 'keyNotFound=test' -FailIfCannotMatch
                     try { 
                         Invoke-Command @params 
                     } catch {

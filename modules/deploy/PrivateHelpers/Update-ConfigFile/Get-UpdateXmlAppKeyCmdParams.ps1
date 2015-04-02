@@ -28,6 +28,9 @@ function Get-UpdateXmlAppKeyCmdParams {
     .SYNOPSIS
     A helper for Update-ConfigFile function that returns scriptblock for ConfigType = XmlAppKey.
     
+    .PARAMETER ConfigType
+    Type of xml entry to update - 'appSettings/add key' or 'connectionStrings/add name'.
+
     .PARAMETER ConfigFiles
     List of configuration file names to update.
 
@@ -46,6 +49,11 @@ function Get-UpdateXmlAppKeyCmdParams {
     [OutputType([scriptblock])]
     param(
         [Parameter(Mandatory=$true)]
+        [string]
+        [ValidateSet('XmlAppKey', 'XmlConnectionString')]
+        $ConfigType,
+
+        [Parameter(Mandatory=$true)]
         [string[]]
         $ConfigFiles,
 
@@ -60,11 +68,21 @@ function Get-UpdateXmlAppKeyCmdParams {
 
     $configValuesMatches = Get-KeyValueMatches -ConfigValues $ConfigValues
 
+    if ($ConfigType -eq 'XmlAppKey') {
+        $nodeToMatch = '/configuration/appSettings'
+        $keyValueAttr = @('key', 'value')
+    } elseif ($ConfigTYpe -eq 'XmlConnectionString') {
+        $nodeToMatch = '/configuration/connectionStrings'
+        $keyValueAttr = @('name', 'connectionString')
+    } else {
+        Write-Log -Critical "Not implemented"
+    }
+
     $result = @{}
 
     $result.ScriptBlock = {
         
-        param($ConfigFiles, $ConfigValuesMatches, $FailIfCannotMatch)
+        param($ConfigFiles, $ConfigValuesMatches, $FailIfCannotMatch, $NodeToMatch, $KeyValueAttr)
 
         $Global:ErrorActionPreference = 'Stop'
         foreach ($configFileName in $ConfigFiles) {
@@ -78,29 +96,31 @@ function Get-UpdateXmlAppKeyCmdParams {
     
             $needSaving = $false
             foreach ($match in $configValuesMatches) {
-                $node = $config.SelectSingleNode("/configuration/appSettings/add[@key=`"$($match.Key)`"]")
+                $keyAttr = $KeyValueAttr[0]
+                $valueAttr = $KeyValueAttr[1]
+                $node = $config.SelectSingleNode("$NodeToMatch/add[@${keyAttr}=`"$($match.Key)`"]")
                 if (!$node) {
                     if ($FailIfCannotMatch) {
-                        throw "Key '$($match.Key)' not found under configuration/appSettings/add (file '$configFileName')."
+                        throw "$keyAttr '$($match.Key)' not found under $NodeToMatch/add (file '$configFileName')."
                     } else {
-                        Write-Output -InputObject "Key '$($match.key)' not found - adding with value '$($match.Value)'."
-                        $appSettings = $config.SelectSingleNode("/configuration/appSettings")
-                        if (!$appSettings) {
-                            throw "/configuration/appSettings node not found in file '$configFileName' - please ensure it exists."
+                        Write-Output -InputObject "$keyAttr '$($match.key)' not found under $NodeToMatch - adding with $valueAttr '$($match.Value)'."
+                        $nodeXml = $config.SelectSingleNode($NodeToMatch)
+                        if (!$nodeXml) {
+                            throw "$NodeToMatch node not found in file '$configFileName' - please ensure it exists."
                         }
-                        $node = $config.CreateElement("add")
-                        $node.SetAttribute('key', $match.Key)
-                        $node.SetAttribute('value', $match.Value)
-                        [void]$appSettings.appendChild($node)
+                        $node = $config.CreateElement('add')
+                        $node.SetAttribute($keyAttr, $match.Key)
+                        $node.SetAttribute($valueAttr, $match.Value)
+                        [void]$nodeXml.appendChild($node)
                         $needSaving = $true
                     }
                 } else {
-                    if ($node.value -eq $match.Value) {
-                        Write-Output -InputObject "Key '$($match.Key)' - value is already '$($match.Value)'."
+                    if ($node.$valueAttr -eq $match.Value) {
+                        Write-Output -InputObject "$keyAttr '$($match.Key)' - $valueAttr is already '$($match.Value)'."
                     } else { 
-                        $node.value = $match.Value
+                        $node.$valueAttr = $match.Value
                         $needSaving = $true
-                        Write-Output -InputObject "Key '$($match.Key)' - value set to '$($match.Value)'."
+                        Write-Output -InputObject "$keyAttr '$($match.Key)' - $valueAttr set to '$($match.Value)'."
                     }
                 }
             }
@@ -112,7 +132,7 @@ function Get-UpdateXmlAppKeyCmdParams {
         }  
     }
 
-    $result.ArgumentList = @($ConfigFiles, $ConfigValuesMatches, $FailIfCannotMatch)
+    $result.ArgumentList = @($ConfigFiles, $ConfigValuesMatches, $FailIfCannotMatch, $nodeToMatch, $keyValueAttr)
 
     return $result
 }
