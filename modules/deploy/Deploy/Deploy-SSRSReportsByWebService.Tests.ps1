@@ -36,6 +36,7 @@ Describe -Tag "PSCI.integration" "Deploy-SSRSReportsByWebService " {
         Context "when deploying SSRS project file" { 
             Mock Test-Path { return $true }
             Mock Get-ConfigurationPaths { return @{ PackagesPath = '.' }}
+            Mock Resolve-PathRelativeToProjectRoot { return "." }
             Mock New-SSRSCatalogItem {}
             Mock New-SSRSFolder {}
             Mock Set-SSRSItemDataSources {}
