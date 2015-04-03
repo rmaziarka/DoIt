@@ -102,9 +102,15 @@ function Update-ConfigFile {
         $ConnectionParameters
     )
 
-    $resolvedConfigFiles = @()
-    foreach ($configFile in $ConfigFiles) { 
-        $resolvedConfigFiles += Resolve-PathRelativeToProjectRoot -Path $configFile -ErrorMsg "Cannot find config file '{0}'."
+    if ($ConnectionParameters.Nodes) {
+        $computerNamesLog = $ConnectionParameters.Nodes
+        $resolvedConfigFiles = $ConfigFiles
+    } else {
+        $computerNamesLog = ([system.environment]::MachineName)
+        $resolvedConfigFiles = @()
+        foreach ($configFile in $ConfigFiles) { 
+            $resolvedConfigFiles += Resolve-PathRelativeToProjectRoot -Path $configFile -ErrorMsg "Cannot find config file '{0}'."
+        }
     }
 
     if ($ConfigType -eq 'XmlAppKey' -or $ConfigType -eq 'XmlConnectionString') {
@@ -123,11 +129,7 @@ function Update-ConfigFile {
         }
     }
 
-    if ($ConnectionParameters.Nodes) {
-        $computerNamesLog = $ConnectionParameters.Nodes
-    } else {
-        $computerNamesLog = ([system.environment]::MachineName)
-    }
+
 
     if ($ConnectionParameters) {
         $cmdParams += $ConnectionParameters.PSSessionParams
