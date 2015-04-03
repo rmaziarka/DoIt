@@ -136,7 +136,8 @@ function Update-ConfigFile {
     }
 
     Write-Log -Info ('Updating file(s) {0} on server(s) {1}' -f ($resolvedConfigFiles -join ', '), ($ComputerNamesLog -join ', ')) 
-    Invoke-Command @cmdParams
+    $output = Invoke-Command @cmdParams
+    Write-Log -_Debug $output
     if ($LASTEXITCODE) {
         Write-Log -Critical "Failed to update files $WebConfigFiles"
     }

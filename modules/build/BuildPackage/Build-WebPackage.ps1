@@ -104,10 +104,12 @@ function Build-WebPackage {
 
     $params = $PSBoundParameters
 
+    $packageNameLeaf = Split-Path -Path $PackageName -Leaf
+
     $configPaths = Get-ConfigurationPaths
     $OutputPath = Resolve-PathRelativeToProjectRoot `
                             -Path $OutputPath `
-                            -DefaultPath (Join-Path -Path (Join-Path -Path $configPaths.PackagesPath -ChildPath $PackageName) -ChildPath "${PackageName}.zip") `
+                            -DefaultPath (Join-Path -Path (Join-Path -Path $configPaths.PackagesPath -ChildPath $PackageName) -ChildPath "${packageNameLeaf}.zip") `
                             -CheckExistence:$false
     
     [void]($params.Remove('AutoParameterizeConnectionStrings'))
