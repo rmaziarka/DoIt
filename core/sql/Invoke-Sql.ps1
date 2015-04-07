@@ -139,7 +139,7 @@ function Invoke-Sql {
 
     if ($InputFile) {
         foreach ($file in $Inputfile) { 
-            if (!(Test-Path -Path $file)) { 
+            if (!(Test-Path -LiteralPath $file)) { 
                 Write-Log -Critical "$InputFile does not exist. Current directory: $(Get-Location)"
             }
         }
@@ -179,7 +179,7 @@ function Invoke-Sql {
 
         [void]($params.Remove('Query'))
         foreach ($file in $InputFile) {
-            $file = (Resolve-Path -Path $file).ProviderPath
+            $file = (Resolve-Path -LiteralPath $file).ProviderPath
             $params['InputFile'] = $file
             Write-Log -_Debug "Running sql file '$file' at $targetLog using sqlcmd"
             Invoke-SqlSqlcmd @params
@@ -199,9 +199,9 @@ function Invoke-Sql {
         }
 
         foreach ($file in $InputFile) {
-            $file = (Resolve-Path -Path $file).ProviderPath
+            $file = (Resolve-Path -LiteralPath $file).ProviderPath
             Write-Log -_Debug "Running sql file '$file' at $targetLog using .Net"
-            $params['Query'] = Get-Content -Path $file -ReadCount 0 | Out-String
+            $params['Query'] = Get-Content -LiteralPath $file -ReadCount 0 | Out-String
             Invoke-SqlDotNet @params
         }
     } else {
