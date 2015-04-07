@@ -42,6 +42,9 @@ function New-SSRSDataSource {
     .PARAMETER Overwrite
         [Optional] TRUE to overwrite existing data source; FALSE otherwise. Defaults to TRUE.
 
+    .PARAMETER DataSourceDefinition
+        A data source definition created with New-SSRSDataSourceDefinition. If specified, it will override default settings.
+
     .EXAMPLE
         $Proxy = New-SSRSWebServiceProxy -Uri "http://localhost/reportserver"
         $RdsPath = "C:\Projects\JiraReports\git\JiraReporting.git\JiraReporting.Reports\jiradb.rds"
@@ -67,7 +70,11 @@ function New-SSRSDataSource {
 
         [parameter(Mandatory=$false)]
         [bool]
-        $Overwrite = $true
+        $Overwrite = $true,
+
+        [parameter(Mandatory=$false)]
+        [hashtable]
+        $DataSourceDefinition
     )
     
     Write-Log -Info "Creating SSRS data source '$RdsPath' at '$Folder', overwrite '$Overwrite'"
@@ -86,6 +93,13 @@ function New-SSRSDataSource {
 
     if ($IntegratedSecurity -and [Convert]::ToBoolean($ConnProps.IntegratedSecurity)) {
         $Definition.CredentialRetrieval = 'Integrated'
+    }
+
+    if ($DataSourceDefinition) {
+        foreach ($key in $DataSourceDefinition.Keys) {
+            Write-Log -_Debug "Setting $key = $($DataSourceDefinition[$key])"
+            $Definition.$key = $DataSourceDefinition[$key]
+        }
     }
     
     $DataSource = New-Object -TypeName PSObject -Property @{

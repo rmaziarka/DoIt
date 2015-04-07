@@ -57,6 +57,7 @@ Export-ModuleMember -Function `
     New-EventLogSource, `
     New-SSRSDataSet, `
     New-SSRSDataSource, `
+    New-SSRSDataSourceDefinition, `
     New-SSRSResource, `
     New-SSRSFolder, `
     New-SSRSWebServiceProxy, `
