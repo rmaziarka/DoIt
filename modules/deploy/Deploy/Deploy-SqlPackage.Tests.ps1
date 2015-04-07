@@ -108,6 +108,23 @@ Describe -Tag "PSCI.unit" "Deploy-SqlPackage" {
                 Remove-SqlTestPackage
             }
         }
+
+        Context "when invoked with Exclude" {
+            try { 
+                New-SqlTestPackage
+                $global:sqlsInvoked = @()
+                Deploy-SqlPackage -PackageName 'sqls' -ConnectionString 'test' -Exclude @('test10.sql', 'dir1\\test1.sql')
+
+                It "should not invoke excluded sqls" {
+            	    $global:sqlsInvoked.Count | Should Be 2
+                    $global:sqlsInvoked[0] | Should Be (Resolve-Path -Path 'sqls\dir1\test2.sql').ProviderPath
+                    $global:sqlsInvoked[1] | Should Be (Resolve-Path -Path 'sqls\dir2\test1.sql').ProviderPath
+                    
+                }
+            } finally {
+                Remove-SqlTestPackage
+            }
+        }
         
     }
 }

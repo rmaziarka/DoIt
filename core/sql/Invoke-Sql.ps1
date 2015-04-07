@@ -60,8 +60,9 @@ function Invoke-Sql {
     .PARAMETER Credential
     Credential to impersonate in Integrated Security mode.
 
-    .PARAMETER IgnoreInitialCatalog
-    If $true, InitialCatalog will be removed from ConnectionString (if present).
+    .PARAMETER DatabaseName
+    Database name to use, regardless of Initial Catalog settings in connection string.
+    Can also be used to remove database name from connection string (when passed empty string).
 
     .OUTPUTS
     String if Mode = sqlcmd.
@@ -117,8 +118,8 @@ function Invoke-Sql {
         $Credential,
 
         [Parameter(Mandatory=$false)]
-        [switch] 
-        $IgnoreInitialCatalog
+        [string] 
+        $DatabaseName
     ) 
 
     if (!$Mode) {
@@ -147,8 +148,8 @@ function Invoke-Sql {
       
     $csb = New-Object -TypeName System.Data.SqlClient.SqlConnectionStringBuilder -ArgumentList $ConnectionString
 
-    if ($IgnoreInitialCatalog -and $csb.InitialCatalog) {
-        $csb.set_InitialCatalog('')
+    if ($PSBoundParameters.ContainsKey('DatabaseName')) {
+        $csb.set_InitialCatalog($DatabaseName)
     }
 
     $params = @{

@@ -67,10 +67,10 @@ function Update-SqlUser {
         Username = $Username 
         DatabaseName = $DatabaseName
     }
-    [void](Invoke-Sql -ConnectionString $ConnectionString -InputFile $sqlScript -SqlCmdVariables $parameters -IgnoreInitialCatalog)
+    [void](Invoke-Sql -ConnectionString $ConnectionString -InputFile $sqlScript -SqlCmdVariables $parameters -DatabaseName '')
 
     $sqlScript = Join-Path -Path $PSScriptRoot -ChildPath 'Update-SqlUserRole.sql'
     foreach ($role in $DbRoles) {
-        [void](Invoke-Sql -ConnectionString $connectionString -InputFile $sqlScript -SqlCmdVariables @{ Username = $Username; DatabaseName = $DatabaseName; Role = $role } -IgnoreInitialCatalog)
+        [void](Invoke-Sql -ConnectionString $connectionString -InputFile $sqlScript -SqlCmdVariables @{ Username = $Username; DatabaseName = $DatabaseName; Role = $role } -DatabaseName '')
     }
 }

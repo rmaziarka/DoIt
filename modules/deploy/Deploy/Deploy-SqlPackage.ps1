@@ -40,6 +40,13 @@ function Deploy-SqlPackage {
     .PARAMETER SqlDirectories
     Paths to directories containing sql files (relative to $PackagePath). If not provided, $PackagePath will be used.
 
+    .PARAMETER Exclude
+    List of regexes that will be used to exclude filenames.
+
+    .PARAMETER DatabaseName
+    Database name to use, regardless of Initial Catalog settings in connection string.
+    Can also be used to remove database name from connection string (when passed empty string).
+
     .PARAMETER PackagePath
     Path to the package containing sql files. If not provided, $PackagePath = $PackagesPath\$PackageName, where $PackagesPath is taken from global variable.
 
@@ -81,6 +88,14 @@ function Deploy-SqlPackage {
         [Parameter(Mandatory=$false)]
         [string[]] 
         $SqlDirectories,
+
+        [Parameter(Mandatory=$false)]
+        [string[]] 
+        $Exclude,
+
+        [Parameter(Mandatory=$false)] 
+        [string]
+        $DatabaseName,
 
         [Parameter(Mandatory=$false)]
         [string] 
@@ -134,6 +149,17 @@ function Deploy-SqlPackage {
 		}
 	}
 
+    if ($Exclude) { 
+        $sqlPaths = $sqlPaths | Where-Object -FilterScript { 
+            foreach ($regex in $Exclude) {
+                if ($_ -imatch $regex) {
+                    return $false
+                }
+            }
+            return $true
+        }
+    }
+
     if ($CustomSortOrder) {
         $sqlPaths = $sqlPaths | Sort-Object -Property @{ Expression = { 
             $fileName = $_
@@ -165,6 +191,9 @@ function Deploy-SqlPackage {
         }
         if ($SqlCmdVariables) {
             $params.SqlCmdVariables = $SqlCmdVariables
+        }
+        if ($PSBoundParameters.ContainsKey('DatabaseName')) {
+            $params.DatabaseName = $DatabaseName
         }
         Invoke-Sql @params
     }

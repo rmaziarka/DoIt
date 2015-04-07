@@ -87,10 +87,10 @@ function Update-SqlLogin {
         WindowsAuthentication = $WinAuth
     }
 
-   [void](Invoke-Sql -ConnectionString $connectionString -InputFile $sqlScript -SqlCmdVariables $parameters -IgnoreInitialCatalog)
+   [void](Invoke-Sql -ConnectionString $connectionString -InputFile $sqlScript -SqlCmdVariables $parameters -DatabaseName '')
 
    $sqlScript = Join-Path -Path $PSScriptRoot -ChildPath 'Update-SqlLoginRole.sql'
    foreach ($role in $ServerRoles) {
-     [void](Invoke-Sql -ConnectionString $connectionString -InputFile $sqlScript -SqlCmdVariables @{ Username = $Username; Role = $role } -IgnoreInitialCatalog)
+     [void](Invoke-Sql -ConnectionString $connectionString -InputFile $sqlScript -SqlCmdVariables @{ Username = $Username; Role = $role } -DatabaseName '')
    }
 }

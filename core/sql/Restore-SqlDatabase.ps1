@@ -97,7 +97,7 @@ function Restore-SqlDatabase {
         $sqlScript = Join-Path -Path $PSScriptRoot -ChildPath "Restore-SqlDatabase.sql"
         $parameters =  @{ "DatabaseName" = $DatabaseName }
         $parameters += @{ "Path" = $Path }
-        [void](Invoke-Sql -ConnectionString $ConnectionString -InputFile $sqlScript -SqlCmdVariables $parameters -Credential $Credential -QueryTimeoutInSeconds $QueryTimeoutInSeconds -IgnoreInitialCatalog)
+        [void](Invoke-Sql -ConnectionString $ConnectionString -InputFile $sqlScript -SqlCmdVariables $parameters -Credential $Credential -QueryTimeoutInSeconds $QueryTimeoutInSeconds -DatabaseName '')
     } finally {
         if ($RemoteShareCredential) {
             Disconnect-Share -Path $shareDir
