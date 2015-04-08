@@ -42,8 +42,6 @@ function Start-NugetRestore {
         $ProjectPath
     )
 
-    Write-ProgressExternal -Message 'Running Nuget restore' -ErrorMessage 'Nuget restore error'
-
     if (!(Test-Path -Path $ProjectPath)) {
         Write-Log -Critical "Project file does not exist at '$ProjectPath'."
     }
@@ -71,5 +69,4 @@ function Start-NugetRestore {
 
     [void](Invoke-ExternalCommand -Command $cmd)
     
-    Write-ProgressExternal -Message '' -ErrorMessage ''
 }
