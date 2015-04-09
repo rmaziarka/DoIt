@@ -113,6 +113,15 @@ function New-SSRSDataSourceDefinition {
     foreach ($key in $PSBoundParameters.Keys) {
         $result[$key] = $PSBoundParameters[$key]
     }
+    if (!$Extension) {
+        $result.Remove('Extension')
+    }
+    if (!$UserName) {
+        $result.Remove('UserName')
+    }
+    if (!$Password) {
+        $result.Remove('Password')
+    }
 
     return $result
 }
