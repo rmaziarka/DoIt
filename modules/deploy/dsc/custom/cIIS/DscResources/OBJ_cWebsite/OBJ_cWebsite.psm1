@@ -40,7 +40,12 @@ function Get-TargetResource
         if (!(Get-Module -Name WebAdministration -ErrorAction SilentlyContinue)) {
             Import-Module -Name WebAdministration -Verbose:$false
         }
-        $Website = Get-Item "IIS:\sites\$Name" -ErrorAction SilentlyContinue
+        try { 
+            $Website = Get-Item "IIS:\sites\$Name" -ErrorAction SilentlyContinue
+        } catch {
+            # Workaround for 2008 R2 issue - see http://stevenmaglio.blogspot.com/2014/11/webadministration-not-loaded-correctly.html
+            $Website = Get-Item "IIS:\sites\$Name" -ErrorAction SilentlyContinue
+        }
 
         if ($Website.count -eq 0) # No Website exists with this name.
         {
@@ -144,7 +149,12 @@ function Set-TargetResource
             # Without explicit Import-Module on 2008 R2, Get-Item "IIS:\..." sometimes returns "a drive with the name iis does not exist"
             Import-Module -Name WebAdministration -Verbose:$false
         }
-        $website = Get-Item "IIS:\sites\$Name" -ErrorAction SilentlyContinue
+        try { 
+            $Website = Get-Item "IIS:\sites\$Name" -ErrorAction SilentlyContinue
+        } catch {
+            # Workaround for 2008 R2 issue - see http://stevenmaglio.blogspot.com/2014/11/webadministration-not-loaded-correctly.html
+            $Website = Get-Item "IIS:\sites\$Name" -ErrorAction SilentlyContinue
+        }
 
         if($website -ne $null)
         {
@@ -337,7 +347,12 @@ function Set-TargetResource
             if (!(Get-Module -Name WebAdministration -ErrorAction SilentlyContinue)) {
                 Import-Module -Name WebAdministration -Verbose:$false
             }
-            $website = Get-Item "IIS:\sites\$Name" -ErrorAction SilentlyContinue
+            try { 
+               $website = Get-Item "IIS:\sites\$Name" -ErrorAction SilentlyContinue
+            } catch {
+               # Workaround for 2008 R2 issue - see http://stevenmaglio.blogspot.com/2014/11/webadministration-not-loaded-correctly.html
+               $website = Get-Item "IIS:\sites\$Name" -ErrorAction SilentlyContinue
+            }
 
             if($website -ne $null)
             {
@@ -402,7 +417,12 @@ function Test-TargetResource
     if (!(Get-Module -Name WebAdministration -ErrorAction SilentlyContinue)) {
         Import-Module -Name WebAdministration -Verbose:$false
     }
-    $website = Get-Item "IIS:\sites\$Name" -ErrorAction SilentlyContinue
+   try { 
+        $website = Get-Item "IIS:\sites\$Name" -ErrorAction SilentlyContinue
+    } catch {
+        # Workaround for 2008 R2 issue - see http://stevenmaglio.blogspot.com/2014/11/webadministration-not-loaded-correctly.html
+        $website = Get-Item "IIS:\sites\$Name" -ErrorAction SilentlyContinue
+    }
 
     $Stop = $true
 
