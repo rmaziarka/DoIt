@@ -22,51 +22,46 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 #>
 
-function Start-NugetRestore {
+function Get-KeyValueMatches {
+
     <#
     .SYNOPSIS
-    Runs nuget restore for given project.
+    A helper for Get-update* functions that matches input string array with key=value.
 
-    .PARAMETER ProjectPath
-    Path to the project file.
+    .DESCRIPTION
+    Returns array of PSCustomObjects, each having properties Key, Value and Line.
+    
+    .PARAMETER ConfigValues
+    Input string array to match.
 
     .EXAMPLE
-    Start-NugetRestore -ProjectPath $projectPath
+    Get-KeyValueMatches -ConfigValues 'key1=value1','key2=value2'
     #>
 
     [CmdletBinding()]
-    [OutputType([void])]
+    [OutputType([PSCustomObject[]])]
     param(
         [Parameter(Mandatory=$true)]
-        [string]
-        $ProjectPath
+        [string[]]
+        $ConfigValues
     )
 
-    if (!(Test-Path -Path $ProjectPath)) {
-        Write-Log -Critical "Project file does not exist at '$ProjectPath'."
-    }
-    
-    $projectDir = Split-Path -Parent $ProjectPath
+    $result = @() 
 
-    $currentPath = $projectDir
-    $nugetPath = ''
-    while (!$nugetPath -and $currentPath) {
-        $path = Join-Path -Path $currentPath -ChildPath '.nuget\nuget.exe'
-        if (Test-Path -Path $path) {
-            $nugetPath = $path
+    $i = 1;
+    foreach ($line in $ConfigValues) {
+        if ($line -match '^([^=]+)=(.*)$') {
+            # SuppressScriptCop - adding small arrays is ok
+            $result += [PSCustomObject] @{
+                'Key' = $Matches[1]
+                'Value' = $Matches[2]
+                'Line' = $Matches[0]
+            }
         } else {
-            $currentPath = Split-Path -Path $currentPath -Parent
+            Write-Log -Critical "Improper format of `$ConfigValues. It needs to contain one or more (newline- or comma delimited) key=value strings. Offending line number = $i, contents = '$line'."
         }
+        $i++
     }
-
-    if (!$nugetPath) {
-        Write-Log -Warn "Nuget.exe does not exist at '$projectDir\.nuget\nuget.exe' or any parent directory - using nuget distributed with PSCI."
-        $nugetPath = Get-PathToExternalLib -ModulePath 'nuget\nuget.exe'
-    }
-
-    $cmd = Add-QuotesToPaths -Paths $nugetPath
-    $cmd += " restore " + (Add-QuotesToPaths -Paths $ProjectPath)
-
-    [void](Invoke-ExternalCommand -Command $cmd)
-    
+   
+    return $result
 }

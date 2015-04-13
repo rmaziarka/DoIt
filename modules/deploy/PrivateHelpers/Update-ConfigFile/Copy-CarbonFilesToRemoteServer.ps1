@@ -22,51 +22,45 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 #>
 
-function Start-NugetRestore {
+function Copy-CarbonFilesToRemoteServer {
+
     <#
     .SYNOPSIS
-    Runs nuget restore for given project.
+    A helper for Get-updateXdtCmdParams function that copies files needed for running XDT transform to remote servers.
+   
+    .PARAMETER ConnectionParameters
+    Connection parameters created by New-ConnectionParameters function.
 
-    .PARAMETER ProjectPath
-    Path to the project file.
+    .PARAMETER DestinationPath
+    DestinationPath on remote servers.
 
     .EXAMPLE
-    Start-NugetRestore -ProjectPath $projectPath
+     Copy-CarbonFilesToRemoteServer -ConnectionParameters $ConnectionParameters -DestinationPath 'C:\XDTTransform'
     #>
 
     [CmdletBinding()]
-    [OutputType([void])]
+    [OutputType([PSCustomObject[]])]
     param(
         [Parameter(Mandatory=$true)]
+        [hashtable]
+        $ConnectionParameters,
+
+        [Parameter(Mandatory=$true)]
         [string]
-        $ProjectPath
+        $DestinationPath
     )
 
-    if (!(Test-Path -Path $ProjectPath)) {
-        Write-Log -Critical "Project file does not exist at '$ProjectPath'."
-    }
-    
-    $projectDir = Split-Path -Parent $ProjectPath
+    $carbonPath = Get-PathToExternalLib -ModulePath 'Carbon\Carbon'
+    $psciCorePath = Get-PSCIModulePath -ModuleName 'PSCI.core'
 
-    $currentPath = $projectDir
-    $nugetPath = ''
-    while (!$nugetPath -and $currentPath) {
-        $path = Join-Path -Path $currentPath -ChildPath '.nuget\nuget.exe'
-        if (Test-Path -Path $path) {
-            $nugetPath = $path
-        } else {
-            $currentPath = Split-Path -Path $currentPath -Parent
-        }
-    }
+    $files = @(
+        "$carbonPath\Xml"
+        "$carbonPath\Path\Resolve-FullPath.ps1"
+        "$carbonPath\bin\Microsoft.Web.XmlTransform.dll"
+        "$carbonPath\bin\Carbon.Xdt.dll"
+        "$psciCorePath\utils\Convert-XmlUsingXdt.ps1"
+    )
 
-    if (!$nugetPath) {
-        Write-Log -Warn "Nuget.exe does not exist at '$projectDir\.nuget\nuget.exe' or any parent directory - using nuget distributed with PSCI."
-        $nugetPath = Get-PathToExternalLib -ModulePath 'nuget\nuget.exe'
-    }
+    Copy-FilesToRemoteServer -Path $files -ConnectionParams $ConnectionParameters -Destination $DestinationPath -CheckHashMode UseHashFile
 
-    $cmd = Add-QuotesToPaths -Paths $nugetPath
-    $cmd += " restore " + (Add-QuotesToPaths -Paths $ProjectPath)
-
-    [void](Invoke-ExternalCommand -Command $cmd)
-    
 }

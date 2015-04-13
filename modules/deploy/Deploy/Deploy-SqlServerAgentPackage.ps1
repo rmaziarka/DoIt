@@ -129,7 +129,7 @@ function Deploy-SqlServerAgentPackage {
 
     $sqlParams = @{ 
         ConnectionString = $ConnectionString
-        IgnoreInitialCatalog = $true
+        DatabaseName = ''
     }
     if ($Credential) {
         $sqlParams.Credential = $Credential

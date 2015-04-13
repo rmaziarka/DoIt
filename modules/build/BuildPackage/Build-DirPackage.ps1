@@ -98,6 +98,7 @@ function Build-DirPackage {
 
     [void](New-Item -Path $OutputPath -ItemType Directory)
 
+    # TODO: include is weak
     Write-Log -Info "Copying items from '$SourcePath' to '$OutputPath', include '$Include', exclude '$Exclude'..."
     if (Test-Path -Path $SourcePath -PathType Container) {
         $SourcePath = Join-Path -Path $SourcePath -ChildPath "*"

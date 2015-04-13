@@ -154,6 +154,7 @@ function Build-EntityFrameworkMigratePackage {
     $requiredTools = @('EntityFramework*.dll', 'migrate.exe')
     $pathsToCheck = @($MigrationsDir)
     if ($EntityFrameworkDir) {
+        $pathsToCheck += $EntityFrameworkDir
         $pathsToCheck += Join-Path -Path $EntityFrameworkDir -ChildPath 'lib\net45'
         $pathsToCheck += Join-Path -Path $EntityFrameworkDir -ChildPath 'tools'
     }

@@ -109,7 +109,7 @@ function Start-SqlServerAgentJob {
 
     $sqlParams = @{ 
         ConnectionString = $ConnectionString
-        IgnoreInitialCatalog = $true
+        DatabaseName = ''
         SqlCommandMode = 'Scalar'
         Mode = '.net'
     }

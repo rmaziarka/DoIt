@@ -122,27 +122,28 @@ function Invoke-SqlDotNet {
 
     $ConnectionStringBuilder.set_ConnectTimeout($ConnectTimeoutInSeconds)
 
-    foreach ($q in $queriesSplit) { 
-        try { 
-            $connection = New-Object -TypeName System.Data.SqlClient.SQLConnection -ArgumentList ($ConnectionStringBuilder.ToString())
-            $connection.FireInfoMessageEventOnUserErrors = $true
-            $errorOccurred = @{ Error = $false }
-            $infoEventHandler = [System.Data.SqlClient.SqlInfoMessageEventHandler] { 
-                foreach ($err in $_.Errors) { 
-                    if ($err.Class -le 10) { 
-                        Write-Log -Info $err.Message
-                    } else { 
-                        Write-Log -Error $err.Message
-                        if (!$IgnoreErrors) {
-                            $errorOccurred.Error = $true
-                        }
+
+    try { 
+        $connection = New-Object -TypeName System.Data.SqlClient.SQLConnection -ArgumentList ($ConnectionStringBuilder.ToString())
+        $connection.FireInfoMessageEventOnUserErrors = $true
+        $errorOccurred = @{ Error = $false }
+        $infoEventHandler = [System.Data.SqlClient.SqlInfoMessageEventHandler] { 
+            foreach ($err in $_.Errors) { 
+                if ($err.Class -le 10) { 
+                    Write-Log -Info $err.Message
+                } else { 
+                    Write-Log -Error $err.Message
+                    if (!$IgnoreErrors) {
+                        $errorOccurred.Error = $true
                     }
                 }
+            }
                 
-            } 
-            $connection.add_InfoMessage($infoEventHandler)
-            $connection.Open()
+        } 
+        $connection.add_InfoMessage($infoEventHandler)
+        $connection.Open()
 
+        foreach ($q in $queriesSplit) { 
             $command = New-Object -TypeName System.Data.SqlClient.SqlCommand -ArgumentList $q, $connection
             $command.CommandTimeout = $QueryTimeoutInSeconds
 
@@ -164,12 +165,12 @@ function Invoke-SqlDotNet {
             if ($errorOccurred.Error) {
                 Write-Log -Critical "SQL error(s) occurred."
             }
+        }
     
-            $connection.Close();
-        } finally {
-            if ($connection) {
-                $connection.Dispose();
-            }
+        $connection.Close();
+    } finally {
+        if ($connection) {
+            $connection.Dispose();
         }
     }
     

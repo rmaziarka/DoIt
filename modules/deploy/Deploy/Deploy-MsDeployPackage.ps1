@@ -187,9 +187,11 @@ function Deploy-MsDeployPackage {
 
     $configPaths = Get-ConfigurationPaths
 
+    $packageNameLeaf = Split-Path -Path $PackageName -Leaf
+
     $PackagePath = Resolve-PathRelativeToProjectRoot `
                     -Path $PackagePath `
-                    -DefaultPath (Join-Path -Path (Join-Path -Path $configPaths.PackagesPath -ChildPath $PackageName) -ChildPath "${PackageName}.zip") `
+                    -DefaultPath (Join-Path -Path (Join-Path -Path $configPaths.PackagesPath -ChildPath $PackageName) -ChildPath "${packageNameLeaf}.zip") `
                     -ErrorMsg "Cannot find file '{0}' required for deployment of package '$PackageName'. Please ensure you have run the build and the package exists."
 
     if (!$PackagePath.ToLower().EndsWith("zip")) {

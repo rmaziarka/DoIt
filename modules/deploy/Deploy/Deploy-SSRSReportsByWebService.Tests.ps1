@@ -33,26 +33,26 @@ Describe -Tag "PSCI.integration" "Deploy-SSRSReportsByWebService " {
             }
         }
 
-        Context "when deploying SSRS project file" { 
-            Mock Test-Path { return $true }
-            Mock Get-ConfigurationPaths { return @{ PackagesPath = '.' }}
-            Mock New-SSRSCatalogItem {}
-            Mock New-SSRSFolder {}
-            Mock Set-SSRSItemDataSources {}
-            Mock Set-SSRSItemReferences {}
-            Mock New-SSRSDataSource {return New-Object -TypeName PSObject -Property @{
-                    Name = 'MyDatabase'
-                    Path = 'Data Sources/MyDatabase'
-                    }
+        Mock Test-Path { return $true }
+        Mock Get-ConfigurationPaths { return @{ PackagesPath = '.' }}
+        Mock Resolve-PathRelativeToProjectRoot { return "." }
+        Mock New-SSRSCatalogItem {}
+        Mock New-SSRSFolder {}
+        Mock Set-SSRSItemDataSources {}
+        Mock Set-SSRSItemReferences {}
+        Mock New-SSRSDataSource {return New-Object -TypeName PSObject -Property @{
+                Name = 'MyDatabase'
+                Path = 'Data Sources/MyDatabase'
                 }
-            Mock New-SSRSDataSet {return New-Object -TypeName PSObject -Property @{
-                    Name = 'Customers'
-                    Path = 'Datasets/Customers'
-                    }
+            }
+        Mock New-SSRSDataSet {return New-Object -TypeName PSObject -Property @{
+                Name = 'Customers'
+                Path = 'Datasets/Customers'
                 }
-            Mock Get-AllBytes { return [Byte[]] (,0xFF * 100) }
+            }
+        Mock Get-AllBytes { return [Byte[]] (,0xFF * 100) }
 
-            Mock Get-Content { return @"
+        Mock Get-Content { return @"
             <Project>
               <DataSources>
                 <ProjectItem>
@@ -90,7 +90,7 @@ Describe -Tag "PSCI.integration" "Deploy-SSRSReportsByWebService " {
             </Project>
 "@ } -ParameterFilter { $Path -and $Path.EndsWith('rptproj') }
 
-            Mock Get-Content { return @"
+        Mock Get-Content { return @"
 <?xml version="1.0" encoding="utf-8"?>
 <Report xmlns:rd="http://schemas.microsoft.com/SQLServer/reporting/reportdesigner" xmlns:cl="http://schemas.microsoft.com/sqlserver/reporting/2010/01/componentdefinition" xmlns="http://schemas.microsoft.com/sqlserver/reporting/2010/01/reportdefinition">
   <AutoRefresh>0</AutoRefresh>
@@ -134,9 +134,9 @@ Describe -Tag "PSCI.integration" "Deploy-SSRSReportsByWebService " {
 </Report>
 "@ } -ParameterFilter { $Path -and $Path.EndsWith('rdl') }
 
+        Context "when deploying SSRS project file" { 
+            Deploy-SSRSReportsByWebService -PackageName 'SSRSReports' -ProjectName 'ReportsProject' -ProjectConfigurationName 'Debug'
 	        It "should not throw any error" {
-		        { Deploy-SSRSReportsByWebService -PackageName 'SSRSReports' -ProjectName 'ReportsProject' -ProjectConfigurationName 'Debug' } | Should Not Throw
-
                 Assert-MockCalled New-SSRSDataSource -Exactly 1
                 Assert-MockCalled New-SSRSDataSet -Exactly 1
                 Assert-MockCalled New-SSRSCatalogItem -Exactly 1 -ParameterFilter { $ItemType -eq 'Report' }

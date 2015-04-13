@@ -53,10 +53,10 @@ function Deploy-SSDTDacpac {
     https://msdn.microsoft.com/en-us/library/microsoft.sqlserver.dac.dacdeployoptions.aspx
     https://msdn.microsoft.com/en-us/library/hh550080%28v=vs.103%29.aspx
 
-    .PARAMETER ForceRegisterDataTierApplication
-    Whether to register this .dacpac as data-tier application - see https://msdn.microsoft.com/en-us/library/ee210546.aspx.
-    When it's on, you can see deployed version of .dacpac in table msdb.dbo.sysdac_instances.
-    Note this is a convenience switch only - you could also switch it on by passing DacDeployOptions = { RegisterDataTierApplication = $true }.
+    Note by default RegisterDataTierApplication is set to $true, BlockWhenDriftDetected = $false.
+    This means .dacpac is to be registered as as data-tier application (see https://msdn.microsoft.com/en-us/library/ee210546.aspx)
+    amd you can see deployed version of .dacpac in table msdb.dbo.sysdac_instances.
+    Note you can change it by passing DacDeployOptions = { RegisterDataTierApplication = $false }.
 
     .PARAMETER SqlCmdVariables
     Hashtable containing sqlcmd variables.
@@ -103,10 +103,6 @@ function Deploy-SSDTDacpac {
         $DacDeployOptions,
 
         [Parameter(Mandatory=$false)] 
-        [switch]
-        $ForceRegisterDataTierApplication = $true,
-
-        [Parameter(Mandatory=$false)] 
         [hashtable]
         $SqlCmdVariables,
 
@@ -118,8 +114,8 @@ function Deploy-SSDTDacpac {
         [string]
         [ValidateSet($null, '2012', '2014')]
         $SqlServerVersion
-
         #TODO: override recovery mode
+
     )
 
     $configPaths = Get-ConfigurationPaths
@@ -185,6 +181,8 @@ function Deploy-SSDTDacpac {
             $DacDeployOptions = $dacProfile.DeployOptions
         }
         $DacDeployOptions = New-Object -TypeName Microsoft.SqlServer.Dac.DacDeployOptions
+        $DacDeployOptions.RegisterDataTierApplication = $true
+        $DacDeployOptions.BlockWhenDriftDetected = $false
     } elseif ($DacDeployOptions -is [hashtable]) {
         $newDacDeployOptions = New-Object -TypeName Microsoft.SqlServer.Dac.DacDeployOptions
         foreach ($option in $DacDeployOptions.GetEnumerator()) {
@@ -199,10 +197,6 @@ function Deploy-SSDTDacpac {
         foreach ($cmdVar in $SqlCmdVariables.GetEnumerator()) {
             $DacDeployOptions.SqlCommandVariableValues[$cmdVar.Key] = $cmdVar.Value
         }
-    }
-
-    if ($ForceRegisterDataTierApplication) {
-        $DacDeployOptions.RegisterDataTierApplication = $true
     }
 
     $dacServices = New-Object -TypeName Microsoft.SqlServer.Dac.DacServices -ArgumentList $ConnectionString

@@ -55,6 +55,9 @@ function Deploy-SSRSReportsByVisualStudio {
     .PARAMETER Credential
         Credentials
 
+    .PARAMETER PackagePath
+    Path to the package containing SSRS files. If not provided, $PackagePath = $PackagesPath\$PackageName, where $PackagesPath is taken from global variable.
+
     .EXAMPLE
         Deploy-SSRSReportsByVisualStudio -PackageName 'SSRSReports' -Configuration 'UAT'
 
@@ -92,17 +95,28 @@ function Deploy-SSRSReportsByVisualStudio {
 
         [Parameter(Mandatory=$false)]
         [System.Management.Automation.PSCredential] 
-        $Credential
+        $Credential,
+
+        [Parameter(Mandatory=$false)]
+        [string] 
+        $PackagePath
     )
+
+    Write-Log -Info "Deploying SSRS package '$PackageName' using TargetServerURL '$ConnectionString', Folder '$TargetFolder', DataSource '$TargetDataSourceFolder'" -Emphasize
+
+    $configPaths = Get-ConfigurationPaths
+
+    $PackagePath = Resolve-PathRelativeToProjectRoot `
+                    -Path $PackagePath `
+                    -DefaultPath (Join-Path -Path $configPaths.PackagesPath -ChildPath $PackageName) `
+                    -ErrorMsg "Cannot find file '{0}' required for deployment of package '$PackageName'. Please ensure you have run the build and the package exists."
+
 
     $DevEnvPath = "C:\Program Files (x86)\Microsoft Visual Studio 9.0\Common7\IDE\devenv.com"
 
     if (!(Test-Path -Path $DevEnvPath)) {
         Write-Log -Critical "BIDS for SQL Server 2008 R2 has not been found at '$DevEnvPath'."
     }        
-
-    $configPaths = Get-ConfigurationPaths
-    $PackagePath = Join-Path -Path $configPaths.PackagesPath -ChildPath $PackageName
 
     if ($ProjectName) {
         $RSProject = Join-Path -Path $PackagePath -ChildPath "$ProjectName.rptproj"

@@ -40,6 +40,13 @@ function Deploy-SqlPackage {
     .PARAMETER SqlDirectories
     Paths to directories containing sql files (relative to $PackagePath). If not provided, $PackagePath will be used.
 
+    .PARAMETER Exclude
+    List of regexes that will be used to exclude filenames.
+
+    .PARAMETER DatabaseName
+    Database name to use, regardless of Initial Catalog settings in connection string.
+    Can also be used to remove database name from connection string (when passed empty string).
+
     .PARAMETER PackagePath
     Path to the package containing sql files. If not provided, $PackagePath = $PackagesPath\$PackageName, where $PackagesPath is taken from global variable.
 
@@ -51,6 +58,11 @@ function Deploy-SqlPackage {
 
     .PARAMETER QueryTimeoutInSeconds
     Sql query timeout in seconds.
+
+    .PARAMETER CustomSortOrder
+    If array is passed here, custom sort order will be applied using regexes. Files will be sorted according to the place in the array, and then according to
+    the file name. For example, if we have files 'c:\sql\dir1\test1.sql', 'c:\sql\dir1\test2.sql'
+    and we pass CustomSortOrder = 'dir1\\test2.sql' (or just 'test2.sql'), then 'test2.sql' will run first.
 
     .PARAMETER Mode
     Determines how the sql is run - by sqlcmd.exe or .NET SqlCommand.
@@ -78,6 +90,14 @@ function Deploy-SqlPackage {
         $SqlDirectories,
 
         [Parameter(Mandatory=$false)]
+        [string[]] 
+        $Exclude,
+
+        [Parameter(Mandatory=$false)] 
+        [string]
+        $DatabaseName,
+
+        [Parameter(Mandatory=$false)]
         [string] 
         $PackagePath,
 
@@ -92,6 +112,10 @@ function Deploy-SqlPackage {
 		[Parameter(Mandatory=$false)]
         [int] 
         $QueryTimeoutInSeconds,
+
+        [Parameter(Mandatory=$false)]
+        [string[]] 
+        $CustomSortOrder,
 
         [Parameter(Mandatory=$false)] 
         [string]
@@ -114,16 +138,41 @@ function Deploy-SqlPackage {
             $sqlPackageDir = Join-Path -Path $PackagePath -ChildPath $sqlDir
             Write-Log -Info "Adding .sql files from directory '$sqlPackageDir'."
             # SuppressScriptCop - adding small arrays is ok
-			$sqlPaths += Get-ChildItem -Path $sqlPackageDir -Filter *.sql | Select-Object -ExpandProperty FullName | Sort-Object
+			$sqlPaths += Get-ChildItem -Path $sqlPackageDir -Filter *.sql -Recurse | Select-Object -ExpandProperty FullName | Sort-Object
 		}
 	} else {
         Write-Log -Info "Adding .sql files from directory '$PackagePath'"
-		$sqlPaths = Get-ChildItem -Path $PackagePath -Filter *.sql | Select-Object -ExpandProperty FullName | Sort-Object
+		$sqlPaths = Get-ChildItem -Path $PackagePath -Filter *.sql -Recurse | Select-Object -ExpandProperty FullName | Sort-Object
 		if (!$sqlPaths) {
 			Write-Log -Warn "Package '$packageName' - no sqls found in directory '$PackagePath'."
 			return
 		}
 	}
+
+    if ($Exclude) { 
+        $sqlPaths = $sqlPaths | Where-Object -FilterScript { 
+            foreach ($regex in $Exclude) {
+                if ($_ -imatch $regex) {
+                    return $false
+                }
+            }
+            return $true
+        }
+    }
+
+    if ($CustomSortOrder) {
+        $sqlPaths = $sqlPaths | Sort-Object -Property @{ Expression = { 
+            $fileName = $_
+            $i = 0;
+            foreach ($sortEntry in $CustomSortOrder) {
+                if ($fileName -imatch $sortEntry) {
+                    return "___$i"
+                }
+                $i++
+            }
+            return $fileName
+        } }
+    }
 
     
     foreach ($sqlPath in $sqlPaths) {
@@ -142,6 +191,9 @@ function Deploy-SqlPackage {
         }
         if ($SqlCmdVariables) {
             $params.SqlCmdVariables = $SqlCmdVariables
+        }
+        if ($PSBoundParameters.ContainsKey('DatabaseName')) {
+            $params.DatabaseName = $DatabaseName
         }
         Invoke-Sql @params
     }

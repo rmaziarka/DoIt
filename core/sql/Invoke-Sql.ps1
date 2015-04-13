@@ -60,8 +60,9 @@ function Invoke-Sql {
     .PARAMETER Credential
     Credential to impersonate in Integrated Security mode.
 
-    .PARAMETER IgnoreInitialCatalog
-    If $true, InitialCatalog will be removed from ConnectionString (if present).
+    .PARAMETER DatabaseName
+    Database name to use, regardless of Initial Catalog settings in connection string.
+    Can also be used to remove database name from connection string (when passed empty string).
 
     .OUTPUTS
     String if Mode = sqlcmd.
@@ -117,8 +118,8 @@ function Invoke-Sql {
         $Credential,
 
         [Parameter(Mandatory=$false)]
-        [switch] 
-        $IgnoreInitialCatalog
+        [string] 
+        $DatabaseName
     ) 
 
     if (!$Mode) {
@@ -139,7 +140,7 @@ function Invoke-Sql {
 
     if ($InputFile) {
         foreach ($file in $Inputfile) { 
-            if (!(Test-Path -Path $file)) { 
+            if (!(Test-Path -LiteralPath $file)) { 
                 Write-Log -Critical "$InputFile does not exist. Current directory: $(Get-Location)"
             }
         }
@@ -147,8 +148,8 @@ function Invoke-Sql {
       
     $csb = New-Object -TypeName System.Data.SqlClient.SqlConnectionStringBuilder -ArgumentList $ConnectionString
 
-    if ($IgnoreInitialCatalog -and $csb.InitialCatalog) {
-        $csb.set_InitialCatalog('')
+    if ($PSBoundParameters.ContainsKey('DatabaseName')) {
+        $csb.set_InitialCatalog($DatabaseName)
     }
 
     $params = @{
@@ -179,7 +180,7 @@ function Invoke-Sql {
 
         [void]($params.Remove('Query'))
         foreach ($file in $InputFile) {
-            $file = (Resolve-Path -Path $file).ProviderPath
+            $file = (Resolve-Path -LiteralPath $file).ProviderPath
             $params['InputFile'] = $file
             Write-Log -_Debug "Running sql file '$file' at $targetLog using sqlcmd"
             Invoke-SqlSqlcmd @params
@@ -199,9 +200,9 @@ function Invoke-Sql {
         }
 
         foreach ($file in $InputFile) {
-            $file = (Resolve-Path -Path $file).ProviderPath
+            $file = (Resolve-Path -LiteralPath $file).ProviderPath
             Write-Log -_Debug "Running sql file '$file' at $targetLog using .Net"
-            $params['Query'] = Get-Content -Path $file -ReadCount 0 | Out-String
+            $params['Query'] = Get-Content -LiteralPath $file -ReadCount 0 | Out-String
             Invoke-SqlDotNet @params
         }
     } else {
