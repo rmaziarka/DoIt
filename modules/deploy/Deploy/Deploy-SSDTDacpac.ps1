@@ -134,7 +134,13 @@ function Deploy-SSDTDacpac {
     if ($PublishProfile) {
         Write-Log -Info "Using publish profile '$PublishProfile'."
         if (!(Test-Path -Path $PublishProfile)) {
-            Write-Log -Critical "Cannot find publish profile file '$PublishProfile'."
+            if (![System.IO.Path]::IsPathRooted($PublishProfile)) {
+                $PublishProfile = Join-Path -Path $PackagePath -ChildPath $PublishProfile
+            }
+
+            if (!(Test-Path -Path $PublishProfile)) {
+                Write-Log -Critical "Cannot find publish profile file '$PublishProfile'."
+            }
         }
         $dacProfile = [Microsoft.SqlServer.Dac.DacProfile]::Load($PublishProfile)
         if ($DacDeployOptions) {
