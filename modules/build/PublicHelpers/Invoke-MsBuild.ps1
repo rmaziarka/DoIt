@@ -158,7 +158,7 @@ function Invoke-MsBuild {
 
     if ($MsBuildOptions.MsBuildCmdLineArguments) {
         foreach ($param in $MsBuildOptions.MsBuildCmdLineArguments) {
-            $cmd += $param + " "
+            $cmd += " $param"
         }
     }
 
