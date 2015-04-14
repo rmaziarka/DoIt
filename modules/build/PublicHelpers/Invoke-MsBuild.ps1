@@ -150,10 +150,10 @@ function Invoke-MsBuild {
 
     # maxcpucount - use all available cpus
     # nodeReuse - kill msbuild.exe process after finishing (without it issues with directory locking can occur)
-    $cmd += " /nologo /maxcpucount /nodeReuse:false "
+    $cmd += ' /nologo /maxcpucount /nodeReuse:false'
 
     if ($MsBuildOptions.Quiet) {
-        $cmd += '/v:q /clp:ErrorsOnly;Summary'
+        $cmd += ' /v:q /clp:ErrorsOnly;Summary'
     }
 
     if ($MsBuildOptions.MsBuildCmdLineArguments) {
