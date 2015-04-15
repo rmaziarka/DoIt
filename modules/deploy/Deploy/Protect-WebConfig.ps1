@@ -39,6 +39,8 @@ function Protect-WebConfig {
     .EXAMPLE
     Protect-WebConfig -Path "C:\inetpub\wwwroot\Application" -Section "connectionStrings"
     #>
+    [CmdletBinding()]
+    [OutputType([void])]
     param(
         [Parameter(Mandatory=$true)]
         [string]
