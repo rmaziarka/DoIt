@@ -62,7 +62,7 @@ function Resolve-Token {
         $Name, 
 
         [Parameter(Mandatory=$false)]
-        [string] 
+        [object] 
         $Value, 
         
         [Parameter(Mandatory=$true)]
@@ -81,7 +81,9 @@ function Resolve-Token {
         [string] 
         $TokenRegex = '\$\{(\w+)\}'
     )
-    
+    if (!$Value -or $Value.GetType().FullName -ne "System.String") {
+        return $Value
+    }
     $i = 0
     do {
         $substituted = $false    

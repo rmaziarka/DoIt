@@ -153,12 +153,9 @@ function Resolve-Tokens {
                     $newHashTable[$tokenValueEnumerator.Key] = $newValue
                 }
                 $resolvedTokens[$category][$tokenKey] = $newHashTable
-            } elseif ($tokenValue -and $tokenValue.GetType().FullName -eq "System.String") {
+            } else {
                 $newValue = Resolve-Token -Name $tokenKey -Value $tokenValue -ResolvedTokens $resolvedTokens -Category $category -ValidateExistence:$false
-
-                if ($newValue -ne $tokenValue) {
-                    $resolvedTokens[$category][$tokenKey] = $newValue
-                }
+                $resolvedTokens[$category][$tokenKey] = $newValue
             }
         }
     }
@@ -190,14 +187,8 @@ function Resolve-Tokens {
 
         foreach ($tokenKey in $tokensCatKeys) {
             $tokenValue = $resolvedTokens[$category][$tokenKey]
-
-            if ($tokenValue -and $tokenValue.GetType().FullName -eq "System.String") {
-                $newValue = Resolve-Token -Name $tokenKey -Value $tokenValue -ResolvedTokens $resolvedTokens -Category $category
-
-                if ($newValue -ne $tokenValue) {
-                    $resolvedTokens[$category][$tokenKey] = $newValue
-                }
-            }
+            $newValue = Resolve-Token -Name $tokenKey -Value $tokenValue -ResolvedTokens $resolvedTokens -Category $category
+            $resolvedTokens[$category][$tokenKey] = $newValue
         }
     }
 
