@@ -146,7 +146,14 @@ function Resolve-Tokens {
         foreach ($tokenKey in $tokensCatKeys) {
             $tokenValue = $resolvedTokens[$category][$tokenKey]
 
-            if ($tokenValue -and $tokenValue.GetType().FullName -eq "System.String") {
+            if ($tokenValue -is [hashtable]) {
+                $newHashTable = @{}
+                foreach ($tokenValueEnumerator in $tokenValue.GetEnumerator()) {
+                    $newValue = Resolve-Token -Name "${tokenKey}.$($tokenValueEnumerator.Key)" -Value $tokenValueEnumerator.Value -ResolvedTokens $resolvedTokens -Category $category -ValidateExistence:$false
+                    $newHashTable[$tokenValueEnumerator.Key] = $newValue
+                }
+                $resolvedTokens[$category][$tokenKey] = $newHashTable
+            } elseif ($tokenValue -and $tokenValue.GetType().FullName -eq "System.String") {
                 $newValue = Resolve-Token -Name $tokenKey -Value $tokenValue -ResolvedTokens $resolvedTokens -Category $category -ValidateExistence:$false
 
                 if ($newValue -ne $tokenValue) {
