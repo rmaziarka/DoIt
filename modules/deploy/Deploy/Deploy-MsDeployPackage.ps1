@@ -62,6 +62,9 @@ function Deploy-MsDeployPackage {
     .PARAMETER SkipDir
     List of directories to skip. Passed in '-skip' msdeploy parameter.
 
+    .PARAMETER UseChecksum
+    Whether to use checksum for directory sync. Note checksum sometimes causes issues in msdeploy - see http://stackoverflow.com/questions/20240261/notimplementedexception-in-msdeploy-when-using-usechecksum.
+
     .PARAMETER Website
     IIS website where the package will be deployed to. Only used if PackageType = Web.
 
@@ -138,6 +141,10 @@ function Deploy-MsDeployPackage {
         [Parameter(Mandatory=$false)]
         [string] 
         $SkipDir,
+
+        [Parameter(Mandatory=$false)]
+        [switch] 
+        $UseChecksum = $true,
 
         [Parameter(Mandatory=$false)]
         [string] 
@@ -229,12 +236,12 @@ function Deploy-MsDeployPackage {
         }
 
         Write-Log -Info "Deploying web package '$PackageName' to server '$Node'" -Emphasize
-        Sync-MsDeployDirectory -SourcePath $packageCopyPath -DestString $MsDeployDestinationString -AddParameters $MsDeployAddParameters
+        Sync-MsDeployDirectory -SourcePath $packageCopyPath -DestString $MsDeployDestinationString -AddParameters $MsDeployAddParameters -UseChecksum:$UseChecksum
     } elseif ($PackageType -eq "Dir") {
         Write-Log -Info "Deploying directory package '$PackageName' to server '$Node'" -Emphasize
         $tempDir = New-TempDirectory
         Expand-Zip -ArchiveFile $PackagePath -OutputDirectory $tempDir
-        Sync-MsDeployDirectory -SourcePath $tempDir -DestinationDir $PhysicalPath -DestString $MsDeployDestinationString -AddParameters $MsDeployAddParameters
+        Sync-MsDeployDirectory -SourcePath $tempDir -DestinationDir $PhysicalPath -DestString $MsDeployDestinationString -AddParameters $MsDeployAddParameters -UseChecksum:$UseChecksum
         Remove-TempDirectory
     }
 

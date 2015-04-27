@@ -416,6 +416,7 @@ Describe -Tag "PSCI.unit" "Resolve-Tokens" {
 			    Tokens Credentials @{
                     User = 'user1' 
                     User2 = '${User}'
+                    # this is why we need 3 passes of Resolve-Tokens - tokens, scripts, tokens again
                     PSCredential = { ConvertTo-PSCredential -User $Tokens.Credentials.User2 -Password 'test' } 
                     User3 = { $Tokens.Credentials.User2 }
                     User4 = '${User3}'
@@ -431,6 +432,40 @@ Describe -Tag "PSCI.unit" "Resolve-Tokens" {
                 $resolvedTokens.Credentials.User3 | should Be 'user1'
                 $resolvedTokens.Credentials.User4 | should Be 'user1'
                 $resolvedTokens.Credentials.PSCredential.UserName | should Be 'user1'
+            }
+        }
+
+        Context "when used with hashtables" {
+            Initialize-Deployment
+
+		    Environment Default {
+			    Tokens DestinationNodes @{
+                    ExternalNodeValue = { 'localhost:e' }
+                    NodesMap = @{ 
+                        'localhost'  = @{ 
+                            InternalNode = { return 'localhost:i' }
+                            ExternalNode = '${ExternalNodeValue}'
+                            #Nested = @{ NestedNode = { return 'nested' } } 
+                        } 
+                    }
+	            }
+
+                Tokens Node @{
+                    SelectedNode = 'localhost'
+                    InternalNode = { $Tokens.DestinationNodes.NodesMap[$Tokens.Node.SelectedNode].InternalNode }
+                    ExternalNode = { $Tokens.DestinationNodes.NodesMap[$Tokens.Node.SelectedNode].ExternalNode }
+                }
+            }
+
+            $resolvedTokens = Resolve-Tokens -AllEnvironments $Global:Environments -Environment Default -Node 's01'
+
+            It "Should properly resolve tokens" {
+                $resolvedTokens.Count | Should Be 4
+                $resolvedTokens.Node.InternalNode | should Be 'localhost:i'
+                $resolvedTokens.Node.ExternalNode | should Be 'localhost:e'
+                #$resolvedTokens.NodesMap.localhost.InternalNode | should Be 'localhost:i'
+                #$resolvedTokens.NodesMap.localhost.ExternalNode | should Be 'localhost:e'
+                #$resolvedTokens.NodesMap.localhost.Nested.NestedNode | should Be 'nested'
             }
         }
     }

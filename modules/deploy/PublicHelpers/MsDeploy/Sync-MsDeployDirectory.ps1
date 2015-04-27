@@ -36,6 +36,9 @@ function Sync-MsDeployDirectory {
     .PARAMETER DestString
     Destination string to pass to msdeploy.
 
+    .PARAMETER UseChecksum
+    Whether to use checksum for directory sync. Note checksum sometimes causes issues in msdeploy - see http://stackoverflow.com/questions/20240261/notimplementedexception-in-msdeploy-when-using-usechecksum.
+
     .PARAMETER AddParameters
     Additional parameters to pass to msdeploy.
 
@@ -59,14 +62,21 @@ function Sync-MsDeployDirectory {
         $DestString, 
 
         [Parameter(Mandatory=$false)]
+        [switch] 
+        $UseChecksum = $true, 
+
+        [Parameter(Mandatory=$false)]
         [string[]] 
         $AddParameters
     )
 
     $params = @(
-        "-verb:sync",
-        "-useCheckSum"
+        "-verb:sync"
     )
+
+    if ($useCheksum) {
+        $params += "-useCheckSum"
+    }
 
     if (Test-Path -Path $SourcePath -PathType Leaf) {
         $params += "-source:package='$SourcePath'"
