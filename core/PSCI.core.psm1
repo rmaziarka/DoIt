@@ -90,4 +90,5 @@ Export-ModuleMember -Function `
     Build-DeploymentScriptsPackage, `
     Test-Integer, `
     ConvertTo-Integer, `
-    Get-VisualStudioPath
+    Get-VisualStudioPath, `
+	Backup-SqlDatabase
