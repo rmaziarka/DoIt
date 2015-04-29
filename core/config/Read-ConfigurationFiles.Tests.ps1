@@ -66,7 +66,7 @@ Describe -Tag "PSCI.unit" "Read-ConfigurationFiles" {
                     $result = Read-ConfigurationFiles
                 
                     $result | Should Not Be $null
-                    $result.Files | Should Be (Resolve-Path -Path $testFileFunc).ProviderPath
+                    $result.Files | Should Be (Resolve-Path -LiteralPath $testFileFunc).ProviderPath
                     $result.RequiredDSCModules.Count | Should Be 0
                 } finally {
                     Remove-Item -Path $testConfigDir -Force -Recurse
@@ -97,7 +97,7 @@ Describe -Tag "PSCI.unit" "Read-ConfigurationFiles" {
                     $result = Read-ConfigurationFiles
                 
                     $result | Should Not Be $null
-                    $result.Files | Should Be (Resolve-Path -Path $testFileDSC).Path
+                    $result.Files | Should Be (Resolve-Path -LiteralPath $testFileDSC).Path
                     $result.RequiredDSCModules.Count | Should Be 5
                     $result.RequiredDSCModules -icontains 'xPSDesiredStateConfiguration1' | Should Be $true
                     $result.RequiredDSCModules -icontains 'xPSDesiredStateConfiguration2' | Should Be $true

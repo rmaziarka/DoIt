@@ -94,7 +94,7 @@ function Resolve-PathRelativeToProjectRoot {
         }
 
         if (Test-Path -Path $p) {
-            return ((Resolve-Path -Path $p).ProviderPath)
+            return ((Resolve-Path -LiteralPath $p).ProviderPath)
         }        
     }
 
