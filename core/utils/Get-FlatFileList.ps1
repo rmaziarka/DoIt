@@ -97,38 +97,41 @@ function Get-FlatFileList {
     }
         
     foreach ($p in $Path) {
-        if (!(Test-Path -LiteralPath $p)) {
+        if (!(Test-Path -Path $p)) {
             # this function can be run remotely without PSCI available
             if (Get-Command -Name Write-Log -ErrorAction SilentlyContinue) {
                 Write-Log -Critical "Path '$p' does not exist."
             } else {
                 throw "Path '$p' does not exist"
             }
-        } elseif (Test-Path -LiteralPath $p -PathType Container) {
-            try {
-                Push-Location -LiteralPath $p
-                $files = Get-ChildItem -LiteralPath '.' -Recurse -File
-                foreach ($file in $files) {
-                    $relativePath = Resolve-Path -LiteralPath $file.FullName -Relative
-                    if ($excludeRegex -and $relativePath -imatch $excludeRegex) {
-                        continue
+        } 
+        # each $p can be a wildcard, so we need to resolve it first
+        $p = (Resolve-Path -Path $p).ProviderPath
+        foreach ($singleItem in $p) { 
+            if (Test-Path -LiteralPath $singleItem -PathType Container) {
+                try {
+                    Push-Location -LiteralPath $singleItem
+                    $files = Get-ChildItem -LiteralPath '.' -Recurse -File
+                    foreach ($file in $files) {
+                        $relativePath = Resolve-Path -LiteralPath $file.FullName -Relative
+                        if ($excludeRegex -and $relativePath -imatch $excludeRegex) {
+                            continue
+                        }
+                        if ($includeRegex -and $relativePath -inotmatch $includeRegex) {
+                            continue
+                        }
+                        if ($relativePath.StartsWith(".\")) {
+                           $relativePath = $relativePath.Remove(0,2);
+                        }
+                        # TODO: this probably isn't good for performance
+                        Add-Member -InputObject $file -MemberType NoteProperty -Name RelativePath -Value $relativePath
+                        [void]($result.Add($file))
                     }
-                    if ($includeRegex -and $relativePath -inotmatch $includeRegex) {
-                        continue
-                    }
-                    if ($relativePath.StartsWith(".\")) {
-                       $relativePath = $relativePath.Remove(0,2);
-                    }
-                    # TODO: this probably isn't good for performance
-                    Add-Member -InputObject $file -MemberType NoteProperty -Name RelativePath -Value $relativePath
-                    [void]($result.Add($file))
+                } finally {
+                    Pop-Location
                 }
-            } finally {
-                Pop-Location
-            }
-        } else {
-            $files = Get-Item -LiteralPath $p
-            foreach ($file in $files) {
+            } else {
+                $file = Get-Item -Path $singleItem
                 [void]($result.Add($file))
                 Add-Member -InputObject $file -MemberType NoteProperty -Name RelativePath -Value $file.Name
             }
