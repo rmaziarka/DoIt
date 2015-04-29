@@ -33,7 +33,7 @@ Describe -Tag "PSCI.unit" "Update-TokensInZipFile" {
             }
         }
 
-        Mock Test-Path { return $true } -ParameterFilter { $Path -eq 'test.zip' }
+        Mock Test-Path { return $true } -ParameterFilter { $LiteralPath -eq 'test.zip' }
         Mock Copy-Item { }
         Mock Open-ZipArchive { 
             $zipArchive =  @{ 'Entries' = 
@@ -53,7 +53,7 @@ Describe -Tag "PSCI.unit" "Update-TokensInZipFile" {
         Mock New-TempDirectory { return "c:\Temp" }
     
         Context "when invoked for non-existing .zip file" {
-            Mock Test-Path { return $false } -ParameterFilter { $Path -eq 'test.zip' }
+            Mock Test-Path { return $false } -ParameterFilter { $LiteralPath -eq 'test.zip' }
 
             It "should throw exception" {
                 try { 
