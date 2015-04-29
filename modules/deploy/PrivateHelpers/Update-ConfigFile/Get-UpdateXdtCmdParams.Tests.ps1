@@ -75,7 +75,7 @@ Describe -Tag "PSCI.unit" "Get-UpdateXdtCmdParams" {
 '@
 
                 } finally {
-                    Remove-Item -Path $testFileName -Force -ErrorAction SilentlyContinue
+                    Remove-Item -LiteralPath $testFileName -Force -ErrorAction SilentlyContinue
                 }
 
             }
@@ -104,8 +104,8 @@ Describe -Tag "PSCI.unit" "Get-UpdateXdtCmdParams" {
 '@
 
                 } finally {
-                    Remove-Item -Path $testFileName -Force -ErrorAction SilentlyContinue
-                    Remove-Item -Path $xdtFilename -Force -ErrorAction SilentlyContinue
+                    Remove-Item -LiteralPath $testFileName -Force -ErrorAction SilentlyContinue
+                    Remove-Item -LiteralPath $xdtFilename -Force -ErrorAction SilentlyContinue
                 }
             }
 

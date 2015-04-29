@@ -82,7 +82,7 @@ keyNew=newValue
                     $result[6] | Should Match "Key 'app.webservice.password' - value set to '123'"
 
                 } finally {
-                    Remove-Item -Path $testFileName -Force -ErrorAction SilentlyContinue
+                    Remove-Item -LiteralPath $testFileName -Force -ErrorAction SilentlyContinue
                 }
 
             }
@@ -102,7 +102,7 @@ keyNew=newValue
                     }
                     0 | Should Be 1
                 } finally {
-                    Remove-Item -Path $testFileName -Force -ErrorAction SilentlyContinue
+                    Remove-Item -LiteralPath $testFileName -Force -ErrorAction SilentlyContinue
                 }
             }
         }

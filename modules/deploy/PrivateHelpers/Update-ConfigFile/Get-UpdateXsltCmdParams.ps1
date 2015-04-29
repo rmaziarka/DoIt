@@ -69,7 +69,7 @@ function Get-UpdateXsltCmdParams {
 
         $Global:ErrorActionPreference = 'Stop'
         foreach ($configFileName in $ConfigFiles) {
-            if (!(Test-Path -Path $configFileName)) {
+            if (!(Test-Path -LiteralPath $configFileName)) {
                 throw "File $configFileName does not exist (server $([system.environment]::MachineName))."
             }
 
@@ -78,7 +78,7 @@ function Get-UpdateXsltCmdParams {
             $xslt = New-Object System.Xml.Xsl.XslCompiledTransform
 
             if ($XsltFilename) {
-                if (!(Test-Path -Path $XsltFilename)) {
+                if (!(Test-Path -LiteralPath $XsltFilename)) {
                     throw "File '$XsltFilename' does not exist"
                 }
                 Write-Output "Loading xslt stylesheet from file '$XsltFilename'"
@@ -103,13 +103,13 @@ function Get-UpdateXsltCmdParams {
             Write-Output "Transforming file '$configFileName' - output '$tempFileName'"
             $xslt.Transform($configFileName, $tempFileName) 
 
-            if (!(Test-Path -Path $tempFileName)) {
+            if (!(Test-Path -LiteralPath $tempFileName)) {
                 throw "Someting went wrong - file '$tempFileName' does not exist."
             }
 
             Write-Output "Replacing file '$configFileName' with '$tempFileName'"
             Move-Item -Path $tempFileName -Destination $configFileName -Force
-            if (!(Test-Path -Path $configFileName)) {
+            if (!(Test-Path -LiteralPath $configFileName)) {
                 throw "Someting went wrong - file '$configFileName' does not exist."
             }
         }  

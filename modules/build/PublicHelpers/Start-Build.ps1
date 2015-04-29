@@ -69,7 +69,7 @@ function Start-Build {
         $buildParamsHash[$param.Name] = $param.Value
      }
 
-     if (!(Test-Path -Path $ScriptsDirectory -PathType Container)) {
+     if (!(Test-Path -LiteralPath $ScriptsDirectory -PathType Container)) {
         Write-Log -Critical "Directory '$ScriptsDirectory' does not exist. Current location: $((Get-Location).Path)"
      }
 
@@ -115,7 +115,7 @@ function Start-Build {
      }
 
      $packagePath = (Get-ConfigurationPaths).PackagesPath
-     if ((Test-Path -Path $packagePath)) {
+     if ((Test-Path -LiteralPath $packagePath)) {
        Write-Log -Info "Build finished successfully. Package has been created at '$packagePath'." -Emphasize
      } else {
        Write-Log -Info "Build finished successfully. " -Emphasize

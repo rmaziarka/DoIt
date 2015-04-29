@@ -78,7 +78,7 @@ function Sync-MsDeployDirectory {
         $params += "-useCheckSum"
     }
 
-    if (Test-Path -Path $SourcePath -PathType Leaf) {
+    if (Test-Path -LiteralPath $SourcePath -PathType Leaf) {
         $params += "-source:package='$SourcePath'"
         if ($DestinationDir) {
             $params += "-dest:contentPath='$DestinationDir',$DestString"

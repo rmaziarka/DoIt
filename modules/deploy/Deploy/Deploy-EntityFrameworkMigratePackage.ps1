@@ -85,7 +85,7 @@ function Deploy-EntityFrameworkMigratePackage {
                     -ErrorMsg "Cannot find file '{0}' required for deployment of package '$PackageName'. Please ensure you have run the build and the package exists."
 
 
-    if ((Test-Path -Path "$PackagePath\$PackageName.zip")) {
+    if ((Test-Path -LiteralPath "$PackagePath\$PackageName.zip")) {
         Expand-Zip -ArchiveFile "$PackagePath\$packageName.zip" -OutputDirectory $PackagePath
     }
 

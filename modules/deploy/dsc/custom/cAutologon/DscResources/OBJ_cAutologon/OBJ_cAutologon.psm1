@@ -136,7 +136,7 @@ function Set-TargetResource {
         if (!$Domain -or !$Username -or !$Password -or !$AutologonPath) {
             throw 'Parameters Domain, Username, Password and AutologonPath must be specified when Ensure = Present.'
         }
-        if (!(Test-Path -Path $AutologonPath)) {
+        if (!(Test-Path -LiteralPath $AutologonPath)) {
             throw "Autologon cannot be found at '$AutologonPath'."
         }
 

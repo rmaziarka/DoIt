@@ -64,7 +64,7 @@ function Publish-EntityFrameworkMigrate {
     )
 
     #TODO: move to validation part
-    if (!(Test-Path -Path "$PackagePath\migrate.exe")) {
+    if (!(Test-Path -LiteralPath "$PackagePath\migrate.exe")) {
         Write-Log -Critical "No migrate.exe in '$PackagePath')"
     }
     Write-Log -Info "Running migrate.exe for package: '$PackagePath'"

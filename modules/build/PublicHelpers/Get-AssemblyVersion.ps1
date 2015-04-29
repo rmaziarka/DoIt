@@ -66,7 +66,7 @@ function Get-AssemblyVersion {
     }
 
     $Path = Resolve-PathRelativeToProjectRoot -Path $Path
-    if (Test-Path -Path $Path -PathType Leaf) {
+    if (Test-Path -LiteralPath $Path -PathType Leaf) {
         $file = $Path
     } else {
         $file = @(Get-ChildItem -Path $Path -File -Filter $FileMask -Recurse | Select-Object -ExpandProperty FullName)

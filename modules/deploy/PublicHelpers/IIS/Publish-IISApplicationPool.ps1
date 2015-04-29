@@ -113,7 +113,7 @@ function Publish-IISApplicationPool {
 
     $path = "IIS:\AppPools\$ApplicationPoolName"
 
-	if (!(Test-Path -Path $path)) {
+	if (!(Test-Path -LiteralPath $path)) {
 		Write-Log -Info "Creating application pool: $ApplicationPoolName"
 	    $appPool = New-WebAppPool -Name $ApplicationPoolName
 	} else {

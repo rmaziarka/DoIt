@@ -55,7 +55,7 @@ function Build-Cube
     )
 
     $DevEnvPath = "C:\Program Files (x86)\Microsoft Visual Studio 9.0\Common7\IDE\devenv.com"
-    if (!(Test-Path -Path $DevEnvPath)) {
+    if (!(Test-Path -LiteralPath $DevEnvPath)) {
         Write-Log -Critical "BIDS for SQL Server 2008 R2 has not been found at '$DevEnvPath'."
     }        
 

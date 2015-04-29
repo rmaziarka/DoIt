@@ -180,8 +180,8 @@ function Copy-FilesToRemoteServer {
         } else {
             $tempZip = ([IO.Path]::GetTempFileName()) + ".zip"
             $zipToCopy = $tempZip
-            if (Test-Path -Path $tempZip) {
-                [void](Remove-Item -Path $tempZip -Force)
+            if (Test-Path -LiteralPath $tempZip) {
+                [void](Remove-Item -LiteralPath $tempZip -Force)
             }
             Write-Progress -Activity "Creating '$zipToCopy'" -Status "Preparing files to copy" -Id 1
 
@@ -201,7 +201,7 @@ function Copy-FilesToRemoteServer {
                 New-Zip @zipParams
                 $isStructuredZip = $false
             }
-            if (!(Test-Path -Path $tempZip)) {
+            if (!(Test-Path -LiteralPath $tempZip)) {
                 Write-Log -Critical "Temporary zip file '$tempZip' has not been created - critical exception, please investigate."
             }
         }
@@ -226,8 +226,8 @@ function Copy-FilesToRemoteServer {
         foreach ($session in ($sessions | Where-Object { $_.State -ne 'Closed' })) {
             Remove-PSSession -Session $session
         }
-        if ($tempZip -and (Test-Path -Path $tempZip)) {
-            [void](Remove-Item -Path $tempZip -Force)
+        if ($tempZip -and (Test-Path -LiteralPath $tempZip)) {
+            [void](Remove-Item -LiteralPath $tempZip -Force)
         }
     }
     return $serversToUpdate

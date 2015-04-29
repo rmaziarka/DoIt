@@ -52,7 +52,7 @@ function Protect-WebConfig {
     )
     
     $aspnet_regiis = Join-Path -Path $env:windir -ChildPath "Microsoft.NET\Framework\v4.0.30319\aspnet_regiis.exe"
-    if(!(Test-Path -Path $aspnet_regiis))
+    if(!(Test-Path -LiteralPath $aspnet_regiis))
     {
         Write-Log -Critical "$aspnet_regiis doesn't exists."
     }

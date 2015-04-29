@@ -56,9 +56,9 @@ function Remove-TempDirectory {
         $BasePath = $env:TEMP
     }
     $tempDir = Join-Path -Path $BasePath -ChildPath $DirName
-    if (Test-Path -Path $tempDir) {
+    if (Test-Path -LiteralPath $tempDir) {
         Write-Log -_Debug "Deleting temp directory at '$tempDir'"
-        [void](Remove-Item -Path $tempDir -Recurse -Force)
+        [void](Remove-Item -LiteralPath $tempDir -Recurse -Force)
     }
     return $tempDir
 }

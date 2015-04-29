@@ -96,7 +96,7 @@ function Set-TargetResource
 
     $LogPath = Join-Path -Path $env:SystemDrive -ChildPath "Logs"
 
-    if (!(Test-Path -Path $LogPath))
+    if (!(Test-Path -LiteralPath $LogPath))
     {
         New-Item $LogPath -ItemType Directory
     }

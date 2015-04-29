@@ -72,13 +72,13 @@ function Initialize-ConfigurationPaths {
     }
 
     # DeployScriptsPath - validate deploy.ps1 exists in current directory
-    if (!(Test-Path -Path 'deploy.ps1')) {
+    if (!(Test-Path -LiteralPath 'deploy.ps1')) {
         Write-Log -Warn "deploy.ps1 has not been found in current directory '($((Get-Location).Path)'"
     }
 
     # ProjectRootPath - if not empty validate it exists, if empty set to current directory
     if ($ProjectRootPath) {
-        if (!(Test-Path -Path $ProjectRootPath -PathType Container)) {
+        if (!(Test-Path -LiteralPath $ProjectRootPath -PathType Container)) {
             Write-Log -Critical "Project root directory '$ProjectRootPath' does not exist. Please ensure you have passed valid 'ProjectRootPath' argument to Initialize-ConfigurationPaths."
         }
         $configPaths.ProjectRootPath = (Resolve-Path -LiteralPath $ProjectRootPath).ProviderPath
@@ -94,7 +94,7 @@ function Initialize-ConfigurationPaths {
         } else {
             $configPaths.PackagesPath = $PackagesPath
         }
-        if ((Test-Path -Path $configPaths.PackagesPath -PathType Container)) {
+        if ((Test-Path -LiteralPath $configPaths.PackagesPath -PathType Container)) {
             $configPaths.PackagesPath = (Resolve-Path -LiteralPath $configPaths.PackagesPath).ProviderPath
         } elseif ($ValidatePackagesPath) {
             Write-Log -Critical "Packages directory '$($configPaths.PackagesPath)' does not exist. Please ensure you have packages available in this location (do you need to run the build?)."  
@@ -102,10 +102,10 @@ function Initialize-ConfigurationPaths {
 
         if ($ValidatePackagesPath) {
             $packagesNotExisting = @()
-            if (!(Test-Path -Path (Join-Path -Path $configPaths.PackagesPath -ChildPath 'DeployScripts'))) {
+            if (!(Test-Path -LiteralPath (Join-Path -Path $configPaths.PackagesPath -ChildPath 'DeployScripts'))) {
                 $packagesNotExisting += 'DeployScripts'
             }
-            if (!(Test-Path -Path (Join-Path -Path $configPaths.PackagesPath -ChildPath 'PSCI'))) {
+            if (!(Test-Path -LiteralPath (Join-Path -Path $configPaths.PackagesPath -ChildPath 'PSCI'))) {
                 $packagesNotExisting += 'PSCI'
             }
             if (!$packagesNotExisting) {

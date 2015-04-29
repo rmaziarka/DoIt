@@ -50,7 +50,7 @@ Import-Module -Name "$curDir\core\PSCI.core.psm1" -Force -Global 3>$null
 
 $buildNumber = Get-PSCIBuildNumber -Path $curDir
 
-if (Test-Path -Path "$curDir\modules") {
+if (Test-Path -LiteralPath "$curDir\modules") {
 	$modulesToImport = Get-ChildItem -Path "$curDir\modules\*\*.psm1"
 	foreach ($modulePath in $modulesToImport.FullName) {
 		Import-Module -Name $modulePath -Force -Global 3>$null

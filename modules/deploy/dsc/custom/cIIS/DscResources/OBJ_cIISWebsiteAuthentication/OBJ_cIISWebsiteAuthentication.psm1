@@ -150,7 +150,7 @@ function Run-AppCmd {
     )
 
     $appcmdPath = [System.IO.Path]::Combine($env:WINDIR, 'system32', 'inetsrv', 'appcmd.exe')
-    if (!(Test-Path -Path $appcmdPath)) {
+    if (!(Test-Path -LiteralPath $appcmdPath)) {
         throw "Cannot find file '$appcmdPath'"
     }
 

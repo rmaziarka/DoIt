@@ -33,7 +33,7 @@ function Get-TargetResource {
 
     $buildAgentPropFile = [System.IO.Path]::Combine($TeamcityAgentPath, 'conf', 'buildAgent.properties')
     $result = @{ TeamcityAgentPath = $TeamcityAgentPath }
-    if (!(Test-Path -Path $buildAgentPropFile)) {
+    if (!(Test-Path -LiteralPath $buildAgentPropFile)) {
         return $result
     }
     $buildAgentProperties = [System.IO.File]::ReadAllText($buildAgentPropFile)
@@ -113,7 +113,7 @@ function Set-TargetResource {
         $AgentPort
     )
 
-    if (!(Test-Path -Path $TeamcityAgentPath)) {
+    if (!(Test-Path -LiteralPath $TeamcityAgentPath)) {
         throw "Directory '$TeamcityAgentPath' does not exist."
     }
 
@@ -122,9 +122,9 @@ function Set-TargetResource {
     }
 
     $buildAgentPropFile = [System.IO.Path]::Combine($TeamcityAgentPath, 'conf', 'buildAgent.properties')
-    if (!(Test-Path -Path $buildAgentPropFile)) {
+    if (!(Test-Path -LiteralPath $buildAgentPropFile)) {
         $buildAgentDistFile = [System.IO.Path]::Combine($TeamcityAgentPath, 'conf', 'buildAgent.dist.properties')
-        if (!(Test-Path -Path $buildAgentDistFile)) {
+        if (!(Test-Path -LiteralPath $buildAgentDistFile)) {
             throw "Neither '$buildAgentPropFile' nor '$buildAgentDistFile' exists."
         }
         Copy-Item -Path $buildAgentDistFile -Destination $buildAgentPropFile -Force

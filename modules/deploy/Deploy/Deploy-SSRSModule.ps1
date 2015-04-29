@@ -68,7 +68,7 @@ function Deploy-SSRSModule {
     foreach ($vsInstance in $vsEnvVars) {
         $vsPath = Get-Content -Path Env:\$vsInstance -ReadCount 0
         $privAssembliesPath =  Join-Path -Path $vsPath.ToString() -ChildPath "..\IDE\PrivateAssemblies\"
-        if (Test-Path -Path $privAssembliesPath -PathType Container) {
+        if (Test-Path -LiteralPath $privAssembliesPath -PathType Container) {
             [void]$paths.Add($privAssembliesPath)
         }
     }

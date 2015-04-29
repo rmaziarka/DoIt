@@ -58,6 +58,6 @@ function Test-LocalDSC {
 
     $VerbosePreference = $oldVerbosePreference
 
-    Remove-Item -Path $localTestPath -Force -Recurse -ErrorAction SilentlyContinue
+    Remove-Item -LiteralPath $localTestPath -Force -Recurse -ErrorAction SilentlyContinue
     Write-Output 'Success.'
 }

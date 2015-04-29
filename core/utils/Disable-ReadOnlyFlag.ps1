@@ -43,7 +43,7 @@ function Disable-ReadOnlyFlag {
 		$Path
 	)
 
-    if (!(Test-Path -Path $Path -PathType Leaf)) {
+    if (!(Test-Path -LiteralPath $Path -PathType Leaf)) {
         Write-Log -Critical "'$Path' does not exist or it is not a file"
     }
 

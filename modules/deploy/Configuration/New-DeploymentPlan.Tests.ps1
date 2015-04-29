@@ -371,7 +371,7 @@ Describe -Tag "PSCI.unit" "New-DeploymentPlan" {
 
                     $deploymentPlan[0].ConfigurationName | Should Be 'dsc1'
                     $deploymentPlan[0].ConfigurationType | Should Be 'Configuration'
-                    Test-Path -Path 'dscOutput\node1\dsc1\node1.mof' -PathType Leaf | Should Be $true
+                    Test-Path -LiteralPath 'dscOutput\node1\dsc1\node1.mof' -PathType Leaf | Should Be $true
                     $deploymentPlan[0].ConfigurationMofDir | Should Be (Resolve-Path -LiteralPath 'dscOutput\node1\dsc1').Path
                     
                     $deploymentPlan[0].ConnectionParams | Should Not Be $null
@@ -381,7 +381,7 @@ Describe -Tag "PSCI.unit" "New-DeploymentPlan" {
 
                     $deploymentPlan[1].ConfigurationName | Should Be 'dsc1'
                     $deploymentPlan[1].ConfigurationType | Should Be 'Configuration'
-                    Test-Path -Path 'dscOutput\node2\dsc1\node2.mof' -PathType Leaf | Should Be $true
+                    Test-Path -LiteralPath 'dscOutput\node2\dsc1\node2.mof' -PathType Leaf | Should Be $true
                     $deploymentPlan[1].ConfigurationMofDir | Should Be (Resolve-Path -LiteralPath 'dscOutput\node2\dsc1').Path
                     $deploymentPlan[1].ConnectionParams | Should Not Be $null
                     $deploymentPlan[1].ConnectionParams.Nodes[0] | Should Be 'node2'
@@ -389,7 +389,7 @@ Describe -Tag "PSCI.unit" "New-DeploymentPlan" {
                     $deploymentPlan[1].IsLocalRun | Should Be $false
                 }
             } finally {
-                Remove-Item -Path 'dscOutput' -Force -Recurse -ErrorAction SilentlyContinue
+                Remove-Item -LiteralPath 'dscOutput' -Force -Recurse -ErrorAction SilentlyContinue
             }
         }
 
@@ -412,7 +412,7 @@ Describe -Tag "PSCI.unit" "New-DeploymentPlan" {
                     $fail | Should Be $true
                 }
             } finally {
-                Remove-Item -Path 'dscOutput' -Force -Recurse -ErrorAction SilentlyContinue
+                Remove-Item -LiteralPath 'dscOutput' -Force -Recurse -ErrorAction SilentlyContinue
             }
         }
 
@@ -513,11 +513,11 @@ Describe -Tag "PSCI.unit" "New-DeploymentPlan" {
                     $deploymentPlan[3].RequiredPackages | Should Be 'package1'
                 }
             } finally {
-                Remove-Item -Path 'dscOutput' -Force -Recurse -ErrorAction SilentlyContinue
-                Remove-Item -Path 'package1' -Force -Recurse -ErrorAction SilentlyContinue
-                Remove-Item -Path 'package2' -Force -Recurse -ErrorAction SilentlyContinue
-                Remove-Item -Path 'packagen1' -Force -Recurse -ErrorAction SilentlyContinue
-                Remove-Item -Path 'packagen2' -Force -Recurse -ErrorAction SilentlyContinue
+                Remove-Item -LiteralPath 'dscOutput' -Force -Recurse -ErrorAction SilentlyContinue
+                Remove-Item -LiteralPath 'package1' -Force -Recurse -ErrorAction SilentlyContinue
+                Remove-Item -LiteralPath 'package2' -Force -Recurse -ErrorAction SilentlyContinue
+                Remove-Item -LiteralPath 'packagen1' -Force -Recurse -ErrorAction SilentlyContinue
+                Remove-Item -LiteralPath 'packagen2' -Force -Recurse -ErrorAction SilentlyContinue
             }
         }
     }

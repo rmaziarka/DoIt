@@ -120,7 +120,7 @@ function Start-ExternalProcess {
 	)
 
     $commandPath = $Command
-    if (!(Test-Path -Path $commandPath)) {
+    if (!(Test-Path -LiteralPath $commandPath)) {
         $exists = $false
 
         if (![System.IO.Path]::IsPathRooted($commandPath)) {
@@ -129,7 +129,7 @@ function Start-ExternalProcess {
 
             if (!$exists -and $WorkingDirectory) {
                 $commandPath = Join-Path -Path $WorkingDirectory -ChildPath $commandPath
-                $exists = Test-Path -Path $commandPath
+                $exists = Test-Path -LiteralPath $commandPath
                 $commandPath = (Resolve-Path -LiteralPath $commandPath).ProviderPath
             }
         } 

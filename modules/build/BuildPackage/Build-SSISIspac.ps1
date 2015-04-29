@@ -104,13 +104,13 @@ function Build-SSISIspac {
             '2013' = '12.0'
         }
         $vsDir = "$baseVsDir\Microsoft Visual Studio {0}" -f $vsVersionMap[$VisualStudioVersion]
-        if (!(Test-Path -Path $vsDir)) {
+        if (!(Test-Path -LiteralPath $vsDir)) {
             Write-Log -Critical "Cannot find Visual Studio directory at '$vsDir'. you probably don't have 'Microsoft SQL Server Data Tools - Business Intelligence for Visual Studio $VisualStudioVersion'. Please install it and try again."
         }
     }
 
     $devEnvPath = Join-Path -Path $vsDir -ChildPath 'Common7\IDE\devenv.com'
-    if (!(Test-Path -Path $devEnvPath)) {
+    if (!(Test-Path -LiteralPath $devEnvPath)) {
         Write-Log -Critical "Cannot find '$devEnvPath'."
     }
 
@@ -122,7 +122,7 @@ function Build-SSISIspac {
         $ssdtMissingError = $false
         if ($output -imatch 'see the migration report:(.*.htm)') {
             $migrationReportPath = $Matches[1]
-            if (Test-Path -Path $migrationReportPath) {
+            if (Test-Path -LiteralPath $migrationReportPath) {
                 $migrationReportContents = [IO.File]::ReadAllText($migrationReportPath)
                 if ($migrationReportContents -imatch '(?ms)<body>.*</body>') {
                     Write-Log -Warn "Migration report contents: `n$($Matches[0])"

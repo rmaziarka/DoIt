@@ -57,13 +57,13 @@ function Get-DscResourcesPaths {
     $baseDestPath = Join-Path -Path 'C:\Program Files' -ChildPath 'WindowsPowerShell\Modules'
     $isAll = ($ModuleNames.Count -eq 1 -and $ModuleNames[0] -ieq 'all')
     
-    if ((Test-Path -Path (Join-Path -Path $baseDscDir -ChildPath 'ext'))) { 
+    if ((Test-Path -LiteralPath (Join-Path -Path $baseDscDir -ChildPath 'ext'))) { 
         $modulesExternal = @(Join-Path -Path $baseDscDir -ChildPath 'ext\*\*' | Get-ChildItem -Directory)
         if (!$isAll) {
             $modulesExternal = @($modulesExternal | Where-Object { $ModuleNames -icontains $_.Name })
         }
     }
-    if ((Test-Path -Path (Join-Path -Path $baseDscDir -ChildPath 'custom'))) {
+    if ((Test-Path -LiteralPath (Join-Path -Path $baseDscDir -ChildPath 'custom'))) {
         $modulesCustom = @(Join-Path -Path $baseDscDir -ChildPath 'custom' | Get-ChildItem -Directory)
         if (!$isAll) {
             $modulesCustom = @($modulesCustom | Where-Object { $ModuleNames -icontains $_.Name })

@@ -95,7 +95,7 @@ Describe -Tag "PSCI.unit" "Get-UpdateXmlAppKeyCmdParams" {
                     $result[4] | Should Match "Key 'keyNew' not found under /configuration/appSettings - adding with value 'newValue'"
 
                 } finally {
-                    Remove-Item -Path $testFileName -Force -ErrorAction SilentlyContinue
+                    Remove-Item -LiteralPath $testFileName -Force -ErrorAction SilentlyContinue
                 }
 
             }
@@ -115,7 +115,7 @@ Describe -Tag "PSCI.unit" "Get-UpdateXmlAppKeyCmdParams" {
                     }
                     0 | Should Be 1
                 } finally {
-                    Remove-Item -Path $testFileName -Force -ErrorAction SilentlyContinue
+                    Remove-Item -LiteralPath $testFileName -Force -ErrorAction SilentlyContinue
                 }
             }
         }
@@ -157,7 +157,7 @@ Describe -Tag "PSCI.unit" "Get-UpdateXmlAppKeyCmdParams" {
                     $result[4] | Should Match "name 'keyNew' not found under /configuration/connectionStrings - adding with connectionString 'newValue'"
 
                 } finally {
-                    Remove-Item -Path $testFileName -Force -ErrorAction SilentlyContinue
+                    Remove-Item -LiteralPath $testFileName -Force -ErrorAction SilentlyContinue
                 }
 
             }
@@ -177,7 +177,7 @@ Describe -Tag "PSCI.unit" "Get-UpdateXmlAppKeyCmdParams" {
                     }
                     0 | Should Be 1
                 } finally {
-                    Remove-Item -Path $testFileName -Force -ErrorAction SilentlyContinue
+                    Remove-Item -LiteralPath $testFileName -Force -ErrorAction SilentlyContinue
                 }
             }
         }

@@ -180,7 +180,7 @@ function Start-DeploymentByPSRemoting {
         } finally {
             if ($PackageDirectoryAutoRemove) {
                 Set-Location -Path (Split-Path -Path $PackageDirectory -Parent)
-                Remove-Item -Path $PackageDirectory -Force -Recurse
+                Remove-Item -LiteralPath $PackageDirectory -Force -Recurse
             }
         }
     }

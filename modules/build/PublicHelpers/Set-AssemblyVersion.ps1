@@ -89,7 +89,7 @@ function Set-AssemblyVersion {
     $resolvedPaths = @()
     foreach ($p in $Path) { 
         $resolvedPath = Resolve-PathRelativeToProjectRoot -Path $p
-        if (Test-Path -Path $resolvedPath -PathType Leaf) {
+        if (Test-Path -LiteralPath $resolvedPath -PathType Leaf) {
             $resolvedPaths += $resolvedPath
         } else {
             $files = @(Get-ChildItem -Path $resolvedPath -File -Filter $FileMask -Recurse | Select-Object -ExpandProperty FullName)
@@ -102,7 +102,7 @@ function Set-AssemblyVersion {
 
     <#if ($CreateBackup) { 
         foreach ($p in $resolvedPaths) {
-            if (Test-Path -Path "${p}.bak") {
+            if (Test-Path -LiteralPath "${p}.bak") {
                 Write-Log -Critical "Backup file '${p}.bak' already exists. Please ensure you run Set-AssemblyVersion exactly once for each assembly info file."
             }
         }

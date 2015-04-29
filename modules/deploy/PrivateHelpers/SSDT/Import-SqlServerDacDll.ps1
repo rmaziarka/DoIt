@@ -49,7 +49,7 @@ function Import-SqlServerDacDll {
     
     $potentialDacDllPaths = @()
     $sqlServerPath = Join-Path -Path (Get-ProgramFilesx86Path) -ChildPath 'Microsoft SQL Server'
-    if (Test-Path -Path $sqlServerPath) {
+    if (Test-Path -LiteralPath $sqlServerPath) {
         $potentialDacDllPaths += $sqlServerPath
     }
 
@@ -57,7 +57,7 @@ function Import-SqlServerDacDll {
     if ($vsPath) {
         foreach ($path in $vsPath) {
             $dacPath = Join-Path -Path $path -ChildPath 'Common7\IDE\Extensions\Microsoft\SQLDB\DAC'
-            if (Test-Path -Path $dacPath) {
+            if (Test-Path -LiteralPath $dacPath) {
                 $potentialDacDllPaths += $dacPath
             }
         }
@@ -83,12 +83,12 @@ function Import-SqlServerDacDll {
 
     foreach ($potentialDacDllPath in $potentialDacDllPathsVer) {
         $path = Join-Path -Path $potentialDacDllPath.FullName -ChildPath 'Dac\bin\Microsoft.SqlServer.Dac.dll'
-        if (Test-Path -Path $path) {
+        if (Test-Path -LiteralPath $path) {
             $dacDllPath = $path
             break
         }
         $path = Join-Path -Path $potentialDacDllPath.FullName -ChildPath 'Microsoft.SqlServer.Dac.dll'
-        if (Test-Path -Path $path) {
+        if (Test-Path -LiteralPath $path) {
             $dacDllPath = $path
             break
         }

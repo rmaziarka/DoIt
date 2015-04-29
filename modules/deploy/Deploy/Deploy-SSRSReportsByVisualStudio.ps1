@@ -114,14 +114,14 @@ function Deploy-SSRSReportsByVisualStudio {
 
     $DevEnvPath = "C:\Program Files (x86)\Microsoft Visual Studio 9.0\Common7\IDE\devenv.com"
 
-    if (!(Test-Path -Path $DevEnvPath)) {
+    if (!(Test-Path -LiteralPath $DevEnvPath)) {
         Write-Log -Critical "BIDS for SQL Server 2008 R2 has not been found at '$DevEnvPath'."
     }        
 
     if ($ProjectName) {
         $RSProject = Join-Path -Path $PackagePath -ChildPath "$ProjectName.rptproj"
     
-        if (!(Test-Path -Path $RSProject)) {
+        if (!(Test-Path -LiteralPath $RSProject)) {
             Write-Log -Critical "Project $RSProject doesn't exist"
         }
     } else{
@@ -140,7 +140,7 @@ function Deploy-SSRSReportsByVisualStudio {
 
         $DataSourcePath = Join-Path -Path $PackagePath -ChildPath $_
 
-        if (!(Test-Path -Path $DataSourcePath)) {
+        if (!(Test-Path -LiteralPath $DataSourcePath)) {
             Write-Log -Critical "DataSource $DataSourcePath doesn't exist"
         }
 

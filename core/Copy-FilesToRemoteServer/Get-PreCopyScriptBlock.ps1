@@ -74,21 +74,21 @@ function Get-PreCopyScriptBlock {
         }
 
         $destZipFile = Join-Path -Path $Destination[0] -ChildPath $ZipFileName
-        if (Test-Path -Path $destZipFile) {
-            Remove-Item -Path $destZipFile -Force
+        if (Test-Path -LiteralPath $destZipFile) {
+            Remove-Item -LiteralPath $destZipFile -Force
         }
 
         foreach ($destPath in $Destination) { 
-            if (Test-Path -Path $destPath -PathType Leaf) {
+            if (Test-Path -LiteralPath $destPath -PathType Leaf) {
                 # if a file with the same name as Destination directory, just delete it
-                [void](Remove-Item -Path $destPath -Force)
-            } elseif ($ClearDestination -and (Test-Path -Path $destPath -PathType Container)) {
+                [void](Remove-Item -LiteralPath $destPath -Force)
+            } elseif ($ClearDestination -and (Test-Path -LiteralPath $destPath -PathType Container)) {
                 # if Destination directory exists and $ClearDestination = $true, delete it
-                [void](Remove-Item -Path $destPath -Force -Recurse)
+                [void](Remove-Item -LiteralPath $destPath -Force -Recurse)
             }
 
             # create Destination directory
-            if (!(Test-Path -Path $destPath)) {
+            if (!(Test-Path -LiteralPath $destPath)) {
                 [void](New-Item -Path $destPath -ItemType Directory)
             }   
         }

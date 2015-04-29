@@ -42,7 +42,7 @@ Describe -Tag "PSCI.unit" "Copy-FilesToRemoteServer" {
 
         $dstDir = 'c:\PSCITestDir'
         $dstDirGreen = 'c:\PSCITestDir2'
-        Remove-Item -Path $dstDir -Force -Recurse -ErrorAction SilentlyContinue
+        Remove-Item -LiteralPath $dstDir -Force -Recurse -ErrorAction SilentlyContinue
 
         function New-TestDirStructure {
             New-Item -Path 'testFolder1\testFolder11' -ItemType Directory -Force 
@@ -53,29 +53,29 @@ Describe -Tag "PSCI.unit" "Copy-FilesToRemoteServer" {
         }
 
         function Remove-TestDirStructure {
-             Remove-Item -Path 'testFolder1' -Force -Recurse -ErrorAction SilentlyContinue
-             Remove-Item -Path 'testFolder2' -Force -Recurse -ErrorAction SilentlyContinue
-             Remove-Item -Path $dstDir -Force -Recurse -ErrorAction SilentlyContinue
-             Remove-Item -Path $dstDirGreen -Force -Recurse -ErrorAction SilentlyContinue
+             Remove-Item -LiteralPath 'testFolder1' -Force -Recurse -ErrorAction SilentlyContinue
+             Remove-Item -LiteralPath 'testFolder2' -Force -Recurse -ErrorAction SilentlyContinue
+             Remove-Item -LiteralPath $dstDir -Force -Recurse -ErrorAction SilentlyContinue
+             Remove-Item -LiteralPath $dstDirGreen -Force -Recurse -ErrorAction SilentlyContinue
         }
 
         function Validate-TestDirStructure($dst) {
-            Test-Path -Path $dst -PathType Container | Should Be $true
-            Test-Path -Path "$dst\test1\testFile2" -PathType Leaf | Should Be $true
+            Test-Path -LiteralPath $dst -PathType Container | Should Be $true
+            Test-Path -LiteralPath "$dst\test1\testFile2" -PathType Leaf | Should Be $true
             (Get-Item -Path "$dst\test1\testFile2").Length | Should Be (Get-Item -Path 'testFolder1\testFile2').Length
-            Test-Path -Path "$dst\test1\testFolder11\testFile3" -PathType Leaf | Should Be $true
+            Test-Path -LiteralPath "$dst\test1\testFolder11\testFile3" -PathType Leaf | Should Be $true
             (Get-Item -Path "$dst\test1\testFolder11\testFile3").Length | Should Be (Get-Item -Path 'testFolder1\testfolder11\testFile3').Length
-            Test-Path -Path "$dst\test2\testFile4" -PathType Leaf | Should Be $true
+            Test-Path -LiteralPath "$dst\test2\testFile4" -PathType Leaf | Should Be $true
             (Get-Item -Path "$dst\test2\testFile4").Length | Should Be (Get-Item -Path 'testFolder2\testFile4').Length
         }
 
         function Validate-TestDirStructureFlat($dst) {
-            Test-Path -Path $dst -PathType Container | Should Be $true
-            Test-Path -Path "$dst\testFile2" -PathType Leaf | Should Be $true
+            Test-Path -LiteralPath $dst -PathType Container | Should Be $true
+            Test-Path -LiteralPath "$dst\testFile2" -PathType Leaf | Should Be $true
             (Get-Item -Path "$dst\testFile2").Length | Should Be (Get-Item -Path 'testFolder1\testFile2').Length
-            Test-Path -Path "$dst\testFolder11\testFile3" -PathType Leaf | Should Be $true
+            Test-Path -LiteralPath "$dst\testFolder11\testFile3" -PathType Leaf | Should Be $true
             (Get-Item -Path "$dst\testFolder11\testFile3").Length | Should Be (Get-Item -Path 'testFolder1\testfolder11\testFile3').Length
-            Test-Path -Path "$dst\testFile4" -PathType Leaf | Should Be $true
+            Test-Path -LiteralPath "$dst\testFile4" -PathType Leaf | Should Be $true
             (Get-Item -Path "$dst\testFile4").Length | Should Be (Get-Item -Path 'testFolder2\testFile4').Length
         }
         
@@ -88,8 +88,8 @@ Describe -Tag "PSCI.unit" "Copy-FilesToRemoteServer" {
                 Copy-FilesToRemoteServer -Path 'test.zip' -Destination $dstDir -ConnectionParams $connectionParams
             
                 It "should copy the file" {
-                    Test-Path -Path $dstDir -PathType Container | Should Be $true
-                    Test-Path -Path "$dstDir\testFile1" -PathType Leaf | Should Be $true
+                    Test-Path -LiteralPath $dstDir -PathType Container | Should Be $true
+                    Test-Path -LiteralPath "$dstDir\testFile1" -PathType Leaf | Should Be $true
                     (Get-Item -Path "$dstDir\testFile1").Length | Should Be (Get-Item -Path 'testFile1').Length
                 }
 
@@ -98,9 +98,9 @@ Describe -Tag "PSCI.unit" "Copy-FilesToRemoteServer" {
                 }
 
             } finally {
-                Remove-Item -Path 'testfile1' -Force -ErrorAction SilentlyContinue
-                Remove-Item -Path 'test.zip' -Force -ErrorAction SilentlyContinue
-                Remove-Item -Path $dstDir -Force -Recurse -ErrorAction SilentlyContinue
+                Remove-Item -LiteralPath 'testfile1' -Force -ErrorAction SilentlyContinue
+                Remove-Item -LiteralPath 'test.zip' -Force -ErrorAction SilentlyContinue
+                Remove-Item -LiteralPath $dstDir -Force -Recurse -ErrorAction SilentlyContinue
             }
         }
 
@@ -111,14 +111,14 @@ Describe -Tag "PSCI.unit" "Copy-FilesToRemoteServer" {
                 Copy-FilesToRemoteServer -Path 'testFile1' -Destination $dstDir -ConnectionParams $connectionParams
 
                 It "should copy the file" {
-                    Test-Path -Path $dstDir -PathType Container | Should Be $true
-                    Test-Path -Path "$dstDir\testFile1" -PathType Leaf | Should Be $true
+                    Test-Path -LiteralPath $dstDir -PathType Container | Should Be $true
+                    Test-Path -LiteralPath "$dstDir\testFile1" -PathType Leaf | Should Be $true
                     (Get-Item -Path "$dstDir\testFile1").Length | Should Be (Get-Item -Path 'testFile1').Length
                 }
 
             } finally {
-                Remove-Item -Path 'testFile1' -Force -ErrorAction SilentlyContinue
-                Remove-Item -Path $dstDir -Force -Recurse -ErrorAction SilentlyContinue
+                Remove-Item -LiteralPath 'testFile1' -Force -ErrorAction SilentlyContinue
+                Remove-Item -LiteralPath $dstDir -Force -Recurse -ErrorAction SilentlyContinue
             }
         } 
 
@@ -132,18 +132,18 @@ Describe -Tag "PSCI.unit" "Copy-FilesToRemoteServer" {
                 Copy-FilesToRemoteServer -Path 'testFile1', 'testFolder1' -Destination $dstDir -ConnectionParams $connectionParams
 
                 It "should copy the files with structure intact" {
-                    Test-Path -Path $dstDir -PathType Container | Should Be $true
-                    Test-Path -Path "$dstDir\testFile1" -PathType Leaf | Should Be $true
+                    Test-Path -LiteralPath $dstDir -PathType Container | Should Be $true
+                    Test-Path -LiteralPath "$dstDir\testFile1" -PathType Leaf | Should Be $true
                     (Get-Item -Path "$dstDir\testFile1").Length | Should Be (Get-Item -Path 'testFile1').Length
-                    Test-Path -Path "$dstDir\testFile2" -PathType Leaf | Should Be $true
+                    Test-Path -LiteralPath "$dstDir\testFile2" -PathType Leaf | Should Be $true
                     (Get-Item -Path "$dstDir\testFile2").Length | Should Be (Get-Item -Path 'testFolder1\testFile2').Length
-                    Test-Path -Path "$dstDir\testFolder11\testFile3" -PathType Leaf | Should Be $true
+                    Test-Path -LiteralPath "$dstDir\testFolder11\testFile3" -PathType Leaf | Should Be $true
                     (Get-Item -Path "$dstDir\testFolder11\testFile3").Length | Should Be (Get-Item -Path 'testFolder1\testfolder11\testFile3').Length
                 }
 
             } finally {
-                Remove-Item -Path 'testFile1' -Force -ErrorAction SilentlyContinue
-                Remove-Item -Path 'testFolder1' -Force -Recurse -ErrorAction SilentlyContinue
+                Remove-Item -LiteralPath 'testFile1' -Force -ErrorAction SilentlyContinue
+                Remove-Item -LiteralPath 'testFolder1' -Force -Recurse -ErrorAction SilentlyContinue
             }
         } 
          
@@ -180,12 +180,12 @@ Describe -Tag "PSCI.unit" "Copy-FilesToRemoteServer" {
                 }  
 
                 It "should not touch additional files" {
-                    Test-Path -Path "$dstDir\test1\testFileAdditional" -PathType Leaf | Should Be $true
-                    Test-Path -Path "$dstDir\test1\newFolder\testFileAdditional" -PathType Leaf | Should Be $true
+                    Test-Path -LiteralPath "$dstDir\test1\testFileAdditional" -PathType Leaf | Should Be $true
+                    Test-Path -LiteralPath "$dstDir\test1\newFolder\testFileAdditional" -PathType Leaf | Should Be $true
                     (Get-Item -Path "$dstDir\test1\newFolder\testFileAdditional").Length | Should Be $len
-                    Test-Path -Path "$dstDir\test1\testFileAdditional" -PathType Leaf | Should Be $true
+                    Test-Path -LiteralPath "$dstDir\test1\testFileAdditional" -PathType Leaf | Should Be $true
                     (Get-Item -Path "$dstDir\test1\testFileAdditional").Length | Should Be $len
-                    Test-Path -Path "$dstDir\testFileAdditional" -PathType Leaf | Should Be $true
+                    Test-Path -LiteralPath "$dstDir\testFileAdditional" -PathType Leaf | Should Be $true
                     (Get-Item -Path "$dstDir\testFileAdditional").Length | Should Be $len
                 }
             } finally {
@@ -210,12 +210,12 @@ Describe -Tag "PSCI.unit" "Copy-FilesToRemoteServer" {
                 }
 
                 It "should delete additional files in Destination" {       
-                    Test-Path -Path "$dstDir\test1\testFileAdditional" | Should Be $false
-                    Test-Path -Path "$dstDir\test1\newFolder" | Should Be $false
+                    Test-Path -LiteralPath "$dstDir\test1\testFileAdditional" | Should Be $false
+                    Test-Path -LiteralPath "$dstDir\test1\newFolder" | Should Be $false
                 }
 
                 It "should not touch additional files outside Destination" {       
-                    Test-Path -Path "$dstDir\testFileAdditional" | Should Be $true
+                    Test-Path -LiteralPath "$dstDir\testFileAdditional" | Should Be $true
                 }
 
             } finally {
@@ -240,9 +240,9 @@ Describe -Tag "PSCI.unit" "Copy-FilesToRemoteServer" {
                 }
 
                 It "should delete additional files in Destination" {       
-                    Test-Path -Path "$dstDir\test1\newFolder\testFileAdditional" | Should Be $false
-                    Test-Path -Path "$dstDir\test1\testFileAdditional" | Should Be $false
-                    Test-Path -Path "$dstDir\testFileAdditional"| Should Be $false
+                    Test-Path -LiteralPath "$dstDir\test1\newFolder\testFileAdditional" | Should Be $false
+                    Test-Path -LiteralPath "$dstDir\test1\testFileAdditional" | Should Be $false
+                    Test-Path -LiteralPath "$dstDir\testFileAdditional"| Should Be $false
                 }
             } finally {
                 Remove-TestDirStructure
@@ -294,7 +294,7 @@ Describe -Tag "PSCI.unit" "Copy-FilesToRemoteServer" {
                 }
 
                 It "should create syncHash file in first directory" {
-                    Test-Path -Path "$dstDir\test1\syncHash_999606178B015C8FB734CF07D268AA300861CB34" | Should Be $true
+                    Test-Path -LiteralPath "$dstDir\test1\syncHash_999606178B015C8FB734CF07D268AA300861CB34" | Should Be $true
                     (Get-ChildItem -Path "$dstDir\test1" -Filter "syncHash*").Count | Should Be 1
 
                 }
@@ -309,7 +309,7 @@ Describe -Tag "PSCI.unit" "Copy-FilesToRemoteServer" {
                     Set-Content -Path "testfolder1\testFile2" -Value 'aa' -Force
                     Copy-FilesToRemoteServer -Path 'testFolder1', 'testFolder2' -Destination "$dstDir\test1", "$dstDir\test2" -ConnectionParams $connectionParams -CheckHashMode UseHashFile
                     Validate-TestDirStructure $dstDir
-                    Test-Path -Path "$dstDir\test1\syncHash_28B142D577A040D52F5D1BA8C42CA5517F75382E" | Should Be $true
+                    Test-Path -LiteralPath "$dstDir\test1\syncHash_28B142D577A040D52F5D1BA8C42CA5517F75382E" | Should Be $true
                     (Get-ChildItem -Path "$dstDir\test1" -Filter "syncHash*").Count | Should Be 1
                 }
 
@@ -401,7 +401,7 @@ Describe -Tag "PSCI.unit" "Copy-FilesToRemoteServer" {
                 }             
 
                 It "second directory should not exist" {
-                    Test-Path -Path $dstDirGreen | Should Be $false
+                    Test-Path -LiteralPath $dstDirGreen | Should Be $false
                 }  
                 
                 It "should set environment variable to first direcory" {
@@ -409,7 +409,7 @@ Describe -Tag "PSCI.unit" "Copy-FilesToRemoteServer" {
                 }  
 
                 It "should create .currentLive file in first directory" {
-                    Test-Path -Path "$dstDir\.currentLive" -PathType Leaf | Should be $true
+                    Test-Path -LiteralPath "$dstDir\.currentLive" -PathType Leaf | Should be $true
                 }
 
             } finally {
@@ -429,7 +429,7 @@ Describe -Tag "PSCI.unit" "Copy-FilesToRemoteServer" {
                 }             
 
                 It "first directory should not exist" {
-                    Test-Path -Path $dstDir | Should Be $false
+                    Test-Path -LiteralPath $dstDir | Should Be $false
                 }             
                 
                 It "should set environment variable to second direcory" {
@@ -437,7 +437,7 @@ Describe -Tag "PSCI.unit" "Copy-FilesToRemoteServer" {
                 }  
 
                 It "should create .currentLive file in second directory" {
-                    Test-Path -Path "$dstDirGreen\.currentLive" -PathType Leaf | Should be $true
+                    Test-Path -LiteralPath "$dstDirGreen\.currentLive" -PathType Leaf | Should be $true
                 }
 
             } finally {
@@ -458,7 +458,7 @@ Describe -Tag "PSCI.unit" "Copy-FilesToRemoteServer" {
                 }             
 
                 It "first directory should exist but not have .currentLive file" {
-                    Test-Path -Path "$dstDir\.currentLive" | Should Be $false
+                    Test-Path -LiteralPath "$dstDir\.currentLive" | Should Be $false
                 }             
                 
                 It "should set environment variable to second direcory" {
@@ -466,7 +466,7 @@ Describe -Tag "PSCI.unit" "Copy-FilesToRemoteServer" {
                 }  
 
                 It "should create .currentLive file in second directory" {
-                    Test-Path -Path "$dstDirGreen\.currentLive" -PathType Leaf | Should be $true
+                    Test-Path -LiteralPath "$dstDirGreen\.currentLive" -PathType Leaf | Should be $true
                 }
 
             } finally {

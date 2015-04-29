@@ -83,12 +83,12 @@ function Get-PostCopyScriptBlock {
             try { 
                 $regEntry = 'Registry::HKLM\SOFTWARE\7-Zip'
                 # note - registry check will fail if running Powershell x86 on x64 machine
-                if (Test-Path -Path $regEntry) {
+                if (Test-Path -LiteralPath $regEntry) {
                     $7zipPath = (Get-ItemProperty -Path $regEntry).Path + '7z.exe'
                 } else {
                     $7zipPath = 'C:\Program Files\7-Zip\7z.exe'
                 }
-                if (Test-Path -Path $7zipPath) {
+                if (Test-Path -LiteralPath $7zipPath) {
                     & $7zipPath " x $ZipFilePath -o$Destination -y"
                     if (!$LASTEXITCODE) {
                         $success = $true
@@ -109,12 +109,12 @@ function Get-PostCopyScriptBlock {
             $dst.Copyhere($zip.Items(), 0x14)
         }
 
-        Remove-Item -Path $ZipFilePath -Force
+        Remove-Item -LiteralPath $ZipFilePath -Force
 
         if ($BlueGreenEnvVariableName) {
             $oldPath = [Environment]::GetEnvironmentVariable($BlueGreenEnvVariableName, 'Machine')
             if ($oldPath) {
-                [void](Remove-Item -Path (Join-Path -Path $oldPath -ChildPath '.currentLive') -Force -ErrorAction SilentlyContinue)
+                [void](Remove-Item -LiteralPath (Join-Path -Path $oldPath -ChildPath '.currentLive') -Force -ErrorAction SilentlyContinue)
             }
             Write-Verbose -Message "Setting env variable '$BlueGreenEnvVariableName' to '$destPath'"
             [Environment]::SetEnvironmentVariable($BlueGreenEnvVariableName, $destPath, 'Machine')

@@ -39,11 +39,11 @@ function Get-TargetResource {
 
     $result = @{ MasterFilePath = $MasterFilePath; PartFilePath = $PartFilePath; }
 
-    if (!(Test-Path -Path $MasterFilePath)) {
+    if (!(Test-Path -LiteralPath $MasterFilePath)) {
         throw "File '$MasterFilePath' does not exist."
     }
 
-    if (!(Test-Path -Path $PartFilePath)) {
+    if (!(Test-Path -LiteralPath $PartFilePath)) {
         throw "File '$PartFilePath' does not exist."
     }
 

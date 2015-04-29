@@ -90,7 +90,7 @@ function Get-MsBuildPath {
             } elseif ($ForceArchitecture -eq "x64") {
                 $msBuildPath = $msBuildPath -replace "Framework\\", "Framework64\"
             }
-            if (Test-Path -Path $msBuildPath) {
+            if (Test-Path -LiteralPath $msBuildPath) {
                 return $msBuildPath
             }    
         }

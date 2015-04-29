@@ -59,12 +59,12 @@ function Backup-Files {
     Write-Log -Info "Copying path(s) $($leaves -join ', ') to '$DestinationPath'"
     [void](New-Item -Path $DestinationPath -ItemType Directory -Force)
     foreach ($p in $Path) {
-        if (!(Test-Path -Path $p)) {
+        if (!(Test-Path -LiteralPath $p)) {
             Write-Log -Critical "Path '$p' does not exist."
         }
         $p = (Resolve-Path -LiteralPath $p).ProviderPath
 
-        if (Test-Path -Path $p -PathType Leaf) {
+        if (Test-Path -LiteralPath $p -PathType Leaf) {
             $toCopy = $p
         } else {
             $toCopy = Get-ChildItem -Path $p -Recurse | Select-Object -ExpandProperty FullName

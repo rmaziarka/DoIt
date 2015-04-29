@@ -156,7 +156,7 @@ function Start-DeploymentByMSDeploy {
 try { Set-Location -Path '$PackageDirectory'; `$Global:PSCIRemotingMode = '$($RunOnConnectionParams.RemotingMode)'; `$Global:PSCICIServer = '$($Global:PSCIGlobalConfiguration.CIServer)'; & $deployScript; 
 "@
     if ($PackageDirectoryAutoRemove) {
-        $powershellCmd += "} finally { Set-Location -Path (Split-Path -Path '$PackageDirectory' -Parent); Remove-Item -Path '$PackageDirectory' -Force -Recurse }"
+        $powershellCmd += "} finally { Set-Location -Path (Split-Path -Path '$PackageDirectory' -Parent); Remove-Item -LiteralPath '$PackageDirectory' -Force -Recurse }"
     } else {
         $powershellCmd += "} finally { }"
     }
@@ -165,5 +165,5 @@ try { Set-Location -Path '$PackageDirectory'; `$Global:PSCIRemotingMode = '$($Ru
 
     Sync-MsDeployDirectory -SourcePath $tempSrcPath -DestinationDir $PackageDirectory -DestString $msDeployDestinationString -AddParameters @($postDeploymentScript)
                     
-    [void](Remove-Item -Path $tempSrcPath -Force -Recurse -ErrorAction SilentlyContinue)
+    [void](Remove-Item -LiteralPath $tempSrcPath -Force -Recurse -ErrorAction SilentlyContinue)
 }

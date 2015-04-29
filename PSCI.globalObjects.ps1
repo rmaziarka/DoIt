@@ -64,11 +64,11 @@ $Global:PSCIGlobalConfiguration = [PSCustomObject]@{
     ExitImmediatelyOnError = ($host.name -eq 'ConsoleHost')
 }
 
-if (Test-Path -Path Variable:Global:PSCIRemotingMode) {
+if (Test-Path -LiteralPath Variable:Global:PSCIRemotingMode) {
     $Global:PSCIGlobalConfiguration.RemotingMode = $Global:PSCIRemotingMode
 }
 
-if (Test-Path -Path Variable:Global:PSCICIServer) {
+if (Test-Path -LiteralPath Variable:Global:PSCICIServer) {
     $Global:PSCIGlobalConfiguration.CIServer = $Global:PSCICIServer
 } elseif ($env:TEAMCITY_VERSION) {
     $Global:PSCIGlobalConfiguration.CIServer = 'TeamCity'

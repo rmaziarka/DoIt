@@ -49,7 +49,7 @@ function Start-NugetRestore {
     $nugetPath = ''
     while (!$nugetPath -and $currentPath) {
         $path = Join-Path -Path $currentPath -ChildPath '.nuget\nuget.exe'
-        if (Test-Path -Path $path) {
+        if (Test-Path -LiteralPath $path) {
             $nugetPath = $path
         } else {
             $currentPath = Split-Path -Path $currentPath -Parent

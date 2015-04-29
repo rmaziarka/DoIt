@@ -39,7 +39,7 @@ function Get-TargetResource {
     )
 
     $result = @{ Path = $Path; Key = $Key; }
-    if (!(Test-Path -Path $Path)) {
+    if (!(Test-Path -LiteralPath $Path)) {
         $result.Ensure = 'Absent'
         return $result
     }
@@ -103,7 +103,7 @@ function Set-TargetResource {
         $Ensure = 'Present'
     )
 
-    if (!(Test-Path -Path $Path)) {
+    if (!(Test-Path -LiteralPath $Path)) {
         if ($Ensure -eq 'Absent') {
             return
         }

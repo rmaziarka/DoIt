@@ -77,7 +77,7 @@ function Sync-DirectoriesWithRobocopy {
         $ExcludeFiles
     )
 
-    if (!(Test-Path -Path $SrcPath)) {
+    if (!(Test-Path -LiteralPath $SrcPath)) {
         Write-Log -Critical "Path '$SrcPath' does not exist."
     }
     if (!(Test-Path -IsValid $DestPath) -and !([uri]$DestPath).IsUnc) {

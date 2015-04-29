@@ -281,7 +281,7 @@ function Set-Servers {
     $RegKey = 'HKLM:\SOFTWARE\Policies\Microsoft\Windows\CredentialsDelegation\{0}' -f (Convert-ToRegistryKey -CredentialType $CredentialType)
 
     if (!$DelegateComputers) {
-        Remove-Item -Path $RegKey -ErrorAction SilentlyContinue
+        Remove-Item -LiteralPath $RegKey -ErrorAction SilentlyContinue
     } else {
         [void](New-Item -Path $RegKey -ErrorAction SilentlyContinue)
 

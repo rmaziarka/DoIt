@@ -93,7 +93,7 @@ function Invoke-ScriptCop {
                }
         }
          
-        Remove-Item -Path 'ScriptCop.txt' -Force -ErrorAction SilentlyContinue
+        Remove-Item -LiteralPath 'ScriptCop.txt' -Force -ErrorAction SilentlyContinue
 		$testResults | ForEach-Object { Tee-Object -FilePath 'ScriptCop.txt' -InputObject "$($_.ItemWithProblem) - $($_.Rule) - $($_.Problem))" -Append  }
         $numErrors = $testResults.Count
 	}

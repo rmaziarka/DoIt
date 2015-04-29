@@ -41,9 +41,9 @@ function Remove-PackagesDir {
     $configurationPaths = Get-ConfigurationPaths
 
     $packagesPath = $configurationPaths.PackagesPath
-    if (Test-Path -Path $packagesPath) {
+    if (Test-Path -LiteralPath $packagesPath) {
         Write-Log -Info "Deleting packages directory '$packagesPath'"
-        [void](Remove-Item -Path $packagesPath -Force -Recurse)
+        [void](Remove-Item -LiteralPath $packagesPath -Force -Recurse)
     }
 
 }

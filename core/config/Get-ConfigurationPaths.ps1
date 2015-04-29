@@ -43,7 +43,7 @@ function Get-ConfigurationPaths {
     [OutputType([PSCustomObject])]
     param()
 
-    if (!(Test-Path -Path variable:global:PSCIGlobalConfiguration)) {
+    if (!(Test-Path -LiteralPath variable:global:PSCIGlobalConfiguration)) {
         Write-Log -Critical 'No global PSCIGlobalConfiguration variable.'
     }
 

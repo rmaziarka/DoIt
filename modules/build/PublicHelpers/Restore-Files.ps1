@@ -59,6 +59,6 @@ function Restore-Files {
 
     if ($RemoveDestinationPath) {
         $destinationPath = Split-Path -Path ($BackupList[0].BackupPath) -Parent
-        Remove-Item -Path $destinationPath -Force -Recurse
+        Remove-Item -LiteralPath $destinationPath -Force -Recurse
     }
 }

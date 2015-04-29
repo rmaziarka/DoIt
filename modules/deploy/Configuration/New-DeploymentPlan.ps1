@@ -129,8 +129,8 @@ function New-DeploymentPlan {
         Write-Log -Info "TokensOverride: $log"
     }
 
-    if (Test-Path -Path $dscOutputPath) {
-        [void](Remove-Item -Path $dscOutputPath -Force -Recurse)
+    if (Test-Path -LiteralPath $dscOutputPath) {
+        [void](Remove-Item -LiteralPath $dscOutputPath -Force -Recurse)
     }
 
     foreach ($env in $Environment) {

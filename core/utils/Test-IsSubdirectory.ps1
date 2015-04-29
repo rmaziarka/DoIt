@@ -49,10 +49,10 @@ function Test-IsSubdirectory {
         $Path2
     )
 
-    if (Test-Path -Path $Path1) {
+    if (Test-Path -LiteralPath $Path1) {
         $Path1 = (Resolve-Path -LiteralPath $Path1).ProviderPath
     }
-    if (Test-Path -Path $Path2) {
+    if (Test-Path -LiteralPath $Path2) {
         $Path2 = (Resolve-Path -LiteralPath $Path2).ProviderPath
     }
 

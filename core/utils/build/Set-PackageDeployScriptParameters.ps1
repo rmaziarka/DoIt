@@ -43,7 +43,7 @@ function Set-PackageDeployScriptParameters {
     )
 
     Write-Log -Info "Replacing default path values / variables in file '$DeployScriptToUpdatePath'"
-    if (!(Test-Path -Path $DeployScriptToUpdatePath)) {
+    if (!(Test-Path -LiteralPath $DeployScriptToUpdatePath)) {
         Write-Log -Critical "Cannot find file '$DeployScriptToUpdatePath'. Please ensure it exists or pass parameter -ReplaceDeployScriptParameters:`$false"
     }
 

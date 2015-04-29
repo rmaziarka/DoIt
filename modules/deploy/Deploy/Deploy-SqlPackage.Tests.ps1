@@ -52,7 +52,7 @@ Describe -Tag "PSCI.unit" "Deploy-SqlPackage" {
         }
 
         function Remove-SqlTestPackage {
-            Remove-Item -Path 'sqls' -Force -Recurse -ErrorAction SilentlyContinue
+            Remove-Item -LiteralPath 'sqls' -Force -Recurse -ErrorAction SilentlyContinue
         }
 
         Context "when invoked with default parameters" {

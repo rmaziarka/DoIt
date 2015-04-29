@@ -71,16 +71,16 @@ Describe -Tag "PSCI.unit" "Install-DscResources" {
 
         Context "when installing to localhost" {
             $expectedDst = (Get-DscResourcesPaths $moduleNames).DstPath
-            Remove-Item -Path $expectedDst -Force -Recurse -ErrorAction SilentlyContinue
+            Remove-Item -LiteralPath $expectedDst -Force -Recurse -ErrorAction SilentlyContinue
 
             Install-DscResources -ModuleNames $moduleNames
 
             It "should copy modules" {
-                Test-Path -Path $expectedDst | Should Be $true
+                Test-Path -LiteralPath $expectedDst | Should Be $true
             }
 
             It "should not copy Examples directory" {
-                Test-Path -Path ("{0}\Examples" -f $expectedDst[2]) | Should Be $false
+                Test-Path -LiteralPath ("{0}\Examples" -f $expectedDst[2]) | Should Be $false
             }
         }
 
@@ -89,16 +89,16 @@ Describe -Tag "PSCI.unit" "Install-DscResources" {
             Mock Test-ComputerNameIsLocalhost { return $false }
 
             $expectedDst = (Get-DscResourcesPaths $moduleNames).DstPath
-            Remove-Item -Path $expectedDst -Force -Recurse -ErrorAction SilentlyContinue
+            Remove-Item -LiteralPath $expectedDst -Force -Recurse -ErrorAction SilentlyContinue
 
             Install-DscResources -ModuleNames $moduleNames
 
             It "should copy modules" {
-                Test-Path -Path $expectedDst | Should Be $true
+                Test-Path -LiteralPath $expectedDst | Should Be $true
             }
 
             It "should not copy Examples directory" {
-                Test-Path -Path ("{0}\Examples" -f $expectedDst[2]) | Should Be $false
+                Test-Path -LiteralPath ("{0}\Examples" -f $expectedDst[2]) | Should Be $false
             }
         }
 

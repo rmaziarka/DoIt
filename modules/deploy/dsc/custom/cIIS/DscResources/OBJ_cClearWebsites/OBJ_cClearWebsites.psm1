@@ -129,7 +129,7 @@ function Set-TargetResource
             }
             if ($ClearDirectories) {
                 Write-Verbose "Removing directory '$($entity.PhysicalPath)'"
-                Remove-Item -Path $entity.PhysicalPath -Recurse -Force
+                Remove-Item -LiteralPath $entity.PhysicalPath -Recurse -Force
             }
         }
     } catch { 

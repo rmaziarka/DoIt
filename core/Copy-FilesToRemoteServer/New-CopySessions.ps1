@@ -120,7 +120,7 @@ function New-CopySessions {
             $remoteHash = Invoke-Command -Session $session -ScriptBlock {
                 $destinations = $using:Destination
                 foreach ($dest in $destinations) {
-                    if (!(Test-Path -Path $dest)) {
+                    if (!(Test-Path -LiteralPath $dest)) {
                         return $null
                     }
                 }
@@ -130,7 +130,7 @@ function New-CopySessions {
         } elseif ($CheckHashMode -eq 'UseHashFile' -and $HashPath) {
             $hashRemoteFilePath = Join-Path -Path $Destination[0] -ChildPath "syncHash_$HashPath"
             $hashFileExistsRemotely = Invoke-Command -Session $session -ScriptBlock {
-                Test-Path -Path $using:hashRemoteFilePath
+                Test-Path -LiteralPath $using:hashRemoteFilePath
             }
             $needUpdate = !$hashFileExistsRemotely
         }

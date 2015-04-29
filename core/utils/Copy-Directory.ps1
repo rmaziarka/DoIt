@@ -84,8 +84,8 @@ function Copy-Directory {
         $Overwrite
     ) 
 
-    if ($Overwrite -and (Test-Path -Path $Destination)) {
-        [void](Remove-Item -Path $Destination -Recurse -Force)
+    if ($Overwrite -and (Test-Path -LiteralPath $Destination)) {
+        [void](Remove-Item -LiteralPath $Destination -Recurse -Force)
     }
     [void](New-Item -Path $Destination -ItemType Directory -Force)
 
@@ -93,7 +93,7 @@ function Copy-Directory {
     foreach ($file in $filesToCopy) {
         $destFile = Join-Path -Path $Destination -ChildPath $file.RelativePath
         $destFolder = Split-Path -Path $destFile -Parent
-        if ($destFolder -and !(Test-Path -Path $destFolder)) {
+        if ($destFolder -and !(Test-Path -LiteralPath $destFolder)) {
             [void](New-Item -Path $destFolder -ItemType Directory -Force)
         }
         Copy-Item -Path $file.FullName -Destination $destFile -Force

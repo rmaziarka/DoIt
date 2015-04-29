@@ -166,7 +166,7 @@ function New-DeploymentPlanEntry {
         $packagePath = (Get-ConfigurationPaths).PackagesPath
         foreach ($package in $requiredPackages) {
             $dir = Join-Path -Path $packagePath -ChildPath $package
-            if (!(Test-Path -Path $dir)) {
+            if (!(Test-Path -LiteralPath $dir)) {
                 Write-Log -Critical "A required package named '$package' does not exist at '$dir' (defined in environment '$Environment' / ServerRole '$($ServerRole.Name)' / Configuration '$($Configuration.Name)'."
             }
         }

@@ -57,8 +57,8 @@ function Publish-VirtualDirectory {
     )
 
     $iisPath = "IIS:/sites/$SiteName/$Path"
-    if (!(Test-Path -Path $iisPath)) {
-        if (!(Test-Path -Path $PhysicalPath)) {
+    if (!(Test-Path -LiteralPath $iisPath)) {
+        if (!(Test-Path -LiteralPath $PhysicalPath)) {
             Write-Log -Info "Creating physical path '$PhysicalPath' for virtual directory '$Path'"
             [void](New-Item -Path $PhysicalPath -ItemType directory)
         }

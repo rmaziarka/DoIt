@@ -52,7 +52,7 @@ function Get-TargetResource {
         $Ensure = 'Present'
     )
 
-    if (!(Test-Path -Path $Path)) {
+    if (!(Test-Path -LiteralPath $Path)) {
         throw "Path '$Path' does not exist."
     }
 

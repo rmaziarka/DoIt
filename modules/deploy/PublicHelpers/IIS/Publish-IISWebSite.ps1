@@ -99,13 +99,13 @@ function Publish-IISWebSite {
         Write-Log -Warn "No PhysicalPath specified for website '$SiteName'. Assuming '$PhysicalPath'."
     }
 
-    if (!(Test-Path -Path $PhysicalPath))
+    if (!(Test-Path -LiteralPath $PhysicalPath))
 	{
 	    Write-Log -Info "Creating physical directory '$PhysicalPath' for site '$SiteName'."
         [void](New-Item -Path $PhysicalPath -ItemType directory)
 	}
     
-	if (!(Test-Path -Path $path))
+	if (!(Test-Path -LiteralPath $path))
 	{
 	    Write-Log -Info "Creating website '$SiteName'"
 			

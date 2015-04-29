@@ -75,7 +75,7 @@ Describe -Tag "PSCI.unit" "Get-UpdateXsltCmdParams" {
 '@
 
                 } finally {
-                    Remove-Item -Path $testFileName -Force -ErrorAction SilentlyContinue
+                    Remove-Item -LiteralPath $testFileName -Force -ErrorAction SilentlyContinue
                 }
 
             }
@@ -102,8 +102,8 @@ Describe -Tag "PSCI.unit" "Get-UpdateXsltCmdParams" {
 '@
 
                 } finally {
-                    Remove-Item -Path $testFileName -Force -ErrorAction SilentlyContinue
-                    Remove-Item -Path $xsltFilename -Force -ErrorAction SilentlyContinue
+                    Remove-Item -LiteralPath $testFileName -Force -ErrorAction SilentlyContinue
+                    Remove-Item -LiteralPath $xsltFilename -Force -ErrorAction SilentlyContinue
                 }
             }
 

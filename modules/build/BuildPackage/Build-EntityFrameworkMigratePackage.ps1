@@ -140,7 +140,7 @@ function Build-EntityFrameworkMigratePackage {
                             -DefaultPath (Join-Path -Path $configPaths.PackagesPath -ChildPath $PackageName) `
                             -CheckExistence:$false
 
-    if (![string]::IsNullOrEmpty($ProjectPath) -and !(Test-Path -Path $ProjectPath)) {
+    if (![string]::IsNullOrEmpty($ProjectPath) -and !(Test-Path -LiteralPath $ProjectPath)) {
         Write-Log -Critical "Given project file '$ProjectPath' does not exist for '$PackageName'."
     }
 
@@ -163,7 +163,7 @@ function Build-EntityFrameworkMigratePackage {
         $found = $false
         foreach ($basePath in $pathsToCheck) {
             $path = Join-Path -Path $basePath -ChildPath $toolName
-            if (Test-Path -Path $path) {
+            if (Test-Path -LiteralPath $path) {
                 $requiredToolsPaths += $path
                 $found = $true
                 break

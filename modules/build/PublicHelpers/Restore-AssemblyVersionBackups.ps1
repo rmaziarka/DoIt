@@ -56,7 +56,7 @@ function Restore-AssemblyVersionBackups {
 
     foreach ($p in $Path) { 
         $resolvedPath = Resolve-PathRelativeToProjectRoot -Path $p
-        if ((Test-Path -Path $resolvedPath -PathType Leaf)) {
+        if ((Test-Path -LiteralPath $resolvedPath -PathType Leaf)) {
             $resolvedPaths = $resolvedPath
         } else {
             $files = @(Get-ChildItem -Path $resolvedPath -File -Filter $FileMask -Recurse | Select-Object -ExpandProperty FullName)
@@ -67,7 +67,7 @@ function Restore-AssemblyVersionBackups {
         }
         foreach ($resolvedPath in $resolvedPaths) {
             $backupPath = "${resolvedPath}.bak"
-            if (!(Test-Path -Path $backupPath)) { 
+            if (!(Test-Path -LiteralPath $backupPath)) { 
                 Write-Log -Critical "Backup file '$backupPath' does not exist."
             }
             Write-Log -Info "Restoring file '$resolvedPath' from .bak."

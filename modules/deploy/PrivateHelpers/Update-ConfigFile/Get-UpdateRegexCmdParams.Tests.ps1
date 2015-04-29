@@ -69,7 +69,7 @@ key5=newValue5
 '@
 
                 } finally {
-                    Remove-Item -Path $testFileName -Force -ErrorAction SilentlyContinue
+                    Remove-Item -LiteralPath $testFileName -Force -ErrorAction SilentlyContinue
                 }
 
             }
@@ -93,7 +93,7 @@ key5=newValue5
                     }
                     0 | Should Be 1
                 } finally {
-                    Remove-Item -Path $testFileName -Force -ErrorAction SilentlyContinue
+                    Remove-Item -LiteralPath $testFileName -Force -ErrorAction SilentlyContinue
                 }
             }
         }
@@ -111,7 +111,7 @@ key5=newValue5
                     Invoke-Command @params 
                    
                 } finally {
-                    Remove-Item -Path $testFileName -Force -ErrorAction SilentlyContinue
+                    Remove-Item -LiteralPath $testFileName -Force -ErrorAction SilentlyContinue
                 }
             }
         }

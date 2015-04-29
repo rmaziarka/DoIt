@@ -246,6 +246,6 @@ function Deploy-MsDeployPackage {
     }
 
     if ($removeCopy) {
-        Remove-Item -Path $packageCopyPath -Force
+        Remove-Item -LiteralPath $packageCopyPath -Force
     }
 }

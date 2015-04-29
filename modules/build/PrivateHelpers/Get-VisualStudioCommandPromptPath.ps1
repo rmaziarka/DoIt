@@ -70,7 +70,7 @@ function Get-VisualStudioCommandPromptPath {
             continue
         }
         $cmdPromptFullPath = (Join-Path -Path $cmdPromptPath -ChildPath $cmdPromptFileNames[$version])
-        if (Test-Path -Path $cmdPromptFullPath) {
+        if (Test-Path -LiteralPath $cmdPromptFullPath) {
             return $cmdPromptFullPath
         }
     }

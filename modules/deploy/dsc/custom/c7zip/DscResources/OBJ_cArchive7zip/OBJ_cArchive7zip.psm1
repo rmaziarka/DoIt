@@ -40,7 +40,7 @@ function Get-TargetResource {
 
     $result = @{ 
         DestinationPath = $DestinationPath;
-        Exists = (Test-Path -Path $DestinationPath)
+        Exists = (Test-Path -LiteralPath $DestinationPath)
     }
     return $result
 }
@@ -86,7 +86,7 @@ function Set-TargetResource {
         $Path7zip = Join-Path -Path $env:ProgramFiles -ChildPath '7-Zip'
     }
     $Path7zip = Join-Path -Path $Path7zip -ChildPath '7z.exe'
-    if (!(Test-Path -Path $Path7zip)) {
+    if (!(Test-Path -LiteralPath $Path7zip)) {
         throw "7zip does not exist at '$Path7zip'"
     }
 

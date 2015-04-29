@@ -138,7 +138,7 @@ function Start-DscConfigurationWithRetries
                 Start-DscConfiguration @params
             }
         } catch {
-            if ($MaximumAttempts -gt 1 -and (Test-Path -Path $dscResPathTmp)) {
+            if ($MaximumAttempts -gt 1 -and (Test-Path -LiteralPath $dscResPathTmp)) {
                 Get-Content -Path $dscResPathTmp -ReadCount 0 | Foreach-Object { Write-Log -Info $_ -NoHeader -Emphasize }
             }
             $logParams = @{ StartTime = $startTime }
@@ -155,7 +155,7 @@ function Start-DscConfigurationWithRetries
                 [void](Remove-CimSession -CimSession $cimSession)
             }
         }
-        if ($MaximumAttempts -gt 1 -and (Test-Path -Path $dscResPathTmp)) {
+        if ($MaximumAttempts -gt 1 -and (Test-Path -LiteralPath $dscResPathTmp)) {
             Get-Content -Path $dscResPathTmp -ReadCount 0 | Foreach-Object { Write-Log -Info $_ -NoHeader -Emphasize }
             [string[]]$rebootServerCoincidences = Select-String -Pattern 'reboot is required' -Path $dscResPathTmp
             if ($rebootServerCoincidences.Length -le 0) {

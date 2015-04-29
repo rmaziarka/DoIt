@@ -51,7 +51,7 @@ Describe -Tag "PSCI.unit" "Read-ConfigurationFiles" {
                 } catch {
                     $fail = $true
                 } finally {
-                    Remove-Item -Path $testConfigDir -Force -Recurse
+                    Remove-Item -LiteralPath $testConfigDir -Force -Recurse
                 }
                 $fail | Should Be $true
             }
@@ -69,7 +69,7 @@ Describe -Tag "PSCI.unit" "Read-ConfigurationFiles" {
                     $result.Files | Should Be (Resolve-Path -LiteralPath $testFileFunc).ProviderPath
                     $result.RequiredDSCModules.Count | Should Be 0
                 } finally {
-                    Remove-Item -Path $testConfigDir -Force -Recurse
+                    Remove-Item -LiteralPath $testConfigDir -Force -Recurse
                 }
             }
         }
@@ -105,7 +105,7 @@ Describe -Tag "PSCI.unit" "Read-ConfigurationFiles" {
                     $result.RequiredDSCModules -icontains 'xPSDesiredStateConfiguration4' | Should Be $true
                     $result.RequiredDSCModules -icontains 'xPSDesiredStateConfiguration5' | Should Be $true
                 } finally {
-                    Remove-Item -Path $testConfigDir -Force -Recurse
+                    Remove-Item -LiteralPath $testConfigDir -Force -Recurse
                 }
             }
         }
@@ -130,7 +130,7 @@ Describe -Tag "PSCI.unit" "Read-ConfigurationFiles" {
     
                     $fail | Should Be $true
                 } finally {
-                    Remove-Item -Path $testConfigDir -Force -Recurse
+                    Remove-Item -LiteralPath $testConfigDir -Force -Recurse
                 }
            }
         }
@@ -156,7 +156,7 @@ Describe -Tag "PSCI.unit" "Read-ConfigurationFiles" {
     
                     $fail | Should Be $true
                 } finally {
-                    Remove-Item -Path $testConfigDir -Force -Recurse
+                    Remove-Item -LiteralPath $testConfigDir -Force -Recurse
                 }
             }
         }

@@ -64,7 +64,7 @@ function Get-VisualStudioPath {
         if (!$cmdPromptPath) {
             continue
         }
-        if (Test-Path -Path $cmdPromptPath) {
+        if (Test-Path -LiteralPath $cmdPromptPath) {
             $result += (Resolve-Path -LiteralPath "$cmdPromptPath\..\..").ProviderPath
         }
     }

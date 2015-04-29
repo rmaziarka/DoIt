@@ -45,9 +45,9 @@ function Get-PathTo7Zip {
 
     $regEntry = "Registry::HKLM\SOFTWARE\7-Zip"
     # note - registry check will fail if running Powershell x86 on x64 machine
-    if (Test-Path -Path $regEntry) {
+    if (Test-Path -LiteralPath $regEntry) {
         $7zipPath = (Get-ItemProperty -Path $regEntry).Path
-        if (!(Test-Path -Path $7zipPath)) {
+        if (!(Test-Path -LiteralPath $7zipPath)) {
             if ($FailIfNotFound) { 
                 Write-Log -Critical "7zip directory not found at '$7zipPath'."
             } else {
@@ -57,7 +57,7 @@ function Get-PathTo7Zip {
     } else { 
         # note - 'Program Files' is hardcoded here as $env:ProgramFiles on Powershell x86 is 'Program Files (x86)'
         $7zipPath = "C:\Program Files\7-Zip"
-        if (!(Test-Path -Path $7zipPath)) {
+        if (!(Test-Path -LiteralPath $7zipPath)) {
             if ($FailIfNotFound) { 
                 Write-Log -Critical "Cannot find neither 7-zip registry entry at '$regEntry' nor 7-zip directory at '$7zipPath'. Please ensure 7-zip has been installed."
             } else {
@@ -66,7 +66,7 @@ function Get-PathTo7Zip {
         }       
     }
     $7zipPath = Join-Path -Path $7zipPath -ChildPath "7z.exe"
-    if (!(Test-Path -Path $7zipPath)) {
+    if (!(Test-Path -LiteralPath $7zipPath)) {
         if ($FailIfNotFound) { 
             Write-Log -Critical "7z.exe not found at '$7zipPath'".
         } else {

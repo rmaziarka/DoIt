@@ -126,13 +126,13 @@ function Convert-XmlUsingXdt {
         $carbonPath = Get-PathToExternalLib -ModulePath 'Carbon\Carbon'
     }
 
-    if (Test-Path -Path "$carbonPath\Xml\Convert-XmlFile.ps1") {
+    if (Test-Path -LiteralPath "$carbonPath\Xml\Convert-XmlFile.ps1") {
         # this is normal scenario when run in context of PSCI
         # following includes and variables are required for Convert-XmlFile
 	    $Global:CarbonBinDir = "$carbonPath\bin"
         . "$carbonPath\Path\Resolve-FullPath.ps1"
         . "$carbonPath\Xml\Convert-XmlFile.ps1"
-    } elseif (Test-Path -Path "Convert-XmlFile.ps1") {
+    } elseif (Test-Path -LiteralPath "Convert-XmlFile.ps1") {
         # this is when run outside PSCI (e.g. in remote run)
         $Global:CarbonBinDir = "."
         . ".\Resolve-FullPath.ps1"

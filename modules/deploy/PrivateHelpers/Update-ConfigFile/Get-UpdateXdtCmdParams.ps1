@@ -69,7 +69,7 @@ function Get-UpdateXdtCmdParams {
 
         $Global:ErrorActionPreference = 'Stop'
         foreach ($configFileName in $ConfigFiles) {
-            if (!(Test-Path -Path $configFileName)) {
+            if (!(Test-Path -LiteralPath $configFileName)) {
                 throw "File $configFileName does not exist (server $([system.environment]::MachineName))."
             }
 
@@ -77,7 +77,7 @@ function Get-UpdateXdtCmdParams {
 
             # in remote run we don't have PSCI - need to use files that have been copied earlier to C:\XDTTransform
             if (!$PSCIGlobalConfiguration) {
-                if (!(Test-Path -Path 'C:\XDTTransform')) {
+                if (!(Test-Path -LiteralPath 'C:\XDTTransform')) {
                     throw "Directory C:\XDTTransform does not exist."
                 }
                 Push-Location -Path 'C:\XDTTransform'
@@ -93,7 +93,7 @@ function Get-UpdateXdtCmdParams {
             }
 
             if ($XdtFilename) {
-                if (!(Test-Path -Path $XdtFilename)) {
+                if (!(Test-Path -LiteralPath $XdtFilename)) {
                     throw "File '$XdtFilename' does not exist"
                 }
                 Write-Output "Using xdt file '$XdtFilename'"
@@ -104,14 +104,14 @@ function Get-UpdateXdtCmdParams {
             Write-Output "Transforming file '$configFileName' - output '$tempFileName'"
             Convert-XmlUsingXdt @xdtParam
 
-            if (!(Test-Path -Path $tempFileName)) {
+            if (!(Test-Path -LiteralPath $tempFileName)) {
                 throw "Someting went wrong - file '$tempFileName' does not exist."
             }
 
             Write-Output "Replacing file '$configFileName' with '$tempFileName'"
             Move-Item -Path $tempFileName -Destination $configFileName -Force
 
-            if (!(Test-Path -Path $configFileName)) {
+            if (!(Test-Path -LiteralPath $configFileName)) {
                 throw "Someting went wrong - file '$configFileName' does not exist."
             }
 

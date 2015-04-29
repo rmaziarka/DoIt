@@ -106,7 +106,7 @@ function Update-TokensInZipFile {
         $PreserveTransformFiles
     )
 
-    if (!(Test-Path -Path $ZipFile -PathType Leaf)) {
+    if (!(Test-Path -LiteralPath $ZipFile -PathType Leaf)) {
         Write-Log -Critical "Cannot access file '$ZipFile'"
     }
 

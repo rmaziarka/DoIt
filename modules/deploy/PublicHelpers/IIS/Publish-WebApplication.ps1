@@ -73,13 +73,13 @@ function Publish-WebApplication {
     Import-Module WebAdministration
 	$path = "IIS:/sites/$SiteName/$AppPath"
 
-    if ($PhysicalPath -and !(Test-Path -Path $PhysicalPath))
+    if ($PhysicalPath -and !(Test-Path -LiteralPath $PhysicalPath))
 	{
 	    Write-Log -Info ("Creating physical directory '$PhysicalPath' for application '$SiteName/$AppPath'.")
         [void](New-Item -Path $PhysicalPath -ItemType directory)
 	}
     
-	if (!(Test-Path -Path $path) -or !(Get-WebApplication -Site $SiteName -Name $AppPath)) {
+	if (!(Test-Path -LiteralPath $path) -or !(Get-WebApplication -Site $SiteName -Name $AppPath)) {
 		Write-Log -Info "Creating application '$SiteName/$AppPath'"
 		[void](New-WebApplication -Site $SiteName -Name $AppPath -PhysicalPath $PhysicalPath -ApplicationPool $ApplicationPool)
 	} else {

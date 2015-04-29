@@ -68,7 +68,7 @@ function Install-Powershell4 {
     }
 
     $powershellPath =  'C:\powershell'
-    if (!(Test-Path -Path $powershellpath)) {
+    if (!(Test-Path -LiteralPath $powershellpath)) {
         New-Item -ItemType Directory -Path $powershellpath
     
     }
