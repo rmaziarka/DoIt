@@ -163,7 +163,7 @@ function Build-EntityFrameworkMigratePackage {
         $found = $false
         foreach ($basePath in $pathsToCheck) {
             $path = Join-Path -Path $basePath -ChildPath $toolName
-            if (Test-Path -LiteralPath $path) {
+            if (Test-Path -Path $path) {
                 $requiredToolsPaths += $path
                 $found = $true
                 break
