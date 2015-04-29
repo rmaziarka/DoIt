@@ -38,7 +38,7 @@ Describe -Tag "PSCI.unit" "Invoke-Sql" {
         
             
         Context "When Invoke-Sql Is called with mode sqlcmd" {
-            Mock Test-Path -MockWith { if ($Path -match 'sqlcmd|Binn') { return $true } }
+            Mock Test-Path -MockWith { if ($LiteralPath -match 'sqlcmd|Binn') { return $true } }
             $connectionString = "data source=localhost;integrated security=True"
             $sql = "SELECT * FROM Categories"
             $param = @{"dummy"="param"; "anotherdummy"="parameter"}
