@@ -97,19 +97,19 @@ function Get-FlatFileList {
     }
         
     foreach ($p in $Path) {
-        if (!(Test-Path -Path $p)) {
+        if (!(Test-Path -LiteralPath $p)) {
             # this function can be run remotely without PSCI available
             if (Get-Command -Name Write-Log -ErrorAction SilentlyContinue) {
                 Write-Log -Critical "Path '$p' does not exist."
             } else {
                 throw "Path '$p' does not exist"
             }
-        } elseif (Test-Path -Path $p -PathType Container) {
+        } elseif (Test-Path -LiteralPath $p -PathType Container) {
             try {
-                Push-Location -Path $p
-                $files = Get-ChildItem -Path '.' -Recurse -File
+                Push-Location -LiteralPath $p
+                $files = Get-ChildItem -LiteralPath '.' -Recurse -File
                 foreach ($file in $files) {
-                    $relativePath = Resolve-Path -Path $file.FullName -Relative
+                    $relativePath = Resolve-Path -LiteralPath $file.FullName -Relative
                     if ($excludeRegex -and $relativePath -imatch $excludeRegex) {
                         continue
                     }
@@ -127,7 +127,7 @@ function Get-FlatFileList {
                 Pop-Location
             }
         } else {
-            $files = Get-Item -Path $p
+            $files = Get-Item -LiteralPath $p
             foreach ($file in $files) {
                 [void]($result.Add($file))
                 Add-Member -InputObject $file -MemberType NoteProperty -Name RelativePath -Value $file.Name
