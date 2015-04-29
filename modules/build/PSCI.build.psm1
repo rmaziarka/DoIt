@@ -50,4 +50,5 @@ Export-ModuleMember -Function `
     Restore-AssemblyVersionBackups, `
     Start-Build, `
     Backup-Files, `
-    Restore-Files
+    Restore-Files, `
+	Start-NugetRestore

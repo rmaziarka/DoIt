@@ -42,10 +42,7 @@ function Start-NugetRestore {
         $ProjectPath
     )
 
-    if (!(Test-Path -Path $ProjectPath)) {
-        Write-Log -Critical "Project file does not exist at '$ProjectPath'."
-    }
-    
+    $ProjectPath = Resolve-PathRelativeToProjectRoot -Path $ProjectPath   
     $projectDir = Split-Path -Parent $ProjectPath
 
     $currentPath = $projectDir
