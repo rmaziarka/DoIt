@@ -157,7 +157,7 @@ function New-Zip {
         $fileStream = New-Object -TypeName System.IO.FileStream -ArgumentList $OutputFile, $fileMode
         $zipArchiveMode = [System.IO.Compression.ZipArchiveMode]::Create
         $zipArchive = New-Object -TypeName System.IO.Compression.ZipArchive -ArgumentList $fileStream, $zipArchiveMode
-        $outputFileResolved = (Resolve-Path -Path $OutputFile).ProviderPath
+        $outputFileResolved = (Resolve-Path -LiteralPath $OutputFile).ProviderPath
         Write-Log -Info "Creating archive '$OutputFile' from '$($Path -join `"', '`")', include '$($Include -join `"', '`")'."
         $i = 0
         foreach ($p in $Path) { 

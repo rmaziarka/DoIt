@@ -81,7 +81,7 @@ function Initialize-ConfigurationPaths {
         if (!(Test-Path -Path $ProjectRootPath -PathType Container)) {
             Write-Log -Critical "Project root directory '$ProjectRootPath' does not exist. Please ensure you have passed valid 'ProjectRootPath' argument to Initialize-ConfigurationPaths."
         }
-        $configPaths.ProjectRootPath = (Resolve-Path -Path $ProjectRootPath).ProviderPath
+        $configPaths.ProjectRootPath = (Resolve-Path -LiteralPath $ProjectRootPath).ProviderPath
     } else {
         $configPaths.ProjectRootPath = $configPaths.DeployScriptsPath
     } 

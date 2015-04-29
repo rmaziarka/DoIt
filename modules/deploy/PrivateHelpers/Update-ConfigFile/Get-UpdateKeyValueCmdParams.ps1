@@ -72,7 +72,7 @@ function Get-UpdateKeyValueCmdParams {
                 throw "File $configFileName does not exist (server $([system.environment]::MachineName))."
             }
 
-            $configFileName = (Resolve-Path -Path $configFileName).ProviderPath
+            $configFileName = (Resolve-Path -LiteralPath $configFileName).ProviderPath
 
             $config = [IO.File]::ReadAllText($configFileName)
             $oldConfig = $config

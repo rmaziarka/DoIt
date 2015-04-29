@@ -63,10 +63,10 @@ Describe -Tag "PSCI.unit" "Deploy-SqlPackage" {
 
                 It "should invoke sqls in appropriate order" {
             	    $global:sqlsInvoked.Count | Should Be 4
-                    $global:sqlsInvoked[0] | Should Be (Resolve-Path -Path 'sqls\dir1\test1.sql').ProviderPath
-                    $global:sqlsInvoked[1] | Should Be (Resolve-Path -Path 'sqls\dir1\test10.sql').ProviderPath
-                    $global:sqlsInvoked[2] | Should Be (Resolve-Path -Path 'sqls\dir1\test2.sql').ProviderPath
-                    $global:sqlsInvoked[3] | Should Be (Resolve-Path -Path 'sqls\dir2\test1.sql').ProviderPath
+                    $global:sqlsInvoked[0] | Should Be (Resolve-Path -LiteralPath 'sqls\dir1\test1.sql').ProviderPath
+                    $global:sqlsInvoked[1] | Should Be (Resolve-Path -LiteralPath 'sqls\dir1\test10.sql').ProviderPath
+                    $global:sqlsInvoked[2] | Should Be (Resolve-Path -LiteralPath 'sqls\dir1\test2.sql').ProviderPath
+                    $global:sqlsInvoked[3] | Should Be (Resolve-Path -LiteralPath 'sqls\dir2\test1.sql').ProviderPath
                 }
             } finally {
                 Remove-SqlTestPackage
@@ -81,9 +81,9 @@ Describe -Tag "PSCI.unit" "Deploy-SqlPackage" {
 
                 It "should invoke sqls in appropriate order" {
             	    $global:sqlsInvoked.Count | Should Be 3
-                    $global:sqlsInvoked[0] | Should Be (Resolve-Path -Path 'sqls\dir1\test1.sql').ProviderPath
-                    $global:sqlsInvoked[1] | Should Be (Resolve-Path -Path 'sqls\dir1\test10.sql').ProviderPath
-                    $global:sqlsInvoked[2] | Should Be (Resolve-Path -Path 'sqls\dir1\test2.sql').ProviderPath
+                    $global:sqlsInvoked[0] | Should Be (Resolve-Path -LiteralPath 'sqls\dir1\test1.sql').ProviderPath
+                    $global:sqlsInvoked[1] | Should Be (Resolve-Path -LiteralPath 'sqls\dir1\test10.sql').ProviderPath
+                    $global:sqlsInvoked[2] | Should Be (Resolve-Path -LiteralPath 'sqls\dir1\test2.sql').ProviderPath
                 }
             } finally {
                 Remove-SqlTestPackage
@@ -98,10 +98,10 @@ Describe -Tag "PSCI.unit" "Deploy-SqlPackage" {
 
                 It "should invoke sqls in appropriate order" {
             	    $global:sqlsInvoked.Count | Should Be 4
-                    $global:sqlsInvoked[0] | Should Be (Resolve-Path -Path 'sqls\dir1\test10.sql').ProviderPath
-                    $global:sqlsInvoked[1] | Should Be (Resolve-Path -Path 'sqls\dir2\test1.sql').ProviderPath
-                    $global:sqlsInvoked[2] | Should Be (Resolve-Path -Path 'sqls\dir1\test1.sql').ProviderPath
-                    $global:sqlsInvoked[3] | Should Be (Resolve-Path -Path 'sqls\dir1\test2.sql').ProviderPath
+                    $global:sqlsInvoked[0] | Should Be (Resolve-Path -LiteralPath 'sqls\dir1\test10.sql').ProviderPath
+                    $global:sqlsInvoked[1] | Should Be (Resolve-Path -LiteralPath 'sqls\dir2\test1.sql').ProviderPath
+                    $global:sqlsInvoked[2] | Should Be (Resolve-Path -LiteralPath 'sqls\dir1\test1.sql').ProviderPath
+                    $global:sqlsInvoked[3] | Should Be (Resolve-Path -LiteralPath 'sqls\dir1\test2.sql').ProviderPath
                     
                 }
             } finally {
@@ -117,8 +117,8 @@ Describe -Tag "PSCI.unit" "Deploy-SqlPackage" {
 
                 It "should not invoke excluded sqls" {
             	    $global:sqlsInvoked.Count | Should Be 2
-                    $global:sqlsInvoked[0] | Should Be (Resolve-Path -Path 'sqls\dir1\test2.sql').ProviderPath
-                    $global:sqlsInvoked[1] | Should Be (Resolve-Path -Path 'sqls\dir2\test1.sql').ProviderPath
+                    $global:sqlsInvoked[0] | Should Be (Resolve-Path -LiteralPath 'sqls\dir1\test2.sql').ProviderPath
+                    $global:sqlsInvoked[1] | Should Be (Resolve-Path -LiteralPath 'sqls\dir2\test1.sql').ProviderPath
                     
                 }
             } finally {

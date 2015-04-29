@@ -63,7 +63,7 @@ function Install-DscResources {
         $ConnectionParams = New-ConnectionParameters -Nodes 'localhost'
     }
     $nodes = $ConnectionParams.Nodes.Clone()
-    $baseDscDir = Resolve-Path -Path (Join-Path -Path $PSScriptRoot -ChildPath '..\..\dsc')
+    $baseDscDir = Resolve-Path -LiteralPath (Join-Path -Path $PSScriptRoot -ChildPath '..\..\dsc')
 
     $dscModulesInfo = Get-DscResourcesPaths -ModuleNames $ModuleNames
     Write-Log -Info ("Installing following DSC modules from '$baseDscDir' to {0}: {1} (total {2})" -f ($nodes -join ', '), ($dscModulesInfo.Name -join ', '), $dscModulesInfo.Count)

@@ -62,7 +62,7 @@ function Backup-Files {
         if (!(Test-Path -Path $p)) {
             Write-Log -Critical "Path '$p' does not exist."
         }
-        $p = (Resolve-Path -Path $p).ProviderPath
+        $p = (Resolve-Path -LiteralPath $p).ProviderPath
 
         if (Test-Path -Path $p -PathType Leaf) {
             $toCopy = $p

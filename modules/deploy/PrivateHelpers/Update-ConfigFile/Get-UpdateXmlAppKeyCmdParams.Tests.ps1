@@ -64,7 +64,7 @@ Describe -Tag "PSCI.unit" "Get-UpdateXmlAppKeyCmdParams" {
                     
                 try { 
                     New-TestFileAppSettings
-                    $testFileName = (Resolve-Path -Path $testFileName).ProviderPath
+                    $testFileName = (Resolve-Path -LiteralPath $testFileName).ProviderPath
                     $configValues = @('key1=newValue1', 'key2=c:\x\z', 'key3=&', 'key4=value4', 'keyNew=newValue')
 
                     $params = Get-UpdateXmlAppKeyCmdParams -ConfigType 'XmlAppKey' -ConfigFiles $testFileName -ConfigValues $configValues
@@ -125,7 +125,7 @@ Describe -Tag "PSCI.unit" "Get-UpdateXmlAppKeyCmdParams" {
 
                 try { 
                     New-TestFileConnectionStrings
-                    $testFileName = (Resolve-Path -Path $testFileName).ProviderPath
+                    $testFileName = (Resolve-Path -LiteralPath $testFileName).ProviderPath
                     $configValues = @('key1=newValue1', 'key2=c:\x\z', 'key3=&', 'key4=value4', 'keyNew=newValue')
 
                     $params = Get-UpdateXmlAppKeyCmdParams -ConfigType 'XmlConnectionString' -ConfigFiles $testFileName -ConfigValues $configValues

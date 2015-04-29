@@ -152,7 +152,7 @@ function New-DeploymentPlanEntry {
             Write-Log -Warn "Mof file has not been generated for configuration named '$($Configuration.Name)' (Environment '$Environment' / ServerRole '$($ServerRole.Name)'). Please ensure your configuration definition is correct."
             continue
         }
-        $mofDir = Resolve-Path -Path $mofDir
+        $mofDir = Resolve-Path -LiteralPath $mofDir
 
     }
 
