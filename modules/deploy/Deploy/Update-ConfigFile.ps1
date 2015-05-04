@@ -60,9 +60,12 @@ function Update-ConfigFile {
     .PARAMETER ConnectionParameters
     Connection parameters created by New-ConnectionParameters function. If not provided, function will run locally.
 
+    .PARAMETER IgnoreErrors
+    If $true, errors will be ignored.
+
     .EXAMPLE
     Update-ConfigFile -ConfigFiles 'application.properties' -ConfigValues 'service.mode=true' -ConfigType 'XmlAppKey'
-"@
+
     #>
     
     [CmdletBinding(DefaultParametersetName='XmlOrKeyValue')]
@@ -99,7 +102,11 @@ function Update-ConfigFile {
 
         [Parameter(Mandatory=$false)]
         [hashtable]
-        $ConnectionParameters
+        $ConnectionParameters,
+
+        [Parameter(Mandatory=$false)]
+        [switch]
+        $IgnoreErrors
     )
 
     if ($ConnectionParameters.Nodes) {
@@ -108,28 +115,27 @@ function Update-ConfigFile {
     } else {
         $computerNamesLog = ([system.environment]::MachineName)
         $resolvedConfigFiles = @()
+        $checkExistence = !$IgnoreErrors
         foreach ($configFile in $ConfigFiles) { 
-            $resolvedConfigFiles += Resolve-PathRelativeToProjectRoot -Path $configFile -ErrorMsg "Cannot find config file '{0}'."
+            $resolvedConfigFiles += Resolve-PathRelativeToProjectRoot -Path $configFile -ErrorMsg "Cannot find config file '{0}'." -CheckExistence:$checkExistence
         }
     }
 
     if ($ConfigType -eq 'XmlAppKey' -or $ConfigType -eq 'XmlConnectionString') {
-        $cmdParams = Get-UpdateXmlAppKeyCmdParams -ConfigType $ConfigType -ConfigFiles $resolvedConfigFiles -ConfigValues $ConfigValues
+        $cmdParams = Get-UpdateXmlAppKeyCmdParams -ConfigType $ConfigType -ConfigFiles $resolvedConfigFiles -ConfigValues $ConfigValues -IgnoreErrors:$IgnoreErrors
     } elseif ($ConfigType -eq 'KeyValue') {
-        $cmdParams = Get-UpdateKeyValueCmdParams -ConfigFiles $resolvedConfigFiles -ConfigValues $ConfigValues
+        $cmdParams = Get-UpdateKeyValueCmdParams -ConfigFiles $resolvedConfigFiles -ConfigValues $ConfigValues -IgnoreErrors:$IgnoreErrors
     } elseif ($ConfigType -eq 'Regex') {
-        $cmdParams = Get-UpdateRegexCmdParams -ConfigFiles $resolvedConfigFiles -RegexSearch $RegexSearch -ReplaceString $ReplaceString
+        $cmdParams = Get-UpdateRegexCmdParams -ConfigFiles $resolvedConfigFiles -RegexSearch $RegexSearch -ReplaceString $ReplaceString -IgnoreErrors:$IgnoreErrors
     } elseif ($ConfigType -eq 'XSLT') {
-        $cmdParams = Get-UpdateXSLTCmdParams -ConfigFiles $resolvedConfigFiles -XsltFilename $TransformFilename -XsltBody $TransformBody
+        $cmdParams = Get-UpdateXSLTCmdParams -ConfigFiles $resolvedConfigFiles -XsltFilename $TransformFilename -XsltBody $TransformBody -IgnoreErrors:$IgnoreErrors
     } elseif ($ConfigType -eq 'XDT') {
-        $cmdParams = Get-UpdateXDTCmdParams -ConfigFiles $resolvedConfigFiles -XdtFilename $TransformFilename -XdtBody $TransformBody
+        $cmdParams = Get-UpdateXDTCmdParams -ConfigFiles $resolvedConfigFiles -XdtFilename $TransformFilename -XdtBody $TransformBody -IgnoreErrors:$IgnoreErrors
         if ($ConnectionParameters -and $ConnectionParameters.Nodes) {
             # for remote run, we need to copy Carbon files
             Copy-CarbonFilesToRemoteServer -ConnectionParameters $ConnectionParameters -DestinationPath 'C:\XDTTransform'
         }
     }
-
-
 
     if ($ConnectionParameters) {
         $cmdParams += $ConnectionParameters.PSSessionParams
@@ -138,7 +144,7 @@ function Update-ConfigFile {
     Write-Log -Info ('Updating file(s) {0} on server(s) {1}' -f ($resolvedConfigFiles -join ', '), ($ComputerNamesLog -join ', ')) 
     $output = Invoke-Command @cmdParams
     Write-Log -_Debug $output
-    if ($LASTEXITCODE) {
+    if ($LASTEXITCODE -and !$IgnoreErrors) {
         Write-Log -Critical "Failed to update files $WebConfigFiles"
     }
 

@@ -38,6 +38,9 @@ function Get-UpdateKeyValueCmdParams {
     If false and key not found, it will be added to the file.
     If true and key not found, exception will be thrown.
 
+    .PARAMETER IgnoreErrors
+    If $true, errors will be ignored.
+
     .EXAMPLE
     Get-UpdateKeyValueCmdParams -ConfigFiles 'application.properties' -ConfigValues 'service.mode=true'
 #>
@@ -55,7 +58,11 @@ function Get-UpdateKeyValueCmdParams {
 
         [Parameter(Mandatory=$false)]
         [switch]
-        $FailIfCannotMatch
+        $FailIfCannotMatch,
+
+        [Parameter(Mandatory=$false)]
+        [switch]
+        $IgnoreErrors
     )
 
     $configValuesMatches = Get-KeyValueMatches -ConfigValues $ConfigValues
@@ -64,12 +71,18 @@ function Get-UpdateKeyValueCmdParams {
 
     $result.ScriptBlock = {
 
-        param($ConfigFiles, $ConfigValuesMatches, $FailIfCannotMatch)
+        param($ConfigFiles, $ConfigValuesMatches, $FailIfCannotMatch, $IgnoreErrors)
 
         $Global:ErrorActionPreference = 'Stop'
         foreach ($configFileName in $ConfigFiles) {
             if (!(Test-Path -LiteralPath $configFileName)) {
-                throw "File $configFileName does not exist (server $([system.environment]::MachineName))."
+                $msg = "File $configFileName does not exist (server $([system.environment]::MachineName))."
+                if ($IgnoreErrors) {
+                    Write-Output -InputObject $msg
+                    continue
+                } else { 
+                    throw $msg
+                }
             }
 
             $configFileName = (Resolve-Path -LiteralPath $configFileName).ProviderPath
@@ -86,7 +99,13 @@ function Get-UpdateKeyValueCmdParams {
 
                 if (!($config -imatch $regex)) {
                     if ($FailIfCannotMatch) {
-                        throw "Cannot find key '$($match.key)' in file '$configFileName' - regex '$regex'."
+                        $msg = "Cannot find key '$($match.key)' in file '$configFileName' - regex '$regex'."
+                        if ($IgnoreErrors) {
+                            Write-Output -InputObject $msg
+                            continue
+                        } else {
+                            throw $msg
+                        }
                     } else {
                         Write-Output -InputObject "Key '$($match.key)' not found - adding with value '$value'."
                         if (!$config.EndsWith("`n")) {
@@ -114,7 +133,7 @@ function Get-UpdateKeyValueCmdParams {
         }  
     }
 
-    $result.ArgumentList = @($ConfigFiles, $ConfigValuesMatches, $FailIfCannotMatch)
+    $result.ArgumentList = @($ConfigFiles, $ConfigValuesMatches, $FailIfCannotMatch, $IgnoreErrors)
 
     return $result
 

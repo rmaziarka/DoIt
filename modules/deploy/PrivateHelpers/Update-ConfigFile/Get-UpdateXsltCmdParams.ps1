@@ -37,6 +37,9 @@ function Get-UpdateXsltCmdParams {
     .PARAMETER XsltBody
     String containing XSLT stylesheet. If not provided, XsltFilemane will be used.
 
+    .PARAMETER IgnoreErrors
+    If $true, errors will be ignored.
+
     .EXAMPLE
     Get-UpdateXsltCmdParams -ConfigFiles 'web.config' -XsltFilename 'web.local.config.xsl'
 #>
@@ -54,7 +57,11 @@ function Get-UpdateXsltCmdParams {
 
         [Parameter(Mandatory=$false)]
         [string]
-        $XsltBody
+        $XsltBody,
+
+        [Parameter(Mandatory=$false)]
+        [switch]
+        $IgnoreErrors
     )
 
     if (!$XsltFilename -and !$XsltBody) {
@@ -65,12 +72,18 @@ function Get-UpdateXsltCmdParams {
 
     $result.ScriptBlock = {
 
-        param($ConfigFiles, $XsltFilename, $XsltBody)
+        param($ConfigFiles, $XsltFilename, $XsltBody, $IgnoreErrors)
 
         $Global:ErrorActionPreference = 'Stop'
         foreach ($configFileName in $ConfigFiles) {
             if (!(Test-Path -LiteralPath $configFileName)) {
-                throw "File $configFileName does not exist (server $([system.environment]::MachineName))."
+                $msg = "File $configFileName does not exist (server $([system.environment]::MachineName))."
+                if ($IgnoreErrors) {
+                    Write-Output -InputObject $msg
+                    continue
+                } else { 
+                    throw $msg
+                }
             }
 
             $configFileName = (Resolve-Path -LiteralPath $configFileName).ProviderPath
@@ -79,12 +92,18 @@ function Get-UpdateXsltCmdParams {
 
             if ($XsltFilename) {
                 if (!(Test-Path -LiteralPath $XsltFilename)) {
-                    throw "File '$XsltFilename' does not exist"
+                    $msg = "File '$XsltFilename' does not exist"
+                    if ($IgnoreErrors) {
+                        Write-Output -InputObject $msg
+                        continue
+                    } else { 
+                        throw $msg
+                    }
                 }
-                Write-Output "Loading xslt stylesheet from file '$XsltFilename'"
+                Write-Output -InputObject "Loading xslt stylesheet from file '$XsltFilename'"
                 $xslt.Load($XsltFilename)
             } else {
-                Write-Output "Parsing the provided xslt"
+                Write-Output -InputObject "Parsing the provided xslt"
                 try { 
                     $textReader = New-Object System.IO.StringReader $XsltBody
                     $xmlReader = [System.Xml.XmlReader]::Create($textReader)
@@ -104,18 +123,30 @@ function Get-UpdateXsltCmdParams {
             $xslt.Transform($configFileName, $tempFileName) 
 
             if (!(Test-Path -LiteralPath $tempFileName)) {
-                throw "Someting went wrong - file '$tempFileName' does not exist."
+                $msg = "Someting went wrong - file '$tempFileName' does not exist." 
+                if ($IgnoreErrors) { 
+                    Write-Output -InputObject $msg
+                    continue
+                } else { 
+                    throw $msg
+                }
             }
 
             Write-Output "Replacing file '$configFileName' with '$tempFileName'"
             Move-Item -Path $tempFileName -Destination $configFileName -Force
             if (!(Test-Path -LiteralPath $configFileName)) {
-                throw "Someting went wrong - file '$configFileName' does not exist."
+                $msg = "Someting went wrong - file '$configFileName' does not exist."
+                if ($IgnoreErrors) { 
+                    Write-Output -InputObject $msg
+                    continue
+                } else { 
+                    throw $msg
+                }
             }
         }  
     }
 
-    $result.ArgumentList = @($ConfigFiles, $XsltFilename, $XsltBody)
+    $result.ArgumentList = @($ConfigFiles, $XsltFilename, $XsltBody, $IgnoreErrors)
 
     return $result
 

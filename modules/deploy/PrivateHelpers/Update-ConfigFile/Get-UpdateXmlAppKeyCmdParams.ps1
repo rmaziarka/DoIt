@@ -41,6 +41,9 @@ function Get-UpdateXmlAppKeyCmdParams {
     If false and key not found, it will be added to the file.
     If true and key not found, exception will be thrown.
 
+    .PARAMETER IgnoreErrors
+    If $true, errors will be ignored.
+
     .EXAMPLE
     Get-UpdateXmlAppKeyCmdParams -ConfigFiles 'web.config' -ConfigValues 'serviceMode=true'
 #>
@@ -63,7 +66,11 @@ function Get-UpdateXmlAppKeyCmdParams {
 
         [Parameter(Mandatory=$false)]
         [switch]
-        $FailIfCannotMatch
+        $FailIfCannotMatch,
+
+        [Parameter(Mandatory=$false)]
+        [switch]
+        $IgnoreErrors
     )
 
     $configValuesMatches = Get-KeyValueMatches -ConfigValues $ConfigValues
@@ -82,12 +89,18 @@ function Get-UpdateXmlAppKeyCmdParams {
 
     $result.ScriptBlock = {
         
-        param($ConfigFiles, $ConfigValuesMatches, $FailIfCannotMatch, $NodeToMatch, $KeyValueAttr)
+        param($ConfigFiles, $ConfigValuesMatches, $FailIfCannotMatch, $IgnoreErrors, $NodeToMatch, $KeyValueAttr)
 
         $Global:ErrorActionPreference = 'Stop'
         foreach ($configFileName in $ConfigFiles) {
             if (!(Test-Path -LiteralPath $configFileName)) {
-                throw "File $configFileName does not exist (server $([system.environment]::MachineName))."
+                $msg = "File $configFileName does not exist (server $([system.environment]::MachineName))."
+                if ($IgnoreErrors) {
+                    Write-Output -InputObject $msg
+                    continue
+                } else { 
+                    throw $msg
+                }
             }
 
             $configFileName = (Resolve-Path -LiteralPath $configFileName).ProviderPath
@@ -101,12 +114,24 @@ function Get-UpdateXmlAppKeyCmdParams {
                 $node = $config.SelectSingleNode("$NodeToMatch/add[@${keyAttr}=`"$($match.Key)`"]")
                 if (!$node) {
                     if ($FailIfCannotMatch) {
-                        throw "$keyAttr '$($match.Key)' not found under $NodeToMatch/add (file '$configFileName')."
+                        $msg = "$keyAttr '$($match.Key)' not found under $NodeToMatch/add (file '$configFileName')."
+                        if ($IgnoreErrors) {
+                            Write-Output -InputObject $msg
+                            continue
+                        } else {
+                            throw $msg
+                        }
                     } else {
                         Write-Output -InputObject "$keyAttr '$($match.key)' not found under $NodeToMatch - adding with $valueAttr '$($match.Value)'."
                         $nodeXml = $config.SelectSingleNode($NodeToMatch)
                         if (!$nodeXml) {
-                            throw "$NodeToMatch node not found in file '$configFileName' - please ensure it exists."
+                            $msg = "$NodeToMatch node not found in file '$configFileName' - please ensure it exists."
+                            if ($IgnoreErrors) { 
+                                Write-Output -InputObject $msg
+                                continue
+                            } else { 
+                                throw $msg
+                            }
                         }
                         $node = $config.CreateElement('add')
                         $node.SetAttribute($keyAttr, $match.Key)
@@ -132,7 +157,7 @@ function Get-UpdateXmlAppKeyCmdParams {
         }  
     }
 
-    $result.ArgumentList = @($ConfigFiles, $ConfigValuesMatches, $FailIfCannotMatch, $nodeToMatch, $keyValueAttr)
+    $result.ArgumentList = @($ConfigFiles, $ConfigValuesMatches, $FailIfCannotMatch, $IgnoreErrors, $nodeToMatch, $keyValueAttr)
 
     return $result
 }

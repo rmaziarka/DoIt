@@ -40,6 +40,9 @@ function Get-UpdateRegexCmdParams {
     .PARAMETER FailIfCannotMatch
     If true and key not found, exception will be thrown.
 
+    .PARAMETER IgnoreErrors
+    If $true, errors will be ignored.
+
     .EXAMPLE
     Get-UpdateRegexCmdParams -ConfigFiles 'application.properties' -RegexSearch 'service.mode=(true|false)' -ReplaceString 'service.mode=FALSE'
 #>
@@ -61,19 +64,29 @@ function Get-UpdateRegexCmdParams {
 
         [Parameter(Mandatory=$false)]
         [switch]
-        $FailIfCannotMatch
+        $FailIfCannotMatch,
+
+        [Parameter(Mandatory=$false)]
+        [switch]
+        $IgnoreErrors
     )
 
     $result = @{}
 
     $result.ScriptBlock = {
 
-        param($ConfigFiles, $RegexSearch, $ReplaceString, $FailIfCannotMatch)
+        param($ConfigFiles, $RegexSearch, $ReplaceString, $FailIfCannotMatch, $IgnoreErrors)
 
         $Global:ErrorActionPreference = 'Stop'
         foreach ($configFileName in $ConfigFiles) {
             if (!(Test-Path -LiteralPath $configFileName)) {
-                throw "File $configFileName does not exist (server $([system.environment]::MachineName))."
+                $msg = "File $configFileName does not exist (server $([system.environment]::MachineName))."
+                if ($IgnoreErrors) {
+                    Write-Output -InputObject $msg
+                    continue
+                } else { 
+                    throw $msg
+                }
             }
 
             $configFileName = (Resolve-Path -LiteralPath $configFileName).ProviderPath
@@ -83,9 +96,16 @@ function Get-UpdateRegexCmdParams {
 
             if (!($config -imatch $RegexSearch)) {
                 if ($FailIfCannotMatch) {
-                    throw "Regex '$RegexSearch' did not return any matches for file '$configFileName'."
+                    $msg = "Regex '$RegexSearch' did not return any matches for file '$configFileName'."
+                    if ($IgnoreErrors) { 
+                        Write-Output -InputObject $msg
+                        continue
+                    } else {
+                        throw $msg
+                    }
+                    
                 } else {
-                    Write-Output "Regex '$RegexSearch' did not return any matches."
+                    Write-Output -InputObject "Regex '$RegexSearch' did not return any matches."
                 }
             } else {
                 $config = $config -ireplace $RegexSearch, $ReplaceString
@@ -100,7 +120,7 @@ function Get-UpdateRegexCmdParams {
         }  
     }
 
-    $result.ArgumentList = @($ConfigFiles, $RegexSearch, $ReplaceString, $FailIfCannotMatch)
+    $result.ArgumentList = @($ConfigFiles, $RegexSearch, $ReplaceString, $FailIfCannotMatch, $IgnoreErrors)
 
     return $result
 

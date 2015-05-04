@@ -37,6 +37,9 @@ function Get-UpdateXdtCmdParams {
     .PARAMETER XdtBody
     String containing XDT transform. If not provided, XdtFilemane will be used.
 
+    .PARAMETER IgnoreErrors
+    If $true, errors will be ignored.
+
     .EXAMPLE
     Get-UpdateXdtCmdParams -ConfigFiles 'web.config' -XdtFilename 'web.local.config'
 #>
@@ -54,7 +57,11 @@ function Get-UpdateXdtCmdParams {
 
         [Parameter(Mandatory=$false)]
         [string]
-        $XdtBody
+        $XdtBody,
+
+        [Parameter(Mandatory=$false)]
+        [switch]
+        $IgnoreErrors
     )
 
     if (!$XdtFilename -and !$XdtBody) {
@@ -65,12 +72,18 @@ function Get-UpdateXdtCmdParams {
 
     $result.ScriptBlock = {
 
-        param($ConfigFiles, $XdtFilename, $XdtBody)
+        param($ConfigFiles, $XdtFilename, $XdtBody, $IgnoreErrors)
 
         $Global:ErrorActionPreference = 'Stop'
         foreach ($configFileName in $ConfigFiles) {
             if (!(Test-Path -LiteralPath $configFileName)) {
-                throw "File $configFileName does not exist (server $([system.environment]::MachineName))."
+                $msg = "File $configFileName does not exist (server $([system.environment]::MachineName))."
+                if ($IgnoreErrors) {
+                    Write-Output -InputObject $msg
+                    continue
+                } else { 
+                    throw $msg
+                }
             }
 
             $configFileName = (Resolve-Path -LiteralPath $configFileName).ProviderPath
@@ -94,7 +107,12 @@ function Get-UpdateXdtCmdParams {
 
             if ($XdtFilename) {
                 if (!(Test-Path -LiteralPath $XdtFilename)) {
-                    throw "File '$XdtFilename' does not exist"
+                    $msg = "File '$XdtFilename' does not exist"
+                    if ($IgnoreErrors) {
+                        Write-Output -InputObject $msg
+                    } else { 
+                        throw $msg
+                    }
                 }
                 Write-Output "Using xdt file '$XdtFilename'"
                 $xdtParam.XdtPath = $XdtFilename
@@ -105,21 +123,33 @@ function Get-UpdateXdtCmdParams {
             Convert-XmlUsingXdt @xdtParam
 
             if (!(Test-Path -LiteralPath $tempFileName)) {
-                throw "Someting went wrong - file '$tempFileName' does not exist."
+                $msg = "Someting went wrong - file '$tempFileName' does not exist." 
+                if ($IgnoreErrors) { 
+                    Write-Output -InputObject $msg
+                    continue
+                } else { 
+                    throw $msg
+                }
             }
 
             Write-Output "Replacing file '$configFileName' with '$tempFileName'"
             Move-Item -Path $tempFileName -Destination $configFileName -Force
 
             if (!(Test-Path -LiteralPath $configFileName)) {
-                throw "Someting went wrong - file '$configFileName' does not exist."
+                $msg = "Someting went wrong - file '$configFileName' does not exist."
+                if ($IgnoreErrors) { 
+                    Write-Output -InputObject $msg
+                    continue
+                } else { 
+                    throw $msg
+                }
             }
 
             Pop-Location
         }  
     }
 
-    $result.ArgumentList = @($ConfigFiles, $XdtFilename, $XdtBody)
+    $result.ArgumentList = @($ConfigFiles, $XdtFilename, $XdtBody, $IgnoreErrors)
 
     return $result
 
