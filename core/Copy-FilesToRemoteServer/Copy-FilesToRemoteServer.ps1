@@ -217,7 +217,7 @@ function Copy-FilesToRemoteServer {
            } else {
                $dest = Split-Path -Parent $destZipFile
            }
-           Invoke-Command -Session $session -ScriptBlock $postCopyScriptBlock -ArgumentList $destZipFile, $dest, $BlueGreenEnvVariableName, $hashPath, $ClearDestination
+           [void](Invoke-Command -Session $session -ScriptBlock $postCopyScriptBlock -ArgumentList $destZipFile, $dest, $BlueGreenEnvVariableName, $hashPath, $ClearDestination)
 
            Remove-PSSession -Session $session
            Write-Progress -Activity "Finished" -Completed -Id 1

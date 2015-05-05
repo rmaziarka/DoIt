@@ -64,7 +64,6 @@ function Get-PostCopyScriptBlock {
         )
 
         $Global:ErrorActionPreference = 'Stop'
-        $Global:VerbosePreference = 'Continue'
         $success = $false
 
         # try decompressing with .NET first (only if destination does not exist - otherwise it fails)
@@ -74,7 +73,7 @@ function Get-PostCopyScriptBlock {
                 [System.IO.Compression.ZipFile]::ExtractToDirectory($ZipFilePath, $Destination) 
                 $success = $true
             } catch {
-                Write-Verbose -Message ".Net decompression failed: $_ - falling back to 7-zip / shell."
+                Write-Host -Object ".Net decompression failed: $_ - falling back to 7-zip / shell."
             }
         }
 
@@ -89,13 +88,13 @@ function Get-PostCopyScriptBlock {
                     $7zipPath = 'C:\Program Files\7-Zip\7z.exe'
                 }
                 if (Test-Path -LiteralPath $7zipPath) {
-                    & $7zipPath " x $ZipFilePath -o$Destination -y"
+                    & $7zipPath " x `"$ZipFilePath `"-o`"$Destination`" -y"
                     if (!$LASTEXITCODE) {
                         $success = $true
                     }
                 }
             } catch {
-                Write-Verbose -Message "7zip decompression failed: $_ - falling back to shell."
+                Write-Host -Object "7zip decompression failed: $_ - falling back to shell."
             }
         }
 
@@ -116,7 +115,7 @@ function Get-PostCopyScriptBlock {
             if ($oldPath) {
                 [void](Remove-Item -LiteralPath (Join-Path -Path $oldPath -ChildPath '.currentLive') -Force -ErrorAction SilentlyContinue)
             }
-            Write-Verbose -Message "Setting env variable '$BlueGreenEnvVariableName' to '$destPath'"
+            Write-Host -Object "Setting env variable '$BlueGreenEnvVariableName' to '$destPath'"
             [Environment]::SetEnvironmentVariable($BlueGreenEnvVariableName, $destPath, 'Machine')
             [void](New-Item -Path (Join-Path -Path $Destination -ChildPath '.currentLive') -Force -ItemType File)
         }
