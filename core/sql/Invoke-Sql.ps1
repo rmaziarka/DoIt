@@ -103,7 +103,7 @@ function Invoke-Sql {
     
         [Parameter(Mandatory=$false)] 
         [int]
-        $QueryTimeoutInSeconds = 120,
+        $QueryTimeoutInSeconds = 3600,
 
         [Parameter(Mandatory=$false)] 
         [int]

@@ -77,7 +77,7 @@ function Deploy-DBDeploySqlScriptsPackage {
 
         [Parameter(Mandatory=$false)]
         [int] 
-        $QueryTimeoutInSeconds = 600,
+        $QueryTimeoutInSeconds = 3600,
 
         [Parameter(Mandatory=$false)] 
         [string]
