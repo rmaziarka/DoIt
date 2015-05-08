@@ -107,7 +107,7 @@ function Invoke-Sql {
 
         [Parameter(Mandatory=$false)] 
         [int]
-        $ConnectTimeoutInSeconds = 8,
+        $ConnectTimeoutInSeconds = 60,
     
         [Parameter(Mandatory=$false)] 
         [hashtable]
@@ -174,7 +174,7 @@ function Invoke-Sql {
             } else {
                 $qLog = $q
             }
-            Write-Log -_Debug "Running custom query at $targetLog using sqlcmd (${qLog}...)"
+            Write-Log -_Debug "Running custom query at $targetLog using sqlcmd, QueryTimeout = $QueryTimeoutInSeconds s (${qLog}...)"
             Invoke-SqlSqlcmd @params
         }
 
@@ -182,7 +182,7 @@ function Invoke-Sql {
         foreach ($file in $InputFile) {
             $file = (Resolve-Path -LiteralPath $file).ProviderPath
             $params['InputFile'] = $file
-            Write-Log -_Debug "Running sql file '$file' at $targetLog using sqlcmd"
+            Write-Log -_Debug "Running sql file '$file' at $targetLog using sqlcmd, QueryTimeout = $QueryTimeoutInSeconds s"
             Invoke-SqlSqlcmd @params
         }
 
@@ -201,7 +201,7 @@ function Invoke-Sql {
 
         foreach ($file in $InputFile) {
             $file = (Resolve-Path -LiteralPath $file).ProviderPath
-            Write-Log -_Debug "Running sql file '$file' at $targetLog using .Net"
+            Write-Log -_Debug "Running sql file '$file' at $targetLog using .Net, QueryTimeout = $QueryTimeoutInSeconds s"
             $params['Query'] = Get-Content -LiteralPath $file -ReadCount 0 | Out-String
             Invoke-SqlDotNet @params
         }
