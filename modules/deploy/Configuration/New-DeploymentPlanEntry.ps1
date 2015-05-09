@@ -172,6 +172,8 @@ function New-DeploymentPlanEntry {
         }
     }
 
+    $rebootHandlingMode = Resolve-ScriptedToken -ScriptedToken $Configuration.RebootHandlingMode -ResolvedTokens $ResolvedTokens -Environment $Environment -Node $Node
+
     return [PSCustomObject]@{ 
         EntryNo = $entryNo
         ConnectionParams = $connectionParamsObj
@@ -186,7 +188,7 @@ function New-DeploymentPlanEntry {
         Tokens = $ResolvedTokens; 
         TokensOverride = $TokensOverride;
         RequiredPackages = $requiredPackages
-        RebootHandlingMode = $Configuration.RebootHandlingMode
+        RebootHandlingMode = $rebootHandlingMode
     }
 }
 

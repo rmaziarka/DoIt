@@ -77,8 +77,8 @@ function ConfigurationSettings {
         $RunOn,
 
         [Parameter(Mandatory=$false)]
-        [ValidateSet($null, 'None', 'Stop', 'RetryWithoutReboot', 'AutoReboot')]
-        [string]
+        #[ValidateSet($null, 'None', 'Stop', 'RetryWithoutReboot', 'AutoReboot')]
+        [object]
         $RebootHandlingMode
     )
 
