@@ -153,12 +153,12 @@ function Start-DeploymentByMSDeploy {
     }
 
     $powershellCmd = @"
-try { Set-Location -Path '$PackageDirectory'; `$Global:PSCIRemotingMode = '$($RunOnConnectionParams.RemotingMode)'; `$Global:PSCICIServer = '$($Global:PSCIGlobalConfiguration.CIServer)'; & $deployScript; 
+try { Set-Location -Path '$PackageDirectory'; `$Global:PSCIRemotingMode = '$($RunOnConnectionParams.RemotingMode)'; `$Global:PSCICIServer = '$($Global:PSCIGlobalConfiguration.CIServer)'; `$exitCode = 1; & $deployScript; `$exitCode = `$LASTEXITCODE
 "@
     if ($PackageDirectoryAutoRemove) {
-        $powershellCmd += "} finally { Set-Location -Path (Split-Path -Path '$PackageDirectory' -Parent); Remove-Item -LiteralPath '$PackageDirectory' -Force -Recurse }"
+        $powershellCmd += "} finally { Set-Location -Path (Split-Path -Path '$PackageDirectory' -Parent); Remove-Item -LiteralPath '$PackageDirectory' -Force -Recurse; exit `$exitCode }"
     } else {
-        $powershellCmd += "} finally { }"
+        $powershellCmd += "} finally { exit `$exitCode }"
     }
 
     $postDeploymentScript += "-PostSync:runCommand='powershell -Command `"$powershellCmd`"',dontUseCommandExe=true,waitInterval=2147483647,waitAttempts=1"
