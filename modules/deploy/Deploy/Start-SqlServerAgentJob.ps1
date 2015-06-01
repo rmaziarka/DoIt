@@ -103,7 +103,7 @@ function Start-SqlServerAgentJob {
         $syncLog = 'asynchronously'
     }
 
-    Write-ProgressExternal -Message "Running SQL Server Agent job $JobName" -ErrorMessage 'SQL Server Agent job $JobName failed'
+    Write-ProgressExternal -Message "Running SQL Server Agent job $JobName" -ErrorMessage "SQL Server Agent job $JobName failed"
 
     Write-Log -Info "Running SQL Server Agent job named '$JobName' $syncLog using connectionString '$ConnectionString'" -Emphasize
 
