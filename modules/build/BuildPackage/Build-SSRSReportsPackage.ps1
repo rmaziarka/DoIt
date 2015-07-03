@@ -99,7 +99,7 @@ function Build-SSRSReportsPackage {
     [void](New-Item -Path $OutputPath -ItemType Directory -Force)
 
     Write-Log -Info "Copying Package..."
-    Copy-Item -Path "$ProjectDirPath/*" -Destination $OutputPath -Exclude '*.data'
+    Copy-Item -Path "$ProjectDirPath/*" -Recurse -Destination $OutputPath -Exclude '*.data'
 
     if ($Version) {
         if (!$VersionPlaceHolderXpath -or !$NameSpace) {
