@@ -62,7 +62,7 @@ function Start-Build {
         [Parameter(Mandatory=$true)]
         [string]
         $DefaultTask
-     )  
+     )
 
      $buildParamsHash = @{}
      foreach ($param in $BuildParams) {
@@ -72,8 +72,8 @@ function Start-Build {
      if (!(Test-Path -LiteralPath $ScriptsDirectory -PathType Container)) {
         Write-Log -Critical "Directory '$ScriptsDirectory' does not exist. Current location: $((Get-Location).Path)"
      }
-
-     $scripts = Get-ChildItem -Path "$ScriptsDirectory\*.ps*1" -File | Select-Object -ExpandProperty FullName | Sort
+     
+     $scripts = Get-ChildItem -Path "$ScriptsDirectory\" -Filter "*.ps*1" -Recurse -File | Select-Object -ExpandProperty FullName | Sort
      foreach ($script in $scripts) {
         Write-Log -Info "Including '$script'."
         . $script
@@ -99,7 +99,7 @@ function Start-Build {
      foreach ($task in $buildParamsHash.Tasks) {
         $cmd = Get-Command -Name $task
         $cmdParams = $cmd.ParameterSets[0].Parameters | Where-Object { $_.Position -ge 0 } | Sort-Object -Property Position | Select-Object -ExpandProperty Name
-        
+
         $invokeArgs = @()
         $logInvocation = "$($cmd.Name) "
         foreach ($param in $cmdParams) {
