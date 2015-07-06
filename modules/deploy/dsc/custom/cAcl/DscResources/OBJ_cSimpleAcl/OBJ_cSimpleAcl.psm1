@@ -135,7 +135,7 @@ function Set-TargetResource {
         $Ensure = 'Present'
     )
 
-    $acl = (Get-Item $Path).GetAccessControl('Access')
+    $acl = (Get-Item -Path $Path).GetAccessControl('Access')
 
     if ($Inherit) {
         $inheritArg = 'ContainerInherit, ObjectInherit'
