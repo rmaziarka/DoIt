@@ -1,4 +1,4 @@
-﻿$zipFilePath = "$pwd\Target.zip"
+$zipFilePath = "$pwd\Target.zip"
 
 del "$pwd\SourceDir-1" -Force -Recurse -ErrorAction SilentlyContinue
 del "$pwd\SourceDir-2" -Force -Recurse -ErrorAction SilentlyContinue

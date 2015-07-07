@@ -1,4 +1,4 @@
-﻿Configuration Sample_xService_ServiceWithCredential
+Configuration Sample_xService_ServiceWithCredential
 {
 
     param
@@ -8,7 +8,7 @@
 
         [System.String]
         $Name,
-		
+        
         [System.String]
         [ValidateSet("Automatic", "Manual", "Disabled")]
         $StartupType="Automatic",
@@ -70,6 +70,7 @@ $Config = @{
 $credential = Get-Credential
 
 Sample_xService_ServiceWithCredential -ConfigurationData $Config -Name "Sample Service" -DisplayName "Sample Display Name" -Ensure "Present" -Path "C:\DSC\TestService.exe" -StartupType Automatic -Credential $credential
+
 
 
 

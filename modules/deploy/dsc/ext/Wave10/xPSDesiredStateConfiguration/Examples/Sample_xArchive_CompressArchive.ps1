@@ -1,4 +1,4 @@
-﻿
+
 Configuration Sample_xArchive_CompressArchive
 {
     param 

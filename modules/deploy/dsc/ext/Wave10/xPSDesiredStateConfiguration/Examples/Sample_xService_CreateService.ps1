@@ -1,4 +1,4 @@
-﻿Configuration Sample_xService_CreateService
+Configuration Sample_xService_CreateService
 {
 
     param
@@ -8,7 +8,7 @@
 
         [System.String]
         $Name,
-		
+        
         [System.String]
         [ValidateSet("Automatic", "Manual", "Disabled")]
         $StartupType="Automatic",
@@ -56,6 +56,7 @@
 
 
 Sample_xService_CreateService -Name "Sample Service" -Ensure "Present" -Path "C:\DSC\TestService.exe"
+
 
 
 

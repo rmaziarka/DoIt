@@ -1,4 +1,4 @@
-﻿Configuration Sample_xService_ServiceWithCredential
+Configuration Sample_xService_ServiceWithCredential
 {
 
     param
@@ -8,7 +8,7 @@
 
         [System.String]
         $Name,
-		
+        
         [System.String]
         [ValidateSet("Automatic", "Manual", "Disabled")]
         $StartupType="Automatic",
@@ -58,6 +58,7 @@
 }
 
 # To use the sample(s) with credentials, see blog at http://blogs.msdn.com/b/powershell/archive/2014/01/31/want-to-secure-credentials-in-windows-powershell-desired-state-configuration.aspx
+
 
 
 

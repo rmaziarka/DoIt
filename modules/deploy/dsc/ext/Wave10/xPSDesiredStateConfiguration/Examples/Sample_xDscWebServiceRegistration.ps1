@@ -1,6 +1,8 @@
 # DSC configuration for Pull Server and Compliance Server
 # Prerequisite: Certificate "CN=PSDSCPullServerCert" in "CERT:\LocalMachine\MY\" store
 # Note: A Certificate may be generated using MakeCert.exe: http://msdn.microsoft.com/en-us/library/windows/desktop/aa386968%28v=vs.85%29.aspx
+# This version sets the RegistrationKeyPath which is where registration keys are stored. It also installs the native module that allows for the
+# acceptance of self-signed certificates in IIS.
 
 configuration Sample_xDscWebService
 {
@@ -32,7 +34,9 @@ configuration Sample_xDscWebService
             ModulePath              = "$env:PROGRAMFILES\WindowsPowerShell\DscService\Modules"
             ConfigurationPath       = "$env:PROGRAMFILES\WindowsPowerShell\DscService\Configuration"            
             State                   = "Started"
-            DependsOn               = "[WindowsFeature]DSCServiceFeature"                        
+            DependsOn               = "[WindowsFeature]DSCServiceFeature" 
+            RegistrationKeyPath     = "$env:PROGRAMFILES\WindowsPowerShell\DscService"   
+            AcceptSelfSignedCertificates = $true
         }
 
         xDscWebService PSDSCComplianceServer

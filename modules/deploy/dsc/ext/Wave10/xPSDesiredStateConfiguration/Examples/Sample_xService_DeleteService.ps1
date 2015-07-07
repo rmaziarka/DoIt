@@ -1,4 +1,4 @@
-﻿Configuration Sample_xService_DeleteService
+Configuration Sample_xService_DeleteService
 {
 
     param
@@ -8,7 +8,7 @@
 
         [System.String]
         $Name,
-		
+        
         [System.String]
         [ValidateSet("Automatic", "Manual", "Disabled")]
         $StartupType,
@@ -55,4 +55,5 @@
 
 
 Sample_xService_DeleteService -Name "Sample Service" -Ensure "Absent" 
+
 

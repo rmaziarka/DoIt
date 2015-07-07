@@ -1,4 +1,4 @@
-﻿Configuration Sample_xWindowsProcess_EnsureAbsentWithCredential
+Configuration Sample_xWindowsProcess_EnsureAbsentWithCredential
 {
     param
     (

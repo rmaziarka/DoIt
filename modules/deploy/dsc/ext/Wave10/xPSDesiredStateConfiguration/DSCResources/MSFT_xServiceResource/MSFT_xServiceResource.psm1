@@ -82,7 +82,7 @@ function Test-TargetResource
         [ValidateNotNullOrEmpty()]
         [System.String]
         $Name,
-		
+        
         [System.String]
         [ValidateSet("Automatic", "Manual", "Disabled")]
         $StartupType,
@@ -1172,3 +1172,4 @@ function Write-Log
 }
 
 Export-ModuleMember -function Get-TargetResource, Set-TargetResource, Test-TargetResource
+

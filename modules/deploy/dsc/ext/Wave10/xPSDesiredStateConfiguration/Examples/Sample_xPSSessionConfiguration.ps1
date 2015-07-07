@@ -1,4 +1,4 @@
-﻿configuration Sample_xPSEndpoint_NewWithDefaults
+configuration Sample_xPSEndpoint_NewWithDefaults
 {
     param
     (

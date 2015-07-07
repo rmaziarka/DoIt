@@ -1,4 +1,4 @@
-﻿
+
 $zipFilePath = "$pwd\Target.zip"
 
 del "$pwd\Sample-1.txt" -Force -Recurse -ErrorAction SilentlyContinue

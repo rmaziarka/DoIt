@@ -1,4 +1,4 @@
-﻿
+
 $zipFilePath = "$pwd\SampleArchive.zip"
 $expandedZipDir = "$pwd\TargetExpanded"
 
