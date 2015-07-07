@@ -71,6 +71,10 @@ function Start-Deployment {
     Functions - deploy only non-DSC configurations
     Adhoc     - override configurations and nodes with $ConfigurationsFilter and $NodesFilter (they don't have to be defined in ServerRoles - useful for adhoc deployments)
 
+    .PARAMETER DeployConfigurationPath
+    Path to the directory where configuration files reside, relative to current directory. 
+    Can be used for ad-hoc deployments (without Initialize-ConfigurationPaths invocation).
+
     .EXAMPLE
     Start-Deployment -Environment $Environment -TokensOverride $TokensOverride
 
@@ -113,13 +117,21 @@ function Start-Deployment {
         [Parameter(Mandatory=$false)]
         [ValidateSet('All', 'DSC', 'Functions', 'Adhoc')]
         [string]
-        $DeployType = 'All'
+        $DeployType = 'All',
+
+        [Parameter(Mandatory=$false)]
+        [string]
+        $DeployConfigurationPath
      )  
 
     if (!$PSCIGlobalConfiguration.RemotingMode) {
         Write-ProgressExternal -Message ("Starting deployment to env {0}" -f ($Environment -join ',')) -ErrorMessage "Deployment init error"
     }
-    $configPaths = Get-ConfigurationPaths
+    $configPaths = Get-ConfigurationPaths -DefaultDeployConfigurationPath $DeployConfigurationPath
+    if (!$configPaths.DeployConfigurationPath) {
+        Write-Log -Critical "No `$DeployConfigurationPath defined. Please pass it to Start-Deployment function or invoke Initialize-ConfigurationPaths function."
+    }
+
     $packagesPath = $configPaths.PackagesPath
     
     Write-Log -Info "[START] PARSE CONFIG FILES - environment(s) '$($Environment -join ',')'" -Emphasize

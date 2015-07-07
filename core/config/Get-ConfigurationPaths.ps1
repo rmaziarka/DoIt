@@ -35,13 +35,20 @@ function Get-ConfigurationPaths {
     DeployConfigurationPath - path to directory with configuration files
     DeployScriptsPath       - path to directory with deploy.ps1  
 
+    .PARAMETER DefaultDeployConfigurationPath
+    Default DeployConfigurationPath to use if configuration paths have not been initialized yet.
+
     .EXAMPLE
     $configPaths = Get-ConfigurationPaths
     #>
 
     [CmdletBinding()]
     [OutputType([PSCustomObject])]
-    param()
+    param(
+        [Parameter(Mandatory=$false)]
+        [string]
+        $DefaultDeployConfigurationPath
+    )
 
     if (!(Test-Path -LiteralPath variable:global:PSCIGlobalConfiguration)) {
         Write-Log -Critical 'No global PSCIGlobalConfiguration variable.'
@@ -49,7 +56,7 @@ function Get-ConfigurationPaths {
 
     $configPaths = $Global:PSCIGlobalConfiguration.ConfigurationPaths
     if (!$configPaths) {
-        Initialize-ConfigurationPaths
+        Initialize-ConfigurationPaths -DeployConfigurationPath $DefaultDeployConfigurationPath
     }
     return $Global:PSCIGlobalConfiguration.ConfigurationPaths
 }

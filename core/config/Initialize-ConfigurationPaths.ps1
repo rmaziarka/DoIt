@@ -73,7 +73,7 @@ function Initialize-ConfigurationPaths {
 
     # DeployScriptsPath - validate deploy.ps1 exists in current directory
     if (!(Test-Path -LiteralPath 'deploy.ps1')) {
-        Write-Log -Warn "deploy.ps1 has not been found in current directory '($((Get-Location).Path)'"
+        Write-Log -Warn "deploy.ps1 has not been found in current directory '($((Get-Location).Path))'"
     }
 
     # ProjectRootPath - if not empty validate it exists, if empty set to current directory

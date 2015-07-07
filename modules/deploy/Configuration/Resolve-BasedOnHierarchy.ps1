@@ -57,7 +57,7 @@ function Resolve-BasedOnHierarchy {
     )   
 
     if (!$AllElements.ContainsKey($SelectedElement)) {
-        Write-Log -Critical "$ConfigElementName '$SelectedElement' is not defined."
+        Write-Log -Critical "$ConfigElementName '$SelectedElement' is not defined. Available elements: $($AllElements.Keys -join ', ')."
     }
 
     $result = @($SelectedElement)

@@ -56,7 +56,7 @@ function Read-ConfigurationFiles {
     }
 
     $invalidLineRegex = '(Import-DSCResource.*`[\s\\r\\n$])'
-    $dscResourceRegex = 'Import-DSCResource\s+(?:-Module)?\s*([^-][^\s;]+)|Import-DSCResource.+-Module\s*([^-][^\s;]+)'
+    $dscResourceRegex = 'Import-DSCResource\s+(?:-Module)?(?:Name)?\s*([^-][^\s;]+)|Import-DSCResource.+-Module(?:Name)?\s*([^-][^\s;]+)'
 
     foreach ($script in $configScripts) {
         $contents = Get-Content -Path $script.FullName -ReadCount 0 | Out-String
