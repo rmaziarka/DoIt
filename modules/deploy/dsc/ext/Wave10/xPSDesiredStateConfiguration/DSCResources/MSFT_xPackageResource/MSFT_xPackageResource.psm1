@@ -856,7 +856,8 @@ function Set-TargetResource
             }
             catch
             {
-                Throw-TerminatingError ($LocalizedData.CouldNotStartProcess -f $Path) $_
+				$errorMessage = "$($LocalizedData.CouldNotStartProcess -f $Path): $($_.Exception.Message) / $($_.ScriptStackTrace)"
+                Throw-TerminatingError $errorMessage $_
             }
 
 
