@@ -1,4 +1,4 @@
-﻿configuration DbBackup
+configuration DbBackup
 {
     param
     (

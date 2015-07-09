@@ -25,7 +25,7 @@ SOFTWARE.
 function Invoke-Sql {
     <# 
     .SYNOPSIS 
-    Runs a T-SQL script using sqlcmd.exe. 
+    Runs a T-SQL script using .NET classes (default, no prerequisites needed) or sqlcmd.exe. 
     
     .DESCRIPTION 
     Runs sql command or sql script file 
