@@ -26,7 +26,7 @@ function Convert-HashtableToString {
 
     <#
     .SYNOPSIS
-    Converts hashtable to a serializable string.
+    Converts hashtable or any other dictionary to a serializable string. It also supports nested hashtables.
 
     .PARAMETER Hashtable
     Hashtable to convert.
@@ -39,9 +39,27 @@ function Convert-HashtableToString {
     [OutputType([string])]
     param(
         [Parameter(Mandatory=$true)]
-        [hashtable]
+        [System.Collections.IDictionary]
         $Hashtable
     )
+
+    $sb = New-Object -TypeName System.Text.StringBuilder
+    [void]($sb.Append('@{'))
+    foreach ($entry in $Hashtable.GetEnumerator()) {
+
+        $key = $entry.Key -replace "'","''"
+        $key = "'$key'"
+        $value = $entry.Value
+        if ($value -is [System.Collections.IDictionary]) {
+            $value = Convert-HashtableToString -Hashtable $value
+        } else {
+            $value = $value -replace "'","''"
+            $value = "'$value'"
+        }
         
-    '@{' + (($Hashtable.GetEnumerator() | Foreach-Object { "'$($_.Key -replace "'","''")'='$($_.Value -replace "'","''")'" }) -join ';') + '}'
+        [void]($sb.Append("$key=$value; "))
+    }
+    [void]($sb.Append('}'))
+
+    return $sb.ToString()
 }

@@ -57,6 +57,9 @@ function Invoke-Sql {
     .PARAMETER SqlCmdVariables
     Hashtable containing sqlcmd variables.
 
+    .PARAMETER SqlParameters
+    Array of SqlParameters for .NET SqlCommand.
+
     .PARAMETER Credential
     Credential to impersonate in Integrated Security mode.
 
@@ -114,6 +117,10 @@ function Invoke-Sql {
         $SqlCmdVariables,
 
         [Parameter(Mandatory=$false)]
+        [Data.SqlClient.SqlParameter[]] 
+        $SqlParameters,
+
+        [Parameter(Mandatory=$false)]
         [PSCredential] 
         $Credential,
 
@@ -169,10 +176,10 @@ function Invoke-Sql {
     if ($Mode -eq 'sqlcmd') {
         foreach ($q in $Query) { 
             $params['Query'] = $q
-            if ($q.Length -gt 40) {
-                $qLog = ($q.Substring(0, 40) -replace "`r", '' -replace "`n", '; ') + '...'
+            if ($q.Trim().Length -gt 40) {
+                $qLog = ($q.Trim().Substring(0, 40) -replace "`r", '' -replace "`n", '; ') + '...'
             } else {
-                $qLog = $q
+                $qLog = $q.Trim()
             }
             Write-Log -_Debug "Running custom query at $targetLog using sqlcmd, QueryTimeout = $QueryTimeoutInSeconds s (${qLog}...)"
             Invoke-SqlSqlcmd @params
@@ -188,12 +195,13 @@ function Invoke-Sql {
 
     } elseif ($Mode -eq '.net') {
         $params['Mode'] = $SqlCommandMode
+        $params['SqlParameters'] = $SqlParameters
         foreach ($q in $Query) { 
             $params['Query'] = $q
-            if ($q.Length -gt 40) {
-                $qLog = ($q.Substring(0, 40) -replace "`r", '' -replace "`n", '; ') + '...'
+            if ($q.Trim().Length -gt 40) {
+                $qLog = ($q.Trim().Substring(0, 40) -replace "`r", '' -replace "`n", '; ') + '...'
             } else {
-                $qLog = $q
+                $qLog = $q.Trim()
             }
             Write-Log -_Debug "Running custom query at $targetLog using .Net (${qLog})"
             Invoke-SqlDotNet @params

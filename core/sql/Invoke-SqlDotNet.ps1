@@ -51,6 +51,9 @@ function Invoke-SqlDotNet {
     .PARAMETER SqlCmdVariables
     Hashtable containing sqlcmd variables.
 
+    .PARAMETER SqlParameters
+    Array of SqlParameters for .NET SqlCommand.
+
     .PARAMETER Credential
     Credential to impersonate in Integrated Security mode.
 
@@ -89,6 +92,10 @@ function Invoke-SqlDotNet {
         [Parameter(Mandatory=$false)] 
         [hashtable]
         $SqlCmdVariables,
+
+        [Parameter(Mandatory=$false)]
+        [Data.SqlClient.SqlParameter[]] 
+        $SqlParameters,
 
         [Parameter(Mandatory=$false)]
         [PSCredential] 
@@ -146,6 +153,13 @@ function Invoke-SqlDotNet {
         foreach ($q in $queriesSplit) { 
             $command = New-Object -TypeName System.Data.SqlClient.SqlCommand -ArgumentList $q, $connection
             $command.CommandTimeout = $QueryTimeoutInSeconds
+
+            if ($SqlParameters) {
+                foreach ($sqlParam in $SqlParameters) {
+                    Write-Log -_Debug "Key: $($sqlParam.ParameterName), value: $($sqlParam.Valuee)"
+                    $command.Parameters.Add($sqlParam)
+                }
+            }
 
             if ($Mode -eq 'Dataset') { 
                 $dataset = New-Object -TypeName System.Data.DataSet 
