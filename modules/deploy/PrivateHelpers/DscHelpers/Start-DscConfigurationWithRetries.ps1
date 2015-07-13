@@ -108,12 +108,17 @@ function Start-DscConfigurationWithRetries
             }
             Write-Log -Info "Start-DscConfiguration will run in REMOTE mode - NODE '$($ConnectionParams.NodesAsString)' / AUTH '$($ConnectionParams.Authentication)' / CRED '$userName' / PROTOCOL '$($ConnectionParams.Protocol)' / REBOOT '$RebootHandlingMode'"
             $cimSessionParams = $ConnectionParams.CimSessionParams
-            $cimSession = New-CimSession @cimSessionParams
+            if ($cimSessionParams.ComputerName) { 
+                $cimSession = New-CimSession @cimSessionParams
 
-            # if there are LocalConfigurationManager settings, we need to apply them explicitly - see http://colinsalmcorner.com/post/powershell-dsc-remotely-configuring-a-node-to-rebootnodeifneeded
-            if (Test-Path -Path (Join-Path -Path $MofDir -ChildPath '*.meta.mof')) {
-                Set-DscLocalConfigurationManager -CimSession $cimSession -Path $MofDir
-            }           
+                # if there are LocalConfigurationManager settings, we need to apply them explicitly - see http://colinsalmcorner.com/post/powershell-dsc-remotely-configuring-a-node-to-rebootnodeifneeded
+                if (Test-Path -Path (Join-Path -Path $MofDir -ChildPath '*.meta.mof')) {
+                    Set-DscLocalConfigurationManager -CimSession $cimSession -Path $MofDir
+                }           
+            } else {
+                # this can happen when RemotingMode -eq WebDeployHandler and we're deploying dsc to localhost
+                $cimSession = $null
+            }
         }
 
         $params = @{ 

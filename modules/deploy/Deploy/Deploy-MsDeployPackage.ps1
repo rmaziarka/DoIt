@@ -200,11 +200,7 @@ function Deploy-MsDeployPackage {
                     -Path $PackagePath `
                     -DefaultPath (Join-Path -Path (Join-Path -Path $configPaths.PackagesPath -ChildPath $PackageName) -ChildPath "${packageNameLeaf}.zip") `
                     -ErrorMsg "Cannot find file '{0}' required for deployment of package '$PackageName'. Please ensure you have run the build and the package exists."
-
-    if (!$PackagePath.ToLower().EndsWith("zip")) {
-        Write-Log -Critical "Invalid package: '$PackagePath' - expecting zip"
-    }
-    
+   
     if ($SkipDir) {
         $MsDeployAddParameters += "-skip:Directory=`"$SkipDir`" "
     }   
@@ -227,6 +223,9 @@ function Deploy-MsDeployPackage {
     }
 
     if ($PackageType -eq "Web") {
+        if (!$PackagePath.ToLower().EndsWith("zip")) {
+           Write-Log -Critical "Invalid package: '$PackagePath' - expecting zip"
+        }
         if ($Website -and $WebApplication) {
             $MsDeployAddParameters += "-setParam:name='IIS Web Application Name',value='${Website}\${WebApplication}' "
         } elseif ($Website) {
@@ -239,8 +238,12 @@ function Deploy-MsDeployPackage {
         Sync-MsDeployDirectory -SourcePath $packageCopyPath -DestString $MsDeployDestinationString -AddParameters $MsDeployAddParameters -UseChecksum:$UseChecksum
     } elseif ($PackageType -eq "Dir") {
         Write-Log -Info "Deploying directory package '$PackageName' to server '$Node'" -Emphasize
-        $tempDir = New-TempDirectory
-        Expand-Zip -ArchiveFile $PackagePath -OutputDirectory $tempDir
+        if ($PackagePath.ToLower().EndsWith("zip")) {
+            $tempDir = New-TempDirectory
+            Expand-Zip -ArchiveFile $PackagePath -OutputDirectory $tempDir
+        } else {
+            $tempDir = $PackagePath
+        }
         Sync-MsDeployDirectory -SourcePath $tempDir -DestinationDir $PhysicalPath -DestString $MsDeployDestinationString -AddParameters $MsDeployAddParameters -UseChecksum:$UseChecksum
         Remove-TempDirectory
     }
