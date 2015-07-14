@@ -22,31 +22,26 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 #>
 
-function Convert-BytesToSize {
+function Test-WhatIf {
     <#
     .SYNOPSIS
-    Converts size in bytes to user-friendly format (MB/GB etc.)
+    Returns $true if current function is invoked with -WhatIf parameter.
 
-    .PARAMETER Size
-    Input size.
-
+    .DESCRIPTION
+    Useful if we only want to check if -WhatIf has been specified, without printing anything.
+     
     .EXAMPLE
-    Convert-BytesToSize -Size 1024
+    $whatIf = Test-WhatIf
     #>
-  
     [CmdletBinding()]
-    [OutputType([void])]
-    param(
-        [Parameter(Mandatory=$true)]
-        [int64] 
-        $Size
-    )
+    [OutputType([bool])]
+    param()
 
-    switch ($Size) {
-        {$Size -ge 1TB} { return ('{0:n1} TB' -f ($_ / 1TB)) }
-        {$Size -ge 1GB} { return ('{0:n1} GB' -f ($_ / 1GB)) }
-        {$Size -ge 1MB} { return ('{0:n1} MB' -f ($_ / 1MB)) }
-        {$Size -ge 1KB} { return ('{0:n1} kB' -f ($_ / 1KB)) }
-        default { return ('{0} B' -f $_) }
+    foreach ($entry in (Get-PSCallStack)) {
+        if ($entry.InvocationInfo -and $entry.InvocationInfo.BoundParameters -and $entry.InvocationInfo.BoundParameters.ContainsKey('WhatIf')) {
+            return $true
+        }
     }
+    return $false
+
 }

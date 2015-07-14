@@ -1,4 +1,4 @@
-<#
+﻿<#
 The MIT License (MIT)
 
 Copyright (c) 2015 Objectivity Bespoke Software Specialists
@@ -22,31 +22,26 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 #>
 
-function Convert-BytesToSize {
-    <#
-    .SYNOPSIS
-    Converts size in bytes to user-friendly format (MB/GB etc.)
+. "$PSScriptRoot\Remove-DiacriticChars.ps1" -Force
 
-    .PARAMETER Size
-    Input size.
+Describe "Remove-DiacriticChars" {
 
-    .EXAMPLE
-    Convert-BytesToSize -Size 1024
-    #>
-  
-    [CmdletBinding()]
-    [OutputType([void])]
-    param(
-        [Parameter(Mandatory=$true)]
-        [int64] 
-        $Size
-    )
+    Context "when invoked for alphanumeric characters" {
+        $str = (0..127 | Foreach-Object { [char] $_ }) -join ''
+        $result = Remove-DiacriticChars -String $str
 
-    switch ($Size) {
-        {$Size -ge 1TB} { return ('{0:n1} TB' -f ($_ / 1TB)) }
-        {$Size -ge 1GB} { return ('{0:n1} GB' -f ($_ / 1GB)) }
-        {$Size -ge 1MB} { return ('{0:n1} MB' -f ($_ / 1MB)) }
-        {$Size -ge 1KB} { return ('{0:n1} kB' -f ($_ / 1KB)) }
-        default { return ('{0} B' -f $_) }
+        It "should not change any character" {
+            $result | Should Be $str
+        }
     }
+
+    Context "when invoked for polish characters" {
+        $str = 'ąćęłńóśżźĄĆĘŁŃÓŚŻŹ'
+        $result = Remove-DiacriticChars -String $str
+
+        It "should change characters to non-polish ones" {
+            $result | Should Be 'acelnoszzACELNOSZZ'
+        }
+    }
+
 }

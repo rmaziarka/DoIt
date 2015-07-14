@@ -91,4 +91,10 @@ Export-ModuleMember -Function `
     Test-Integer, `
     ConvertTo-Integer, `
     Get-VisualStudioPath, `
-	Backup-SqlDatabase
+	Backup-SqlDatabase, `
+    Convert-FileEncoding, `
+    ConvertTo-Date, `
+    Remove-DiacriticChars, `
+    Test-WhatIf, `
+    Get-CsvData, `
+    Test-ColumnIsValid

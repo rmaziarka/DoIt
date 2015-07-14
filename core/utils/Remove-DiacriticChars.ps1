@@ -22,31 +22,25 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 #>
 
-function Convert-BytesToSize {
+function Remove-DiacriticChars {
+
     <#
     .SYNOPSIS
-    Converts size in bytes to user-friendly format (MB/GB etc.)
-
-    .PARAMETER Size
-    Input size.
+    Removes diacritic characters from specified string. Currently only Polish is supported.
+     
+    .PARAMETER String
+    String to be converted.
 
     .EXAMPLE
-    Convert-BytesToSize -Size 1024
+    $text = Remove-DiacriticChars -String $text
     #>
-  
     [CmdletBinding()]
-    [OutputType([void])]
     param(
-        [Parameter(Mandatory=$true)]
-        [int64] 
-        $Size
-    )
+        [Parameter(Mandatory = $true)]
+        [string]
+        $String
+    ) 
 
-    switch ($Size) {
-        {$Size -ge 1TB} { return ('{0:n1} TB' -f ($_ / 1TB)) }
-        {$Size -ge 1GB} { return ('{0:n1} GB' -f ($_ / 1GB)) }
-        {$Size -ge 1MB} { return ('{0:n1} MB' -f ($_ / 1MB)) }
-        {$Size -ge 1KB} { return ('{0:n1} kB' -f ($_ / 1KB)) }
-        default { return ('{0} B' -f $_) }
-    }
+    return ([Text.Encoding]::ASCII.GetString([Text.Encoding]::GetEncoding("Cyrillic").GetBytes($String)))
+
 }
