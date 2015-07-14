@@ -185,6 +185,8 @@ function Get-CsvData {
             }
         }
 
+        $added = 0
+        $ignored = 0
         # Run Transformation Rules
         if ($CsvTransformRules) {
             $resultArray = New-Object -TypeName System.Collections.ArrayList
@@ -197,8 +199,14 @@ function Get-CsvData {
                 } catch {
                     Write-ErrorRecord -ErrorRecord $_
                 }
-                [void]($resultArray.Add($resultRow))
+                if ($resultRow) { 
+                    [void]($resultArray.Add($resultRow))
+                    $added++
+                } else {
+                    $ignored++
+                }
             }
+            Write-Log -Info "CSV file read successfully ($added rows returned, $ignored rows ignored)."
             return $resultArray
         } else {
             return $inputData
@@ -209,6 +217,6 @@ function Get-CsvData {
         }
     }
 
-    Write-Log -Info "CSV file read successfully."
+    
     
 }
