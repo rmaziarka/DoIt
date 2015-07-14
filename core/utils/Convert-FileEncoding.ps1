@@ -46,7 +46,7 @@ function Convert-FileEncoding {
     Convert-FileEncoding -Path $CsvPath -OutputPath $tempFileName -InputEncoding 'Windows-1250' -OutputEncoding 'UTF-8'
     #>
     [CmdletBinding()]
-    [OutputType()]
+    [OutputType([void])]
     param(
         [Parameter(Mandatory = $true)]
         [string]

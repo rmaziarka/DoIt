@@ -35,6 +35,7 @@ function Remove-DiacriticChars {
     $text = Remove-DiacriticChars -String $text
     #>
     [CmdletBinding()]
+    [OutputType([string])]
     param(
         [Parameter(Mandatory = $true)]
         [string]
