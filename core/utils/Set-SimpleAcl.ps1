@@ -73,18 +73,19 @@ function Set-SimpleAcl {
 
     ) 
 
-    $acl = Get-Acl -Path $Path
+    $acl = (Get-Item -Path $path).GetAccessControl('Access')
 
     if ($Inherit) {
-        $inheritArg = 'ContainerInherit, ObjectInherit'
+        $inheritArg = @([System.Security.AccessControl.InheritanceFlags]::ContainerInherit,[System.Security.AccessControl.InheritanceFlags]::ObjectInherit)
     } else {
-        $inheritArg = 'None'
+        $inheritArg = @([System.Security.AccessControl.InheritanceFlags]::None)
     }
 
+    $propagation = [System.Security.AccessControl.PropagationFlags]::None
+
     Write-Log -Info "Setting ACL on '$Path' - '$Type' user '$User', permission '$Permission', inherit $Inherit"
-    $accessRule = New-Object -TypeName System.Security.AccessControl.FileSystemAccessRule -ArgumentList $User, $Permission, $inheritArg, 'None', $Type
+    $accessRule = New-Object -TypeName System.Security.AccessControl.FileSystemAccessRule -ArgumentList $User, $Permission, $inheritArg, $propagation, $Type
 
-    $acl.SetAccessRule($accessRule)
-
-    $acl | Set-Acl -Path $Path
+    $acl.AddAccessRule($accessRule)
+    Set-Acl -Path $Path -AclObject $acl
 }

@@ -56,7 +56,7 @@ function Get-TargetResource {
         throw "Path '$Path' does not exist."
     }
 
-    $acl = Get-Acl -Path $Path
+    $acl = (Get-Item -Path $Path).GetAccessControl('Access')
 
     $entry = $acl.Access | Where-Object { $_.IdentityReference.Value -ieq $Username -and $_.FileSystemRights -imatch $Permission -and $_.AccessControlType -ieq $Type }
 
@@ -138,17 +138,18 @@ function Set-TargetResource {
     $acl = (Get-Item -Path $Path).GetAccessControl('Access')
 
     if ($Inherit) {
-        $inheritArg = 'ContainerInherit, ObjectInherit'
+        $inheritArg = @([System.Security.AccessControl.InheritanceFlags]::ContainerInherit,[System.Security.AccessControl.InheritanceFlags]::ObjectInherit)
     } else {
-        $inheritArg = 'None'
+        $inheritArg = @([System.Security.AccessControl.InheritanceFlags]::None)
     }
 
+    $propagation = [System.Security.AccessControl.PropagationFlags]::None
+
     Write-Verbose "Setting ACL on '$Path' - '$Type' user '$Username', permission '$Permission', inherit $Inherit"
-    $accessRule = New-Object -TypeName System.Security.AccessControl.FileSystemAccessRule -ArgumentList $Username, $Permission, $inheritArg, 'None', $Type
+    $accessRule = New-Object -TypeName System.Security.AccessControl.FileSystemAccessRule -ArgumentList $Username, $Permission, $inheritArg, $propagation, $Type
 
-    $acl.SetAccessRule($accessRule)
-
-    $acl | Set-Acl -Path $Path
+    $acl.AddAccessRule($accessRule)
+    Set-Acl -Path $Path -AclObject $acl
 
 }
 
