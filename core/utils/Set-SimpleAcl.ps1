@@ -27,6 +27,9 @@ function Set-SimpleAcl {
     .SYNOPSIS
     Sets a simple ACL rule for given Path.
             
+    .DESCRIPTION
+    Returns true if an access rule has been added. False if it was already present.
+
     .PARAMETER Path
     Path to update.
 
@@ -46,8 +49,8 @@ function Set-SimpleAcl {
     Set-SimpleAcl -Path 'c:\test' -User 'Everyone' -Permission 'FullControl' -Type 'Allow'
     #>
     
-    [CmdletBinding()]
-    [OutputType([void])]
+    [CmdletBinding(SupportsShouldProcess = $true)]
+    [OutputType([bool])]
     param(
         [Parameter(Mandatory=$true)]
         [string]
@@ -73,6 +76,16 @@ function Set-SimpleAcl {
 
     ) 
 
+    # see http://stackoverflow.com/questions/7984876/powershell-how-to-get-whatif-to-propagate-to-cmdlets-in-another-module :(
+    $whatIf = Test-WhatIf
+
+    if (!(Test-Path -Path $Path)) {
+        if ($PSCmdlet.ShouldProcess('Directory', "Add permission '$Permission' to item '$Path' (if it exists) for user '$User'") -and !$whatIf) {
+            Write-Log -Critical "Item '$Path' does not exist."
+        }
+        return $true
+    }
+
     $acl = (Get-Item -Path $path).GetAccessControl('Access')
 
     if ($Inherit) {
@@ -81,11 +94,21 @@ function Set-SimpleAcl {
         $inheritArg = @([System.Security.AccessControl.InheritanceFlags]::None)
     }
 
+    $userRegex = $User -replace '\\', '\\'
+    $existingEntry = $acl.Access.Where({ $_.IdentityReference.Value -imatch $userRegex -and $_.FileSystemRights -imatch $Permission -and $_.AccessControlType -ieq $Type })
+    if ($existingEntry -and $existingEntry.InheritanceFlags -eq $inheritArg) {
+        Write-Host -_Debug "ACL on '$Path' already matches desired value ('$Type' user '$User', permission '$Permission', inherit $Inherit)"
+        return $false
+    }
+
     $propagation = [System.Security.AccessControl.PropagationFlags]::None
 
-    Write-Log -Info "Setting ACL on '$Path' - '$Type' user '$User', permission '$Permission', inherit $Inherit"
-    $accessRule = New-Object -TypeName System.Security.AccessControl.FileSystemAccessRule -ArgumentList $User, $Permission, $inheritArg, $propagation, $Type
+    if ($PSCmdlet.ShouldProcess('Directory', "Add permission '$Permission' to item '$Path' for user '$User'") -and !$whatIf) {
+        Write-Host -Info "Setting ACL on '$Path' - '$Type' user '$User', permission '$Permission', inherit $Inherit"
+        $accessRule = New-Object -TypeName System.Security.AccessControl.FileSystemAccessRule -ArgumentList $User, $Permission, $inheritArg, $propagation, $Type
 
-    $acl.AddAccessRule($accessRule)
-    Set-Acl -Path $Path -AclObject $acl
+        $acl.AddAccessRule($accessRule)
+        Set-Acl -Path $Path -AclObject $acl
+    }
+    return $true
 }
