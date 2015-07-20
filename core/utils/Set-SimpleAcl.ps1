@@ -97,14 +97,14 @@ function Set-SimpleAcl {
     $userRegex = $User -replace '\\', '\\'
     $existingEntry = $acl.Access.Where({ $_.IdentityReference.Value -imatch $userRegex -and $_.FileSystemRights -imatch $Permission -and $_.AccessControlType -ieq $Type })
     if ($existingEntry -and $existingEntry.InheritanceFlags -eq $inheritArg) {
-        Write-Host -_Debug "ACL on '$Path' already matches desired value ('$Type' user '$User', permission '$Permission', inherit $Inherit)"
+        Write-Log -_Debug "ACL on '$Path' already matches desired value ('$Type' user '$User', permission '$Permission', inherit $Inherit)"
         return $false
     }
 
     $propagation = [System.Security.AccessControl.PropagationFlags]::None
 
     if ($PSCmdlet.ShouldProcess('Directory', "Add permission '$Permission' to item '$Path' for user '$User'") -and !$whatIf) {
-        Write-Host -Info "Setting ACL on '$Path' - '$Type' user '$User', permission '$Permission', inherit $Inherit"
+        Write-Log -Info "Setting ACL on '$Path' - '$Type' user '$User', permission '$Permission', inherit $Inherit"
         $accessRule = New-Object -TypeName System.Security.AccessControl.FileSystemAccessRule -ArgumentList $User, $Permission, $inheritArg, $propagation, $Type
 
         $acl.AddAccessRule($accessRule)
