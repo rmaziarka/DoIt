@@ -157,7 +157,7 @@ function Invoke-SqlDotNet {
             if ($SqlParameters) {
                 foreach ($sqlParam in $SqlParameters) {
                     Write-Log -_Debug "Key: $($sqlParam.ParameterName), value: $($sqlParam.Valuee)"
-                    $command.Parameters.Add($sqlParam)
+                    [void]($command.Parameters.Add($sqlParam))
                 }
             }
 
