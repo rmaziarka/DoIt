@@ -25,7 +25,15 @@ AAA pattern (Arrange-Act-Assert), this typically holds the
 Assert.
 
 .PARAMETER Pending
-Marks the test as pending, that is inconclusive/not implemented. The test will not run and will
+Use this parameter to explicitly mark the test as work-in-progress/not implemented/pending when you
+need to distinguish a test that fails because it is not finished yet from a tests
+that fail as a result of changes being made in the code base. An empty test, that is a
+test that contains nothing except whitespace or comments is marked as Pending by default.
+
+.PARAMETER Skip
+Use this parameter to explicitly mark the test to be skipped. This is preferable to temporarily
+commenting out a test, because the test remains listed in the output. Use the Strict parameter
+of Invoke-Pester to force all skipped tests to fail.
 
 .PARAMETER TestCases
 Optional array of hashtable (or any IDictionary) objects.  If this parameter is used,
@@ -102,6 +110,7 @@ about_should
         [Switch] $Pending,
 
         [Parameter(ParameterSetName = 'Skip')]
+        [Alias('Ignore')]
         [Switch] $Skip
     )
 
@@ -121,6 +130,7 @@ function ItImpl
         [Switch] $Pending,
 
         [Parameter(ParameterSetName = 'Skip')]
+        [Alias('Ignore')]
         [Switch] $Skip,
 
         $Pester,
@@ -128,6 +138,10 @@ function ItImpl
     )
 
     Assert-DescribeInProgress -CommandName It
+
+    # Jumping through hoops to make strict mode happy.
+    if ($PSCmdlet.ParameterSetName -ne 'Skip') { $Skip = $false }
+    if ($PSCmdlet.ParameterSetName -ne 'Pending') { $Pending = $false }
 
     #unless Skip or Pending is specified you must specify a ScriptBlock to the Test parameter
     if (-not ($PSBoundParameters.ContainsKey('test') -or $Skip -or $Pending))
@@ -209,6 +223,7 @@ function Invoke-Test
         [Switch] $Pending,
 
         [Parameter(ParameterSetName = 'Skip')]
+        [Alias('Ignore')]
         [Switch] $Skip
     )
 
@@ -226,18 +241,43 @@ function Invoke-Test
     }
     else
     {
-        Invoke-TestCaseSetupBlocks
+        Write-Progress -Activity "Running test '$Name'" -Status Processing
 
-        $PesterException = $null
-        try{
-            $null = & $ScriptBlock @Parameters
-        } catch {
-            $PesterException = $_
+        $errorRecord = $null
+        try
+        {
+            Invoke-TestCaseSetupBlocks
+
+            do
+            {
+                $null = & $ScriptBlock @Parameters
+            } until ($true)
+        }
+        catch
+        {
+            $errorRecord = $_
+        }
+        finally
+        {
+            #guarantee that the teardown action will run and prevent it from failing the whole suite
+            try
+            {
+                if (-not ($Skip -or $Pending))
+                {
+                    Invoke-TestCaseTeardownBlocks
+                }
+            }
+            catch
+            {
+                $errorRecord = $_
+            }
         }
 
-        $result = Get-PesterResult -Test $ScriptBlock -Exception $PesterException
+
+        $result = Get-PesterResult -ErrorRecord $errorRecord
         $orderedParameters = Get-OrderedParameterDictionary -ScriptBlock $ScriptBlock -Dictionary $Parameters
         $Pester.AddTestResult( $result.name, $result.Result, $null, $result.FailureMessage, $result.StackTrace, $ParameterizedSuiteName, $orderedParameters )
+        Write-Progress -Activity "Running test '$Name'" -Completed -Status Processing
     }
 
     if ($null -ne $OutputScriptBlock)
@@ -245,17 +285,16 @@ function Invoke-Test
         $Pester.testresult[-1] | & $OutputScriptBlock
     }
 
-    if (-not ($Skip -or $Pending))
-    {
-        Invoke-TestCaseTeardownBlocks
-    }
-
     Exit-MockScope
     $Pester.LeaveTest()
 }
 
 function Get-PesterResult {
-    param([ScriptBlock] $Test, $Time, $Exception)
+    param(
+        [Nullable[TimeSpan]] $Time,
+        [System.Management.Automation.ErrorRecord] $ErrorRecord
+    )
+
     $testResult = @{
         name = $name
         time = $time
@@ -265,27 +304,33 @@ function Get-PesterResult {
         result = "Failed"
     };
 
-    if(-not $exception)
+    if(-not $ErrorRecord)
     {
         $testResult.Result = "Passed"
         $testResult.success = $true
         return $testResult
     }
 
-    if ($exception.FullyQualifiedErrorID -eq 'PesterAssertionFailed')
+    if ($ErrorRecord.FullyQualifiedErrorID -eq 'PesterAssertionFailed')
     {
-        $failureMessage = $exception.exception.message
-        $file = $test.File
-        $line = if ( $exception.ErrorDetails.message -match "\d+$" )  { $matches[0] }
+        # we use TargetObject to pass structured information about the error.
+        $details = $ErrorRecord.TargetObject
+
+        $failureMessage = $details.Message
+        $file = $details.File
+        $line = $details.Line
+        $lineText = "`n$line`: $($details.LineText)"
     }
-    else {
-        $failureMessage = $exception.ToString()
-        $file = $Exception.InvocationInfo.ScriptName
-        $line = $Exception.InvocationInfo.ScriptLineNumber
+    else
+    {
+        $failureMessage = $ErrorRecord.ToString()
+        $file = $ErrorRecord.InvocationInfo.ScriptName
+        $line = $ErrorRecord.InvocationInfo.ScriptLineNumber
+        $lineText = ''
     }
 
-    $testResult.failureMessage = $failureMessage -replace "Exception calling", "Assert failed on"
-    $testResult.stackTrace = "at line: $line in $file"
+    $testResult.failureMessage = $failureMessage
+    $testResult.stackTrace = "at line: $line in ${file}${lineText}"
 
     return $testResult
 }

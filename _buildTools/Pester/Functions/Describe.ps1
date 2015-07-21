@@ -72,7 +72,7 @@ about_TestDrive
         $script:mockTable = @{}
     }
 
-    if($Pester.TestNameFilter -and ($Name -notlike $Pester.TestNameFilter))
+    if($Pester.TestNameFilter-and -not ($Pester.TestNameFilter | Where-Object { $Name -like $_ }))
     {
         #skip this test
         return
@@ -94,7 +94,11 @@ about_TestDrive
 
         Add-SetupAndTeardown -ScriptBlock $Fixture
         Invoke-TestGroupSetupBlocks -Scope $pester.Scope
-        $null = & $Fixture
+
+        do
+        {
+            $null = & $Fixture
+        } until ($true)
     }
     catch
     {

@@ -95,13 +95,13 @@ function Write-NUnitTestResultAttributes($PesterState, [System.Xml.XmlWriter] $X
     $XmlWriter.WriteAttributeString('xmlns','xsi', $null, 'http://www.w3.org/2001/XMLSchema-instance')
     $XmlWriter.WriteAttributeString('xsi','noNamespaceSchemaLocation', [Xml.Schema.XmlSchema]::InstanceNamespace , 'nunit_schema_2.5.xsd')
     $XmlWriter.WriteAttributeString('name','Pester')
-    $XmlWriter.WriteAttributeString('total', $PesterState.TotalCount)
+    $XmlWriter.WriteAttributeString('total', ($PesterState.TotalCount - $PesterState.SkippedCount))
     $XmlWriter.WriteAttributeString('errors', '0')
     $XmlWriter.WriteAttributeString('failures', $PesterState.FailedCount)
     $XmlWriter.WriteAttributeString('not-run', '0')
     $XmlWriter.WriteAttributeString('inconclusive', $PesterState.PendingCount)
-    $XmlWriter.WriteAttributeString('ignored', '0')
-    $XmlWriter.WriteAttributeString('skipped', $PesterState.SkippedCount)
+    $XmlWriter.WriteAttributeString('ignored', $PesterState.SkippedCount)
+    $XmlWriter.WriteAttributeString('skipped', '0')
     $XmlWriter.WriteAttributeString('invalid', '0')
     $date = Get-Date
     $XmlWriter.WriteAttributeString('date', (Get-Date -Date $date -Format 'yyyy-MM-dd'))
@@ -149,7 +149,12 @@ function Write-NUnitCultureInformation($PesterState, [System.Xml.XmlWriter] $Xml
 function Write-NUnitGlobalTestSuiteAttributes($PesterState, [System.Xml.XmlWriter] $XmlWriter, [switch] $LegacyFormat)
 {
     $XmlWriter.WriteAttributeString('type', 'Powershell')
-    $XmlWriter.WriteAttributeString('name', $PesterState.Path)
+
+    # TODO: This used to be writing $PesterState.Path, back when that was a single string (and existed.)
+    #       Better would be to produce a test suite for each resolved file, rather than for the value
+    #       of the path that was passed to Invoke-Pester.
+
+    $XmlWriter.WriteAttributeString('name', 'Pester')
     $XmlWriter.WriteAttributeString('executed', 'True')
 
     $isSuccess = $PesterState.FailedCount -eq 0
@@ -163,23 +168,26 @@ function Write-NUnitGlobalTestSuiteAttributes($PesterState, [System.Xml.XmlWrite
 function Write-NUnitDescribeElements($PesterState, [System.Xml.XmlWriter] $XmlWriter, [switch] $LegacyFormat)
 {
     $Describes = $PesterState.TestResult | Group-Object -Property Describe
-    foreach ($currentDescribe in $Describes)
+    if ($null -ne $Describes)
     {
-        $DescribeInfo = Get-TestSuiteInfo $currentDescribe
+        foreach ($currentDescribe in $Describes)
+        {
+            $DescribeInfo = Get-TestSuiteInfo $currentDescribe
 
-        #Write test suites
-        $XmlWriter.WriteStartElement('test-suite')
+            #Write test suites
+            $XmlWriter.WriteStartElement('test-suite')
 
-        if ($LegacyFormat) { $suiteType = 'PowerShell' } else { $suiteType = 'TestFixture' }
+            if ($LegacyFormat) { $suiteType = 'PowerShell' } else { $suiteType = 'TestFixture' }
 
-        Write-NUnitTestSuiteAttributes -TestSuiteInfo $DescribeInfo -TestSuiteType $suiteType -XmlWriter $XmlWriter -LegacyFormat:$LegacyFormat
+            Write-NUnitTestSuiteAttributes -TestSuiteInfo $DescribeInfo -TestSuiteType $suiteType -XmlWriter $XmlWriter -LegacyFormat:$LegacyFormat
 
-        $XmlWriter.WriteStartElement('results')
+            $XmlWriter.WriteStartElement('results')
 
-        Write-NUnitDescribeChildElements -TestResults $currentDescribe.Group -XmlWriter $XmlWriter -LegacyFormat:$LegacyFormat -DescribeName $DescribeInfo.Name
+            Write-NUnitDescribeChildElements -TestResults $currentDescribe.Group -XmlWriter $XmlWriter -LegacyFormat:$LegacyFormat -DescribeName $DescribeInfo.Name
 
-        $XmlWriter.WriteEndElement()
-        $XmlWriter.WriteEndElement()
+            $XmlWriter.WriteEndElement()
+            $XmlWriter.WriteEndElement()
+        }
     }
 }
 
@@ -324,7 +332,7 @@ function Write-NUnitTestCaseAttributes($TestResult, [System.Xml.XmlWriter] $XmlW
                         }
                         else
                         {
-                            #do not use .ToString() it uses the current culture settings 
+                            #do not use .ToString() it uses the current culture settings
                             #and we need to use en-US culture, which [string] or .ToString([Globalization.CultureInfo]'en-us') uses
                             [string]$value
                         }
@@ -343,7 +351,6 @@ function Write-NUnitTestCaseAttributes($TestResult, [System.Xml.XmlWriter] $XmlW
     }
 
     $XmlWriter.WriteAttributeString('name', $testName)
-    $XmlWriter.WriteAttributeString('executed', 'True')
     $XmlWriter.WriteAttributeString('time', (Convert-TimeSpan $TestResult.Time))
     $XmlWriter.WriteAttributeString('asserts', '0')
     $XmlWriter.WriteAttributeString('success', $TestResult.Passed)
@@ -353,21 +360,25 @@ function Write-NUnitTestCaseAttributes($TestResult, [System.Xml.XmlWriter] $XmlW
         Passed
         {
             $XmlWriter.WriteAttributeString('result', 'Success')
+            $XmlWriter.WriteAttributeString('executed', 'True')
             break
         }
         Skipped
         {
-            $XmlWriter.WriteAttributeString('result', 'Skipped')
+            $XmlWriter.WriteAttributeString('result', 'Ignored')
+            $XmlWriter.WriteAttributeString('executed', 'False')
             break
         }
         Pending
         {
             $XmlWriter.WriteAttributeString('result', 'Inconclusive')
+            $XmlWriter.WriteAttributeString('executed', 'True')
             break
         }
         Failed
         {
             $XmlWriter.WriteAttributeString('result', 'Failure')
+            $XmlWriter.WriteAttributeString('executed', 'True')
             $XmlWriter.WriteStartElement('failure')
             $xmlWriter.WriteElementString('message', $TestResult.FailureMessage)
             $XmlWriter.WriteElementString('stack-trace', $TestResult.StackTrace)
@@ -399,7 +410,7 @@ function Get-ParentResult ($InputObject)
     #I am not sure about the result precedence, and can't find any good source
     #TODO: Confirm this is the correct order of precedence
     if ($inputObject.FailedCount  -gt 0) { return 'Failure' }
-    if ($InputObject.SkippedCount -gt 0) { return 'Skipped' }
+    if ($InputObject.SkippedCount -gt 0) { return 'Ignored' }
     if ($InputObject.PendingCount -gt 0) { return 'Inconclusive' }
     return 'Success'
 }
@@ -409,7 +420,7 @@ function Get-GroupResult ($InputObject)
     #I am not sure about the result precedence, and can't find any good source
     #TODO: Confirm this is the correct order of precedence
     if ($InputObject |  Where {$_.Result -eq 'Failed'}) { return 'Failure' }
-    if ($InputObject |  Where {$_.Result -eq 'Skipped'}) { return 'Skipped' }
+    if ($InputObject |  Where {$_.Result -eq 'Skipped'}) { return 'Ignored' }
     if ($InputObject |  Where {$_.Result -eq 'Pending'}) { return 'Inconclusive' }
     return 'Success'
 }

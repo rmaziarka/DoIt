@@ -94,16 +94,6 @@ function Get-CoverageInfoFromDictionary
     return New-CoverageInfo -Path $path -StartLine $startLine -EndLine $endLine -Function $function
 }
 
-function Get-DictionaryValueFromFirstKeyFound
-{
-    param ([System.Collections.IDictionary] $Dictionary, [object[]] $Key)
-
-    foreach ($keyToTry in $Key)
-    {
-        if ($Dictionary.Contains($keyToTry)) { return $Dictionary[$keyToTry] }
-    }
-}
-
 function Convert-UnknownValueToInt
 {
     param ([object] $Value, [int] $DefaultValue = 0)
@@ -324,7 +314,7 @@ function IsIgnoredCommand
 
         if (IsChildOfHashtableDynamicKeyword -Command $Command)
         {
-            # The lines inside DSC resource declarations don't trigger their breakpooints when executed,
+            # The lines inside DSC resource declarations don't trigger their breakpoints when executed,
             # just like the "configuration" keyword itself.  I don't know why, at this point, but just like
             # configuration, we'll ignore it so it doesn't clutter up the coverage analysis with useless junk.
             return $true
@@ -484,6 +474,12 @@ function Get-CoverageMissedCommands
     $CommandCoverage | Where-Object { $_.Breakpoint.HitCount -eq 0 }
 }
 
+function Get-CoverageHitCommands
+{
+    param ([object[]] $CommandCoverage)
+    $CommandCoverage | Where-Object { $_.Breakpoint.HitCount -gt 0 }
+}
+
 function Get-CoverageReport
 {
     param ([object] $PesterState)
@@ -491,6 +487,7 @@ function Get-CoverageReport
     $totalCommandCount = $PesterState.CommandCoverage.Count
 
     $missedCommands = @(Get-CoverageMissedCommands -CommandCoverage $PesterState.CommandCoverage | Select-Object File, Line, Function, Command)
+    $hitCommands = @(Get-CoverageHitCommands -CommandCoverage $PesterState.CommandCoverage | Select-Object File, Line, Function, Command)
     $analyzedFiles = @($PesterState.CommandCoverage | Select-Object -ExpandProperty File -Unique)
     $fileCount = $analyzedFiles.Count
 
@@ -502,6 +499,7 @@ function Get-CoverageReport
         NumberOfCommandsExecuted = $executedCommandCount
         NumberOfCommandsMissed   = $missedCommands.Count
         MissedCommands           = $missedCommands
+        HitCommands              = $hitCommands
         AnalyzedFiles            = $analyzedFiles
     }
 }

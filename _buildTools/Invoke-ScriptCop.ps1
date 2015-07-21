@@ -48,21 +48,18 @@ function Invoke-ScriptCop {
 
         [Parameter(Mandatory=$false)]
 		[string[]]
-        $ExcludeNames,
-
-        [Parameter(Mandatory=$false)]
-		[string[]]
-        $PrerequisitesPaths
+        $ExcludeNames
 	)
 
 	begin {
 		$global:ErrorActionPreference = "Stop"
-		if ($PrerequisitesPaths) {
-            foreach ($prereq in $PrerequisitesPaths) {
-                Write-Output -InputObject "Including '$prereq'"
-                . $prereq
-            }
-        }
+
+		$prerequisitesPaths = @("$PSScriptRoot\..\PSCI.classes.ps1", "$PSScriptRoot\..\core\utils\Write-ProgressExternal.ps1")
+		foreach ($prereq in $prerequisitesPaths) {
+			Write-Output -InputObject "Including '$prereq'"
+			. $prereq
+		}
+        
         Write-ProgressExternal -Message 'Running ScriptCop' -ErrorMessage 'ScriptCop invocation error'
     }
 	process {
