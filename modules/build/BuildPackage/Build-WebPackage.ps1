@@ -122,4 +122,8 @@ function Build-WebPackage {
     }
    
     Build-MSBuild @params
+
+    if (!(Test-Path -LiteralPath $OutputPath)) {
+        Write-Log -Critical "Package '$OutputPath' has not been created by msbuild. Please investigate."
+    }
 }
