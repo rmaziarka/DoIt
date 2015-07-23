@@ -92,7 +92,7 @@ function New-ConnectionParameters {
         if ($Nodes) {
             $psRemotingParams['ComputerName'] = $Nodes
         }
-        if ($Authentication) {
+        if ($Authentication -and $Nodes) {
             $psRemotingParams['Authentication'] = $Authentication
         }
 
