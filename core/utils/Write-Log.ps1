@@ -30,16 +30,16 @@ Function Write-Log {
     .DESCRIPTION
     Writes according to $PSCIGlobalConfiguration.Log* variables.
 
-    .PARAMETER critical
+    .PARAMETER Critical
     If specified, an error will be logged and an exception will be thrown
 
-    .PARAMETER error
+    .PARAMETER Error
     If specified, an error will be logged.
 
-    .PARAMETER warn
+    .PARAMETER Warn
     If specified, a warning will be logged.
 
-    .PARAMETER info
+    .PARAMETER Info
     If specified, an information will be logged.
 
      .PARAMETER _debug
@@ -48,10 +48,13 @@ Function Write-Log {
      .PARAMETER Emphasize
     If set, the Message at console will be made more visible (using colors).
 
-    .PARAMETER noHeader
+    .PARAMETER NoHeader
     If specified, Header information will not be logged (e.g. '[ERROR]: (function_name)')
 
-    .PARAMETER indent
+    .PARAMETER NoStackTrace
+    If specified, call stack will not be included on -Critical level.
+
+    .PARAMETER Indent
     Additional indent (optional).
 
      .PARAMETER Message
@@ -91,6 +94,10 @@ Function Write-Log {
         [Parameter(Mandatory=$false)]
         [switch] 
         $NoHeader = $false,
+
+        [Parameter(Mandatory=$false)]
+        [switch] 
+        $NoStackTrace = $false,
 
         [Parameter(Mandatory=$true, ValueFromPipeline=$true)]
         [string[]]
@@ -146,7 +153,9 @@ Function Write-Log {
         }
         if ($Critical) {
             $Message += "`r`nCritical exception. Please see messages above for details.`r`n"
-            $Message += Get-CallStack
+            if (!$NoStackTrace) { 
+                $Message += Get-CallStack
+            }
         }
     }
     Process { 

@@ -132,7 +132,7 @@ function Get-CsvData {
     )
 
     if (!(Test-Path -LiteralPath $CsvPath)) {
-        throw "Csv input file '$CsvPath' does not exist at $((Get-Location).Path)."
+        Write-Log -Critical "Csv input file '$CsvPath' does not exist at $((Get-Location).Path)."
     }
 
     $tempFileName = ''
@@ -181,7 +181,7 @@ function Get-CsvData {
             if ($errorArray) {
                 $msg = "`r`n" + ($errorArray -join "`r`n")
                 Write-Log -Error $msg
-                Write-Log -Critical "Input CSV file has not passed validation rules. Please fix the file and try again."
+                Write-Log -Critical "Input CSV file has not passed validation rules. Please fix the file and try again." -NoStackTrace
             }
         }
 
