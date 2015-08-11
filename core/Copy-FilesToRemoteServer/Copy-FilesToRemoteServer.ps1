@@ -121,9 +121,9 @@ function Copy-FilesToRemoteServer {
         Write-Log -Critical "ConnectionParams.Nodes is empty. It must be specified for this function."
     }
     
-    for ($i = 0; $i -lt $DestinationZipPath.Count; $i++) {
-        $dest = $DestinationZipPath[$i]
-        $destNext = $DestinationZipPath[$i+1]
+    for ($i = 0; $i -lt $Destination.Count; $i++) {
+        $dest = $Destination[$i]
+        $destNext = $Destination[$i+1]
         if (![System.IO.Path]::IsPathRooted($dest)) {
             Write-Log -Critical "'Destination' must be an absolute path - invalid value '$dest'."
         }
@@ -143,8 +143,8 @@ function Copy-FilesToRemoteServer {
         Write-Log -Critical "'Destinations' parameter must contain two different paths (currently are the same - $($Destination[0])."
     }
 
-    $preCopyScriptBlock = Get-PreCopyScriptBlock 
-    $postCopyScriptBlock = Get-PostCopyScriptBlock
+    $preCopyScriptBlock = Get-PreCopyToScriptBlock 
+    $postCopyScriptBlock = Get-PostCopyToScriptBlock
 
     # calculate hash for local files if required
     if ($CheckHashMode -ne 'DontCheckHash') {
@@ -152,8 +152,7 @@ function Copy-FilesToRemoteServer {
        $hashPath = Get-Hash -Path $Path -Include $Include -IncludeRecurse:$IncludeRecurse -Exclude $Exclude -ExcludeRecurse:$ExcludeRecurse
     }
 
-    $sessions = New-CopySessions -Path $Path `
-                                 -ConnectionParams $ConnectionParams `
+    $sessions = New-CopySessions -ConnectionParams $ConnectionParams `
                                  -Include $Include `
                                  -IncludeRecurse:$IncludeRecurse `
                                  -Exclude $Exclude `

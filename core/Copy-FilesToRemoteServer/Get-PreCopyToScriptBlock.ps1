@@ -22,7 +22,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 #>
 
-function Get-PreCopyScriptBlock {
+function Get-PreCopyToScriptBlock {
 
     <#
 	.SYNOPSIS
@@ -33,7 +33,7 @@ function Get-PreCopyScriptBlock {
         Then, it deletes $Destination if $ClearDestination = $true, and creates new directory at $Destination.
 
     .EXAMPLE
-        $preCopyScriptBlock = Get-PreCopyScriptBlock 
+        $preCopyScriptBlock = Get-PreCopyToScriptBlock 
     #>
     [CmdletBinding()]
 	[OutputType([scriptblock])]

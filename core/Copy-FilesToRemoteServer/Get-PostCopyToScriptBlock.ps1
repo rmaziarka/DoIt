@@ -22,7 +22,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 #>
 
-function Get-PostCopyScriptBlock {
+function Get-PostCopyToScriptBlock {
     <#
     .SYNOPSIS
 	    Returns a scriptblock that uncompresses zip file and creates syncHash_* file for Copy-FilesToRemoteServer.
@@ -31,7 +31,7 @@ function Get-PostCopyScriptBlock {
         If $BlueGreenEnvVariableName is passed, it also creates '.currentLive' file in current destination directory.
 
     .EXAMPLE
-        $postCopyScriptBlock = Get-PostCopyScriptBlock
+        $postCopyScriptBlock = Get-PostCopyToScriptBlock
     #>
     [CmdletBinding()]
     [OutputType([scriptblock])]

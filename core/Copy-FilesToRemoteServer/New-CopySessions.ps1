@@ -28,9 +28,6 @@ function New-CopySessions {
 	.SYNOPSIS
 		Creates new PS sessions if they are needed (depending on hashes). Helper function for Copy-FilesToRemoteServer.
 
-	.PARAMETER Path
-		The file or directory path that should be sent to remote server.
-
     .PARAMETER ConnectionParams
         Connection parameters created by New-ConnectionParameters function.
 
@@ -56,20 +53,16 @@ function New-CopySessions {
         UseHashFile - files are uploaded to the servers if there doesn't exist a syncHash_<hash> file, where hash is hash calculated in local path
 
     .PARAMETER HashPath
-        Hash calculated for $Path. Used when CheckHashMode != DontCheckHash.
+        Hash used when CheckHashMode != DontCheckHash.
 
 	.EXAMPLE			
-        $sessions = New-CopySessions -Path $Path -ConnectionParams $ConnectionParams -Exclude $Exclude -Destination $Destination -CheckHashMode $CheckHashMode
+        $sessions = New-CopySessions -ConnectionParams $ConnectionParams -Exclude $Exclude -Destination $Destination -CheckHashMode $CheckHashMode
 
 	#>
     
     [CmdletBinding()]
 	[OutputType([object[]])]
     param(
-        [Parameter(Mandatory = $true)]
-        [string[]]
-        $Path,
-
         [Parameter(Mandatory = $true)]
         [object]
         $ConnectionParams,
