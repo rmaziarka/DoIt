@@ -447,3 +447,20 @@ function Write-LogToEventLog() {
         }
     }
 }
+
+function Test-WebDeployRemotingMode() {
+
+    <#
+    .SYNOPSIS
+    Tests whether we're running in WebDeploy remoting mode.
+
+    .EXAMPLE
+    Test-WebDeployRemotingMode
+    #>
+
+    [CmdletBinding()]
+    [OutputType([bool])]
+    param ()
+
+    return $PSCIGlobalConfiguration.RemotingMode -in @("WebDeployHandler", "WebDeployAgentService")
+}
