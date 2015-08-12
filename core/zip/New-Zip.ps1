@@ -158,7 +158,14 @@ function New-Zip {
         $zipArchiveMode = [System.IO.Compression.ZipArchiveMode]::Create
         $zipArchive = New-Object -TypeName System.IO.Compression.ZipArchive -ArgumentList $fileStream, $zipArchiveMode
         $outputFileResolved = (Resolve-Path -LiteralPath $OutputFile).ProviderPath
-        Write-Log -Info "Creating archive '$OutputFile' from '$($Path -join `"', '`")', include '$($Include -join `"', '`")'."
+
+        $msg = "Creating archive '$OutputFile' from '$($Path -join `"', '`")', include '$($Include -join `"', '`")'."
+        # this function can be run remotely without PSCI available
+        if (Get-Command -Name Write-Log -ErrorAction SilentlyContinue) {
+            Write-Log -Info $msg 
+        } else {
+            Write-Verbose -Message $msg
+        }
         $i = 0
         foreach ($p in $Path) { 
             if ($DestinationZipPath) {
@@ -191,7 +198,6 @@ function New-Zip {
         if ($fileStream) {
             $fileStream.Dispose()
         }
-        Pop-Location
     }
     
 }

@@ -175,6 +175,7 @@ function New-ConnectionParameters {
         PSSessionParams = $psRemotingParams
         CimSessionParams = $cimSessionParams
         MsDeployDestinationString = $msDeployDestinationString
+        OptionsAsString = "Credential: '$($Credential.UserName)', RemotingMode: '$RemotingMode', Auth: '$Authentication', Protocol: '$Protocol', Port: '$Port'"
     }
 
 }

@@ -28,7 +28,7 @@ Describe -Tag "PSCI.unit" "Copy-FilesToRemoteServer" {
 
     InModuleScope PSCI.core {
 
-        $Global:loggedMessage = ''
+        $Global:loggedMessage = @('')
 
         Mock Write-Log { 
             $Global:loggedMessage += $Message
@@ -261,9 +261,9 @@ Describe -Tag "PSCI.unit" "Copy-FilesToRemoteServer" {
                 }
 
                 It "copying it again with CheckHashMode = AlwaysCalculateHash should do nothing" {
-                    $Global:loggedMessage = ''
+                    $Global:loggedMessage = @()
                     Copy-FilesToRemoteServer -Path 'testFolder1', 'testFolder2' -Destination "$dstDir\test1", "$dstDir\test2" -ConnectionParams $connectionParams -CheckHashMode AlwaysCalculateHash
-                    $Global:loggedMessage | Should Be "'localhost' is up to date - no need to copy."
+                    $Global:loggedMessage[1] | Should Be "'localhost' is up to date - no need to copy."
                 }
 
                 It "copying it again when one file changed at destination should update the files" {
@@ -300,9 +300,9 @@ Describe -Tag "PSCI.unit" "Copy-FilesToRemoteServer" {
                 }
 
                 It "copying it again with CheckHashMode = UseHashFile should do nothing" {
-                    $Global:loggedMessage = ''
+                    $Global:loggedMessage = @()
                     Copy-FilesToRemoteServer -Path 'testFolder1', 'testFolder2' -Destination "$dstDir\test1", "$dstDir\test2" -ConnectionParams $connectionParams -CheckHashMode UseHashFile
-                    $Global:loggedMessage | Should Be "'localhost' is up to date - no need to copy."
+                    $Global:loggedMessage[1] | Should Be "'localhost' is up to date - no need to copy."
                 }
 
                 It "copying it again when one file changed at source should update the files and syncHash" {

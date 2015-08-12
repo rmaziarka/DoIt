@@ -111,7 +111,7 @@ function Copy-FilesToRemoteServer {
 
         [Parameter(Mandatory = $false)]
         [switch]
-        $ClearDestination = $true
+        $ClearDestination
     )
 
     if ($ConnectionParams.RemotingMode -ne 'PSRemoting') {

@@ -63,6 +63,7 @@ Export-ModuleMember -Function `
     Convert-ConfigurationPaths, `
     Read-ConfigFiles, 
     Copy-FilesToRemoteServer, `
+    Copy-FilesFromRemoteServer, `
     ConvertTo-PSCredential, `
     New-Zip, `
     Disable-ReadOnlyFlag, `
