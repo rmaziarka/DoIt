@@ -66,47 +66,7 @@ function Get-PostCopyToScriptBlock {
         $Global:ErrorActionPreference = 'Stop'
         $success = $false
 
-        # try decompressing with .NET first (only if destination does not exist - otherwise it fails)
-        if ($ZipDestinationIsClear) {
-           try { 
-                Add-Type -AssemblyName System.IO.Compression.FileSystem
-                [System.IO.Compression.ZipFile]::ExtractToDirectory($ZipFilePath, $Destination) 
-                $success = $true
-            } catch {
-                Write-Host -Object ".Net decompression failed: $_ - falling back to 7-zip / shell."
-            }
-        }
-
-        if (!$success) { 
-            # then 7-zip
-            try { 
-                $regEntry = 'Registry::HKLM\SOFTWARE\7-Zip'
-                # note - registry check will fail if running Powershell x86 on x64 machine
-                if (Test-Path -LiteralPath $regEntry) {
-                    $7zipPath = (Get-ItemProperty -Path $regEntry).Path + '7z.exe'
-                } else {
-                    $7zipPath = 'C:\Program Files\7-Zip\7z.exe'
-                }
-                if (Test-Path -LiteralPath $7zipPath) {
-                    & $7zipPath " x `"$ZipFilePath `"-o`"$Destination`" -y"
-                    if (!$LASTEXITCODE) {
-                        $success = $true
-                    }
-                }
-            } catch {
-                Write-Host -Object "7zip decompression failed: $_ - falling back to shell."
-            }
-        }
-
-        # then shell - which can be slow when running remotely for unknown reasons
-        if (!$success) {
-            $shell = New-Object -ComObject Shell.Application
-            $zip = $shell.Namespace($ZipFilePath)
-        
-            $dst = $shell.namespace($Destination)
-            # 0x14 = overwrite and don't show dialogs
-            $dst.Copyhere($zip.Items(), 0x14)
-        }
+        Expand-Zip -ArchiveFile $ZipFilePath -OutputDirectory $Destination
 
         Remove-Item -LiteralPath $ZipFilePath -Force
 

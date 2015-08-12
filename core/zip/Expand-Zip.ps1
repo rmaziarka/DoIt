@@ -48,12 +48,54 @@ function Expand-Zip {
         [string] 
         $OutputDirectory
     )
-
-    Write-Log -Info "Decompressing file '$ArchiveFile' to '$OutputDirectory'"
-    $shell = New-Object -ComObject Shell.Application
-    $zip = $shell.NameSpace($ArchiveFile)
-    foreach ($item in $zip.items()) {
-        # 0x14 = overwrite and don't show dialogs
-        $shell.Namespace($OutputDirectory).CopyHere($item, 0x14)
+    $msg = "Decompressing file '$ArchiveFile' to '$OutputDirectory'"
+    # this function can be run remotely without PSCI available
+    if (Get-Command -Name Write-Log -ErrorAction SilentlyContinue) {
+        Write-Log -Info $msg 
+    } else {
+        Write-Verbose -Message $msg
     }
+
+    # try decompressing with .NET first (only if destination does not exist - otherwise it fails)
+    if (!(Test-Path -Path $OutputDirectory)) { 
+        try { 
+            Add-Type -AssemblyName System.IO.Compression.FileSystem
+            [System.IO.Compression.ZipFile]::ExtractToDirectory($ArchiveFile, $OutputDirectory) 
+            return
+        } catch {
+            Write-Host -Object ".Net decompression failed: $_ - falling back to 7-zip / shell."
+        }
+    }
+    
+    # then 7-zip
+    try { 
+        $regEntry = 'Registry::HKLM\SOFTWARE\7-Zip'
+        # note - registry check will fail if running Powershell x86 on x64 machine
+        if (Test-Path -LiteralPath $regEntry) {
+            $7zipPath = (Get-ItemProperty -Path $regEntry).Path + '7z.exe'
+        } else {
+            $7zipPath = 'C:\Program Files\7-Zip\7z.exe'
+        }
+        if (Test-Path -LiteralPath $7zipPath) {
+            $7zipPath = '"{0}"' -f $7zipPath
+            $cmdLine =  " x `"$ArchiveFile`" -o`"$OutputDirectory`" -y"
+            . $env:ComSpec /C """$7zipPath $cmdLine"""
+            if (!$LASTEXITCODE) {
+                return
+            } else {
+                Write-Host -Object "7zip decompression failed with exitcode $LASTEXITCODE - falling back to shell."
+            }
+                
+        }
+    } catch {
+        Write-Host -Object "7zip decompression failed: $_ - falling back to shell."
+    }
+    
+    # then shell - which can be slow when running remotely for unknown reasons
+    $shell = New-Object -ComObject Shell.Application
+    $zip = $shell.Namespace($ArchiveFile)
+    $dst = $shell.Namespace($OutputDirectory)
+    # 0x14 = overwrite and don't show dialogs
+    $dst.Copyhere($zip.Items(), 0x14)
+    
 }
