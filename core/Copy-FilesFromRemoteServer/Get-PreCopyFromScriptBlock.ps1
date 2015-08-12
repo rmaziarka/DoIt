@@ -66,7 +66,6 @@ function Get-PreCopyFromScriptBlock {
 
         $Global:ErrorActionPreference = 'Stop'
         $Global:VerbosePreference = 'Continue'
-        $success = $false
 
         $zipFilePath = '{0}{1}.zip' -f [System.IO.Path]::GetTempPath(), [System.IO.Path]::GetRandomFileName()
         New-Zip -Path $RemotePath -OutputFile $zipFilePath -Include $Include -IncludeRecurse:$IncludeRecurse -Exclude $Exclude -ExcludeRecurse:$ExcludeRecurse -DestinationZipPath $Destination

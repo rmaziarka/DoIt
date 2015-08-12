@@ -130,8 +130,6 @@ function Copy-FilesFromRemoteServer {
         return @()
     }
 
-    $servers = $sessions | Select-Object -ExpandProperty ComputerName
-
     try { 
         foreach ($session in $sessions) { 
            Invoke-Command -Session $session -ScriptBlock (Convert-FunctionToScriptBlock -FunctionName Get-FlatFileList)
