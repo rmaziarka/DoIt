@@ -64,7 +64,6 @@ function Get-PostCopyToScriptBlock {
         )
 
         $Global:ErrorActionPreference = 'Stop'
-        $success = $false
 
         Expand-Zip -ArchiveFile $ZipFilePath -OutputDirectory $Destination
 
