@@ -56,17 +56,19 @@ function Get-DscResourcesPaths {
     # note: $Env:ProgramFiles gives Program Files (x86) if running Powershell x86...
     $baseDestPath = Join-Path -Path 'C:\Program Files' -ChildPath 'WindowsPowerShell\Modules'
     $isAll = ($ModuleNames.Count -eq 1 -and $ModuleNames[0] -ieq 'all')
+
+    $versionReplaceRegex = '\.[0-9]\..*$'
     
     if ((Test-Path -LiteralPath (Join-Path -Path $baseDscDir -ChildPath 'ext'))) { 
         $modulesExternal = @(Join-Path -Path $baseDscDir -ChildPath 'ext\*\*' | Get-ChildItem -Directory)
         if (!$isAll) {
-            $modulesExternal = @($modulesExternal | Where-Object { $ModuleNames -icontains $_.Name })
+            $modulesExternal = @($modulesExternal | Where-Object { $ModuleNames -icontains ($_.Name -replace $versionReplaceRegex, '') })
         }
     }
     if ((Test-Path -LiteralPath (Join-Path -Path $baseDscDir -ChildPath 'custom'))) {
         $modulesCustom = @(Join-Path -Path $baseDscDir -ChildPath 'custom' | Get-ChildItem -Directory)
         if (!$isAll) {
-            $modulesCustom = @($modulesCustom | Where-Object { $ModuleNames -icontains $_.Name })
+            $modulesCustom = @($modulesCustom | Where-Object { $ModuleNames -icontains ($_.Name -replace $versionReplaceRegex, '') })
         }
     }
 
@@ -81,10 +83,11 @@ function Get-DscResourcesPaths {
     }
 
     foreach ($module in $foundModules) {
+        $moduleNameWithoutVersion = $module.Name -replace $versionReplaceRegex, ''
         [void]($result.Add([PSCustomObject]@{
             Name = $module.Name
             SrcPath = $module.FullName
-            DstPath = Join-Path -Path $baseDestPath -ChildPath $module.Name
+            DstPath = Join-Path -Path $baseDestPath -ChildPath $moduleNameWithoutVersion
         }))
     }
 

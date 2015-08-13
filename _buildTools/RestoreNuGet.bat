@@ -1,0 +1,1 @@
+%~dp0..\externalLibs\nuget\nuget.exe restore %~dp0..\modules\deploy\dsc\ext\PsGallery\packages.config -ConfigFile %~dp0..\modules\deploy\dsc\ext\PsGallery\nuget.config -OutputDirectory %~dp0..\modules\deploy\dsc\ext\PsGallery

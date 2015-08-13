@@ -25,6 +25,9 @@ SOFTWARE.
 Configuration SimpleDscProvision {
 	param ($NodeName, $Environment, $Tokens)
 
+    Import-DSCResource -Module xWebAdministration
+    Import-DSCResource -Module cAutologon
+
 	Node $NodeName {
 
         File TestFolder {

@@ -9,3 +9,4 @@ tokensSensitive.ps1
 examples/**/obj
 examples/**/packages
 StyleCop.cache
+*.nupkg

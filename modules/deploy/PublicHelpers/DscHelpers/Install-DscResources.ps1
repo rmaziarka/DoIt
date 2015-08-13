@@ -69,7 +69,7 @@ function Install-DscResources {
     Write-Log -Info ("Installing following DSC modules from '$baseDscDir' to {0}: {1} (total {2})" -f ($nodes -join ', '), ($dscModulesInfo.Name -join ', '), $dscModulesInfo.Count)
 
     $isLocalhostDone = $false
-    $dscExclude = @('Docs', 'Examples', 'Samples')
+    $dscExclude = @('Docs', 'Examples', 'Samples', 'Tests', '*.nupkg')
     foreach ($node in $ConnectionParams.Nodes) {
         $isLocalhost = Test-ComputerNameIsLocalhost -ComputerName $node
         
