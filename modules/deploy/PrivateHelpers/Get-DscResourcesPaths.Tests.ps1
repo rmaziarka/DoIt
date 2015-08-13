@@ -49,10 +49,11 @@ Describe -Tag "PSCI.unit" "Get-DscResourcesPaths" {
         Context "when supplied with some ModuleNames" {
 
             $moduleNames = @('xWebAdministration', 'cIIS', 'cSqlPS') | Sort
+            $moduleNamesWildcard = @('xWebAdministration.*', 'cIIS', 'cSqlPS') | Sort
             $result = Get-DscResourcesPaths -ModuleNames $moduleNames
 
             It "should return proper paths" {
-                $expectedSrcPaths = Get-ChildItem -Path "$PSScriptRoot\..\dsc" -Directory -Recurse -Include $moduleNames | Sort -Property Name | Select-Object -ExpandProperty FullName
+                $expectedSrcPaths = Get-ChildItem -Path "$PSScriptRoot\..\dsc" -Directory -Recurse -Include $moduleNamesWildcard | Sort -Property Name | Select-Object -ExpandProperty FullName
                 $expectedDstPaths = $moduleNames | Foreach-Object { Join-Path -Path 'C:\Program Files\WindowsPowerShell\Modules' -ChildPath $_ }
 
                 $result.Count | Should Be $moduleNames.Count
