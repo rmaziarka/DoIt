@@ -15,6 +15,6 @@
         <tags>build deployment powershell dsc configuration</tags>
     </metadata>
 	<files>
-		<file src="**" exclude="_buildTools\**;**\packages\**;**\*.Tests.*;**\bin\**;**\obj\**" target="tools"/>
+		<file src="**" exclude="_buildTools\**;**\packages\**;**\*.Tests.*;**\bin\**;**\obj\**" />
 	</files>
 </package>
