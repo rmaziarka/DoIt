@@ -82,11 +82,11 @@ try {
     if (![System.IO.Path]::IsPathRooted($PSCILibraryPath)) {
     	$PSCILibraryPath = Join-Path -Path $ProjectRootPath -ChildPath $PSCILibraryPath
     }
-    if (!(Test-Path "$PSCILibraryPath\PSCI.psm1")) {
+    if (!(Test-Path "$PSCILibraryPath\PSCI.psd1")) {
         Write-Output -InputObject "Cannot find PSCI library at '$PSCILibraryPath' (current dir: '$PSScriptRoot'). Please ensure your ProjectRootPath and PSCILibraryPath parameters are correct."
     	exit 1
     }
-    Import-Module "$PSCILibraryPath\PSCI.psm1" -Force 
+    Import-Module "$PSCILibraryPath\PSCI.psd1" -Force 
 
     $PSCIGlobalConfiguration.LogFile = "$PSScriptRoot\build.log.txt"
     Remove-Item -LiteralPath $PSCIGlobalConfiguration.LogFile -ErrorAction SilentlyContinue

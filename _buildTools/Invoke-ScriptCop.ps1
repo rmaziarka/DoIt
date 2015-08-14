@@ -63,7 +63,7 @@ function Invoke-ScriptCop {
         Write-ProgressExternal -Message 'Running ScriptCop' -ErrorMessage 'ScriptCop invocation error'
     }
 	process {
-		Import-Module -Name (Join-Path -Path $PSScriptRoot -ChildPath "ScriptCop\ScriptCop.psm1") -Force;
+		Import-Module -Name (Join-Path -Path $PSScriptRoot -ChildPath "ScriptCop\ScriptCop.psd1") -Force;
         
         $testResults = New-Object System.Collections.ArrayList
         if ($ExcludeNames) {

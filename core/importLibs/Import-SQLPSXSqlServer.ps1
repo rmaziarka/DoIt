@@ -35,5 +35,5 @@ function Import-SQLPSXSqlServer {
     [OutputType([void])]
     param()
     
-    Import-ExternalLib -ModuleName "SqlServer" -ModulePath "SQLPSX\SqlServer\SqlServer.psm1"
+    Import-ExternalLib -ModuleName "SqlServer" -ModulePath "SQLPSX\SqlServer\SqlServer.psd1"
 }
