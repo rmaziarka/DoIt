@@ -75,7 +75,7 @@ function Get-DscResourcesPaths {
     $foundModules = ($modulesExternal + $modulesCustom) | Sort -Property Name
     if (!$isAll) { 
         if ($foundModules.Count -lt $ModuleNames.Count) {
-            $missingModules = ($ModuleNames | Where { $foundModules.Name -inotcontains $_ }) -join ', '
+            $missingModules = ($ModuleNames | Where { ($foundModules.Name -replace $versionReplaceRegex, '') -inotcontains $_ }) -join ', '
             Write-Log -Critical "Cannot find following modules under '$baseDscDir': $missingModules."
         } elseif ($foundModules.Count -gt $ModuleNames.Count) {
             Write-Log -Critical "Found modules with duplicated name under '$baseDscDir' - this is one of $($ModuleNames -split ',')."
