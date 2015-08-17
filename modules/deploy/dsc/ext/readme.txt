@@ -1,0 +1,1 @@
+This folder contains external DSC resources. See git_url.txt in each folder to find reference to source repositories.
