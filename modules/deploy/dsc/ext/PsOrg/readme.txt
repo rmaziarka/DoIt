@@ -1,1 +1,0 @@
-This folder contains Powershell.Org DSC resources: https://github.com/PowerShellOrg
