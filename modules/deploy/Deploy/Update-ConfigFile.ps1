@@ -35,6 +35,7 @@ function Update-ConfigFile {
     3) Regex - custom regex with replace string.
     4) XSLT - XML using provided XSLT stylesheet
     5) XDT - XML using provided XDT transform
+    6) XPath - update XML using XPath
     
     .PARAMETER ConfigFiles
     List of configuration file names to update.
@@ -60,6 +61,9 @@ function Update-ConfigFile {
     .PARAMETER ConnectionParameters
     Connection parameters created by New-ConnectionParameters function. If not provided, function will run locally.
 
+    .PARAMETER XPath
+    String containing XPath. The value which will be found will be replaces with $ReplaceString
+
     .PARAMETER IgnoreErrors
     If $true, errors will be ignored.
 
@@ -77,7 +81,7 @@ function Update-ConfigFile {
 
         [Parameter(Mandatory=$true)]
         [string]
-        [ValidateSet('XmlAppKey', 'XmlConnectionString', 'KeyValue', 'Regex', 'XSLT', 'XDT')]
+        [ValidateSet('XmlAppKey', 'XmlConnectionString', 'KeyValue', 'Regex', 'XSLT', 'XDT', 'XPath')]
         $ConfigType,
 
         [Parameter(Mandatory=$true,ParameterSetName='XmlOrKeyValue')]
@@ -89,6 +93,7 @@ function Update-ConfigFile {
         $RegexSearch,
 
         [Parameter(Mandatory=$true,ParameterSetName='Regex')]
+        [Parameter(Mandatory=$true,ParameterSetName='XPath')]
         [string]
         $ReplaceString,
 
@@ -103,6 +108,10 @@ function Update-ConfigFile {
         [Parameter(Mandatory=$false)]
         [hashtable]
         $ConnectionParameters,
+
+        [Parameter(Mandatory=$true,ParameterSetName='XPath')]
+        [string]
+        $XPath,
 
         [Parameter(Mandatory=$false)]
         [switch]
@@ -135,6 +144,8 @@ function Update-ConfigFile {
             # for remote run, we need to copy Carbon files
             Copy-CarbonFilesToRemoteServer -ConnectionParameters $ConnectionParameters -DestinationPath 'C:\XDTTransform'
         }
+    } elseif ($ConfigType -eq 'XPath'){
+        $cmdParams = Get-UpdateXmlUsingXPathParams -ConfigFiles $resolvedConfigFiles -XPath $XPath -ReplaceString $ReplaceString -IgnoreErrors:$IgnoreErrors
     }
 
     if ($ConnectionParameters) {
