@@ -48,17 +48,19 @@ function Expand-Zip {
         [string] 
         $OutputDirectory
     )
-    $msg = "Decompressing file '$ArchiveFile' to '$OutputDirectory'"
+    
     # this function can be run remotely without PSCI available
-    if (Get-Command -Name Write-Log -ErrorAction SilentlyContinue) {
-        Write-Log -Info $msg 
-    } else {
-        Write-Verbose -Message $msg
-    }
+    
 
     # try decompressing with .NET first (only if destination does not exist - otherwise it fails)
     if (!(Test-Path -Path $OutputDirectory)) { 
         try { 
+            $msg = "Decompressing file '$ArchiveFile' to '$OutputDirectory' using .NET"
+            if (Get-Command -Name Write-Log -ErrorAction SilentlyContinue) {
+               Write-Log -Info $msg 
+            } else {
+               Write-Verbose -Message $msg
+            }
             Add-Type -AssemblyName System.IO.Compression.FileSystem
             [System.IO.Compression.ZipFile]::ExtractToDirectory($ArchiveFile, $OutputDirectory) 
             return
@@ -69,6 +71,13 @@ function Expand-Zip {
     
     # then 7-zip
     try { 
+        $msg = "Decompressing file '$ArchiveFile' to '$OutputDirectory' using 7-zip"
+        if (Get-Command -Name Write-Log -ErrorAction SilentlyContinue) {
+            Write-Log -Info $msg 
+        } else {
+            Write-Verbose -Message $msg
+        }
+
         $regEntry = 'Registry::HKLM\SOFTWARE\7-Zip'
         # note - registry check will fail if running Powershell x86 on x64 machine
         if (Test-Path -LiteralPath $regEntry) {
@@ -89,6 +98,13 @@ function Expand-Zip {
         }
     } catch {
         Write-Host -Object "7zip decompression failed: $_ - falling back to shell."
+    }
+
+    $msg = "Decompressing file '$ArchiveFile' to '$OutputDirectory' using Shell.Application"
+    if (Get-Command -Name Write-Log -ErrorAction SilentlyContinue) {
+        Write-Log -Info $msg 
+    } else {
+        Write-Verbose -Message $msg
     }
     
     # then shell - which can be slow when running remotely for unknown reasons

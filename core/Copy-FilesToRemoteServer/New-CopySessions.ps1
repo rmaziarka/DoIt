@@ -105,7 +105,7 @@ function New-CopySessions {
         $psSessionParams = $ConnectionParams.PSSessionParams.Clone()
         $psSessionParams.ComputerName = $server
 
-        Write-Log -Info ('Connecting to {0}, {1}' -f $ConnectionParams.NodesAsString, $ConnectionParams.OptionsAsString)
+        Write-Log -Info ('Connecting to {0}, {1}' -f $server, $ConnectionParams.OptionsAsString)
         $session = New-PsSession @psSessionParams
 
         $needUpdate = $true
