@@ -44,8 +44,16 @@ function Get-TargetResource
             Import-Module -Name WebAdministration -Verbose:$false
     }
 
-    $Website = Get-Website | Where-Object -FilterScript {
-        $_.Name -eq $Name
+    try { 
+        $Website = Get-Website | Where-Object -FilterScript {
+            $_.Name -eq $Name
+        }
+    } catch { 
+         # DO NOT REMOVE
+         # This is workaround for 2008 R2 issue - see http://stevenmaglio.blogspot.com/2014/11/webadministration-not-loaded-correctly.html
+         $Website = Get-Website | Where-Object -FilterScript {
+            $_.Name -eq $Name
+         }
     }
 
     if ($Website.count -eq 0) # No Website exists with this name.
@@ -413,8 +421,16 @@ function Test-TargetResource
         Import-Module -Name WebAdministration -Verbose:$false
     }
 
-    $Website = Get-Website | Where-Object -FilterScript {
-        $_.Name -eq $Name
+    try { 
+        $Website = Get-Website | Where-Object -FilterScript {
+            $_.Name -eq $Name
+        }
+    } catch { 
+         # DO NOT REMOVE
+         # This is workaround for 2008 R2 issue - see http://stevenmaglio.blogspot.com/2014/11/webadministration-not-loaded-correctly.html
+         $Website = Get-Website | Where-Object -FilterScript {
+            $_.Name -eq $Name
+         }
     }
     $Stop = $true
 
