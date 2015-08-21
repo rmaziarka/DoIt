@@ -60,7 +60,28 @@ function Write-ErrorRecord {
         $ErrorRecord = $_
     }
     $exception = $ErrorRecord.Exception
-    $messageToLog = $Message + "`n" + ($ErrorRecord | Format-List -Force | Out-String) + ($exception | Format-List -Force | Out-String)
+
+    $messageToLog = ''
+
+    if ($ErrorRecord -and $ErrorRecord.InvocationInfo) {
+        $customCallerInfo = Get-CallerInfo -InvocationInfo $ErrorRecord.InvocationInfo
+    }
+
+    if ($Message) {
+        $messageToLog += $Message + "`n"
+    }
+    if ($ErrorRecord) {
+        if (!$Message) {
+            $messageToLog += ($errorRecord.ToString()) + "`n`n"
+        }
+        $messageToLog += "ERROR RECORD:" + ($ErrorRecord | Format-List -Force | Out-String)
+    }
+    if ($exception) {
+        $messageToLog += "INNER EXCEPTION:" + ($exception | Format-List -Force | Out-String)
+    }
+    if (!$ErrorRecord -or !$ErrorRecord.ScriptStackTrace) {
+        $messageToLog += (Get-CallStack)    
+    }
    
     if (!$Message -and $exception.Message) {
         $progressMessage = "$($exception.Message);`n$messageToLog"
@@ -73,9 +94,13 @@ function Write-ErrorRecord {
         $Global:ProgressErrorMessage = $progressMessage
     }
     
+    Write-Log -Error $messageToLog -CustomCallerInfo $customCallerInfo
+    
     if ($StopExecution) {
-        Write-Log -Critical $messageToLog
-    } else {
-        Write-Log -Error $messageToLog
-    }       
+        if ($exception) { 
+            Stop-Execution -ThrowObject $exception
+        } else {
+            Stop-Execution
+        }
+    }
 }

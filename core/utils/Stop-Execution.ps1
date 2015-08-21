@@ -28,7 +28,10 @@ function Stop-Execution {
     Stops execution of the script. 
 
     .DESCRIPTION
-    In console it will run 'exit 1' to ensure proper exit code is returned. In other environments (e.g. ISE) it will just throw an exception.
+    Depending on $Global:PSCIGlobalConfiguration.ExitImmediatelyOnError, it will either throw an exception or run 'exit 1'.
+
+    .PARAMETER ThrowObject
+    Object to be thrown.
 
     .EXAMPLE
     Stop-Execution
@@ -36,7 +39,11 @@ function Stop-Execution {
 
     [CmdletBinding()]
     [OutputType([void])]
-    param()
+    param(
+        [Parameter(Mandatory=$false)]
+        [object] 
+        $ThrowObject
+    )
 
     if ($Global:ProgressErrorMessage) {
         Write-ProgressExternal -Message $Global:ProgressErrorMessage -MessageType Problem
@@ -45,6 +52,9 @@ function Stop-Execution {
     if ($Global:PSCIGlobalConfiguration.ExitImmediatelyOnError) {
         exit 1
     } else {
-        throw "Execution stopped due to an error or on demand."
+        if (!$ThrowObject) {
+            $ThrowObject = "Execution stopped due to an error or on demand."
+        }
+        throw $ThrowObject
     }
 }

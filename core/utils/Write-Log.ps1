@@ -31,7 +31,8 @@ Function Write-Log {
     Writes according to $PSCIGlobalConfiguration.Log* variables.
 
     .PARAMETER Critical
-    If specified, an error will be logged and an exception will be thrown
+    DEPRECATED - throw an exception instead.
+    If specified, an error will be logged and an exception will be thrown.
 
     .PARAMETER Error
     If specified, an error will be logged.
@@ -52,13 +53,17 @@ Function Write-Log {
     If specified, Header information will not be logged (e.g. '[ERROR]: (function_name)')
 
     .PARAMETER NoStackTrace
+    DEPRECATED - stack traces no longer printed here (moved to Write-ErrorRecord).
     If specified, call stack will not be included on -Critical level.
 
     .PARAMETER Indent
     Additional indent (optional).
 
-     .PARAMETER Message
+    .PARAMETER Message
     Message to output
+
+    .PARAMETER CustomCallerInfo
+    Custom string containing caller information, used in logging exceptions.
 
     .EXAMPLE
     Write-Log -Error "A disaster has occurred."
@@ -69,7 +74,7 @@ Function Write-Log {
     param(
         [Parameter(Mandatory=$false)]
         [switch] 
-        $Critical = $false,
+        $Critical = $false, ## deprecated
         
         [Parameter(Mandatory=$false)]
         [switch] 
@@ -97,7 +102,7 @@ Function Write-Log {
 
         [Parameter(Mandatory=$false)]
         [switch] 
-        $NoStackTrace = $false,
+        $NoStackTrace = $false, ## deprecated
 
         [Parameter(Mandatory=$true, ValueFromPipeline=$true)]
         [string[]]
@@ -105,7 +110,11 @@ Function Write-Log {
 
         [Parameter(Mandatory=$false)]
         [int]
-        $Indent = 0
+        $Indent = 0,
+
+        [Parameter(Mandatory=$false)]
+        [object] 
+        $CustomCallerInfo = $false
     )
     Begin { 
         $severityNotSet = $false;
@@ -133,7 +142,11 @@ Function Write-Log {
         }
 
         $timestamp = Get-Date -Format 'yyyy-MM-dd HH:mm:ss'
-        $callerInfo = Get-CallerInfo
+        if ($CustomCallerInfo) {
+            $callerInfo = $CustomCallerInfo
+        } else { 
+            $callerInfo = Get-CallerInfo
+        }
         if ($severityNotSet) {
             $output = "[Write-Log error / $callerInfo]: At least one of switches (critical / error / warn / info / debug) must be on for Write-Log."
             throw $output
@@ -152,10 +165,7 @@ Function Write-Log {
             $outputHeader = "[$severityChar] $timestamp ${remotingFlag}[$currentHostname/${currentUsername}]: ($callerInfo)`t"
         }
         if ($Critical) {
-            $Message += "`r`nCritical exception. Please see messages above for details.`r`n"
-            if (!$NoStackTrace) { 
-                $Message += Get-CallStack
-            }
+            throw $Message
         }
     }
     Process { 
@@ -165,59 +175,8 @@ Function Write-Log {
         Write-LogMessage -Header (" " * $Indent + $outputHeader) -Message $Message -Severity $Severity -Emphasize:$Emphasize
     }
     End {
-        if ($Critical) {
-            Stop-Execution
-        }
     }
 }
-
-function Get-CallerInfo() {
-    <#
-    .SYNOPSIS
-    Gets information about caller. Helper function.
-
-    .EXAMPLE
-    Get-CallerInfo
-    #>
-
-    [CmdletBinding()]
-    [OutputType([string])]
-    param()
-
-    $callerInfo = (Get-PSCallStack)[2]
-    $callerCommandName = $callerInfo.InvocationInfo.MyCommand.Name
-    if ($callerInfo.ScriptName) {
-        $callerScriptName = Split-Path -Leaf $callerInfo.ScriptName
-    }
-    $callerLineNumber = $callerInfo.ScriptLineNumber
-    return "$callerScriptName/$callerCommandName/$callerLineNumber"
-}
-
-
-function Get-CallStack() {
-    <#
-    .SYNOPSIS
-    Gets call stack. Helper function.
-
-    .EXAMPLE
-    Get-CallStack
-    #>
-
-    [CmdletBinding()]
-    [OutputType([string])]
-    param()
-
-    $psStack = Get-PSCallStack
-    if ($psStack.Length -lt 3) {
-        return "No stack trace."
-    }
-    $msg = ""
-    for ($i = 2; $i -lt $psStack.Length; $i++) {
-        $msg += ("Stack trace {0}: location={1}, command={2}, arguments={3}`r`n " -f ($i-1), $psStack[$i].Location, $psStack[$i].Command, $psStack[$i].Arguments)
-    }
-    return $msg
-}
-
 
 function Write-LogMessage() {
     <#
