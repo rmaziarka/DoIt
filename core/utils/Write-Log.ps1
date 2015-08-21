@@ -428,6 +428,9 @@ function Write-LogToPSOutput() {
     .PARAMETER Severity
     Severity
 
+    .PARAMETER PassThru
+    If enabled, all log output will be available as return value.
+
     .EXAMPLE
     Write-LogToPSOutput -Header "Header" -Message "Message"
     #>
