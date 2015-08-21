@@ -43,24 +43,23 @@ Function Write-Log {
     .PARAMETER Info
     If specified, an information will be logged.
 
-     .PARAMETER _debug
+    .PARAMETER _debug
     If specified, a debug Message will be logged.
 
-     .PARAMETER Emphasize
+    .PARAMETER Emphasize
     If set, the Message at console will be made more visible (using colors).
 
     .PARAMETER NoHeader
-    If specified, Header information will not be logged (e.g. '[ERROR]: (function_name)')
-
-    .PARAMETER NoStackTrace
-    DEPRECATED - stack traces no longer printed here (moved to Write-ErrorRecord).
-    If specified, call stack will not be included on -Critical level.
+    If specified, Header information will not be logged (e.g. '[ERROR]: (function_name)').
 
     .PARAMETER Indent
     Additional indent (optional).
 
     .PARAMETER Message
-    Message to output
+    Message to output.
+
+    .PARAMETER PassThru
+    If enabled, all log output will be available as return value.
 
     .PARAMETER CustomCallerInfo
     Custom string containing caller information, used in logging exceptions.
@@ -100,10 +99,6 @@ Function Write-Log {
         [switch] 
         $NoHeader = $false,
 
-        [Parameter(Mandatory=$false)]
-        [switch] 
-        $NoStackTrace = $false, ## deprecated
-
         [Parameter(Mandatory=$true, ValueFromPipeline=$true)]
         [string[]]
         $Message,
@@ -111,6 +106,10 @@ Function Write-Log {
         [Parameter(Mandatory=$false)]
         [int]
         $Indent = 0,
+
+        [Parameter(Mandatory=$false)]
+        [switch] 
+        $PassThru = $false,
 
         [Parameter(Mandatory=$false)]
         [object] 
@@ -172,7 +171,7 @@ Function Write-Log {
         if (!$severityNotSet -and [int]$Severity -lt [int]$PSCIGlobalConfiguration.LogLevel) {
             return
         }
-        Write-LogMessage -Header (" " * $Indent + $outputHeader) -Message $Message -Severity $Severity -Emphasize:$Emphasize
+        Write-LogMessage -Header (" " * $Indent + $outputHeader) -Message $Message -Severity $Severity -Emphasize:$Emphasize -PassThru:$PassThru
     }
     End {
     }
@@ -195,6 +194,9 @@ function Write-LogMessage() {
     .PARAMETER Emphasize
     Emphasize
 
+    .PARAMETER PassThru
+    If enabled, all log output will be available as return value.
+
     .EXAMPLE
      Write-LogMessage -Header "Header" -Message "Message" -Severity $Severity 
     #>    
@@ -212,13 +214,18 @@ function Write-LogMessage() {
         $Severity, 
         
         [switch] 
-        $Emphasize
+        $Emphasize,
+
+        [Parameter(Mandatory=$false)]
+        [switch] 
+        $PassThru
     )
 
     try { 
         Write-LogToStdOut -Header $Header -Message $Message -Severity $Severity -Emphasize:$Emphasize
         Write-LogToFile -Header $Header -Message $Message -Severity $Severity
         Write-LogToEventLog -Header $Header -Message $Message -Severity $Severity
+        Write-LogToPSOutput -Header $Header -Message $Message -Severity $Severity -PassThru:$PassThru
     } catch {
         $exception = $_.Exception
         $Message = "Writing to log failed - script will terminate.`r`n"
@@ -404,6 +411,47 @@ function Write-LogToEventLog() {
             }
             Write-EventLog -LogName Application -Source $PSCIGlobalConfiguration.LogEventLogSource -EntryType $entryType -EventID 1 -Message ($strBuilder.ToString())
         }
+    }
+}
+
+function Write-LogToPSOutput() {
+    <#
+    .SYNOPSIS
+    Outputs the Message using Write-Output function. Helper function.
+    
+    .PARAMETER Header
+    Message Header
+    
+    .PARAMETER Message
+    Message body
+    
+    .PARAMETER Severity
+    Severity
+
+    .EXAMPLE
+    Write-LogToPSOutput -Header "Header" -Message "Message"
+    #>
+
+    [CmdletBinding()]
+    [OutputType([void])]
+    param(
+        [string] 
+        $Header, 
+        
+        [string[]] 
+        $Message, 
+        
+        [PSCI.LogSeverity] 
+        $Severity,
+
+        [Parameter(Mandatory=$false)]
+        [switch] 
+        $PassThru
+    )
+
+    if ($PassThru) { 
+        $msg = $Message -join "`r`n"
+        Write-Output -InputObject "$Header$msg"
     }
 }
 

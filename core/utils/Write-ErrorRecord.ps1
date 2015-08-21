@@ -30,11 +30,14 @@ function Write-ErrorRecord {
     .PARAMETER ErrorRecord
     Error record to log. If null, $_ will be used.
 
-    .PARAMETER message
+    .PARAMETER Message
     Additional message to log.
 
-    .PARAMETER stopExecution
+    .PARAMETER StopExecution
     If true, script will stop execution (exit with errorcode).
+
+    .PARAMETER PassThru
+    If enabled, all log output will be available as return value.
 
     .EXAMPLE
     Write-ErrorRecord -ErrorRecord $errorRecord -Message "message" -StopExecution
@@ -53,7 +56,11 @@ function Write-ErrorRecord {
         
         [Parameter(Mandatory=$false)]
         [switch] 
-        $StopExecution = $true
+        $StopExecution = $true,
+
+        [Parameter(Mandatory=$false)]
+        [switch] 
+        $PassThru = $false
     )
     
     if (!$ErrorRecord) {
@@ -94,7 +101,7 @@ function Write-ErrorRecord {
         $Global:ProgressErrorMessage = $progressMessage
     }
     
-    Write-Log -Error $messageToLog -CustomCallerInfo $customCallerInfo
+    Write-Log -Error $messageToLog -CustomCallerInfo $customCallerInfo -PassThru:$PassThru
     
     if ($StopExecution) {
         if ($exception) { 
