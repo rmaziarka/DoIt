@@ -75,11 +75,11 @@ function Write-ErrorRecord {
     }
 
     if ($Message) {
-        $messageToLog += $Message + "`n"
+        $messageToLog += $Message + "`r`n"
     }
     if ($ErrorRecord) {
         if (!$Message) {
-            $messageToLog += ($errorRecord.ToString()) + "`n`n"
+            $messageToLog += ($errorRecord.ToString()) + "`r`n`r`n"
         }
         $messageToLog += "ERROR RECORD:" + ($ErrorRecord | Format-List -Force | Out-String)
     }
@@ -91,7 +91,7 @@ function Write-ErrorRecord {
     }
    
     if (!$Message -and $exception.Message) {
-        $progressMessage = "$($exception.Message);`n$messageToLog"
+        $progressMessage = "$($exception.Message);`r`n$messageToLog"
     } else {
         $progressMessage = $messageToLog
     }
