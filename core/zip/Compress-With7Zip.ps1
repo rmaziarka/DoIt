@@ -111,7 +111,7 @@ function Compress-With7Zip {
     $7zipPath = Get-PathTo7Zip -FailIfNotFound
 
     if (([uri]$WorkingDirectory).IsUnc) {
-        Write-Log -Critical "Working directory '$WorkingDirectory' is an unc path. 7-zip does not support that."
+        throw "Working directory '$WorkingDirectory' is an unc path. 7-zip does not support that."
     }
     if (!$WorkingDirectory) {
         $WorkingDirectory = Get-Location | Select-Object -ExpandProperty Path

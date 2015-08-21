@@ -105,7 +105,7 @@ function RemotingTestValidate {
 	param ($NodeName, $Tokens, $Environment, $ConnectionParams)
 
     if (!(Test-Path -LiteralPath 'c:\PSCITest\RemotingTestEvidence')) {
-        Write-Log -Critical 'Test evidence does not exist at c:\PSCITest\RemotingTestEvidence.'
+        throw 'Test evidence does not exist at c:\PSCITest\RemotingTestEvidence.'
     }
     Remove-Item -LiteralPath 'c:\PSCITest' -Force -Recurse
 }

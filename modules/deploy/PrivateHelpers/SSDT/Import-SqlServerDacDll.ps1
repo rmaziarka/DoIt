@@ -64,7 +64,7 @@ function Import-SqlServerDacDll {
     }
 
     if (!$potentialDacDllPaths) {
-        Write-Log -Critical "Cannot find neither '$sqlServerPath' nor Visual Studio directories. Please ensure you have SSDT or Data-Tier Application Framework installed."
+        throw "Cannot find neither '$sqlServerPath' nor Visual Studio directories. Please ensure you have SSDT or Data-Tier Application Framework installed."
     }
 
     if ($SqlServerVersion) { 
@@ -78,7 +78,7 @@ function Import-SqlServerDacDll {
     }
 
     if (!$potentialDacDllPathsVer) {
-        Write-Log -Critical "Cannot find any DAC version directory under any of following directories: $($potentialDacDllPaths -join ', '). Please ensure you have SSDT or Data-Tier Application Framework installed."
+        throw "Cannot find any DAC version directory under any of following directories: $($potentialDacDllPaths -join ', '). Please ensure you have SSDT or Data-Tier Application Framework installed."
     }
 
     foreach ($potentialDacDllPath in $potentialDacDllPathsVer) {
@@ -95,7 +95,7 @@ function Import-SqlServerDacDll {
     }
 
     if (!$dacDllPath) {
-       Write-Log -Critical "Cannot find Microsoft.SqlServer.Dac.dll under any of following directories: $($potentialDacDllPathsVer.FullName -join ', '). Please ensure you have SSDT or Data-Tier Application Framework installed."
+       throw "Cannot find Microsoft.SqlServer.Dac.dll under any of following directories: $($potentialDacDllPathsVer.FullName -join ', '). Please ensure you have SSDT or Data-Tier Application Framework installed."
     }
 
     Write-Log -_Debug "Found at '$dacDllPath' - importing."

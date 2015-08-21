@@ -47,7 +47,7 @@ function Read-ConfigurationFiles {
     # Load file with 'tokens' in the name first, since other files can make use of it
     $configScripts = Get-ChildItem -Recurse $configPath -Include *.ps*1 | Sort-Object -Property { $_.Name -inotmatch "tokens" }, { $_.Name }
     if (!$configScripts) {
-        Write-Log -Critical "There are no configuration files at '$configPath'. Please ensure you have passed valid 'DeployConfigurationPath' parameter."
+        throw "There are no configuration files at '$configPath'. Please ensure you have passed valid 'DeployConfigurationPath' parameter."
     }
 
     $result = [PSCustomObject]@{
@@ -61,7 +61,7 @@ function Read-ConfigurationFiles {
     foreach ($script in $configScripts) {
         $contents = Get-Content -Path $script.FullName -ReadCount 0 | Out-String
         if ($contents -imatch $invalidLineRegex) {
-            Write-Log -Critical "File '$configPath' contains 'Import-DSCResource' line that ends with backtick, which is not allowed. Please change it to fit into one line. Offending line: $($matches[0])"
+            throw "File '$configPath' contains 'Import-DSCResource' line that ends with backtick, which is not allowed. Please change it to fit into one line. Offending line: $($matches[0])"
         }
         $result.Files += $script.FullName
         $matchInfo = Select-String -InputObject $contents -Pattern $dscResourceRegex -AllMatches
@@ -71,10 +71,10 @@ function Read-ConfigurationFiles {
             } elseif ($match.Groups[2].Success) {
                $moduleName = $match.Groups[2].Value
             } else {
-                Write-Log -Critical "Critical regex error during reading file '$configPath' - matches.Groups: $($matches.Groups)"
+                throw "Critical regex error during reading file '$configPath' - matches.Groups: $($matches.Groups)"
             }
             if ($moduleName -imatch '\$') {
-                Write-Log -Critical "File '$configPath' contains 'Import-DSCResource' invocation with a variable substitution which is not allowed. Please change it to a string. Offending line: $($match.Value)"
+                throw "File '$configPath' contains 'Import-DSCResource' invocation with a variable substitution which is not allowed. Please change it to a string. Offending line: $($match.Value)"
             }
             $moduleName = $moduleName -replace '"', ''
             $moduleName = $moduleName -replace "'", ''

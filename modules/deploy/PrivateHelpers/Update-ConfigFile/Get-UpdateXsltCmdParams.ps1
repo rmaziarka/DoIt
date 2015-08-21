@@ -65,7 +65,7 @@ function Get-UpdateXsltCmdParams {
     )
 
     if (!$XsltFilename -and !$XsltBody) {
-        Write-Log -Critical 'Either $XsltFilename or $XsltBody parameter must be provided.'
+        throw 'Either $XsltFilename or $XsltBody parameter must be provided.'
     }
 
     $result = @{}

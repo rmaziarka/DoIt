@@ -101,7 +101,7 @@ function Resolve-ServerConnections {
             $serverConn = Resolve-ServerConnectionConfigElement -AllServerConnections $AllServerConnections -ServerConnection $serverConnectionName -ResolvedTokens $resolvedTokens -Environment $Environment
         } else {
             if (!$AllServerConnections.ContainsKey($serverConnectionName)) {
-                Write-Log -Critical "Invalid ServerConnection reference ('$serverConnectionName') - Environment '$Environment' / ServerRole '$($ServerRole.Name)'."
+                throw "Invalid ServerConnection reference ('$serverConnectionName') - Environment '$Environment' / ServerRole '$($ServerRole.Name)'."
             }
             $serverConn = $AllServerConnections[$serverConnectionName]
         }

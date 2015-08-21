@@ -94,7 +94,7 @@ function Build-SSISIspac {
         $wildcard = "$baseVsDir\Microsoft Visual Studio*"
         $vsDirs = Get-ChildItem -Path $wildcard -Directory | Sort -Descending
         if (!$vsDirs) {
-            Write-Log -Critical "Cannot find Visual Studio directory at '$wildcard'. You probably don't have 'Microsoft SQL Server Data Tools - Business Intelligence for Visual Studio'. Please install it and try again."
+            throw "Cannot find Visual Studio directory at '$wildcard'. You probably don't have 'Microsoft SQL Server Data Tools - Business Intelligence for Visual Studio'. Please install it and try again."
         }
         $vsDir = $vsDirs[0]
     } else {
@@ -105,13 +105,13 @@ function Build-SSISIspac {
         }
         $vsDir = "$baseVsDir\Microsoft Visual Studio {0}" -f $vsVersionMap[$VisualStudioVersion]
         if (!(Test-Path -LiteralPath $vsDir)) {
-            Write-Log -Critical "Cannot find Visual Studio directory at '$vsDir'. you probably don't have 'Microsoft SQL Server Data Tools - Business Intelligence for Visual Studio $VisualStudioVersion'. Please install it and try again."
+            throw "Cannot find Visual Studio directory at '$vsDir'. you probably don't have 'Microsoft SQL Server Data Tools - Business Intelligence for Visual Studio $VisualStudioVersion'. Please install it and try again."
         }
     }
 
     $devEnvPath = Join-Path -Path $vsDir -ChildPath 'Common7\IDE\devenv.com'
     if (!(Test-Path -LiteralPath $devEnvPath)) {
-        Write-Log -Critical "Cannot find '$devEnvPath'."
+        throw "Cannot find '$devEnvPath'."
     }
 
     $args = "`"$projectPath`" /Rebuild `"$Configuration`""
@@ -135,9 +135,9 @@ function Build-SSISIspac {
             }
         }
         if ($ssdtMissingError) {
-            Write-Log -Critical "Building failed - you probably don't have 'Microsoft SQL Server Data Tools - Business Intelligence for Visual Studio $VisualStudioVersion'. Please install it and try again."
+            throw "Building failed - you probably don't have 'Microsoft SQL Server Data Tools - Business Intelligence for Visual Studio $VisualStudioVersion'. Please install it and try again."
         } else { 
-            Write-Log -Critical "Building failed - see errors above for details. "
+            throw "Building failed - see errors above for details. "
         }
     }
 
@@ -145,7 +145,7 @@ function Build-SSISIspac {
     Write-Log -Info "Searching for *.ispac files under '$projectDir'"
     $ispacFiles = Get-ChildItem -Path $projectDir -File -Recurse | Where-Object { $_.FullName -imatch "bin\\$Configuration" -and $_.Name -imatch 'ispac$' }
     if (!$ispacFiles) {
-        Write-Log -Critical "Cannot find any *.ispac files under '$projectDir'."
+        throw "Cannot find any *.ispac files under '$projectDir'."
     }
 
     Write-Log -Info "Copying .ispac files to '$OutputPath': $($ispacFiles.FullName -join ', ')"

@@ -87,12 +87,12 @@ function Update-TokensInStream {
             $totalLen += ($line.Length)
             if ($line -match $TokenRegex) {
                 if ($matches.Count -lt 2) {
-                    Write-Log -Critical "Invalid TokenRegex: '$TokenRegex' - there must be at least one capture group that matches the name of the token"
+                    throw "Invalid TokenRegex: '$TokenRegex' - there must be at least one capture group that matches the name of the token"
                 }
                 $tokenName = $matches[1]
                 if (!$Tokens.ContainsKey($tokenName)) {
                     if ($ValidateTokensExistence) {
-                        Write-Log -Critical ("Token '{0}' ({1}) is missing from configuration files." -f $tokenName, $InputStreamDescription)
+                        throw ("Token '{0}' ({1}) is missing from configuration files." -f $tokenName, $InputStreamDescription)
                     }
                 } else {
                     $newValue = $Tokens[$tokenName]

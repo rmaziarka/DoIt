@@ -67,7 +67,7 @@ function Get-MsBuildPath {
         switch ($VisualStudioVersion) {
             {"2010" -or "2012"} { $MsBuildVersion = "4.0" }
             "2013"              { $MsBuildVersion = "12.0" }
-            default             { Write-Log -Critical "Unrecognized VisualStudioVersion: $VisualStudioVersion" }
+            default             { throw "Unrecognized VisualStudioVersion: $VisualStudioVersion" }
         }
     }
 

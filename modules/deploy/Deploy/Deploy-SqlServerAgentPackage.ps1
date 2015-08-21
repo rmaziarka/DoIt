@@ -142,11 +142,11 @@ function Deploy-SqlServerAgentPackage {
         $sqlPathLeaf = Split-Path -Leaf $sqlPath
         $sqlContent = Get-Content -Path $sqlPath -ReadCount 0 | Out-String
         if ($sqlContent -inotmatch $jobNameRegex) {
-            Write-Log -Critical "File '$sqlPath' does not contain string '@job_name='. Please ensure that SQL scripts in this directory only contains scripted SQL Server Agent jobs."
+            throw "File '$sqlPath' does not contain string '@job_name='. Please ensure that SQL scripts in this directory only contains scripted SQL Server Agent jobs."
         }
         $jobName = $Matches[1]
         if ($sqlContent -imatch $spDeleteJobRegex) {
-            Write-Log -Critical "File '$sqlPath' contains sp_delete_job with job_id parameter. This is not allowed as it is not idempotent (GUIDs will change). Please remove it - PSCI will remove this job while preserving its history for you."
+            throw "File '$sqlPath' contains sp_delete_job with job_id parameter. This is not allowed as it is not idempotent (GUIDs will change). Please remove it - PSCI will remove this job while preserving its history for you."
         }
 
         $sqlParams.SqlCommandMode = 'Scalar'
@@ -165,14 +165,14 @@ function Deploy-SqlServerAgentPackage {
                 $historyEntriesCount = Invoke-Sql @sqlParams -Query "select count(*) from msdb.dbo.sysjobhistory where job_id = '$jobId'"
                 if ($historyEntriesCount -gt 0) {
                     if ($historyTableExists) {
-                        Write-Log -Critical "Job '$JobName' has some history and table 'msdb.dbo.[$historyTableName]' exists. This means that the last deployment was unsuccessful but the job already run. Please investigate and delete the $historyTableName afterwards."
+                        throw "Job '$JobName' has some history and table 'msdb.dbo.[$historyTableName]' exists. This means that the last deployment was unsuccessful but the job already run. Please investigate and delete the $historyTableName afterwards."
                     }
 
                     Write-Log -Info "Creating backup of job's '$jobName' history to table msdb.dbo.[$historyTableName]"
                     Invoke-Sql @sqlParams -Query "select * into msdb.dbo.[$historyTableName] from msdb.dbo.sysjobhistory where job_id = '$JobId'"
                     $countVerify = Invoke-Sql @sqlParams -Query "select count(*) from msdb.dbo.[$historyTableName]"
                     if ($countVerify -ne $historyEntriesCount) {
-                        Write-Log -Critical "Failed to create or fill job's '$jobName' history table (msdb.dbo.[$historyTableName])"
+                        throw "Failed to create or fill job's '$jobName' history table (msdb.dbo.[$historyTableName])"
                     }
                     $historyTableExists = $true
                 } else {
@@ -220,7 +220,7 @@ from msdb.dbo.[$historyTableName]
            $sysjobHistoryCount = Invoke-Sql @sqlParams -Query "select count(*) from msdb.dbo.sysjobhistory where job_id = '$JobId'"
            $backupHistoryCount = Invoke-Sql @sqlParams -Query "select count(*) from msdb.dbo.[$historyTableName]"
            if ($sysjobHistoryCount -ne $backupHistoryCount) {
-               Write-Log -Critical "Restoring history for job '$jobName' failed (table msdb.dbo.[$historyTableName]) - count $sysjobHistoryCount, expected $backupHistoryCount."
+               throw "Restoring history for job '$jobName' failed (table msdb.dbo.[$historyTableName]) - count $sysjobHistoryCount, expected $backupHistoryCount."
            }
 
            Invoke-Sql @sqlParams -Query "drop table msdb.dbo.[$historyTableName]"

@@ -3,6 +3,12 @@ function Get-CallerInfo() {
     .SYNOPSIS
     Gets information about caller. Helper function.
 
+    .PARAMETER InvocationInfo
+    Custom InvocationInfo object, if not defined Get-PSCallStack will be used.
+
+    .PARAMETER StackLevel
+    Stack level, only used if InvocationInfo is not defined.
+
     .EXAMPLE
     Get-CallerInfo
     #>

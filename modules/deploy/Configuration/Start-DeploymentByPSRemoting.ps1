@@ -189,6 +189,6 @@ function Start-DeploymentByPSRemoting {
     $psSessionParams = $RunOnConnectionParams.PSSessionParams
     $result = Invoke-Command @psSessionParams -ScriptBlock $scriptBlock -ArgumentList $PackageDirectory, $PackageDirectoryAutoRemove, $deployScript, $RunOnConnectionParams.RemotingMode, ($Global:PSCIGlobalConfiguration.CIServer)
     if ($result -inotcontains 'success' -and $result -inotmatch 'success') {
-        Write-Log -Critical "Remote invocation failed: $result"
+        throw "Remote invocation failed: $result"
     }
 }

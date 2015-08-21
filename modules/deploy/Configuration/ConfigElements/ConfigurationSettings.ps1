@@ -106,6 +106,6 @@ function ConfigurationSettings {
         }
 
     } else {
-        Write-Log -Critical "'ConfigurationSettings' function cannot be invoked outside 'Environment' function (invalid invocation: 'ConfigurationSettings $Name')."
+        throw "'ConfigurationSettings' function cannot be invoked outside 'Environment' function (invalid invocation: 'ConfigurationSettings $Name')."
     }
 }

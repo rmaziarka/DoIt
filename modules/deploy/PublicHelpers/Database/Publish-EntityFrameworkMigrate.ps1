@@ -65,7 +65,7 @@ function Publish-EntityFrameworkMigrate {
 
     #TODO: move to validation part
     if (!(Test-Path -LiteralPath "$PackagePath\migrate.exe")) {
-        Write-Log -Critical "No migrate.exe in '$PackagePath')"
+        throw "No migrate.exe in '$PackagePath')"
     }
     Write-Log -Info "Running migrate.exe for package: '$PackagePath'"
     $migrateArgs = "$MigrateAssembly /connectionString=`"$DbConnectionString`" /connectionProviderName=System.Data.SqlClient"
@@ -80,11 +80,11 @@ function Publish-EntityFrameworkMigrate {
         if ($output -imatch 'error:(.*)') {
             $errorMsg = "EF migration error:$($Matches[1])"
             Write-ProgressExternal -ErrorMessage $errorMsg
-            Write-Log -Critical $errorMsg
+            throw $errorMsg
         } elseif ($exitCode -ne 0) {
             $errorMsg = "EF migration error - exit code $exitCode"
             Write-ProgressExternal -ErrorMessage $errorMsg
-            Write-Log -Critical $errorMsg
+            throw $errorMsg
         }
 
     } finally {

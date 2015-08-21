@@ -121,7 +121,7 @@ function Publish-IISApplicationPool {
 	}
 	    
     if (!$appPool) {
-        Write-Log -Critical "Unable to access application pool named '$ApplicationPoolName'"
+        throw "Unable to access application pool named '$ApplicationPoolName'"
     }
 
     $identityTypeNum = $null

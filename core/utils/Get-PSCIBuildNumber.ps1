@@ -50,13 +50,13 @@ function Get-PSCIBuildNumber {
     }
     $buildFile = Get-ChildItem -Path $Path -Filter "build.*" -File | Select-Object -ExpandProperty Name
     if (!$buildFile) {
-        Write-Log -Critical "No build version file at '$Path'. PSCI library has not been packaged properly."
+        throw "No build version file at '$Path'. PSCI library has not been packaged properly."
     }
     if (@($buildFile).Length -ne 1) {
-        Write-Log -Critical "More than one build version file. PSCI library has not been packaged properly."
+        throw "More than one build version file. PSCI library has not been packaged properly."
     }
     if (!($buildFile -match "build.(\w+)$")) {
-        Write-Log -Critical "Invalid build version filename: '$buildFile' - should match 'build.local' or 'build.<number>'. PSCI library has not been packaged properly."
+        throw "Invalid build version filename: '$buildFile' - should match 'build.local' or 'build.<number>'. PSCI library has not been packaged properly."
     }
     return $Matches[1]
 }

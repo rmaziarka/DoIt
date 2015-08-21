@@ -178,17 +178,17 @@ function Deploy-MsDeployPackage {
 
     if ($PackageType -eq "Dir") {
         if (!$PhysicalPath -or [String]::IsNullOrEmpty($PhysicalPath)) {
-            Write-Log -Critical "You need to specify 'PhysicalPath' parameter for packages of type 'Dir' (package '$PackageName')."
+            throw "You need to specify 'PhysicalPath' parameter for packages of type 'Dir' (package '$PackageName')."
         }
         if ($Website -or $WebApplication) {
-            Write-Log -Critical "You cannot specify 'Website' or 'WebApplication' parameters for packages of type 'Dir' (package '$PackageName')."
+            throw "You cannot specify 'Website' or 'WebApplication' parameters for packages of type 'Dir' (package '$PackageName')."
         }
     } elseif ($PackageType -eq "Web") {
         if ($PhysicalPath) {
-           Write-Log -Critical "You cannot specify 'PhysicalPath' parameter for packages of type 'Web' (package '$PackageName'). You need to provision IIS to setup proper PhysicalPath (using e.g. xWebAdministration)."
+           throw "You cannot specify 'PhysicalPath' parameter for packages of type 'Web' (package '$PackageName'). You need to provision IIS to setup proper PhysicalPath (using e.g. xWebAdministration)."
         }
         if (!$Website -and $WebApplication) {
-           Write-Log -Critical "You cannot specify 'WebApplication' parameter if 'Website' parameter is not provided."
+           throw "You cannot specify 'WebApplication' parameter if 'Website' parameter is not provided."
         }
     }
 
@@ -224,7 +224,7 @@ function Deploy-MsDeployPackage {
 
     if ($PackageType -eq "Web") {
         if (!$PackagePath.ToLower().EndsWith("zip")) {
-           Write-Log -Critical "Invalid package: '$PackagePath' - expecting zip"
+           throw "Invalid package: '$PackagePath' - expecting zip"
         }
         if ($Website -and $WebApplication) {
             $MsDeployAddParameters += "-setParam:name='IIS Web Application Name',value='${Website}\${WebApplication}' "

@@ -70,7 +70,7 @@ function Start-Build {
      }
 
      if (!(Test-Path -LiteralPath $ScriptsDirectory -PathType Container)) {
-        Write-Log -Critical "Directory '$ScriptsDirectory' does not exist. Current location: $((Get-Location).Path)"
+        throw "Directory '$ScriptsDirectory' does not exist. Current location: $((Get-Location).Path)"
      }
      
      $scripts = Get-ChildItem -Path "$ScriptsDirectory\" -Filter "*.ps*1" -Recurse -File | Select-Object -ExpandProperty FullName | Sort
@@ -93,7 +93,7 @@ function Start-Build {
      }
 
      if ($tasksMissing) {
-        Write-Log -Critical "Missing following functions: $($tasksMissing -join ', '). Please ensure they're available at '$ScriptsDirectory'."
+        throw "Missing following functions: $($tasksMissing -join ', '). Please ensure they're available at '$ScriptsDirectory'."
      }
 
      foreach ($task in $buildParamsHash.Tasks) {
@@ -104,7 +104,7 @@ function Start-Build {
         $logInvocation = "$($cmd.Name) "
         foreach ($param in $cmdParams) {
             if (!$buildParamsHash.ContainsKey($param)) {
-                Write-Log -Critical "Function '$task' takes parameter '$param', which is not defined in main build script. Please add it to build.ps1'"
+                throw "Function '$task' takes parameter '$param', which is not defined in main build script. Please add it to build.ps1'"
             }
             $invokeArgs += $buildParamsHash[$param]
             $logInvocation += "-$param $($buildParamsHash[$param]) "

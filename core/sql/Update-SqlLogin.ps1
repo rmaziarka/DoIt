@@ -72,7 +72,7 @@ function Update-SqlLogin {
     $sqlScript = Join-Path -Path $PSScriptRoot -ChildPath 'Update-SqlLogin.sql'
 
     if ([string]::IsNullOrEmpty($Password) -and !$WindowsAuthentication) {
-        Write-Log -Critical "Empty password when WindowsAuthentication is set to false"
+        throw "Empty password when WindowsAuthentication is set to false"
     }
     
     if ($WindowsAuthentication) {

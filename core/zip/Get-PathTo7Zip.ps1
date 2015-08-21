@@ -49,7 +49,7 @@ function Get-PathTo7Zip {
         $7zipPath = (Get-ItemProperty -Path $regEntry).Path
         if (!(Test-Path -LiteralPath $7zipPath)) {
             if ($FailIfNotFound) { 
-                Write-Log -Critical "7zip directory not found at '$7zipPath'."
+                throw "7zip directory not found at '$7zipPath'."
             } else {
                 return $null
             }
@@ -59,7 +59,7 @@ function Get-PathTo7Zip {
         $7zipPath = "C:\Program Files\7-Zip"
         if (!(Test-Path -LiteralPath $7zipPath)) {
             if ($FailIfNotFound) { 
-                Write-Log -Critical "Cannot find neither 7-zip registry entry at '$regEntry' nor 7-zip directory at '$7zipPath'. Please ensure 7-zip has been installed."
+                throw "Cannot find neither 7-zip registry entry at '$regEntry' nor 7-zip directory at '$7zipPath'. Please ensure 7-zip has been installed."
             } else {
                 return $null
             }
@@ -68,7 +68,7 @@ function Get-PathTo7Zip {
     $7zipPath = Join-Path -Path $7zipPath -ChildPath "7z.exe"
     if (!(Test-Path -LiteralPath $7zipPath)) {
         if ($FailIfNotFound) { 
-            Write-Log -Critical "7z.exe not found at '$7zipPath'".
+            throw "7z.exe not found at '$7zipPath'"
         } else {
             return $null
         }

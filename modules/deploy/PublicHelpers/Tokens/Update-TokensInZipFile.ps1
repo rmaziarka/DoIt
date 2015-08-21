@@ -107,7 +107,7 @@ function Update-TokensInZipFile {
     )
 
     if (!(Test-Path -LiteralPath $ZipFile -PathType Leaf)) {
-        Write-Log -Critical "Cannot access file '$ZipFile'"
+        throw "Cannot access file '$ZipFile'"
     }
 
     if ($OutputFile) {
@@ -153,7 +153,7 @@ function Update-TokensInZipFile {
                 $fileToTransformFullName = $fileToTransformFullName -replace '\\', '/'
                 $fileToTransform = $configFileEntries | Where-Object { $_.FullName -ieq $fileToTransformFullName }
                 if (!$fileToTransform) {
-                    Write-Log -Critical "Can't find file '$fileToTransformFullName' in the archive - required for XDT transform '$($xdtTransformConfig.FullName)'"
+                    throw "Can't find file '$fileToTransformFullName' in the archive - required for XDT transform '$($xdtTransformConfig.FullName)'"
                 }
                 Convert-XmlUsingXdtInArchive -ZipArchive $zipArchive -EntryToTransform $fileToTransform -EntryXdt $xdtTransformConfig 
             } 

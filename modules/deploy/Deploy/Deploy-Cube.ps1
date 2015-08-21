@@ -142,7 +142,7 @@ function Deploy-Cube {
             foreach ($msg in $result) {
                 [void]($stringBuilder.Append(("[ErrorCode]={0}, [Description]={1}" -f $msg.ErrorCode, $msg.Description)))
             }
-            Write-Log -Critical $stringBuilder.ToString()
+            throw $stringBuilder.ToString()
         } else {
             Write-Log -Info "Cube '$ProjectName' was deployed successfully."
         }

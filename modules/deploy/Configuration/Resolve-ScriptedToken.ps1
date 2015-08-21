@@ -74,7 +74,7 @@ function Resolve-ScriptedToken {
         $i++
     }
     if ($i -eq 20) {
-        Write-Log -Critical 'Too many nested script tokens (more than 20 loops). Ensure you don''t have circular reference in your tokens (e.g. a={ $ResolvedTokens.b }, b={ $ResolvedTokens.a })'
+        throw 'Too many nested script tokens (more than 20 loops). Ensure you don''t have circular reference in your tokens (e.g. a={ $ResolvedTokens.b }, b={ $ResolvedTokens.a })'
     }
 
     # suppression for ScriptCop unused variables

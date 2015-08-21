@@ -59,7 +59,7 @@ function New-XMLA {
 
     $DeploymentToolPath = Get-SSASDeploymentCMDPath
     if (!(Test-Path -LiteralPath $DeploymentToolPath)) {
-        Write-Log -Critical "Analysis Services deployment tool has not been found at '$DeploymentToolPath'."
+        throw "Analysis Services deployment tool has not been found at '$DeploymentToolPath'."
     }
 
 	Write-Log -Info "Generating cube deployment script (XMLA)..."
@@ -70,7 +70,7 @@ function New-XMLA {
     Invoke-ExternalCommand -Command $DeployCommand	
 
     if (!(Test-Path -LiteralPath $CubeXmlaFilePath)) {
-        Write-Log -Critical ($VubeXmlaFilePath + " was not generated.")
+        throw ($VubeXmlaFilePath + " was not generated.")
     }
 
     Write-Log -Info "Cube deployment script (XMLA) was generated successfully."

@@ -92,7 +92,7 @@ function Invoke-MsBuild {
 
     if ($Version) {
         if (!$AssemblyInfoFilePaths) {
-            Write-Log -Critical "If version is set, the AssemblyInfoFiles parameter is required"
+            throw "If version is set, the AssemblyInfoFiles parameter is required"
         }
 
         Set-AssemblyVersion -Path $AssemblyInfoFilePaths -Version $Version -VersionAttribute AssemblyVersion,AssemblyFileVersion -CreateBackup
@@ -116,12 +116,12 @@ function Invoke-MsBuild {
             $MsBuildForceArchitecture = "(default)"
         }
         if (!$VisualStudioVersion -and !$MsBuildVersion) {
-            Write-Log -Critical "Cannot find any version of msbuild."
+            throw "Cannot find any version of msbuild."
         }
         if ($VisualStudioVersion) {
-            Write-Log -Critical "Cannot find msbuild for Visual Studio Version = '$VisualStudioVersion', architecture = '$MsBuildForceArchitecture'."
+            throw "Cannot find msbuild for Visual Studio Version = '$VisualStudioVersion', architecture = '$MsBuildForceArchitecture'."
         }
-        Write-Log -Critical "Cannot find msbuild version = '$MsBuildVersion', architecture = '$MsBuildForceArchitecture'."
+        throw "Cannot find msbuild version = '$MsBuildVersion', architecture = '$MsBuildForceArchitecture'."
     }
 
     $cmd = Add-QuotesToPaths -Paths $msbuildPath

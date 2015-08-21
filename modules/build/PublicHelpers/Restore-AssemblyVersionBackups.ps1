@@ -61,14 +61,14 @@ function Restore-AssemblyVersionBackups {
         } else {
             $files = @(Get-ChildItem -Path $resolvedPath -File -Filter $FileMask -Recurse | Select-Object -ExpandProperty FullName)
             if (!$files) {
-                Write-Log -Critical "Cannot find any '$FileMask' files at '$resolvedPath'."
+                throw "Cannot find any '$FileMask' files at '$resolvedPath'."
             }
             $resolvedPaths = $files
         }
         foreach ($resolvedPath in $resolvedPaths) {
             $backupPath = "${resolvedPath}.bak"
             if (!(Test-Path -LiteralPath $backupPath)) { 
-                Write-Log -Critical "Backup file '$backupPath' does not exist."
+                throw "Backup file '$backupPath' does not exist."
             }
             Write-Log -Info "Restoring file '$resolvedPath' from .bak."
             [void](Move-Item -Path $backupPath -Destination $resolvedPath -Force)

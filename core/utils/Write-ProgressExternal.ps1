@@ -79,6 +79,6 @@ Function Write-ProgressExternal {
     } elseif ($MessageType -eq 'Problem') {
         Write-Host "##teamcity[buildProblem description='$Message']"
     } else {
-        Write-Log -Critical "Unrecognized MessageType: $MessageType."
+        throw "Unrecognized MessageType: $MessageType."
     }
 }

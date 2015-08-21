@@ -167,12 +167,12 @@ function Start-DscConfigurationWithRetries
                 [bool]$stopLoop = $true
             } else {
                 if ($RebootHandlingMode -eq 'Stop') {
-                    Write-Log -Critical "Node '$($ConnectionParams.NodesAsString)' requires reboot."
+                    throw "Node '$($ConnectionParams.NodesAsString)' requires reboot."
                 } if ($RebootHandlingMode -eq 'RetryWithoutReboot') {
                     Write-Log -Warn "Node '$($ConnectionParams.NodesAsString)' requires reboot - retrying without rebooting (attempt $attempt)."
                 } elseif ($RebootHandlingMode -eq 'AutoReboot') {
                     if (!$cimSession) {
-                        Write-Log -Critical "Node '$($ConnectionParams.NodesAsString)' requires reboot but is localhost - cannot reboot automatically. Stopping."
+                        throw "Node '$($ConnectionParams.NodesAsString)' requires reboot but is localhost - cannot reboot automatically. Stopping."
                     } else {
                         Write-Log -Warn "Node '$($ConnectionParams.NodesAsString)' requires reboot - rebooting (attempt $attempt)."
                         $restartParams = @{ 

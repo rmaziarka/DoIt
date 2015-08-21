@@ -203,6 +203,6 @@ function ServerConnection {
         return $serverConnectionDef
 
     } else {
-        Write-Log -Critical "'ServerConnection' function cannot be invoked outside 'Environment' function (invalid invocation: 'ServerConnection $name')."
+        throw "'ServerConnection' function cannot be invoked outside 'Environment' function (invalid invocation: 'ServerConnection $name')."
     }
 }

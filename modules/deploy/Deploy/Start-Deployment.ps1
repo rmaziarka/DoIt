@@ -129,7 +129,7 @@ function Start-Deployment {
     }
     $configPaths = Get-ConfigurationPaths -DefaultDeployConfigurationPath $DeployConfigurationPath
     if (!$configPaths.DeployConfigurationPath) {
-        Write-Log -Critical "No `$DeployConfigurationPath defined. Please pass it to Start-Deployment function or invoke Initialize-ConfigurationPaths function."
+        throw "No `$DeployConfigurationPath defined. Please pass it to Start-Deployment function or invoke Initialize-ConfigurationPaths function."
     }
 
     $packagesPath = $configPaths.PackagesPath

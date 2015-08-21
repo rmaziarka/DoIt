@@ -144,7 +144,7 @@ function New-DeploymentPlanEntry {
 		}
 
         if (!$runOnNode -and $ServerConnection.RemotingMode -and $ServerConnection.RemotingMode -ne 'PSRemoting') {
-            Write-Log -Critical "Cannot deploy DSC configurations from localhost when RemotingMode is not PSRemoting. Please either change it to PSRemoting or add '-RunRemotely' switch to the ServerRole or ConfigurationSettings (Environment '$Environment' / ServerRole '$($ServerRole.Name)' / Configuration '$($Configuration.Name)')."
+            throw "Cannot deploy DSC configurations from localhost when RemotingMode is not PSRemoting. Please either change it to PSRemoting or add '-RunRemotely' switch to the ServerRole or ConfigurationSettings (Environment '$Environment' / ServerRole '$($ServerRole.Name)' / Configuration '$($Configuration.Name)')."
         }
     
         $mofDir = Invoke-ConfigurationOrFunction -ConfigurationName $Configuration.Name -OutputPath $DscOutputPath -Node $dscNode -Environment $Environment -ResolvedTokens $ResolvedTokens -ConnectionParams $connectionParamsObj
@@ -167,7 +167,7 @@ function New-DeploymentPlanEntry {
         foreach ($package in $requiredPackages) {
             $dir = Join-Path -Path $packagePath -ChildPath $package
             if (!(Test-Path -LiteralPath $dir)) {
-                Write-Log -Critical "A required package named '$package' does not exist at '$dir' (defined in environment '$Environment' / ServerRole '$($ServerRole.Name)' / Configuration '$($Configuration.Name)'."
+                throw "A required package named '$package' does not exist at '$dir' (defined in environment '$Environment' / ServerRole '$($ServerRole.Name)' / Configuration '$($Configuration.Name)'."
             }
         }
     }

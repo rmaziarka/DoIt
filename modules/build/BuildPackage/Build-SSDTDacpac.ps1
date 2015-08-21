@@ -95,7 +95,7 @@ function Build-SSDTDacpac {
         $sqlProjs = Get-ChildItem -Path $sqlProjRoot -Filter '*.sqlproj' -Recurse
 
         if (!$sqlProjs) {
-            Write-Log -Critical "Cannot find any *.sqlproj file under '$sqlProjRoot'."
+            throw "Cannot find any *.sqlproj file under '$sqlProjRoot'."
         }
         Write-Log -Info "Setting version = '$Version' in file(s) $($sqlProjs.Name -join ', ')."
         foreach ($sqlProj in $sqlProjs) {

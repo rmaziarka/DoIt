@@ -137,7 +137,7 @@ function New-Zip {
     }
 
     if ($DestinationZipPath -and ($Path.Count -ne $DestinationZipPath.Count -and $DestinationZipPath.Count -ne 1)) {
-        Write-Log -Critical "'DestinationZipPath' array must be of length 1 or the same length as 'Path' array."
+        throw "'DestinationZipPath' array must be of length 1 or the same length as 'Path' array."
     }
 
     # remove roots

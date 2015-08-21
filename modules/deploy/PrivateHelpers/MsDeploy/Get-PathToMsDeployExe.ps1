@@ -37,17 +37,17 @@ function Get-PathToMsDeployExe {
 
     $msDeployKey = 'HKLM:\SOFTWARE\Microsoft\IIS Extensions\MSDeploy\3'
     if(!(Test-Path -LiteralPath $msDeployKey)) {
-        Write-Log -Critical "Could not find MSDeploy registry entry. Please make sure MSDeploy 3.5 is installed."
+        throw "Could not find MSDeploy registry entry. Please make sure MSDeploy 3.5 is installed."
     }
 
     $msDeployInstallPath = (Get-ItemProperty -Path $msDeployKey).InstallPath
     if(!$msDeployInstallPath -or !(Test-Path -LiteralPath $msDeployInstallPath)) {
-        Write-Log -Critical "Could not find MSDeploy directory. Please make sure MSDeploy 3.5 is installed."
+        throw "Could not find MSDeploy directory. Please make sure MSDeploy 3.5 is installed."
     }
  
     $msdeployExe = Join-Path -Path $msDeployInstallPath -ChildPath "msdeploy.exe"
     if(!(Test-Path -LiteralPath $msdeployExe)) {
-        Write-Log -Critical "Could not find MSDeploy executable. Please make sure MSDeploy 3.5 is installed."
+        throw "Could not find MSDeploy executable. Please make sure MSDeploy 3.5 is installed."
     }
 
     return $msDeployExe

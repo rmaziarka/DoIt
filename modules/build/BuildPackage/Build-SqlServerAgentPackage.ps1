@@ -102,11 +102,11 @@ function Build-SqlServerAgentPackage {
     foreach ($sqlPath in $sqlPaths) {
         $sqlContent = Get-Content -Path $sqlPath -ReadCount 0 | Out-String
         if ($sqlContent -inotmatch $jobNameRegex) {
-            Write-Log -Critical "File '$sqlPath' does not contain string '@job_name='. Please ensure that SQL scripts in this directory only contains scripted SQL Server Agent jobs."
+            throw "File '$sqlPath' does not contain string '@job_name='. Please ensure that SQL scripts in this directory only contains scripted SQL Server Agent jobs."
         }
         $jobNames += $Matches[1]
         if ($sqlContent -imatch $spDeleteJobRegex) {
-            Write-Log -Critical "File '$sqlPath' contains sp_delete_job with job_id parameter. This is not allowed as it is not idempotent (GUIDs will change). Please remove it - PSCI will remove this job while preserving its history for you."
+            throw "File '$sqlPath' contains sp_delete_job with job_id parameter. This is not allowed as it is not idempotent (GUIDs will change). Please remove it - PSCI will remove this job while preserving its history for you."
         }
     }
     [void](Copy-Item -Path $sqlPaths -Include $Include -Exclude $Exclude -Destination $OutputPath)

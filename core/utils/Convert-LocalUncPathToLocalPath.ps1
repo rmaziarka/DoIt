@@ -43,19 +43,19 @@ function Convert-LocalUncPathToLocalPath {
     )
 
     if (!(([uri]$UncPath).IsUnc)) {
-        Write-Log -Critical "Path: '$UncPath' is not a valid UNC path."
+        throw "Path: '$UncPath' is not a valid UNC path."
     }
     $localShares = Get-WmiObject -Class win32_share
     $uncArr = ([uri]$UncPath).AbsolutePath -split '/'
    
     if ($uncArr.Length -lt 2 -or !$uncArr[1]) {
-        Write-Log -Critical "Cannot map unc path: '$UncPath' to local path. Unc path must contain at least two segments (e.g. \\server\directory or \\server\c$)"
+        throw "Cannot map unc path: '$UncPath' to local path. Unc path must contain at least two segments (e.g. \\server\directory or \\server\c$)"
     }
     $shareSegment = $uncArr[1]
 
     $localShare = $localShares | Where-Object { $_.Name -ieq $shareSegment }
     if (!$localShare) {
-        Write-Log -Critical ("Cannot map unc path: '$uncPath' to local path. Segment '$shareSegment' is not present in shares: {0}" -f ($localShares.Name -join ', '))
+        throw ("Cannot map unc path: '$uncPath' to local path. Segment '$shareSegment' is not present in shares: {0}" -f ($localShares.Name -join ', '))
     }
     $uncArr[1] = $localShare.Path
     $uncArr = $uncArr[1..($uncArr.Length-1)]

@@ -70,5 +70,5 @@ function Get-CurrentDtUtilPath {
         return $dtUtilExe
     }
 
-    Write-Log -Critical "Could not find DTS registry entry, where the Binn/dtutil.exe is located.."
+    throw "Could not find DTS registry entry, where the Binn/dtutil.exe is located.."
 }

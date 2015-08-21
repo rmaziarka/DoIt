@@ -103,7 +103,7 @@ function Build-SSRSReportsPackage {
 
     if ($Version) {
         if (!$VersionPlaceHolderXpath -or !$NameSpace) {
-            Write-Log -Critical "If version is set, 'VersionPlaceHolderXpath' and 'NameSpace' parameters are required"
+            throw "If version is set, 'VersionPlaceHolderXpath' and 'NameSpace' parameters are required"
         }
         
         Write-Log -Info "Setting reports version"

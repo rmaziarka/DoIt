@@ -111,13 +111,13 @@ function Resolve-Token {
                 }
             }
             if (!$substituted -and $ValidateExistence) {
-                Write-Log -Critical "Cannot resolve variable '$key' in token '$Name' = '$Value'. Please ensure token named '$key' is available in your configuration."
+                throw "Cannot resolve variable '$key' in token '$Name' = '$Value'. Please ensure token named '$key' is available in your configuration."
             }
         }
         $i++
     } while ($substituted -and $i -lt 20)
     if ($i -eq 20) {
-        Write-Log -Critical 'Too many nested tokens (more than 20 loops). Ensure you don''t have circular reference in your tokens (e.g. a=${b}, b=${a})'
+        throw 'Too many nested tokens (more than 20 loops). Ensure you don''t have circular reference in your tokens (e.g. a=${b}, b=${a})'
     }
     return $Value
 }

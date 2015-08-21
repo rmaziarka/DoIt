@@ -60,7 +60,7 @@ function Backup-Files {
     [void](New-Item -Path $DestinationPath -ItemType Directory -Force)
     foreach ($p in $Path) {
         if (!(Test-Path -LiteralPath $p)) {
-            Write-Log -Critical "Path '$p' does not exist."
+            throw "Path '$p' does not exist."
         }
         $p = (Resolve-Path -LiteralPath $p).ProviderPath
 

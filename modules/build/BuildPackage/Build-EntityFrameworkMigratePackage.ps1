@@ -141,7 +141,7 @@ function Build-EntityFrameworkMigratePackage {
                             -CheckExistence:$false
 
     if (![string]::IsNullOrEmpty($ProjectPath) -and !(Test-Path -LiteralPath $ProjectPath)) {
-        Write-Log -Critical "Given project file '$ProjectPath' does not exist for '$PackageName'."
+        throw "Given project file '$ProjectPath' does not exist for '$PackageName'."
     }
 
     if ($OutputPath.ToLower().EndsWith('zip')) {
@@ -170,7 +170,7 @@ function Build-EntityFrameworkMigratePackage {
             }
         }
         if (!$found) {
-            Write-Log -Critical "$toolName cannot be found - tried $($pathsToCheck -join ', ') (package '$PackageName')."
+            throw "$toolName cannot be found - tried $($pathsToCheck -join ', ') (package '$PackageName')."
         }
     }  
     
@@ -194,7 +194,7 @@ function Build-EntityFrameworkMigratePackage {
     }
 
     if (!(Test-Path -Path "$migrationsDir\$MigrationsFileWildcard")) {
-        Write-Log -Critical "There are no $MigrationsFileWildcard file(s) at '$migrationsDir' - please ensure `$migrationsDir points to the directory with compiled migrations."
+        throw "There are no $MigrationsFileWildcard file(s) at '$migrationsDir' - please ensure `$migrationsDir points to the directory with compiled migrations."
     }
 
     Write-Log -Info "Building package '$PackageName'." -Emphasize

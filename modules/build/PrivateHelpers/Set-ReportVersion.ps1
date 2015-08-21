@@ -77,7 +77,7 @@ function Set-ReportVersion {
     $reportVersionTextBox = $reportVersionTextBox.Paragraphs.Paragraph.TextRuns.TextRun
 
     if (!$reportVersionTextBox) {
-        Write-Log -Critical "Report $FilePath cannot be versioned: object $VersionPlaceHolderXpath cannot be found. Make sure that VersionPlaceHolderXpath and it's Namespace match the report structure"
+        throw "Report $FilePath cannot be versioned: object $VersionPlaceHolderXpath cannot be found. Make sure that VersionPlaceHolderXpath and it's Namespace match the report structure"
     }
 
 	$reportVersionTextBox.Value  = ("Ver. " + $version)

@@ -122,10 +122,10 @@ function ValidateDeploy {
     Write-Log -Info "Sending HTTP GET request to '$url'"
     $result = Invoke-WebRequest -Uri $url -UseBasicParsing
     if ($result.StatusCode -ne 200) {
-        Write-Log -Critical "Web page at $url is not available - response status code: $($result.StatusCode)."
+        throw "Web page at $url is not available - response status code: $($result.StatusCode)."
     }
     if ($result.Content -inotmatch 'id: 1, name: OrderFromDatabase') {
-        Write-Log -Critical "Web page at $url returns invalid response - does not include order information from database."
+        throw "Web page at $url returns invalid response - does not include order information from database."
     }
     Write-Log -Info 'HTTP response contains information from database - deployment successful.'
 }

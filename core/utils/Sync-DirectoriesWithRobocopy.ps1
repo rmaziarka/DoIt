@@ -78,10 +78,10 @@ function Sync-DirectoriesWithRobocopy {
     )
 
     if (!(Test-Path -LiteralPath $SrcPath)) {
-        Write-Log -Critical "Path '$SrcPath' does not exist."
+        throw "Path '$SrcPath' does not exist."
     }
     if (!(Test-Path -IsValid $DestPath) -and !([uri]$DestPath).IsUnc) {
-        Write-Log -Critical "Path '$DestPath' is invalid."
+        throw "Path '$DestPath' is invalid."
     }
     
     $paths = Add-QuotesToPaths(@($SrcPath, $DestPath))
@@ -105,6 +105,6 @@ function Sync-DirectoriesWithRobocopy {
     #$exitCode = Invoke-ExternalCommand -Command $robocopyCmdLine -CheckLastExitCode:$false -DontCatchOutputStreams:$Quiet -Quiet
     # robocopy's exit codes are specific - see http://ss64.com/nt/robocopy-exit.html
     if ($exitCode -gt 8) {
-        Write-Log -Critical "Robocopy failed with exit code '$exitCode'"
+        throw "Robocopy failed with exit code '$exitCode'"
     }
 }

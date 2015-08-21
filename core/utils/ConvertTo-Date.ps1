@@ -79,7 +79,7 @@ function ConvertTo-Date {
     }
 
     if ($ThrowOnFailure) {
-        Write-Log -Critical "Failed to convert string '$String' to date using formats $DateFormat."
+        throw "Failed to convert string '$String' to date using formats $DateFormat."
     }
 
     return $null

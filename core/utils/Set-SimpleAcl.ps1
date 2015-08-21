@@ -81,7 +81,7 @@ function Set-SimpleAcl {
 
     if (!(Test-Path -Path $Path)) {
         if ($PSCmdlet.ShouldProcess('Directory', "Add permission '$Permission' to item '$Path' (if it exists) for user '$User'") -and !$whatIf) {
-            Write-Log -Critical "Item '$Path' does not exist."
+            throw "Item '$Path' does not exist."
         }
         return $true
     }

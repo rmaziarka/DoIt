@@ -51,7 +51,7 @@ function Get-ConfigurationPaths {
     )
 
     if (!(Test-Path -LiteralPath variable:global:PSCIGlobalConfiguration)) {
-        Write-Log -Critical 'No global PSCIGlobalConfiguration variable.'
+        throw 'No global PSCIGlobalConfiguration variable.'
     }
 
     $configPaths = $Global:PSCIGlobalConfiguration.ConfigurationPaths

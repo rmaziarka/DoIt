@@ -79,7 +79,7 @@ function Initialize-ConfigurationPaths {
     # ProjectRootPath - if not empty validate it exists, if empty set to current directory
     if ($ProjectRootPath) {
         if (!(Test-Path -LiteralPath $ProjectRootPath -PathType Container)) {
-            Write-Log -Critical "Project root directory '$ProjectRootPath' does not exist. Please ensure you have passed valid 'ProjectRootPath' argument to Initialize-ConfigurationPaths."
+            throw "Project root directory '$ProjectRootPath' does not exist. Please ensure you have passed valid 'ProjectRootPath' argument to Initialize-ConfigurationPaths."
         }
         $configPaths.ProjectRootPath = (Resolve-Path -LiteralPath $ProjectRootPath).ProviderPath
     } else {
@@ -97,7 +97,7 @@ function Initialize-ConfigurationPaths {
         if ((Test-Path -LiteralPath $configPaths.PackagesPath -PathType Container)) {
             $configPaths.PackagesPath = (Resolve-Path -LiteralPath $configPaths.PackagesPath).ProviderPath
         } elseif ($ValidatePackagesPath) {
-            Write-Log -Critical "Packages directory '$($configPaths.PackagesPath)' does not exist. Please ensure you have packages available in this location (do you need to run the build?)."  
+            throw "Packages directory '$($configPaths.PackagesPath)' does not exist. Please ensure you have packages available in this location (do you need to run the build?)."  
         }
 
         if ($ValidatePackagesPath) {

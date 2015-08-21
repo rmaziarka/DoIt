@@ -65,7 +65,7 @@ function Get-UpdateXdtCmdParams {
     )
 
     if (!$XdtFilename -and !$XdtBody) {
-        Write-Log -Critical 'Either $XdtFilename or $XdtBody parameter must be provided.'
+        throw 'Either $XdtFilename or $XdtBody parameter must be provided.'
     }
 
     $result = @{}

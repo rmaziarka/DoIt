@@ -44,7 +44,7 @@ function Set-PackageDeployScriptParameters {
 
     Write-Log -Info "Replacing default path values / variables in file '$DeployScriptToUpdatePath'"
     if (!(Test-Path -LiteralPath $DeployScriptToUpdatePath)) {
-        Write-Log -Critical "Cannot find file '$DeployScriptToUpdatePath'. Please ensure it exists or pass parameter -ReplaceDeployScriptParameters:`$false"
+        throw "Cannot find file '$DeployScriptToUpdatePath'. Please ensure it exists or pass parameter -ReplaceDeployScriptParameters:`$false"
     }
 
     $variablesToReplace = @{ 
@@ -76,6 +76,6 @@ function Set-PackageDeployScriptParameters {
     } | Set-Content -Path $DeployScriptToUpdatePath
 
     if ($numMatch -ne $variablesToReplace.Count) {
-        Write-Log -Critical "Failed to replace all default path values / variables in file '$DeployScriptToUpdatePath'. Successful: $numMatch, target: $($variablesToReplace.Count)."
+        throw "Failed to replace all default path values / variables in file '$DeployScriptToUpdatePath'. Successful: $numMatch, target: $($variablesToReplace.Count)."
     }
 }

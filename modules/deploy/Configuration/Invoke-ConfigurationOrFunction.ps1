@@ -118,6 +118,6 @@ function Invoke-ConfigurationOrFunction {
         ([void](Invoke-Expression -Command $expr))
         return ""
     } else {
-        Write-Log -Critical "Command '$ConfigurationName' is of unsupported type: $($configurationCommand.commandType)"
+        throw "Command '$ConfigurationName' is of unsupported type: $($configurationCommand.commandType)"
     }  
 }

@@ -44,7 +44,7 @@ function Disable-ReadOnlyFlag {
 	)
 
     if (!(Test-Path -LiteralPath $Path -PathType Leaf)) {
-        Write-Log -Critical "'$Path' does not exist or it is not a file"
+        throw "'$Path' does not exist or it is not a file"
     }
 
     # remove IsReadOnly attribute in order to edit file

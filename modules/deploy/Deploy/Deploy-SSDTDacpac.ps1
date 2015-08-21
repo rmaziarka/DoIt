@@ -139,7 +139,7 @@ function Deploy-SSDTDacpac {
             }
 
             if (!(Test-Path -LiteralPath $PublishProfile)) {
-                Write-Log -Critical "Cannot find publish profile file '$PublishProfile'."
+                throw "Cannot find publish profile file '$PublishProfile'."
             }
         }
         $dacProfile = [Microsoft.SqlServer.Dac.DacProfile]::Load($PublishProfile)
@@ -168,14 +168,14 @@ function Deploy-SSDTDacpac {
         $TargetDatabase = $csb.InitialCatalog
     }
     if (!$TargetDatabase) {
-        Write-Log -Critical "TargetDatabase has not been specified. Please either pass `$TargetDatabase parameter or supply Initial Catalog in `$ConnectionString."
+        throw "TargetDatabase has not been specified. Please either pass `$TargetDatabase parameter or supply Initial Catalog in `$ConnectionString."
     }
 
     if (!$DacDeployOptions) {
         if ($PublishProfile) {
             Write-Log -Info "Using publish profile '$PublishProfile'."
             if (!(Test-Path -LiteralPath $PublishProfile)) {
-                Write-Log -Critical "Cannot find publish profile file '$PublishProfile'."
+                throw "Cannot find publish profile file '$PublishProfile'."
             }
             $dacProfile = [Microsoft.SqlServer.Dac.DacProfile]::Load($PublishProfile)
             $DacDeployOptions = $dacProfile.DeployOptions
@@ -190,7 +190,7 @@ function Deploy-SSDTDacpac {
         }
         $DacDeployOptions = $newDacDeployOptions
     } elseif ($DacDeployOptions -isnot [Microsoft.SqlServer.Dac.DacDeployOptions]) {
-        Write-Log -Critical "Unrecognized type of `$DacDeployOptions - $($DacDeployOptions.GetType())."
+        throw "Unrecognized type of `$DacDeployOptions - $($DacDeployOptions.GetType())."
     }
 
     if ($SqlCmdVariables) {
@@ -210,7 +210,7 @@ function Deploy-SSDTDacpac {
                 $dacPacPath = Join-Path -Path $PackagePath -ChildPath $dacPacPath
             }
             if (!(Test-Path -LiteralPath $dacPacPath -PathType Leaf)) {
-                Write-Log -Critical "Cannot find file '$dacPacPath' required for deployment of package '$PackageName'. Please specify `$DacPacFilePath."
+                throw "Cannot find file '$dacPacPath' required for deployment of package '$PackageName'. Please specify `$DacPacFilePath."
             }    
 
             $dacPac = [Microsoft.SqlServer.Dac.DacPackage]::Load($dacPacPath)

@@ -58,7 +58,7 @@ uint fuFlags, uint uTimeout, out UIntPtr lpdwResult);
     [void]([win32.nativemethods]::SendMessageTimeout($HWND_BROADCAST, $WM_SETTINGCHANGE, [uintptr]::Zero, "Environment", 2, 5000, [ref]$result))
 
     if ($result -eq 0) {
-        Write-Log -Critical "Failed to reload environment variables."
+        throw "Failed to reload environment variables."
     } else {
         Write-Log -Info "Environment variables have been reloaded."
     }

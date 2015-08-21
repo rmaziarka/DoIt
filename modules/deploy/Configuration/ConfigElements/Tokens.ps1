@@ -103,6 +103,6 @@ function Tokens {
         }
 
     } else {
-        Write-Log -Critical "'Tokens' function cannot be invoked outside 'Environment' function."
+        throw "'Tokens' function cannot be invoked outside 'Environment' function."
     }
 }

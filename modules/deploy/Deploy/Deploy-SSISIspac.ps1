@@ -140,7 +140,7 @@ function Deploy-SSISIspac {
     # Load the IntegrationServices Assembly
     $assembly = [System.Reflection.Assembly]::LoadWithPartialName("Microsoft.SqlServer.Management.IntegrationServices");
     if (!$assembly) {
-        Write-Log -Critical "Microsoft.SqlServer.Management.IntegrationServices assembly has not been found at $([system.environment]::MachineName). Please ensure you have installed SSIS or 'SQL Server Data Tools - Business Intelligence for Visual Studio'."
+        throw "Microsoft.SqlServer.Management.IntegrationServices assembly has not been found at $([system.environment]::MachineName). Please ensure you have installed SSIS or 'SQL Server Data Tools - Business Intelligence for Visual Studio'."
     }
 
     $csb = New-Object -TypeName System.Data.SqlClient.SqlConnectionStringBuilder -ArgumentList $ConnectionString
@@ -162,7 +162,7 @@ function Deploy-SSISIspac {
     $ssisCatalog = $integrationServices.Catalogs[$Catalog]
     if (!$ssisCatalog) {
         if (!$CatalogPassword) {
-            Write-Log -Critical "Catalog '$Catalog' doesn't exist and catalog password has not been specified. Please either provide password in `$CatalogPassword parameter or create catalog manually."
+            throw "Catalog '$Catalog' doesn't exist and catalog password has not been specified. Please either provide password in `$CatalogPassword parameter or create catalog manually."
         }
         Write-Log -Info "Creating SSIS catalog '$Catalog' with password '$CatalogPassword'."
         $ssisCatalog = New-Object -TypeName Microsoft.SqlServer.Management.IntegrationServices.Catalog -ArgumentList $integrationServices, $Catalog, $CatalogPassword
@@ -224,12 +224,12 @@ function Deploy-SSISIspac {
                 Write-Log -Info "Setting following parameters on package '$packageName': $($paramValues.Keys -join ', ')."
                 $ssisPackage = $ssisProject.Packages.Item($packageName)
                 if (!$ssisPackage) {
-                    Write-Log -Critical "SSIS package '$packageName' has not been found under project '$projectName'."
+                    throw "SSIS package '$packageName' has not been found under project '$projectName'."
                 }
                 foreach ($paramName in $paramValues.Keys) {
                     $ssisParameter = $ssisPackage.Parameters[$paramName]
                     if (!$ssisParameter) {
-                        Write-Log -Critical "Parameter named '$paramName' has not been found in SSIS package '$packageName' (project '$projectName')"
+                        throw "Parameter named '$paramName' has not been found in SSIS package '$packageName' (project '$projectName')"
                     }
                     $paramValue = $paramValues[$paramName]
                     if ($Tokens) { 

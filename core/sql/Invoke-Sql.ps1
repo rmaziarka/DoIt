@@ -134,7 +134,7 @@ function Invoke-Sql {
     }
 
     if (!$Query -and !$InputFile) {
-        Write-Log -Critical 'Missing -Query or -InputFile parameter'
+        throw 'Missing -Query or -InputFile parameter'
     }
 
     if ($Mode -eq 'sqlcmd') {
@@ -148,7 +148,7 @@ function Invoke-Sql {
     if ($InputFile) {
         foreach ($file in $Inputfile) { 
             if (!(Test-Path -LiteralPath $file)) { 
-                Write-Log -Critical "$InputFile does not exist. Current directory: $(Get-Location)"
+                throw "$InputFile does not exist. Current directory: $(Get-Location)"
             }
         }
     }
@@ -214,7 +214,7 @@ function Invoke-Sql {
             Invoke-SqlDotNet @params
         }
     } else {
-        Write-Log -Critical "Unrecognized mode: ${Mode}."
+        throw "Unrecognized mode: ${Mode}."
     }
 
 }

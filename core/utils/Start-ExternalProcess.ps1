@@ -135,7 +135,7 @@ function Start-ExternalProcess {
         } 
         
         if (!$exists) {
-            Write-Log -Critical "'$commandPath' cannot be found."
+            throw "'$commandPath' cannot be found."
         }
     } else {
         $commandPath = (Resolve-Path -LiteralPath $commandPath).ProviderPath
@@ -218,15 +218,15 @@ function Start-ExternalProcess {
     }
 
     if ($CheckLastExitCode -and $process.ExitCode -ne 0) {
-        Write-Log -Critical "External command failed with exit code '$($process.ExitCode)'."
+        throw "External command failed with exit code '$($process.ExitCode)'."
     }
 
     if ($CheckStdErr -and $isStandardError) {
-        Write-Log -Critical "External command failed - stderr Output present"
+        throw "External command failed - stderr Output present"
     }
 
     if ($isStringPresenceError) {
-        Write-Log -Critical "External command failed - stdout contains string '$FailOnStringPresence'"
+        throw "External command failed - stdout contains string '$FailOnStringPresence'"
     }
 
 	if ($ReturnLastExitCode) {

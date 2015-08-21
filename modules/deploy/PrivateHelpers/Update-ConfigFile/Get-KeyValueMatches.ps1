@@ -58,7 +58,7 @@ function Get-KeyValueMatches {
                 'Line' = $Matches[0]
             }
         } else {
-            Write-Log -Critical "Improper format of `$ConfigValues. It needs to contain one or more (newline- or comma delimited) key=value strings. Offending line number = $i, contents = '$line'."
+            throw "Improper format of `$ConfigValues. It needs to contain one or more (newline- or comma delimited) key=value strings. Offending line number = $i, contents = '$line'."
         }
         $i++
     }

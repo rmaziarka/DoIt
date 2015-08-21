@@ -92,25 +92,25 @@ function Copy-FilesFromRemoteServer {
     )
 
     if ($ConnectionParams.RemotingMode -ne 'PSRemoting') {
-        Write-Log -Critical "ConnectionParams.RemotingMode = $($ConnectionParams.RemotingMode) is not supported by this function (only PSRemoting is)."
+        throw "ConnectionParams.RemotingMode = $($ConnectionParams.RemotingMode) is not supported by this function (only PSRemoting is)."
     }
     if (!$ConnectionParams.Nodes) {
-        Write-Log -Critical "ConnectionParams.Nodes is empty. It must be specified for this function."
+        throw "ConnectionParams.Nodes is empty. It must be specified for this function."
     }
 
     if ($ConnectionParams.Nodes.Count -ne 1) {
-        Write-Log -Critical "ConnectionParams.Nodes has more than 1 node. Only one node must be specified.."
+        throw "ConnectionParams.Nodes has more than 1 node. Only one node must be specified.."
     }
 
     Write-Log -Info "Copying '$RemotePath' from '$($ConnectionParams.NodesAsString)' to local path '$Destination'" -Emphasize
     
     if (Test-Path -LiteralPath $Destination -PathType Leaf) {
-        Write-Log -Critical "Destination path '$Destination' already exists and is a file. Destination must be a directory."
+        throw "Destination path '$Destination' already exists and is a file. Destination must be a directory."
     }
     if ((Test-Path -LiteralPath $Destination -PathType Container) -and $ClearDestination) {
         $resolvedPath = (Resolve-Path -LiteralPath $Destination).ProviderPath
         if ($resolvedPath.Length -le 3) {
-            Write-Log -Critical "Cannot delete root directory '$resolvedPath'. Please specify ClearDestination = false or different Destination"
+            throw "Cannot delete root directory '$resolvedPath'. Please specify ClearDestination = false or different Destination"
         }
         Write-Log -Info "Deleting destination directory '$Destination'"
         Remove-Item -LiteralPath $Destination -Force -Recurse

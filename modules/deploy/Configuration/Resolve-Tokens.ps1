@@ -173,7 +173,7 @@ function Resolve-Tokens {
                 try { 
                     $newValue = Resolve-ScriptedToken -ScriptedToken $tokenValue -ResolvedTokens $resolvedTokens -Node $Node -Environment $Environment
                 } catch {
-                    Write-Log -Critical ("Cannot evaluate token '$Environment / $category / $tokenKey'. Error message: {0} / token value: {{ {1} }}" -f $_.Exception.Message, $tokenValue)
+                    throw ("Cannot evaluate token '$Environment / $category / $tokenKey'. Error message: {0} / token value: {{ {1} }}" -f $_.Exception.Message, $tokenValue)
                 }
                 $resolvedTokens[$category][$tokenKey] = $newValue
             }

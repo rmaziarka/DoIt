@@ -116,7 +116,7 @@ function Start-SqlServerAgentJob {
 
     $jobId = Invoke-Sql @sqlParams -Query "select job_id from msdb.dbo.sysjobs where name = '$JobName'"
     if (!$jobId) {
-        Write-Log -Critical "Cannot find job named '$JobName' in msdb.dbo.sysjobs table."
+        throw "Cannot find job named '$JobName' in msdb.dbo.sysjobs table."
     }
 
     $beforeRunMaxInstanceId = Invoke-Sql @sqlParams -Query "select max(isnull(instance_id, 0)) from msdb.dbo.sysjobhistory where job_id = '$jobId'"
@@ -132,7 +132,7 @@ function Start-SqlServerAgentJob {
 
     $result = Invoke-Sql @sqlParams -Query $sql
     if ($result -ne 0) {
-        Write-Log -Critical "Failed to start job '$JobName' - sp_start_job failed with result code $result"
+        throw "Failed to start job '$JobName' - sp_start_job failed with result code $result"
     }
 
     if (!$Synchronous) {
@@ -185,7 +185,7 @@ function Start-SqlServerAgentJob {
             $log += "Step $($historyEntry.step_id). '$($historyEntry.step_name)': $($historyEntry.message)`r`n"
         }
         Write-Log -Warn $log
-        Write-Log -Critical "Job '$JobName' has failed - see messages above for details."
+        throw "Job '$JobName' has failed - see messages above for details."
     }
     Write-ProgressExternal -Message ''
     Write-Log -Info "Job '$JobName' has finished successfully."

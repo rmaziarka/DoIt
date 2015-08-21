@@ -115,32 +115,32 @@ function Copy-FilesToRemoteServer {
     )
 
     if ($ConnectionParams.RemotingMode -ne 'PSRemoting') {
-        Write-Log -Critical "ConnectionParams.RemotingMode = $($ConnectionParams.RemotingMode) is not supported by this function (only PSRemoting is)."
+        throw "ConnectionParams.RemotingMode = $($ConnectionParams.RemotingMode) is not supported by this function (only PSRemoting is)."
     }
     if (!$ConnectionParams.Nodes) {
-        Write-Log -Critical "ConnectionParams.Nodes is empty. It must be specified for this function."
+        throw "ConnectionParams.Nodes is empty. It must be specified for this function."
     }
     
     for ($i = 0; $i -lt $Destination.Count; $i++) {
         $dest = $Destination[$i]
         $destNext = $Destination[$i+1]
         if (![System.IO.Path]::IsPathRooted($dest)) {
-            Write-Log -Critical "'Destination' must be an absolute path - invalid value '$dest'."
+            throw "'Destination' must be an absolute path - invalid value '$dest'."
         }
         if ($destNext -and $dest[0] -ne $destNext[0]) {
-            Write-Log -Critical "'Destination' paths must be on the same disk."
+            throw "'Destination' paths must be on the same disk."
         }
     } 
 
     if (!$BlueGreenEnvVariableName -and $Path.Count -ne $Destination.Count -and $Destination.Count -ne 1) {
-        Write-Log -Critical "'Destination' array must be of length 1 or the same length as 'Path' array."
+        throw "'Destination' array must be of length 1 or the same length as 'Path' array."
     }
 
     if ($BlueGreenEnvVariableName -and $Destination.Count -ne 2) {
-        Write-Log -Critical "'Destinations' parameter must be two-element array (two paths for blue-green copy)."
+        throw "'Destinations' parameter must be two-element array (two paths for blue-green copy)."
     }
     if ($BlueGreenEnvVariableName -and $Destination[0] -ieq $Destination[1]) {
-        Write-Log -Critical "'Destinations' parameter must contain two different paths (currently are the same - $($Destination[0])."
+        throw "'Destinations' parameter must contain two different paths (currently are the same - $($Destination[0])."
     }
 
     $preCopyScriptBlock = Get-PreCopyToScriptBlock 
@@ -201,7 +201,7 @@ function Copy-FilesToRemoteServer {
                 $isStructuredZip = $false
             }
             if (!(Test-Path -LiteralPath $tempZip)) {
-                Write-Log -Critical "Temporary zip file '$tempZip' has not been created - critical exception, please investigate."
+                throw "Temporary zip file '$tempZip' has not been created - critical exception, please investigate."
             }
         }
         $zipItem = Get-Item -Path $zipToCopy

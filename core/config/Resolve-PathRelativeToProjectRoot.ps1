@@ -68,7 +68,7 @@ function Resolve-PathRelativeToProjectRoot {
     }
 
     if (!$Path -or [String]::IsNullOrEmpty($Path)) {
-        Write-Log -Critical "Neither 'Path' nor 'DefaultPath' has been provided."
+        throw "Neither 'Path' nor 'DefaultPath' has been provided."
     }
 
     $PathStr = @()
@@ -79,7 +79,7 @@ function Resolve-PathRelativeToProjectRoot {
 
             $projectRootPath = $configPaths.ProjectRootPath
             if (!$projectRootPath) {
-                Write-Log -Critical "Global variable ConfigurationPaths.ProjectRootPath has not been set. Please ensure you have invoked Initialize-ConfigurationPaths."
+                throw "Global variable ConfigurationPaths.ProjectRootPath has not been set. Please ensure you have invoked Initialize-ConfigurationPaths."
             }
     
             $p = Join-Path -Path $projectRootPath -ChildPath $p
@@ -101,9 +101,9 @@ function Resolve-PathRelativeToProjectRoot {
     $PathStr = $PathStr -join ', '
     if ($ErrorMsg) {
 
-        Write-Log -Critical ($ErrorMsg -f $PathStr)
+        throw ($ErrorMsg -f $PathStr)
     } else {
-        Write-Log -Critical "Item(s) '$PathStr' do not exist."
+        throw "Item(s) '$PathStr' do not exist."
     }
     
 }

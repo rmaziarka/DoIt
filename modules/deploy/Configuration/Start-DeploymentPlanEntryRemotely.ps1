@@ -103,7 +103,7 @@ function Start-DeploymentPlanEntryRemotely {
     } elseif ($remotingMode -eq 'PSRemoting') {
         Start-DeploymentByPSRemoting @params
     } else {
-        Write-Log -Critical "Remoting Mode '$remotingMode' is not supported."
+        throw "Remoting Mode '$remotingMode' is not supported."
     }
     Write-Log -Info ("[END] RUN REMOTE CONFIGURATION '{0}' / RUNON '{1}'" -f ($configInfo.Name -join ","), $runOnNode) -Emphasize
     

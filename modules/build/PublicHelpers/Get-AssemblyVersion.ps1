@@ -71,10 +71,10 @@ function Get-AssemblyVersion {
     } else {
         $file = @(Get-ChildItem -Path $Path -File -Filter $FileMask -Recurse | Select-Object -ExpandProperty FullName)
         if (!$file) {
-            Write-Log -Critical "Cannot find any '$FileMask' files at '$Path'."
+            throw "Cannot find any '$FileMask' files at '$Path'."
         }
         if ($file.Count -gt 1) {
-            Write-Log -Critical "Found more than one '$FileMask' files at '$Path': $($file -join ', ')"
+            throw "Found more than one '$FileMask' files at '$Path': $($file -join ', ')"
         }
         $file = $file[0]
     }
@@ -82,7 +82,7 @@ function Get-AssemblyVersion {
     $regex = '{0}\(\"([^\"]*)\"\)' -f $VersionAttribute
     $match = Select-String -Path $file -Encoding UTF8 -Pattern $regex
     if (!$match) {
-        Write-Log -Critical "Cannot find following regex: '$regex' in file '$file'. Please ensure it's valid AssemblyInfo file."
+        throw "Cannot find following regex: '$regex' in file '$file'. Please ensure it's valid AssemblyInfo file."
     }
     $result = $match.Matches.Groups[1].Value
     Write-Log -Info "Got $VersionAttribute='$result' from file '$file'"

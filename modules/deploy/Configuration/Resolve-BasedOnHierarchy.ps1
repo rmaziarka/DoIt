@@ -57,7 +57,7 @@ function Resolve-BasedOnHierarchy {
     )   
 
     if (!$AllElements.ContainsKey($SelectedElement)) {
-        Write-Log -Critical "$ConfigElementName '$SelectedElement' is not defined. Available elements: $($AllElements.Keys -join ', ')."
+        throw "$ConfigElementName '$SelectedElement' is not defined. Available elements: $($AllElements.Keys -join ', ')."
     }
 
     $result = @($SelectedElement)
@@ -71,11 +71,11 @@ function Resolve-BasedOnHierarchy {
                 $curElement.BasedOn = ''
                 break
             } else {
-                Write-Log -Critical "$ConfigElementName '$SelectedElement' has invalid 'BasedOn' argument ('$basedOn'). $ConfigElementName '$basedOn' does not exist."
+                throw "$ConfigElementName '$SelectedElement' has invalid 'BasedOn' argument ('$basedOn'). $ConfigElementName '$basedOn' does not exist."
             }
         } else {
             if ($result.Contains($basedOn)) {
-                Write-Log -Critical "Inheritance cycle found - $ConfigElementName '$SelectedElement'."
+                throw "Inheritance cycle found - $ConfigElementName '$SelectedElement'."
             }
             # SuppressScriptCop - adding small arrays is ok
             $result += $basedOn

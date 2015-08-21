@@ -56,6 +56,6 @@ function Import-ExternalLib {
     }
 
     if (!(Get-Module -Name $ModuleName)) {
-        Write-Log -Critical "Failed to import external library '$ModuleName'."
+        throw "Failed to import external library '$ModuleName'."
     }
 }

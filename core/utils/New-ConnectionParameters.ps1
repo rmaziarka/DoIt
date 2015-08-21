@@ -135,7 +135,7 @@ function New-ConnectionParameters {
         }
     } else {
          if ($Nodes.Count -ne 1) {
-            Write-Log -Critical "Only one node can be specified for RemotingMode = $RemotingMode."
+            throw "Only one node can be specified for RemotingMode = $RemotingMode."
          }
          if ($RemotingMode -eq "WebDeployHandler") {
             if (!$Port) {

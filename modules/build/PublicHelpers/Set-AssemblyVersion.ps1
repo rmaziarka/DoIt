@@ -94,7 +94,7 @@ function Set-AssemblyVersion {
         } else {
             $files = @(Get-ChildItem -Path $resolvedPath -File -Filter $FileMask -Recurse | Select-Object -ExpandProperty FullName)
             if (!$files) {
-                Write-Log -Critical "Cannot find any '$FileMask' files at '$resolvedPath'."
+                throw "Cannot find any '$FileMask' files at '$resolvedPath'."
             }
             $resolvedPaths += $files
         }
@@ -103,7 +103,7 @@ function Set-AssemblyVersion {
     <#if ($CreateBackup) { 
         foreach ($p in $resolvedPaths) {
             if (Test-Path -LiteralPath "${p}.bak") {
-                Write-Log -Critical "Backup file '${p}.bak' already exists. Please ensure you run Set-AssemblyVersion exactly once for each assembly info file."
+                throw "Backup file '${p}.bak' already exists. Please ensure you run Set-AssemblyVersion exactly once for each assembly info file."
             }
         }
     }#>

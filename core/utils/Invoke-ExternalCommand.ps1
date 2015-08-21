@@ -236,19 +236,19 @@ function Invoke-ExternalCommand {
         if ($Output) {
              Write-Log -Error $stdOut
         }
-        Write-Log -Critical "External command failed with exit code '${lastexitcode}'."
+        throw "External command failed with exit code '${lastexitcode}'."
     }
     if ($CheckStdErr -and $stdErrOutputPresent) {
         if ($Output) {
              Write-Log -Error $stdOut
         }
-        Write-Log -Critical "External command failed - stderr Output present"
+        throw "External command failed - stderr Output present"
     }
     if ($FailOnStringPresence -and $stdOut -imatch $FailOnStringPresence) {
         if ($Output) {
              Write-Log -Error $stdOut
         }
-        Write-Log -Critical "External command failed - stdout contains string '$FailOnStringPresence'"
+        throw "External command failed - stdout contains string '$FailOnStringPresence'"
     }
     if ($ReturnLastExitCode) {
         return $lastexitcode

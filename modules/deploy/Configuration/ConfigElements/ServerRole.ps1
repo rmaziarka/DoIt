@@ -193,6 +193,6 @@ function ServerRole {
         }
 
     } else {
-        Write-Log -Critical "'ServerRole' function cannot be invoked outside 'Environment' function (invalid invocation: 'ServerRole $Name')."
+        throw "'ServerRole' function cannot be invoked outside 'Environment' function (invalid invocation: 'ServerRole $Name')."
     }
 }

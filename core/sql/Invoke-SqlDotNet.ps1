@@ -173,11 +173,11 @@ function Invoke-SqlDotNet {
             } elseif ($Mode -eq 'Scalar') {
                 $command.ExecuteScalar()
             } else {
-                Write-Log -Critical "Unsupported mode: ${Mode}."
+                throw "Unsupported mode: ${Mode}."
             }
 
             if ($errorOccurred.Error) {
-                Write-Log -Critical "SQL error(s) occurred."
+                throw "SQL error(s) occurred."
             }
         }
     

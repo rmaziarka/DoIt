@@ -52,6 +52,6 @@ function Start-IISWebsite {
     }
 
     if ($try -eq $maxTries) {
-        Write-Log -Critical "Cannot start website '$SiteName' - tried $try times"
+        throw "Cannot start website '$SiteName' - tried $try times"
     }
 }

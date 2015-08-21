@@ -82,7 +82,7 @@ function Get-UpdateXmlAppKeyCmdParams {
         $nodeToMatch = '/configuration/connectionStrings'
         $keyValueAttr = @('name', 'connectionString')
     } else {
-        Write-Log -Critical "Not implemented"
+        throw "Not implemented"
     }
 
     $result = @{}

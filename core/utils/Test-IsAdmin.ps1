@@ -45,7 +45,7 @@ function Test-IsAdmin {
     $isAdmin = ([Security.Principal.WindowsPrincipal] [Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole] "Administrator")
     if (!$isAdmin -and $ThrowErrorIfNot) {
         $currentUser = (Get-CurrentUser)
-        Write-Log -Critical "Current user ($currentUser) is not an Administrator. Please rerun with 'Run as Administrator'."
+        throw "Current user ($currentUser) is not an Administrator. Please rerun with 'Run as Administrator'."
     }
     return $isAdmin
 }
