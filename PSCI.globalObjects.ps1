@@ -58,10 +58,11 @@ $Global:PSCIGlobalConfiguration = [PSCustomObject]@{
     # If not $null, it means deployment runs under CI Server (currently supported: TeamCity)
     CIServer = $null
 
-    # If $true, 'exit 1' will be run on error (otherwise only an exception will be throw).
-    # This is useful especially if running under CI Server (to ensure build is make red), but in case you want to catch critical errors (or the script is running in ISE),
+    # If $true, 'exit 1' will be run on error (otherwise only an exception will be thrown).
+    # This is useful especially if running under some CI Servers (to ensure build is make red), but in case you want to catch critical errors (or the script is running in ISE),
     # you need to set it to $false.
-    ExitImmediatelyOnError = ($host.name -eq 'ConsoleHost')
+    ExitImmediatelyOnError = $false
+
 }
 
 if (Test-Path -LiteralPath Variable:Global:PSCIRemotingMode) {
