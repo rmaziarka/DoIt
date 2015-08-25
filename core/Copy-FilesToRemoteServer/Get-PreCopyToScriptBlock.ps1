@@ -83,6 +83,9 @@ function Get-PreCopyToScriptBlock {
                 # if a file with the same name as Destination directory, just delete it
                 [void](Remove-Item -LiteralPath $destPath -Force)
             } elseif ($ClearDestination -and (Test-Path -LiteralPath $destPath -PathType Container)) {
+                if ($destPath.Length -lt 4) {
+                    throw ("Cannot delete destination path - root drive cannot be deleted: '$destPath'")
+                }
                 # if Destination directory exists and $ClearDestination = $true, delete it
                 [void](Remove-Item -LiteralPath $destPath -Force -Recurse)
             }
