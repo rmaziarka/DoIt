@@ -446,7 +446,9 @@ Describe -Tag "PSCI.unit" "Resolve-Tokens" {
                             InternalNode = { return 'localhost:i' }
                             ExternalNode = '${ExternalNodeValue}'
                             #Nested = @{ NestedNode = { return 'nested' } } 
-                        } 
+                        }
+                        ExternalNodeScriptBlock = { $Tokens.DestinationNodes.ExternalNodeValue }
+                        ExternalNodeStringRef = '${ExternalNodeValue}'
                     }
 	            }
 
@@ -463,10 +465,13 @@ Describe -Tag "PSCI.unit" "Resolve-Tokens" {
                 $resolvedTokens.Count | Should Be 4
                 $resolvedTokens.Node.InternalNode | should Be 'localhost:i'
                 $resolvedTokens.Node.ExternalNode | should Be 'localhost:e'
-                #$resolvedTokens.NodesMap.localhost.InternalNode | should Be 'localhost:i'
-                #$resolvedTokens.NodesMap.localhost.ExternalNode | should Be 'localhost:e'
-                #$resolvedTokens.NodesMap.localhost.Nested.NestedNode | should Be 'nested'
+                $resolvedTokens.DestinationNodes.NodesMap.ExternalNodeScriptBlock | should Be 'localhost:e'
+                $resolvedTokens.DestinationNodes.NodesMap.ExternalNodeStringRef | should Be 'localhost:e'
+                #$resolvedTokens.DestinationNodes.NodesMap.localhost.InternalNode | should Be 'localhost:i'
+                #$resolvedTokens.DestinationNodes.NodesMap.localhost.ExternalNode | should Be 'localhost:e'
+                #$resolvedTokens.DestinationNodes.NodesMap.localhost.Nested.NestedNode | should Be 'nested'
             }
         }
     }
 }
+

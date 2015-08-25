@@ -169,7 +169,22 @@ function Resolve-Tokens {
         foreach ($tokenKey in $tokensCatKeys) {
             $tokenValue = $resolvedTokens[$category][$tokenKey]
 
-            if ($tokenValue -and $tokenValue -is [ScriptBlock]) {
+            if (!$tokenValue) {
+                continue
+            }
+
+            if ($tokenValue -is [hashtable]) {
+                $newHashTable = @{}
+                foreach ($tokenValueEnumerator in $tokenValue.GetEnumerator()) {
+                    if ($tokenValueEnumerator.Value -and $tokenValueEnumerator.Value -is [ScriptBlock]) {
+                        $newValue = Resolve-ScriptedToken -ScriptedToken $tokenValueEnumerator.Value -ResolvedTokens $resolvedTokens -Node $Node -Environment $Environment    
+                        $newHashTable[$tokenValueEnumerator.Key] = $newValue
+                    } else {
+                        $newHashTable[$tokenValueEnumerator.Key] = $tokenValueEnumerator.Value
+                    }
+                }
+                $resolvedTokens[$category][$tokenKey] = $newHashTable
+            } elseif ($tokenValue -is [ScriptBlock]) {
                 try { 
                     $newValue = Resolve-ScriptedToken -ScriptedToken $tokenValue -ResolvedTokens $resolvedTokens -Node $Node -Environment $Environment
                 } catch {
@@ -187,8 +202,17 @@ function Resolve-Tokens {
 
         foreach ($tokenKey in $tokensCatKeys) {
             $tokenValue = $resolvedTokens[$category][$tokenKey]
-            $newValue = Resolve-Token -Name $tokenKey -Value $tokenValue -ResolvedTokens $resolvedTokens -Category $category
-            $resolvedTokens[$category][$tokenKey] = $newValue
+            if ($tokenValue -is [hashtable]) {
+                $newHashTable = @{}
+                foreach ($tokenValueEnumerator in $tokenValue.GetEnumerator()) {
+                    $newValue = Resolve-Token -Name "${tokenKey}.$($tokenValueEnumerator.Key)" -Value $tokenValueEnumerator.Value -ResolvedTokens $resolvedTokens -Category $category -ValidateExistence:$false
+                    $newHashTable[$tokenValueEnumerator.Key] = $newValue
+                }
+                $resolvedTokens[$category][$tokenKey] = $newHashTable
+            } else {
+                $newValue = Resolve-Token -Name $tokenKey -Value $tokenValue -ResolvedTokens $resolvedTokens -Category $category
+                $resolvedTokens[$category][$tokenKey] = $newValue
+            }
         }
     }
 
