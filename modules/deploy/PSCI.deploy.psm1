@@ -24,7 +24,7 @@ SOFTWARE.
 
 
 $curDir = Split-Path -Parent $MyInvocation.MyCommand.Definition
-Get-ChildItem -Recurse $curDir -Include *.ps1 | Where-Object { $_ -notmatch ".Tests.ps1" -and $_ -notmatch "Import-DeploymentConfiguration.ps1" -and $_ -notmatch "\\dsc\\"} | Foreach-Object {
+Get-ChildItem -Recurse $curDir -Include *.ps1 | Where-Object { $_ -notmatch ".Tests.ps1" -and $_ -notmatch "\\Configurations\\" -and $_ -notmatch "\\dsc\\"} | Foreach-Object {
     . $_.FullName      
 }
 
