@@ -351,6 +351,11 @@ function Write-LogToFile() {
         foreach ($msg in $Message) {
             [void]($strBuilder.Append($msg).Append("`r`n"))
         }
+        
+        if (![System.IO.Path]::IsPathRooted($PSCIGlobalConfiguration.LogFile)) {
+            # we need to set absolute path to log file as .NET working directory would be c:\windows\system32
+            $PSCIGlobalConfiguration.LogFile = Join-Path -Path ((Get-Location).ProviderPath) -ChildPath $PSCIGlobalConfiguration.LogFile
+        }
         [io.file]::AppendAllText($PSCIGlobalConfiguration.LogFile, ($strBuilder.ToString()), [System.Text.Encoding]::Unicode)
     }
 }
