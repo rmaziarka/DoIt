@@ -16,5 +16,6 @@
     </metadata>
 	<files>
 		<file src="**" exclude="_buildTools\**;**\packages\**;**\*.Tests.*;**\bin\**;**\obj\**" />
+		<file src="externalLibs\Carbon\Carbon\bin\**" target="externalLibs\Carbon\Carbon\bin" />
 	</files>
 </package>
