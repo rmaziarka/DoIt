@@ -87,12 +87,12 @@ function New-MsBuildOptions {
 
         [Parameter(Mandatory=$false)]
         [string]
-        [ValidateSet("2013","2012","2010","")]
+        [ValidateSet("2015","2013","2012","2010","")]
         $VisualStudioVersion,
 
         [Parameter(Mandatory=$false)]
         [string]
-        [ValidateSet("12.0","4.0","3.5","2.0","")]
+        [ValidateSet("14.0","12.0","4.0","3.5","2.0","")]
         $MsBuildVersion,
 
         [Parameter(Mandatory=$false)]

@@ -49,12 +49,12 @@ function Get-MsBuildPath {
     param(
         [Parameter(Mandatory=$false)]
         [string] 
-        [ValidateSet("2013","2012","2010","")]
+        [ValidateSet("2015","2013","2012","2010","")]
         $VisualStudioVersion,
 
         [Parameter(Mandatory=$false)]
         [string] 
-        [ValidateSet("12.0","4.0","3.5","2.0","")]
+        [ValidateSet("14.0","12.0","4.0","3.5","2.0","")]
         $MsBuildVersion,
 
         [Parameter(Mandatory=$false)]
@@ -67,12 +67,13 @@ function Get-MsBuildPath {
         switch ($VisualStudioVersion) {
             {"2010" -or "2012"} { $MsBuildVersion = "4.0" }
             "2013"              { $MsBuildVersion = "12.0" }
+            "2015"              { $MsBuildVersion = "14.0" }
             default             { throw "Unrecognized VisualStudioVersion: $VisualStudioVersion" }
         }
     }
 
     if (!$MsBuildVersion) {
-        $versions = @("12.0", "4.0", "3.5", "2.0")
+        $versions = @("14.0", "12.0", "4.0", "3.5", "2.0")
     } else {
         $versions = @($MsBuildVersion)
     }

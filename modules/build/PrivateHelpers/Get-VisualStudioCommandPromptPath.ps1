@@ -42,7 +42,7 @@ function Get-VisualStudioCommandPromptPath {
     param(
         [Parameter(Mandatory=$false)]
         [string] 
-        [ValidateSet($null, '2013', '2012', '2010')]
+        [ValidateSet($null, '2015', '2013', '2012', '2010')]
         $VisualStudioVersion
     )
 
@@ -50,12 +50,14 @@ function Get-VisualStudioCommandPromptPath {
         '2010' = $env:VS100COMNTOOLS
         '2012' = $env:VS110COMNTOOLS
         '2013' = $env:VS120COMNTOOLS
+        '2015' = $env:VS140COMNTOOLS
     }
 
     $cmdPromptFileNames = @{
         '2010' = 'vcvarsall.bat'
         '2012' = 'vsdevcmd.bat'
         '2013' = 'vsdevcmd.bat'
+        '2015' = 'vsdevcmd.bat'
     }
 
     if (!$VisualStudioVersion) {

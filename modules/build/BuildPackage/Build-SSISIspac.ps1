@@ -66,7 +66,7 @@ function Build-SSISIspac {
 
         [Parameter(Mandatory=$false)]
         [string]
-        [ValidateSet('', '2013', '2012', '2010')]
+        [ValidateSet('', '2015', '2013', '2012', '2010')]
         $VisualStudioVersion,
 
         [Parameter(Mandatory=$false)]
@@ -102,6 +102,7 @@ function Build-SSISIspac {
             '2010' = '10.0'
             '2012' = '11.0'
             '2013' = '12.0'
+            '2015' = '14.0'
         }
         $vsDir = "$baseVsDir\Microsoft Visual Studio {0}" -f $vsVersionMap[$VisualStudioVersion]
         if (!(Test-Path -LiteralPath $vsDir)) {

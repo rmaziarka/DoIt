@@ -42,7 +42,7 @@ function Get-VisualStudioPath {
     param(
         [Parameter(Mandatory=$false)]
         [string] 
-        [ValidateSet($null, '2013','2012','2010')]
+        [ValidateSet($null, '2015', '2013','2012','2010')]
         $VisualStudioVersion
     )
 
@@ -50,6 +50,7 @@ function Get-VisualStudioPath {
         '2010' = $env:VS100COMNTOOLS
         '2012' = $env:VS110COMNTOOLS
         '2013' = $env:VS120COMNTOOLS
+        '2015' = $env:VS140COMNTOOLS
     }
 
     if (!$VisualStudioVersion) {

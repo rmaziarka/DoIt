@@ -142,7 +142,8 @@ function Invoke-MsBuild {
         $vsVersionMap = @{ `
             "2010" = "10.0"; `
             "2012" = "11.0"; `
-            "2013" = "12.0";
+            "2013" = "12.0"; `
+            "2015" = "14.0";
         }
         $vsVersion = $vsVersionMap[$VisualStudioVersion]
         $cmd += " /p:VisualStudioVersion=`"${vsVersion}`""
