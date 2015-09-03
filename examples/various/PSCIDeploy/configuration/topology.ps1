@@ -38,7 +38,7 @@ Environment Default {
     ServerConnection TestNodeDefault -Nodes { $Tokens.Topology.Nodes }
     ServerConnection TestNodePSRemoting -BasedOn TestNodeDefault -RemotingCredential { $Tokens.Credentials.RemotingCredential }
     ServerConnection TestNodePSRemotingCredSSP -BasedOn TestNodePSRemoting -Authentication CredSSP -Protocol HTTPS -CrossDomain
-    ServerConnection TestNodeMSDeploy -BasedOn TestNodePSRemoting -RemotingMode WebDeployHandler
+    ServerConnection TestNodeMSDeploy -BasedOn TestNodePSRemoting -RemotingMode WebDeployAgentService
 
     ServerRole Web -Configurations @('WebServerProvision', 'WebServerIISConfig') -ServerConnections TestNodePSRemoting
 	ServerRole Database -Configurations @('DatabaseServerDeploy') -ServerConnections TestNodeDefault
