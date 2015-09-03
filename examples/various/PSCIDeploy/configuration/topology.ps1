@@ -40,7 +40,7 @@ Environment Default {
     ServerConnection TestNodePSRemotingCredSSP -BasedOn TestNodePSRemoting -Authentication CredSSP -Protocol HTTPS -CrossDomain
     ServerConnection TestNodeMSDeploy -BasedOn TestNodePSRemoting -RemotingMode WebDeployHandler
 
-    ServerRole Web -Configurations @('WebServerProvision') -ServerConnections TestNodeDefault
+    ServerRole Web -Configurations @('WebServerProvision', 'WebServerIISConfig') -ServerConnections TestNodePSRemoting
 	ServerRole Database -Configurations @('DatabaseServerDeploy') -ServerConnections TestNodeDefault
 
     ServerRole RemotingTestPSRemoting -Configurations @('RemotingTestPrepare', 'RemotingTestValidate') -RunRemotely -ServerConnections TestNodePSRemoting

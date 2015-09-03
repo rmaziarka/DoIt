@@ -38,7 +38,7 @@ Environment Default {
     ServerConnection WebServer -Nodes localhost -RemotingMode WebDeployAgentService -Authentication NTLM
     ServerConnection DatabaseServer -Nodes localhost
 
-    ServerRole Web -RunRemotely -Configurations WebServerProvision,WebServerDeploy -ServerConnections WebServer
+    ServerRole Web -RunRemotely -Configurations WebServerProvision,WebServerIISConfig,WebServerDeploy -ServerConnections WebServer
     ServerRole Database -Configurations DatabaseDeploy -ServerConnections DatabaseServer
 
     ServerRole DeploymentValidation -Configurations ValidateDeploy -ServerConnections WebServer

@@ -31,6 +31,46 @@ Configuration can be one of the following:
 
 Configuration WebServerProvision {
     param ($NodeName, $Environment, $Tokens)
+
+    Import-DSCResource -Module xDismFeature
+
+    Node $NodeName {
+     if ($Environment -eq "Local") {
+            
+            xDismFeature IISWebServer { 
+                Name = "IIS-WebServerRole"
+            }
+
+            xDismFeature IISASPNET45 { 
+                Name = "IIS-ASPNET45"
+            }
+
+            xDismFeature IISWindowsAuthentication { 
+                Name = "IIS-WindowsAuthentication"
+            }
+        } else {
+            WindowsFeature IIS {
+                Ensure = "Present"
+                Name = "Web-Server"
+            }
+
+            WindowsFeature IISAuth {
+                Ensure = "Present"
+                Name = "Web-Windows-Auth"
+                DependsOn = "[WindowsFeature]IIS"
+            }
+                     
+            WindowsFeature IISASP { 
+              Ensure = "Present"
+              Name = "Web-Asp-Net45"
+              DependsOn = "[WindowsFeature]IIS"
+            } 
+        }
+    }
+}
+
+Configuration WebServerIISConfig {
+    param ($NodeName, $Environment, $Tokens)
     
     Import-DSCResource -Module cIIS
 
