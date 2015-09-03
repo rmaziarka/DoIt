@@ -129,7 +129,7 @@ function WebServerDeploy {
                          PackageType = 'Web';
                          Node = $NodeName;
                          MsDeployDestinationString = $ConnectionParams.MsDeployDestinationString
-                         TokensForConfigFiles = $Tokens.WebTokensConfig;
+                         TokensForConfigFiles = $Tokens.WebTokens;
                          FilesToIgnoreTokensExistence = @( 'NLog.config' );
                          Website = $Tokens.WebConfig.WebsiteName;
                          SkipDir = 'App_Data';

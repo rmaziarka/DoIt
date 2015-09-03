@@ -38,7 +38,7 @@ Environment Default {
     ServerConnection WebServer -Nodes localhost -RemotingMode WebDeployAgentService -Authentication NTLM
     ServerConnection DatabaseServer -Nodes localhost
 
-    ServerRole Web -RunRemotely -Configurations WebServerProvision,WebServerIISConfig,WebServerDeploy -ServerConnections WebServer
+    ServerRole Web -Configurations WebServerProvision,WebServerIISConfig,WebServerDeploy -ServerConnections WebServer
     ServerRole Database -Configurations DatabaseDeploy -ServerConnections DatabaseServer
 
     ServerRole DeploymentValidation -Configurations ValidateDeploy -ServerConnections WebServer
@@ -48,7 +48,6 @@ Environment Default {
 Environment Test {
     ServerConnection WebServer -Nodes { $Tokens.Topology.Nodes } -RemotingMode WebDeployAgentService
     ServerConnection DatabaseServer -BasedOn WebServer
-
     ServerRole Web -RunRemotely
 }
 

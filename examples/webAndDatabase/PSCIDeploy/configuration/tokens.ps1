@@ -47,12 +47,12 @@ Environment Default {
     }
 
     Tokens WebTokens @{
-
+        TestConnectionString = { $Tokens.DatabaseConfig.ConnectionString }
     }
 
     Tokens DatabaseConfig @{
         DatabaseName = 'PSCITest'
-        ConnectionString = 'Server=${Node}\SQLEXPRESS;Database=${DatabaseName};Integrated Security=SSPI'
+        ConnectionString = 'Server=localhost\SQLEXPRESS;Database=${DatabaseName};Integrated Security=SSPI'
         DropDatabase = $true
     }
 }
