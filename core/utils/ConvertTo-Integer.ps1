@@ -31,7 +31,7 @@ function ConvertTo-Integer {
     String to convert.
 
     .EXAMPLE
-    $sqlServerVersions = Get-ChildItem -Path $sqlServerPath | Sort-Object { ConvertTo-Integer -Value $_.Name } -Descending
+    ConvertTo-Integer -Value '3'
     #>   
      
     [CmdletBinding()]
