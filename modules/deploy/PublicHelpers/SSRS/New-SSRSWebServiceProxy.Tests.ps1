@@ -24,7 +24,7 @@ SOFTWARE.
 
 Import-Module -Name "$PSScriptRoot\..\..\..\..\PSCI.psd1"
 
-Describe -Tag "PSCI.integration" "New-SSRSWebServiceProxy" {
+Describe -Tag "PSCI.SSRS" "New-SSRSWebServiceProxy" {
     
     Context "when used with local server" { 
         $Uri = "http://localhost/reportserver"

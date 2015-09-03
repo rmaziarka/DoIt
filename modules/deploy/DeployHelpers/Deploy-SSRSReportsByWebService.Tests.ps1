@@ -24,7 +24,7 @@ SOFTWARE.
 
 Import-Module -Name "$PSScriptRoot\..\..\..\PSCI.psd1" -Force
 
-Describe -Tag "PSCI.integration" "Deploy-SSRSReportsByWebService " {
+Describe -Tag "PSCI.SSRS" "Deploy-SSRSReportsByWebService" {
     InModuleScope PSCI.deploy {
         Mock Write-Log { 
             Write-Output $Message

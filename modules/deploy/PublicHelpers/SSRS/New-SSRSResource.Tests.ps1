@@ -24,7 +24,7 @@ SOFTWARE.
 
 Import-Module -Name "$PSScriptRoot\..\..\..\..\PSCI.psd1"
 
-Describe -Tag "PSCI.integration" "New-SSRSResource" {
+Describe -Tag "PSCI.SSRS" "New-SSRSResource" {
     InModuleScope PSCI.deploy {
         Mock Write-Log { 
             Write-Output $Message
