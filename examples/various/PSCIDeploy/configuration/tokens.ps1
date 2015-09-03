@@ -36,7 +36,7 @@ Environment Default {
 
     Tokens DatabaseConfig @{
         DatabaseName = 'PSCITest'
-		DatabaseDeploymentConnectionString = 'Server=${Node};Integrated Security=SSPI;'
+		DatabaseDeploymentConnectionString = 'Server=${Node}\SQLEXPRESS;Integrated Security=SSPI;'
 	}
 
     Tokens WebServerProvision @{

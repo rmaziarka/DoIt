@@ -52,7 +52,7 @@ Environment Default {
 
     Tokens DatabaseConfig @{
         DatabaseName = 'PSCITest'
-        ConnectionString = 'Server=${Node};Database=${DatabaseName};Integrated Security=SSPI'
+        ConnectionString = 'Server=${Node}\SQLEXPRESS;Database=${DatabaseName};Integrated Security=SSPI'
         DropDatabase = $true
     }
 }
