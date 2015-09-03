@@ -46,7 +46,7 @@ Environment Default {
 }
 
 Environment Test {
-    ServerConnection WebServer -Nodes { $Tokens.Topology.Nodes } -RemotingMode WebDeployHandler
+    ServerConnection WebServer -Nodes { $Tokens.Topology.Nodes } -RemotingMode WebDeployAgentService
     ServerConnection DatabaseServer -BasedOn WebServer
 
     ServerRole Web -RunRemotely
