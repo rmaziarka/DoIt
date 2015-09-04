@@ -72,7 +72,7 @@ function Install-NugetPackage {
 
     $nugetPath = Get-PathToExternalLib -ModulePath 'nuget\nuget.exe'
 
-    $nugetArgs = New-Object System.Text.StringBuilder "install $PackageId"
+    $nugetArgs = New-Object -TypeName System.Text.StringBuilder -ArgumentList "install $PackageId"
 
     if ($NugetSources) {
         foreach ($source in $NugetSources) {
