@@ -31,7 +31,7 @@ function Clear-DscCache {
     This cmdlet stops the process which clears the cache.
 
     .PARAMETER ConnectionParams
-    Connection parameters created by New-ConnectionParameters function. If not specified, will run locally.
+    Connection parameters created by [[New-ConnectionParameters]] function. If not specified, will run locally.
     
     .LINK
     http://social.technet.microsoft.com/Forums/windowsserver/en-US/58352ed2-869a-45be-ad61-9019bb975cc7/desired-state-configuration-manager-caching-custom-resource-scripts?forum=winserverpowershell

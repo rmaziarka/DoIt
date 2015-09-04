@@ -35,7 +35,7 @@ function Start-DscConfigurationWithRetries
     Path to MOF file.
 
     .PARAMETER ConnectionParams
-     Connection parameters created by New-ConnectionParameters function.
+     Connection parameters created by [[New-ConnectionParameters]] function.
 
     .PARAMETER DscForce
     If true, '-Force' parameter will be passed to 'Start-DscConfiguration'. It is required e.g. when last attempt failed and is still running.

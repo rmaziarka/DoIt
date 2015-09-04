@@ -48,7 +48,7 @@ function Invoke-ConfigurationOrFunction {
     Tokens resolved for the node/environment - will be passed as 'Tokens' to the configuration.
 
     .PARAMETER ConnectionParams
-    Connection parameters as defined in server roles (object created by New-ConnectionParameters).
+    Connection parameters as defined in server roles (object created by [[New-ConnectionParameters]]).
 
     .EXAMPLE
     $mofDir = Invoke-ConfigurationOrFunction -ConfigurationName $ConfigurationName -OutputPath $DscOutputPath -Node $Node -Environment $Environment -ResolvedTokens $resolvedTokens

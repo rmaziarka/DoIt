@@ -34,7 +34,7 @@ function Start-DeploymentByMSDeploy {
     Name of the the server role that will be deployed.
 
     .PARAMETER RunOnConnectionParams
-    Connection parameters created by New-ConnectionParameters function.
+    Connection parameters created by [[New-ConnectionParameters]] function.
 
     .PARAMETER PackageDirectory
     Defines location on remote machine where deployment package will be copied to.

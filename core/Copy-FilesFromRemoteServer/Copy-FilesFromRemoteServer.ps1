@@ -31,7 +31,7 @@ function Copy-FilesFromRemoteServer {
 		The file or directory path that should be downloaded from remote server.
 
     .PARAMETER ConnectionParams
-        Connection parameters created by New-ConnectionParameters function.
+        Connection parameters created by [[New-ConnectionParameters]] function.
 
 	.PARAMETER Destination
 		The local path where the file will be saved to (must be a directory - existing or non-existing).

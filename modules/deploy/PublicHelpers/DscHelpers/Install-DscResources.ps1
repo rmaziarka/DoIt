@@ -36,7 +36,7 @@ function Install-DscResources {
     List of module names to install. 
 
     .PARAMETER ConnectionParams
-    Connection parameters created by New-ConnectionParameters function.
+    Connection parameters created by [[New-ConnectionParameters]] function.
 
     .EXAMPLE
     Install-DscResources

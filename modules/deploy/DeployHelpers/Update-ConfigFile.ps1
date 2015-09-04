@@ -59,7 +59,7 @@ function Update-ConfigFile {
     String containing XSLT/XDT transform (only used for FileType = XSLT or XDT). If not provided, $TransformFileName will be used
 
     .PARAMETER ConnectionParameters
-    Connection parameters created by New-ConnectionParameters function. If not provided, function will run locally.
+    Connection parameters created by [[New-ConnectionParameters]] function. If not provided, function will run locally.
 
     .PARAMETER XPath
     String containing XPath. The value which will be found will be replaces with $ReplaceString

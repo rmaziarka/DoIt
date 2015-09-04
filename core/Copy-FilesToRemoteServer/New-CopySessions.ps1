@@ -29,7 +29,7 @@ function New-CopySessions {
 		Creates new PS sessions if they are needed (depending on hashes). Helper function for Copy-FilesToRemoteServer.
 
     .PARAMETER ConnectionParams
-        Connection parameters created by New-ConnectionParameters function.
+        Connection parameters created by [[New-ConnectionParameters]] function.
 
 	.PARAMETER Destination
 		The remote path where the file will be saved to.

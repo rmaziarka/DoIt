@@ -29,7 +29,7 @@ function Copy-CarbonFilesToRemoteServer {
     A helper for Get-updateXdtCmdParams function that copies files needed for running XDT transform to remote servers.
    
     .PARAMETER ConnectionParameters
-    Connection parameters created by New-ConnectionParameters function.
+    Connection parameters created by [[New-ConnectionParameters]] function.
 
     .PARAMETER DestinationPath
     DestinationPath on remote servers.
