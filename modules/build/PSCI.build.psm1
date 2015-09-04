@@ -51,4 +51,5 @@ Export-ModuleMember -Function `
     Start-Build, `
     Backup-Files, `
     Restore-Files, `
-	Start-NugetRestore
+    Start-NugetRestore, `
+    Install-NugetPackage
