@@ -96,7 +96,7 @@ function Build-DirPackage {
         $zipPath = Join-Path -Path $OutputPath -ChildPath "${PackageName}.zip"
     }
 
-    [void](New-Item -Path $OutputPath -ItemType Directory)
+    [void](New-Item -Path $OutputPath -ItemType Directory -Force)
 
     # TODO: include is weak
     Write-Log -Info "Copying items from '$SourcePath' to '$OutputPath', include '$Include', exclude '$Exclude'..."
