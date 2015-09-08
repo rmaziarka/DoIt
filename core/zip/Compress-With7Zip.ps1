@@ -125,7 +125,7 @@ function Compress-With7Zip {
     if ($PathsToCompress.Length -lt 10) {
         $PathsToCompress = Add-QuotesToPaths $PathsToCompress
         [void]($cmdLine.Append(($PathsToCompress -join " ")))
-		# Note: we should not use '-r' option as this is not standard recursion - it would instead search all <$Include> in current directory recursively
+        # Note: we should not use '-r' option as this is not standard recursion - it would instead search all <$Include> in current directory recursively
     } else {
         # for many files we need to create a file containing list of files (or we can get 'command line is too long')
         $fileList = New-Item -Path ([System.IO.Path]::GetTempFileName()) -ItemType File -Value ($PathsToCompress -join "`r`n") -Force

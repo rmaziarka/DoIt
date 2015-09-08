@@ -24,11 +24,11 @@ SOFTWARE.
 
 function Get-RemoteFileUsingStream {
     <#
-	.SYNOPSIS
-		Downloads a file from a remote session using stream.
+    .SYNOPSIS
+        Downloads a file from a remote session using stream.
 
-	.PARAMETER Session
-		Open session to the remote server.
+    .PARAMETER Session
+        Open session to the remote server.
 
     .PARAMETER SourcePath
         The file path that should be downloaded from remote server.
@@ -39,11 +39,11 @@ function Get-RemoteFileUsingStream {
     .PARAMETER SourceFileSize
         Size of source file.
 
-	.EXAMPLE			
+    .EXAMPLE            
         Get-RemoteFileUsingStream -Session $session -SourcePath $srcZipFilePath -DestinationPath $destZipFilePath -SourceFileSize $srcZipFileSize
-	#>
+    #>
     [CmdletBinding()]
-	[OutputType([object[]])]
+    [OutputType([object[]])]
     param(
         [Parameter(Mandatory = $true)]
         [object]

@@ -25,25 +25,25 @@ SOFTWARE.
 function Set-SSRSItemDataSources {
     <#
     .SYNOPSIS
-    	Sets the data sources for an item.
+        Sets the data sources for an item.
 
     .DESCRIPTION
         Sets the data sources for an item in a report server database or SharePoint library. This method applies to the Report and Model item types.
 
-	.PARAMETER Proxy
-		ReportingService2010 web service proxy.
+    .PARAMETER Proxy
+        ReportingService2010 web service proxy.
 
-	.PARAMETER ItemPath
-		The fully qualified URL of the item including the file name and, in SharePoint mode, the extension.
+    .PARAMETER ItemPath
+        The fully qualified URL of the item including the file name and, in SharePoint mode, the extension.
 
     .PARAMETER DataSources
-    	An array of DataSource objects.
+        An array of DataSource objects.
 
     .EXAMPLE
         $DataSource = New-Object -TypeName SSRS.ReportingService2010.DataSource
         $DataSource.Item = $Reference
         $DataSource.Name = 'MyDataSource'
-		Set-SSRSItemDataSources -Proxy $Proxy -ItemPath ('/MyReports/FinancialReport') -DataSources @($DataSource)
+        Set-SSRSItemDataSources -Proxy $Proxy -ItemPath ('/MyReports/FinancialReport') -DataSources @($DataSource)
 
     #>
     [CmdletBinding()]

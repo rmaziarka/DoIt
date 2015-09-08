@@ -44,7 +44,7 @@ function Test-ComputerNameIsLocalhost {
     Test-ComputerNameIsLocalhost -ComputerName '127.0.0.1'
     #>
     [CmdletBinding()]
-	[OutputType([bool])]
+    [OutputType([bool])]
     param(
         [Parameter(Mandatory=$true)]
         [string]

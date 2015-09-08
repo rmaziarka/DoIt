@@ -45,10 +45,10 @@ Describe -Tag "PSCI.unit" "ServerRole" {
         Context "when using single role and environment" {
             Initialize-Deployment
 
-			Environment Local {
+            Environment Local {
                 ServerConnection Web1 -Nodes @('machine1','machine2') -RemotingCredential $remotingDefaultCredential -PackageDirectory 'c:\dir'
-				ServerRole Web -Configurations @('TestFunc', 'TestDSC') -RunOn 'machine1' -ServerConnections Web1
-			}
+                ServerRole Web -Configurations @('TestFunc', 'TestDSC') -RunOn 'machine1' -ServerConnections Web1
+            }
             $resolvedRoles = Resolve-ServerRoles -AllEnvironments $Global:Environments -Environment Local -ResolvedTokens @{}
 
             It "should properly resolve local environment" {
@@ -68,10 +68,10 @@ Describe -Tag "PSCI.unit" "ServerRole" {
 
             Initialize-Deployment
 
-			Environment Local {
+            Environment Local {
                 ServerConnection Web1 -Nodes { @('machine1','machine2') } -RemotingCredential { $remotingDefaultCredential }
-				ServerRole Web -Configurations { 'TestFunc' } -ServerConnections { 'Web1' }
-			}
+                ServerRole Web -Configurations { 'TestFunc' } -ServerConnections { 'Web1' }
+            }
 
             $resolvedRoles = Resolve-ServerRoles -AllEnvironments $Global:Environments -Environment Local -ResolvedTokens @{}
 
@@ -89,9 +89,9 @@ Describe -Tag "PSCI.unit" "ServerRole" {
         Context "when using in-place ServerConnection" {
             Initialize-Deployment
 
-			Environment Local {   
-				ServerRole Web -Configurations { 'TestFunc' } -ServerConnections (ServerConnection Web1 -Nodes { @('machine1','machine2') } -RemotingCredential { $remotingDefaultCredential })
-			}
+            Environment Local {   
+                ServerRole Web -Configurations { 'TestFunc' } -ServerConnections (ServerConnection Web1 -Nodes { @('machine1','machine2') } -RemotingCredential { $remotingDefaultCredential })
+            }
 
             $resolvedRoles = Resolve-ServerRoles -AllEnvironments $Global:Environments -Environment Local -ResolvedTokens @{}
 
@@ -110,9 +110,9 @@ Describe -Tag "PSCI.unit" "ServerRole" {
         Context "when referencing a non-existing Configuration" {
             Initialize-Deployment
 
-			Environment Local {
-				ServerRole Web -Configurations @('NotExisting')
-			}
+            Environment Local {
+                ServerRole Web -Configurations @('NotExisting')
+            }
 
             $fail = $false
             try  {
@@ -130,13 +130,13 @@ Describe -Tag "PSCI.unit" "ServerRole" {
             Initialize-Deployment
             $cred = ConvertTo-PSCredential -User "Test" -Password "Test"
 
-		    Environment Default {
-			    ServerRole Web -Configurations @('TestFunc') -ServerConnections (ServerConnection machine1 -Nodes machine1 -RemotingCredential $cred)
-		    }
+            Environment Default {
+                ServerRole Web -Configurations @('TestFunc') -ServerConnections (ServerConnection machine1 -Nodes machine1 -RemotingCredential $cred)
+            }
 
-		    Environment Local {
-			    ServerRole Web -Configurations @('TestFunc', 'TestDSC') -ServerConnections (ServerConnection -Name 'm1' -Nodes @('machine1','machine2'))
-		    }
+            Environment Local {
+                ServerRole Web -Configurations @('TestFunc', 'TestDSC') -ServerConnections (ServerConnection -Name 'm1' -Nodes @('machine1','machine2'))
+            }
 
             It "should properly resolve Default environment" {
                 $resolvedRoles = Resolve-ServerRoles -AllEnvironments $Global:Environments -Environment Default -ResolvedTokens @{}
@@ -166,12 +166,12 @@ Describe -Tag "PSCI.unit" "ServerRole" {
             Initialize-Deployment
 
             Environment Default {
-			    ServerRole Web -Configurations @('TestFunc') -ServerConnections (ServerConnection machine1 -Nodes machine1)
-		    }
+                ServerRole Web -Configurations @('TestFunc') -ServerConnections (ServerConnection machine1 -Nodes machine1)
+            }
 
-		    Environment Local {
-			    ServerRole Database -Configurations @('TestDSC') -ServerConnections (ServerConnection machine2 -Nodes machine1)
-		    }
+            Environment Local {
+                ServerRole Database -Configurations @('TestDSC') -ServerConnections (ServerConnection machine2 -Nodes machine1)
+            }
 
             It "should properly resolve Default environment" {
                 $resolvedRoles = Resolve-ServerRoles -AllEnvironments $Global:Environments -Environment Default -ResolvedTokens @{}
@@ -205,7 +205,7 @@ Describe -Tag "PSCI.unit" "ServerRole" {
             Initialize-Deployment
             $cred = ConvertTo-PSCredential -User "Test" -Password "Test"
 
-		    Environment Default {
+            Environment Default {
                 ServerConnection WebServers -Nodes @('localhost') -RemotingCredential $cred 
                 ServerConnection DatabaseServers -Nodes @('localhost') -RemotingCredential $cred
                 ServerConnection SSRSServers -Nodes $null
@@ -214,24 +214,24 @@ Describe -Tag "PSCI.unit" "ServerRole" {
                 ServerRole Database -Configurations 'TestDSC' -ServerConnections DatabaseServers
                 ServerRole SSRS -Configurations @('TestFunc') -ServerConnections SSRSServers
                 ServerRole NoConf -ServerConnection WebServers
-		    }
+            }
 
-		    Environment Live {
+            Environment Live {
                 ServerConnection WebServers -Nodes @('web01', 'web02') -PackageDirectory 'C:\Deployment' -RemotingMode PSRemoting -RemotingCredential $null
                 ServerConnection DatabaseServers -Nodes @('db01') -RemotingMode PSRemoting -Authentication Credssp -RemotingCredential $cred
                 ServerConnection SSRSServers -Nodes @('ssrs01') 
 
                 ServerRole Web -Configurations TestFunc2 -RunRemotely
                 ServerRole Database -Configurations TestDSC2 -RunRemotely 
-		    }
+            }
 
-		    Environment LivePerf -BasedOn Live {
+            Environment LivePerf -BasedOn Live {
                 ServerConnection WebServers -PackageDirectory 'C:\Deployment2'
                 ServerConnection SSRSServers -Nodes $null
 
                 ServerRole Database -Configurations TestDSC3
                 
-		    }
+            }
 
             It "should properly resolve Live environment" {
                 $resolvedRoles = Resolve-ServerRoles -AllEnvironments $Global:Environments -Environment Live -ResolvedTokens @{}
@@ -250,13 +250,13 @@ Describe -Tag "PSCI.unit" "ServerRole" {
                 $resolvedRoles.Database.Configurations.Name | Should Be 'TestDSC2'
                 $resolvedRoles.Database.ServerConnections.Count | Should Be 1
                 $resolvedRoles.Database.ServerConnections.Nodes | Should Be 'db01'
-			    $resolvedRoles.Database.ServerConnections.RemotingCredential | Should Be $cred
+                $resolvedRoles.Database.ServerConnections.RemotingCredential | Should Be $cred
 
                 $resolvedRoles.SSRS | Should Not Be $null
                 $resolvedRoles.SSRS.Configurations.Name | Should Be 'TestFunc'
                 $resolvedRoles.SSRS.ServerConnections.Count | Should Be 1
                 $resolvedRoles.SSRS.ServerConnections.Nodes | Should Be 'ssrs01'
-			    $resolvedRoles.SSRS.ServerConnections.RemotingCredential | Should Be $null
+                $resolvedRoles.SSRS.ServerConnections.RemotingCredential | Should Be $null
             }
 
             It "should properly resolve LivePerf environment" {
@@ -276,7 +276,7 @@ Describe -Tag "PSCI.unit" "ServerRole" {
                 $resolvedRoles.Database.Configurations.Name | Should Be 'TestDSC3'
                 $resolvedRoles.Database.ServerConnections.Count | Should Be 1
                 $resolvedRoles.Database.ServerConnections.Nodes | Should Be 'db01'
-			    $resolvedRoles.Database.ServerConnections.RemotingCredential | Should Be $cred
+                $resolvedRoles.Database.ServerConnections.RemotingCredential | Should Be $cred
             }
         }
 
@@ -287,16 +287,16 @@ Describe -Tag "PSCI.unit" "ServerRole" {
                 ServerConnection WebServer -Nodes machine1 -RemotingMode WebDeployHandler
                 ServerConnection DbServer -Nodes machine2 -BasedOn WebServer
                 ServerConnection DbServer2 -Nodes $null -BasedOn WebServer
-			    ServerRole Web -Configurations @('TestFunc') -ServerConnections WebServer
+                ServerRole Web -Configurations @('TestFunc') -ServerConnections WebServer
                 ServerRole Database -Configurations @('TestDSC') -ServerConnections DbServer
                 ServerRole Database2 -Configurations @('TestDSC') -ServerConnections DbServer2 # this should be ignored because DbServer2 will have no Nodes
-		    }
+            }
 
-		    Environment Local {
+            Environment Local {
                 ServerConnection DbServer -Nodes machine3 -BasedOn $null
                 ServerRole Database2 -Configurations @('TestDSC') -ServerConnections (ServerConnection DbServer4 -BasedOn DbServer)
                 ServerRole Database3 -Configurations @('TestDSC') -ServerConnections (ServerConnection DbServer5 -BasedOn DbServer2 -Nodes machine4)
-		    }
+            }
 
             It "should properly resolve Default environment" {
                 $resolvedRoles = Resolve-ServerRoles -AllEnvironments $Global:Environments -Environment Default -ResolvedTokens @{}
@@ -359,8 +359,8 @@ Describe -Tag "PSCI.unit" "ServerRole" {
             Environment Default {
                 ServerConnection WebServer -Nodes machine1 -RemotingMode WebDeployHandler
                 ServerConnection DbServer -Nodes machine1 -BasedOn Invalid
-			    ServerRole Web -Configurations @('TestFunc') -ServerConnections DbServer
-		    }
+                ServerRole Web -Configurations @('TestFunc') -ServerConnections DbServer
+            }
 
             It "should throw exception" {
                 $fail = $false
@@ -379,8 +379,8 @@ Describe -Tag "PSCI.unit" "ServerRole" {
 
             Environment Default {
                 ServerConnection WebServer -Nodes { $Tokens.nodes.node } -RemotingMode WebDeployHandler
-			    ServerRole Web -Configurations @('TestFunc') -ServerConnections WebServer
-		    }
+                ServerRole Web -Configurations @('TestFunc') -ServerConnections WebServer
+            }
 
             $resolvedRoles = Resolve-ServerRoles -AllEnvironments $Global:Environments -Environment Default -ResolvedTokens @{'nodes' = @{'node' = 'machine1'}}
 
@@ -401,10 +401,10 @@ Describe -Tag "PSCI.unit" "ServerRole" {
 
             Environment Default {
                 ServerConnection WebServer -Nodes @('node1', 'node2')
-			    ServerRole Web -Configurations @('TestFunc', 'TestDSC') -ServerConnections WebServer
+                ServerRole Web -Configurations @('TestFunc', 'TestDSC') -ServerConnections WebServer
                 ServerRole Database -Configurations @('TestFunc') -ServerConnections WebServer
                 ServerRole Database2 -Configurations @('TestFunc2') -ServerConnections WebServer
-		    }
+            }
 
             $resolvedRoles = Resolve-ServerRoles -AllEnvironments $Global:Environments -Environment Default -ResolvedTokens @{} `
                              -ConfigurationsFilter 'TestFunc' -ServerRolesFilter @('Web', 'Database') -NodesFilter 'node1'
@@ -431,10 +431,10 @@ Describe -Tag "PSCI.unit" "ServerRole" {
 
             Environment Default {
                 ServerConnection WebServer -Nodes 'node1'
-			    ServerRole Web -Configurations @('TestFunc', 'TestDSC') -ServerConnections WebServer -RunRemotely
+                ServerRole Web -Configurations @('TestFunc', 'TestDSC') -ServerConnections WebServer -RunRemotely
 
                 ConfigurationSettings TestFunc -RequiredPackages 'package1'
-		    }
+            }
 
             Environment Local {
                 ConfigurationSettings TestFunc -RunRemotely:$false

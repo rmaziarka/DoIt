@@ -23,7 +23,7 @@ SOFTWARE.
 #>
 
 function Get-TargetResource {
-    param(	
+    param(    
         [parameter(Mandatory=$true)] 
         [ValidateNotNullOrEmpty()]
         [string] 
@@ -46,7 +46,7 @@ function Get-TargetResource {
 }
 
 function Test-TargetResource {
-    param(	
+    param(    
         [parameter(Mandatory=$true)] 
         [ValidateNotNullOrEmpty()]
         [string] 
@@ -59,7 +59,7 @@ function Test-TargetResource {
 
 
 function Set-TargetResource {
-    param(	
+    param(    
         [parameter(Mandatory=$true)] 
         [ValidateNotNullOrEmpty()]
         [string] 

@@ -24,11 +24,11 @@ SOFTWARE.
 
 function Send-FileStream {
     <#
-	.SYNOPSIS
-		Sends a file to a remote session using stream.
+    .SYNOPSIS
+        Sends a file to a remote session using stream.
 
-	.PARAMETER Session
-		Open session to the remote server.
+    .PARAMETER Session
+        Open session to the remote server.
 
     .PARAMETER ItemToCopy
         Item that will be copied (output from Get-Item).
@@ -36,12 +36,12 @@ function Send-FileStream {
     .PARAMETER DestinationPath
         Destination path on the remote server.
 
-	.EXAMPLE			
+    .EXAMPLE            
         Send-FileStream -Session $session -ItemToCopy $zipItem -DestinationPath $destZipFile 
 
-	#>
+    #>
     [CmdletBinding()]
-	[OutputType([object[]])]
+    [OutputType([object[]])]
     param(
         [Parameter(Mandatory = $true)]
         [object]

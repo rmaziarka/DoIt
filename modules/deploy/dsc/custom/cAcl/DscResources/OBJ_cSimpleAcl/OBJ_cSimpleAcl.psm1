@@ -23,7 +23,7 @@ SOFTWARE.
 #>
 
 function Get-TargetResource {
-    param(	
+    param(    
         [Parameter(Mandatory=$true)]
         [string]
         $Path,
@@ -75,7 +75,7 @@ function Get-TargetResource {
 }
 
 function Test-TargetResource {
-    param(	
+    param(    
         [Parameter(Mandatory=$true)]
         [string]
         $Path,
@@ -110,7 +110,7 @@ function Test-TargetResource {
 }
 
 function Set-TargetResource {
-    param(	
+    param(    
         [Parameter(Mandatory=$true)]
         [string]
         $Path,

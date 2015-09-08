@@ -46,7 +46,7 @@ function Resolve-ServerConnectionsConfigElements {
                }
             }
         }
-	}
+    }
 
     And creates following structure (when resolved for environment Dev):
 
@@ -54,7 +54,7 @@ function Resolve-ServerConnectionsConfigElements {
         Name1 = @{ 
             Nodes = 'node1' 
         }
-		Name2 = ...
+        Name2 = ...
     }
    
     .PARAMETER AllEnvironments

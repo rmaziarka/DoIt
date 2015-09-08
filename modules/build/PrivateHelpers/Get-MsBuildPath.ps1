@@ -24,8 +24,8 @@ SOFTWARE.
 
 function Get-MsBuildPath {
     <#
-	.SYNOPSIS
-	Gets the path to the given version of MsBuild.exe (or the latest one if not specified).
+    .SYNOPSIS
+    Gets the path to the given version of MsBuild.exe (or the latest one if not specified).
 
     .DESCRIPTION
     If msbuild cannot be found, returns null.
@@ -78,10 +78,10 @@ function Get-MsBuildPath {
         $versions = @($MsBuildVersion)
     }
 
-	foreach ($version in $versions) 
-	{
-		$toolsRegKey = "HKLM:\Software\Microsoft\MSBuild\ToolsVersions\$version"
-		$msBuildToolsPath = Get-ItemProperty -Path $toolsRegKey -Name "MSBuildToolsPath" -ErrorAction SilentlyContinue
+    foreach ($version in $versions) 
+    {
+        $toolsRegKey = "HKLM:\Software\Microsoft\MSBuild\ToolsVersions\$version"
+        $msBuildToolsPath = Get-ItemProperty -Path $toolsRegKey -Name "MSBuildToolsPath" -ErrorAction SilentlyContinue
         if ($msBuildToolsPath -and $msBuildToolsPath.MSBuildToolsPath) {
             $msBuildPath = Join-Path -Path $msBuildToolsPath.MSBuildToolsPath -ChildPath "msbuild.exe"
             # TODO: this doesn't seem right!
@@ -95,7 +95,7 @@ function Get-MsBuildPath {
                 return $msBuildPath
             }    
         }
-	} 
+    } 
 
-	return $null
+    return $null
 }

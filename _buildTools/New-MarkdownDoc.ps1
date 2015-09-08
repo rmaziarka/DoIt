@@ -38,16 +38,16 @@ function New-MarkdownDoc {
     #>
 
     [CmdletBinding()]
-	[OutputType([void])]
-	param(
-		[Parameter(Mandatory=$true)]
-		[string]
+    [OutputType([void])]
+    param(
+        [Parameter(Mandatory=$true)]
+        [string]
         $ModuleName,
 
         [Parameter(Mandatory=$true)]
-		[string]
+        [string]
         $OutputPath
-	)
+    )
 
     $outputBasePath = Join-Path $OutputPath -ChildPath "api\$ModuleName"
     if ((Test-Path -Path $outputBasePath)) { 

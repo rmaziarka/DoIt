@@ -31,10 +31,10 @@ Describe -Tag "PSCI.SSRS" "New-SSRSWebServiceProxy" {
         $proxyUrl = $Uri + "/ReportService2010.asmx"
         
 
-	    It "should return local web service proxy" {
-		    $proxy = New-SSRSWebServiceProxy -Uri $Uri
+        It "should return local web service proxy" {
+            $proxy = New-SSRSWebServiceProxy -Uri $Uri
             $proxy | Should Not Be $null
             $proxy.Url | Should Be $proxyUrl
-	    }
+        }
     }
 }

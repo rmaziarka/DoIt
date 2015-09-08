@@ -25,13 +25,13 @@ SOFTWARE.
 function New-SSRSDataSource {
     <#
     .SYNOPSIS
-    	Creates new SSRS Data Source. 
+        Creates new SSRS Data Source. 
 
     .DESCRIPTION
-    	Creates new SSRS Data Source with the given Proxy and for a given Path and Folder.
+        Creates new SSRS Data Source with the given Proxy and for a given Path and Folder.
 
-	.PARAMETER Proxy
-		ReportingService2010 web service proxy.
+    .PARAMETER Proxy
+        ReportingService2010 web service proxy.
 
     .PARAMETER RdsPath
         Data source path.

@@ -49,29 +49,29 @@ Version number of the current build.
 #>
 [CmdletBinding()]
 param(
-	[Parameter(Mandatory=$false)]
-	[string]
-	$ProjectRootPath = '..', # Modify this path according to your project structure. This is relative to the directory where build.ps1 resides ($PSScriptRoot).
-	
-	[Parameter(Mandatory=$false)]
-	[string]
-	$PSCILibraryPath = '..\..', # Modify this path according to your project structure. This is absolute or relative to $ProjectRootPath. 
-                                # If PSCI doesn't exist at this location, it will be downloaded from nuget.org.
-	[Parameter(Mandatory=$false)]
-	[string]
-	$PackagesPath = 'bin', # Modify this path according to your project structure. This is absolute or relative to $ProjectRootPath.
-
     [Parameter(Mandatory=$false)]
-	[string]
-	$DeployConfigurationPath = '', # Modify this path according to your project structure. This is absolute or relative to $ProjectRootPath (by default '<script directory>\configuration').
+    [string]
+    $ProjectRootPath = '..', # Modify this path according to your project structure. This is relative to the directory where build.ps1 resides ($PSScriptRoot).
     
     [Parameter(Mandatory=$false)]
-	[string[]]
-	$Tasks,
+    [string]
+    $PSCILibraryPath = '..\..', # Modify this path according to your project structure. This is absolute or relative to $ProjectRootPath. 
+                                # If PSCI doesn't exist at this location, it will be downloaded from nuget.org.
+    [Parameter(Mandatory=$false)]
+    [string]
+    $PackagesPath = 'bin', # Modify this path according to your project structure. This is absolute or relative to $ProjectRootPath.
 
     [Parameter(Mandatory=$false)]
-	[string]
-	$Version = '1.0.0' # This should be passed from your CI server
+    [string]
+    $DeployConfigurationPath = '', # Modify this path according to your project structure. This is absolute or relative to $ProjectRootPath (by default '<script directory>\configuration').
+    
+    [Parameter(Mandatory=$false)]
+    [string[]]
+    $Tasks,
+
+    [Parameter(Mandatory=$false)]
+    [string]
+    $Version = '1.0.0' # This should be passed from your CI server
 )
 
 $global:ErrorActionPreference = 'Stop'
@@ -80,7 +80,7 @@ try {
     ############# PSCI initialization
     Push-Location -Path $PSScriptRoot
     if (![System.IO.Path]::IsPathRooted($PSCILibraryPath)) {
-    	$PSCILibraryPath = Join-Path -Path $ProjectRootPath -ChildPath $PSCILibraryPath
+        $PSCILibraryPath = Join-Path -Path $ProjectRootPath -ChildPath $PSCILibraryPath
     }
     
     if (!(Test-Path -LiteralPath "$PSCILibraryPath\PSCI.psd1")) {
@@ -88,7 +88,7 @@ try {
             Write-Host -Object "PSCI library found at '$PSScriptRoot\packages\PSCI'."
         } else {
             Write-Host -Object "Cannot find PSCI library at '$PSCILibraryPath' (current dir: '$PSScriptRoot') - downloading nuget.exe."
-		    Invoke-WebRequest -Uri 'http://nuget.org/nuget.exe' -OutFile "$env:TEMP\NuGet.exe"
+            Invoke-WebRequest -Uri 'http://nuget.org/nuget.exe' -OutFile "$env:TEMP\NuGet.exe"
             if (!(Test-Path "$env:TEMP\NuGet.exe")) {
                 Write-Host -Object "Failed to download nuget.exe to '$env:TEMP'. Please download PSCI manually and set PSCILibraryPath parameter to an existing path."
                 exit 1
@@ -96,12 +96,12 @@ try {
             Write-Host -Object 'Nuget.exe downloaded successfully - installing PSCI.'
 
             & "$env:TEMP\NuGet.exe" install PSCI -ExcludeVersion -OutputDirectory "$PSScriptRoot\packages"
-		    $PSCILibraryPath = "$PSScriptRoot\packages\PSCI"
+            $PSCILibraryPath = "$PSScriptRoot\packages\PSCI"
 
-	        if (!(Test-Path -LiteralPath "$PSCILibraryPath\PSCI.psd1")) {
+            if (!(Test-Path -LiteralPath "$PSCILibraryPath\PSCI.psd1")) {
                 Write-Host -Object "Cannot find PSCI library at '$PSCILibraryPath' (current dir: '$PSScriptRoot'). PSCI was not properly installed as nuget."
-    	        exit 1
-		    }
+                exit 1
+            }
         }
         $PSCILibraryPath = "$PSScriptRoot\packages\PSCI"
     } else {

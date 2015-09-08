@@ -139,13 +139,13 @@ function New-ConnectionParameters {
          }
          if ($RemotingMode -eq "WebDeployHandler") {
             if (!$Port) {
-		        # default port
+                # default port
                 $Port = '8172'
             }
             $url = "https://{0}:{1}/msdeploy.axd" -f $Nodes[0], $Port
         } else {
             if (!$Port) {
-		        # default port
+                # default port
                 $Port = '80'
             }
             $url = "http://{0}:{1}/MsDeployAgentService" -f $Nodes[0], $Port

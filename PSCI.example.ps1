@@ -31,9 +31,9 @@ Import-Module -Name (Join-Path -Path $PSScriptRoot -ChildPath "PSCI.psm1") -Forc
 # $PSCIGlobalConfiguration.LogFile = "$PSScriptRoot\PSCI.example.txt"
 
 try {
-	# Put your code here
-	
-	# Install-DscResources
+    # Put your code here
+    
+    # Install-DscResources
 } catch {
     Write-ErrorRecord
 }

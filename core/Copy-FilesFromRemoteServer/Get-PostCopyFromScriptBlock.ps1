@@ -25,7 +25,7 @@ SOFTWARE.
 function Get-PostCopyFromScriptBlock {
     <#
     .SYNOPSIS
-	    Returns a scriptblock that deletes temporary zip file.
+        Returns a scriptblock that deletes temporary zip file.
 
     .EXAMPLE
         $postCopyScriptBlock = Get-PostCopyFromScriptBlock
@@ -37,8 +37,8 @@ function Get-PostCopyFromScriptBlock {
     return {
 
         [CmdletBinding()]
-	    [OutputType([string])]
-	    param(
+        [OutputType([string])]
+        param(
             [Parameter(Mandatory = $true)]
             [string]
             $FileToDelete

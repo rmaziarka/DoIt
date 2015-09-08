@@ -26,7 +26,7 @@ $activeSetupRegParentPath = 'HKLM:\Software\Microsoft\Active Setup\Installed Com
 
 function Get-TargetResource {
     param
-    (	
+    (    
         [parameter(Mandatory=$true)] 
         [ValidateNotNullOrEmpty()]
         [string] 
@@ -52,8 +52,8 @@ function Get-TargetResource {
         $ValueType,
 
         [ValidateSet("Present", "Absent")]
-		[System.String]
-		$Ensure = "Present"
+        [System.String]
+        $Ensure = "Present"
     )
 
     $result = @{ 
@@ -108,7 +108,7 @@ function Get-TargetResource {
 
 function Test-TargetResource {
     param
-    (	
+    (    
         [parameter(Mandatory=$true)] 
         [ValidateNotNullOrEmpty()]
         [string] 
@@ -134,8 +134,8 @@ function Test-TargetResource {
         $ValueType,
 
         [ValidateSet("Present", "Absent")]
-		[System.String]
-		$Ensure = "Present"
+        [System.String]
+        $Ensure = "Present"
     )
 
     $currentState = Get-TargetResource @PSBoundParameters
@@ -170,7 +170,7 @@ function Test-TargetResource {
 
 function Set-TargetResource {
     param
-    (	
+    (    
         [parameter(Mandatory=$true)] 
         [ValidateNotNullOrEmpty()]
         [string] 
@@ -196,8 +196,8 @@ function Set-TargetResource {
         $ValueType,
 
         [ValidateSet("Present", "Absent")]
-		[System.String]
-		$Ensure = "Present"
+        [System.String]
+        $Ensure = "Present"
     )
 
     if (!(Get-PSDrive -Name HKU -ErrorAction SilentlyContinue)) {

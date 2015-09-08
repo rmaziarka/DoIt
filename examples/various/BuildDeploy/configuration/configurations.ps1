@@ -92,7 +92,7 @@ Configuration WebServerIISConfig {
 
         cWebsite PSCIWebsite { 
             Name   = $Tokens.WebServerProvision.WebsiteName
-			ApplicationPool = $Tokens.WebServerProvision.AppPoolName 
+            ApplicationPool = $Tokens.WebServerProvision.AppPoolName 
             Ensure = 'Present' 
             BindingInfo = OBJ_cWebBindingInformation { 
                             Port = $Tokens.WebServerProvision.WebsitePort
@@ -101,7 +101,7 @@ Configuration WebServerIISConfig {
             State = 'Started' 
             DependsOn = @('[File]PSCITestWebsiteDir')
         } 
-		
+        
 
         cIISWebsiteAuthentication PSCIWebsiteWindowsAuth {
             WebsiteName =  $Tokens.WebServerProvision.WebsiteName
@@ -121,7 +121,7 @@ Configuration WebServerIISConfig {
 }
 
 function DatabaseServerDeploy {
-	param ($NodeName, $Tokens, $Environment)
+    param ($NodeName, $Tokens, $Environment)
 
     $databaseName = $Tokens.DatabaseConfig.DatabaseName
     $connectionString = $Tokens.DatabaseConfig.DatabaseDeploymentConnectionString
@@ -142,7 +142,7 @@ function RemotingTestPrepare {
 }
 
 function RemotingTestValidate {
-	param ($NodeName, $Tokens, $Environment, $ConnectionParams)
+    param ($NodeName, $Tokens, $Environment, $ConnectionParams)
 
     if (!(Test-Path -LiteralPath 'c:\PSCITest\RemotingTestEvidence')) {
         throw 'Test evidence does not exist at c:\PSCITest\RemotingTestEvidence.'

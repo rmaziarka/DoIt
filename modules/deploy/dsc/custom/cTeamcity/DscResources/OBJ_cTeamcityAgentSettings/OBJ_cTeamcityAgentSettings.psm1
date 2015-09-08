@@ -24,7 +24,7 @@ SOFTWARE.
 
 function Get-TargetResource {
     param
-    (	
+    (    
         [parameter(Mandatory=$true)] 
         [ValidateNotNullOrEmpty()]
         [string] 
@@ -52,22 +52,22 @@ function Get-TargetResource {
 
 function Test-TargetResource {
     param
-    (	
+    (    
         [parameter(Mandatory=$true)] 
         [ValidateNotNullOrEmpty()]
         [string] 
         $TeamcityAgentPath,
 
         [parameter(Mandatory = $true)]
-    	[string]
+        [string]
         $ServerUrl, 
 
         [parameter(Mandatory = $false)]
-    	[string]
+        [string]
         $AgentName,
 
         [parameter(Mandatory = $false)]
-    	[string]
+        [string]
         $AgentPort
     )
 
@@ -94,22 +94,22 @@ function Test-TargetResource {
 
 function Set-TargetResource {
     param
-    (	
+    (    
         [parameter(Mandatory=$true)] 
         [ValidateNotNullOrEmpty()]
         [string] 
         $TeamcityAgentPath,
 
         [parameter(Mandatory = $true)]
-    	[string]
+        [string]
         $ServerUrl, 
 
         [parameter(Mandatory = $false)]
-    	[string]
+        [string]
         $AgentName,
 
         [parameter(Mandatory = $false)]
-    	[string]
+        [string]
         $AgentPort
     )
 

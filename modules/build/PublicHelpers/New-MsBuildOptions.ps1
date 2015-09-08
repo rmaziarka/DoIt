@@ -24,8 +24,8 @@ SOFTWARE.
 
 function New-MsBuildOptions {
      <#
-	.SYNOPSIS
-	Creates a new object containing options for Invoke-MsBuild.
+    .SYNOPSIS
+    Creates a new object containing options for Invoke-MsBuild.
 
     .PARAMETER BasedOn
     Another MsBuildOptions object - if specified, properties of this object will be copied to the new MsBuildOptions object.

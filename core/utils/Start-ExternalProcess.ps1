@@ -23,7 +23,7 @@ SOFTWARE.
 #>
 
 function Start-ExternalProcess {
-	<#
+    <#
         .SYNOPSIS
         Runs external process.
 
@@ -69,20 +69,20 @@ function Start-ExternalProcess {
         .EXAMPLE
         Start-ExternalProcess -Command "git" -ArgumentList "--version"
     #>
-	[CmdletBinding()]
-	[OutputType([int])]
-	param(
-		[Parameter(Mandatory=$true)]
-		[ValidateNotNullOrEmpty()]
-		[string]
-		$Command,
+    [CmdletBinding()]
+    [OutputType([int])]
+    param(
+        [Parameter(Mandatory=$true)]
+        [ValidateNotNullOrEmpty()]
+        [string]
+        $Command,
 
         [Parameter(Mandatory=$false)]
         # Type commented out for Pester bug: https://github.com/pester/Pester/issues/214
-		#[string]
+        #[string]
         $ArgumentList,
 
-		[Parameter(Mandatory=$false)]
+        [Parameter(Mandatory=$false)]
         [string] 
         $WorkingDirectory, 
         
@@ -117,7 +117,7 @@ function Start-ExternalProcess {
         [Parameter(Mandatory=$false)]
         [string]
         $IgnoreOutputRegex
-	)
+    )
 
     $commandPath = $Command
     if (!(Test-Path -LiteralPath $commandPath)) {
@@ -145,16 +145,16 @@ function Start-ExternalProcess {
         Write-Log -Info "Running external process: $Command $ArgumentList"
     }
 
-	$process = New-Object -TypeName System.Diagnostics.Process
-	$process.StartInfo.CreateNoWindow = $true
-	$process.StartInfo.FileName = $commandPath
-	$process.StartInfo.UseShellExecute = $false
+    $process = New-Object -TypeName System.Diagnostics.Process
+    $process.StartInfo.CreateNoWindow = $true
+    $process.StartInfo.FileName = $commandPath
+    $process.StartInfo.UseShellExecute = $false
     $process.StartInfo.RedirectStandardOutput = $true
-	$process.StartInfo.RedirectStandardError = $true
+    $process.StartInfo.RedirectStandardError = $true
     $process.StartInfo.RedirectStandardInput = $true
-	
+    
     if ($WorkingDirectory) {
-	    $process.StartInfo.WorkingDirectory = $WorkingDirectory
+        $process.StartInfo.WorkingDirectory = $WorkingDirectory
     }
 
     if ($Credential) {
@@ -167,8 +167,8 @@ function Start-ExternalProcess {
     $outputDataSourceIdentifier = "ExternalProcessOutput"
     $errorDataSourceIdentifier = "ExternalProcessError"
 
-	Register-ObjectEvent -InputObject $process -EventName OutputDataReceived -SourceIdentifier $outputDataSourceIdentifier
-	Register-ObjectEvent -InputObject $process -EventName ErrorDataReceived -SourceIdentifier $errorDataSourceIdentifier
+    Register-ObjectEvent -InputObject $process -EventName OutputDataReceived -SourceIdentifier $outputDataSourceIdentifier
+    Register-ObjectEvent -InputObject $process -EventName ErrorDataReceived -SourceIdentifier $errorDataSourceIdentifier
 
     try {
         $stdOut = ""
@@ -176,11 +176,11 @@ function Start-ExternalProcess {
         $isStringPresenceError = $false
 
         $process.StartInfo.Arguments = $ArgumentList
-		
-	    [void]$process.Start()
+        
+        [void]$process.Start()
     
         $process.BeginOutputReadLine()
-	    $process.BeginErrorReadLine()
+        $process.BeginErrorReadLine()
 
         $getEventLogParams = @{OutputDataSourceIdentifier=$outputDataSourceIdentifier;
                           ErrorDataSourceIdentifier=$errorDataSourceIdentifier;
@@ -204,10 +204,10 @@ function Start-ExternalProcess {
             }
         }
 
-	    while (!$process.WaitForExit(1000)) {
-		    Write-EventsToLog @getEventLogParams | Where-Object -FilterScript $validateErrorScript
-	    }
-	    Write-EventsToLog @getEventLogParams | Where-Object -FilterScript $validateErrorScript
+        while (!$process.WaitForExit(1000)) {
+            Write-EventsToLog @getEventLogParams | Where-Object -FilterScript $validateErrorScript
+        }
+        Write-EventsToLog @getEventLogParams | Where-Object -FilterScript $validateErrorScript
     } finally {
         Unregister-Event -SourceIdentifier ExternalProcessOutput
         Unregister-Event -SourceIdentifier ExternalProcessError
@@ -229,7 +229,7 @@ function Start-ExternalProcess {
         throw "External command failed - stdout contains string '$FailOnStringPresence'"
     }
 
-	if ($ReturnLastExitCode) {
+    if ($ReturnLastExitCode) {
         return $process.ExitCode
     }
 }
@@ -301,10 +301,10 @@ function Write-EventsToLog {
     # note: sometimes 'Collection was modified' is thrown by Get-Event.
     # Tried storing events in a hashset and removing them later in a loop, but it doesn't seem to help.
     # $eventIds = New-Object System.Collections.Generic.HashSet[System.String]
-	
+    
     try {
         Get-Event -SourceIdentifier $OutputDataSourceIdentifier -ErrorAction SilentlyContinue | ForEach-Object {
-		    if ($_.SourceEventArgs.Data -and (!$IgnoreOutputRegex -or $_.SourceEventArgs.Data -inotmatch $IgnoreOutputRegex)) {
+            if ($_.SourceEventArgs.Data -and (!$IgnoreOutputRegex -or $_.SourceEventArgs.Data -inotmatch $IgnoreOutputRegex)) {
                 if (!$Quiet) {
                     Write-Log -Info ("[STDOUT] " + $_.SourceEventArgs.Data) -NoHeader
                 }
@@ -316,21 +316,21 @@ function Write-EventsToLog {
                 if ($Output) {
                     $Output.Value += $_.SourceEventArgs.Data
                 }
-		    }
+            }
             Remove-Event -EventIdentifier $_.EventIdentifier -ErrorAction SilentlyContinue
             #[void]($eventIds.Add($_.EventIdentifier))
-	    }
+        }
     
-	    Get-Event -SourceIdentifier $ErrorDataSourceIdentifier -ErrorAction SilentlyContinue | ForEach-Object {
-		    if ($_.SourceEventArgs.Data -and (!$IgnoreOutputRegex -or $_.SourceEventArgs.Data -inotmatch $IgnoreOutputRegex)) {
+        Get-Event -SourceIdentifier $ErrorDataSourceIdentifier -ErrorAction SilentlyContinue | ForEach-Object {
+            if ($_.SourceEventArgs.Data -and (!$IgnoreOutputRegex -or $_.SourceEventArgs.Data -inotmatch $IgnoreOutputRegex)) {
                 if (!$Quiet) {
                     Write-Log -Error ("[STDERR] " + $_.SourceEventArgs.Data) -NoHeader
                 }
                 $error = "StandardError"
-		    }
+            }
             Remove-Event -EventIdentifier $_.EventIdentifier -ErrorAction SilentlyContinue
             #[void]($eventIds.Add($_.EventIdentifier))
-	    }
+        }
     } catch {
       Write-Log -Warn ("Couldn't get events: {0}" -f $_)
     }

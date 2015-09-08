@@ -67,9 +67,9 @@ function Start-DscConfigurationWithRetries
         $ConnectionParams,
 
         [Parameter(Mandatory=$false)]
-	    [int]
-	    $MaximumAttempts = 30,
-		
+        [int]
+        $MaximumAttempts = 30,
+        
         [Parameter(Mandatory=$false)]
         [switch]
         $DscForce = $true,

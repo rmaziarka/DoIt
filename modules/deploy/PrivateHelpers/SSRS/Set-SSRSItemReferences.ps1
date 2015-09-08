@@ -25,25 +25,25 @@ SOFTWARE.
 function Set-SSRSItemReferences {
     <#
     .SYNOPSIS
-    	Sets the catalog items associated with an item.
+        Sets the catalog items associated with an item.
 
     .DESCRIPTION
-    	Sets the catalog items associated with an item. This method applies to the Report and Dataset item types.
+        Sets the catalog items associated with an item. This method applies to the Report and Dataset item types.
     
-	.PARAMETER Proxy
-		ReportingService2010 web service proxy.
+    .PARAMETER Proxy
+        ReportingService2010 web service proxy.
 
-	.PARAMETER ItemPath
-		The fully qualified URL of the item including the file name and, in SharePoint mode, the extension.
+    .PARAMETER ItemPath
+        The fully qualified URL of the item including the file name and, in SharePoint mode, the extension.
 
     .PARAMETER ItemReferences
-    	The item references to set.
+        The item references to set.
 
     .EXAMPLE
         $Reference = New-Object -TypeName SSRS.ReportingService2010.ItemReference
         $Reference.Reference = $DataSourcePath
-		$Reference.Name = 'MyDataSource'
-		Set-SSRSItemReferences -Proxy $Proxy -ItemPath ('/DataSets/MySharedDataSet') -ItemReferences @($Reference)
+        $Reference.Name = 'MyDataSource'
+        Set-SSRSItemReferences -Proxy $Proxy -ItemPath ('/DataSets/MySharedDataSet') -ItemReferences @($Reference)
 
     #>
     [CmdletBinding()]

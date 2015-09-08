@@ -27,7 +27,7 @@ Import-Module -Name "$PSScriptRoot\..\..\..\..\PSCI.psd1"
 Describe -Tag "PSCI.unit" "New-XmlNamespaceManager" {
     InModuleScope PSCI.deploy {
         Context "when used with existing namespaces" { 
-	        It "should define default namespace" {
+            It "should define default namespace" {
                 $doc = [xml] @"
 <?xml version="1.0" encoding="windows-1250"?>
 <Report xmlns:rd="http://schemas.microsoft.com/SQLServer/reporting/reportdesigner" xmlns:cl="http://schemas.microsoft.com/sqlserver/reporting/2010/01/componentdefinition" xmlns="http://schemas.microsoft.com/sqlserver/reporting/2010/01/reportdefinition">
@@ -37,7 +37,7 @@ Describe -Tag "PSCI.unit" "New-XmlNamespaceManager" {
                 $nsmgr = New-XmlNamespaceManager -XmlDocument $doc -DefaultNamespacePrefix 'd'
 
                 $nsmgr.HasNamespace('d') | Should Be $true
-	        }
+            }
         }
     }
 }

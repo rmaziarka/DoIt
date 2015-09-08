@@ -44,7 +44,7 @@ Describe -Tag "PSCI.unit" "Deploy-MsDeployPackage" {
         Context "when using tokens update with SetParam mode" {
 
             It "should assign parameters as SetParam" {
-            	$Tokens = @{ token1='val1';  
+                $Tokens = @{ token1='val1';  
                              'Dummy-Web.config Connection String'='Data source=.;Integrated Security=True'; };
 
                 $msDeployParams = @{ PackageName = 'WebApp';
@@ -54,7 +54,7 @@ Describe -Tag "PSCI.unit" "Deploy-MsDeployPackage" {
                                      TokensForConfigFiles = $Tokens;
                                      Website = 'Default Web Site';
                                      TokenUpdateMode = 'SetParam';
-					               }
+                                   }
 
                 Deploy-MsDeployPackage @msDeployParams
 
@@ -77,7 +77,7 @@ Describe -Tag "PSCI.unit" "Deploy-MsDeployPackage" {
                                      TokensForConfigFiles = $null;
                                      Website = 'MySite';
                                      WebApplication = 'MyApplication';
-					               }
+                                   }
 
                 Deploy-MsDeployPackage @msDeployParams
 
@@ -96,7 +96,7 @@ Describe -Tag "PSCI.unit" "Deploy-MsDeployPackage" {
                                      MsDeployDestinationString = $dest;
                                      TokensForConfigFiles = $null;
                                      Website = 'MySite';
-					               }
+                                   }
 
                 Deploy-MsDeployPackage @msDeployParams
 

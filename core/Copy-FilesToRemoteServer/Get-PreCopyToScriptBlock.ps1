@@ -25,8 +25,8 @@ SOFTWARE.
 function Get-PreCopyToScriptBlock {
 
     <#
-	.SYNOPSIS
-		Returns a scriptblock that prepares destination directory for Copy-FilesToRemoteServer.
+    .SYNOPSIS
+        Returns a scriptblock that prepares destination directory for Copy-FilesToRemoteServer.
 
     .DESCRIPTION
         If $BlueGreenEnvVariableName is passed, it selects destination directory basing on environment variable.
@@ -36,14 +36,14 @@ function Get-PreCopyToScriptBlock {
         $preCopyScriptBlock = Get-PreCopyToScriptBlock 
     #>
     [CmdletBinding()]
-	[OutputType([scriptblock])]
+    [OutputType([scriptblock])]
     param()
 
     return {
         
         [CmdletBinding()]
-	    [OutputType([string])]
-	    param(
+        [OutputType([string])]
+        param(
             [Parameter(Mandatory = $true)]
             [string]
             $ZipFileName,

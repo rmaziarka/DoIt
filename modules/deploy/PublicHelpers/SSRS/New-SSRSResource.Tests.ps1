@@ -37,16 +37,16 @@ Describe -Tag "PSCI.SSRS" "New-SSRSResource" {
             Mock Get-AllBytes { return [Byte[]] (,0xFF * 100) }
             Mock New-SSRSCatalogItem {}
         
-	        It "should create new catalog item" {
+            It "should create new catalog item" {
                 $proxy = New-SSRSWebServiceProxy -Uri 'http://localhost/reportserver/ReportService2010.asmx'
-		        New-SSRSResource -Proxy $proxy -FilePath 'image.jpg' -Folder '.' -MimeType 'image/jpeg'
+                New-SSRSResource -Proxy $proxy -FilePath 'image.jpg' -Folder '.' -MimeType 'image/jpeg'
 
                 Assert-MockCalled New-SSRSCatalogItem -Exactly 1 -ParameterFilter { 
                     $ItemType -eq 'Resource' -and
                     $Overwrite -eq $true -and 
                     $Name -eq 'image.jpg'
                 }
-	        }
+            }
         }
     }
 }

@@ -25,7 +25,7 @@ SOFTWARE.
 function Get-PostCopyToScriptBlock {
     <#
     .SYNOPSIS
-	    Returns a scriptblock that uncompresses zip file and creates syncHash_* file for Copy-FilesToRemoteServer.
+        Returns a scriptblock that uncompresses zip file and creates syncHash_* file for Copy-FilesToRemoteServer.
 
     .DESCRIPTION
         If $BlueGreenEnvVariableName is passed, it also creates '.currentLive' file in current destination directory.
@@ -40,8 +40,8 @@ function Get-PostCopyToScriptBlock {
     return {
 
         [CmdletBinding()]
-	    [OutputType([string])]
-	    param(
+        [OutputType([string])]
+        param(
             [Parameter(Mandatory = $true)]
             [string]
             $ZipFilePath,

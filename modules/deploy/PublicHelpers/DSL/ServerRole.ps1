@@ -83,17 +83,17 @@ function ServerRole {
     .EXAMPLE
     Environment Default {
         ServerRole WebServer -Configurations @('WebServerProvision')
-    	ServerRole DatabaseServer -Configurations @('DatabaseServerDeploy') #-RemotingCredential { $Tokens.Credentials.RemotingCredential }
+        ServerRole DatabaseServer -Configurations @('DatabaseServerDeploy') #-RemotingCredential { $Tokens.Credentials.RemotingCredential }
     }
 
     Environment Local {
         ServerRole WebServer -Nodes 'localhost'
-    	ServerRole DatabaseServer -Nodes 'localhost'
+        ServerRole DatabaseServer -Nodes 'localhost'
     }
 
     Environment Dev { 
         ServerRole WebServer -Nodes 'server1'
-    	ServerRole DatabaseServer -Nodes 'server2'
+        ServerRole DatabaseServer -Nodes 'server2'
     }
 
     a) ServerRole WebServer -Configurations 'WebServerProvision' -ServerConnections 'WebServer1'

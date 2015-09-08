@@ -25,14 +25,14 @@ SOFTWARE.
 function Get-ReadBytesScriptBlock {
 
     <#
-	.SYNOPSIS
-		Returns a scriptblock that reads specified block of file. This is a helper for Copy-FilesFromRemoteServer / Get-RemoteFileUsingStream.
+    .SYNOPSIS
+        Returns a scriptblock that reads specified block of file. This is a helper for Copy-FilesFromRemoteServer / Get-RemoteFileUsingStream.
 
     .EXAMPLE
         $readBytesRemoteScript = Get-ReadBytesScriptBlock
     #>
     [CmdletBinding()]
-	[OutputType([scriptblock])]
+    [OutputType([scriptblock])]
     param()
 
     return {

@@ -53,19 +53,30 @@ $customSources = Get-ChildItem -Path "$PSScriptRoot\.." -File -Filter "*.ps*1" -
                  Where-Object { $_ -inotmatch '(_buildTools\\Pester|_buildtools\\ScriptCop|externalLibs\\|dsc\\ext|cIIS\\|PSHOrg|examples\\|OBJ_cServiceResource)' }
 
 
-$notMatching = New-Object -TypeName System.Collections.ArrayList
+$licenseNotMatching = New-Object -TypeName System.Collections.ArrayList
+$tabsNotMatching = New-Object -TypeName System.Collections.ArrayList
 
 foreach ($file in $customSources) {
     $content = Get-Content -Path $file -ReadCount 0 | Out-String
     if (!$content.StartsWith($licenseText)) { 
-        [void]($notMatching.Add($file))
+        [void]($licenseNotMatching.Add($file))
+    }
+    if ($content -match '\t') {
+        [void]($tabsNotMatching.Add($file))
     }
 }
 
-$notMatching
-if ($notMatching) {
-    throw ('Checked {0} files - there are {1} files without valid license header' -f $customSources.Count, $notMatching.Count)
+$errMsg = @()
+if ($licenseNotMatching) {
+    $errMsg += 'There are {0} files without valid license header: {1}' -f $licenseNotMatching.Count, ($licenseNotMatching -join ', ')
+}
+if ($tabsNotMatching) {
+    $errMsg += 'There are {0} files with tabs: {1}' -f $customSources.Count, ($tabsNotMatching -join ', ')
 }
 
-Write-Host ('Checked {0} files - all have valid license header.' -f $customSources.Count)
+if ($errMsg) {
+    throw ($errMsg -join "`r`n")   
+}
+
+Write-Host ('Checked {0} files - all files passed sanity checks.' -f $customSources.Count)
 

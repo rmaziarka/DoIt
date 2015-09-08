@@ -80,7 +80,7 @@ function Set-ReportVersion {
         throw "Report $FilePath cannot be versioned: object $VersionPlaceHolderXpath cannot be found. Make sure that VersionPlaceHolderXpath and it's Namespace match the report structure"
     }
 
-	$reportVersionTextBox.Value  = ("Ver. " + $version)
+    $reportVersionTextBox.Value  = ("Ver. " + $version)
 
     $reportXml.Save($FilePath)
 }

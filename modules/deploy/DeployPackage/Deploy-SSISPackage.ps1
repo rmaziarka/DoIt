@@ -25,29 +25,29 @@ SOFTWARE.
 function Deploy-SSISPackage {
     
     <#
-    	.SYNOPSIS
-    		Deploys SSIS packages on local server.
+        .SYNOPSIS
+            Deploys SSIS packages on local server.
     
-    	.PARAMETER  PackageName
-    		Name of the package to be deployed.
+        .PARAMETER  PackageName
+            Name of the package to be deployed.
 
         .PARAMETER  ConfigurationPath
-    		Path of the SSIS packages configurations.
+            Path of the SSIS packages configurations.
 
         .PARAMETER  PackagePath
-    		Path of the package.
+            Path of the package.
 
         .PARAMETER  DeleteExistingPackages
-    		If $true then delete existing SSIS packages before deploying new ones.
+            If $true then delete existing SSIS packages before deploying new ones.
 
         .PARAMETER  Tokens
-    		Hashtable with tokens that will be used to replace placeholders in packages configuration files located in $ConfigurationPath.
+            Hashtable with tokens that will be used to replace placeholders in packages configuration files located in $ConfigurationPath.
 
         .PARAMETER  FolderPath
-    		Path on the localhost where SSIS packages will be deployed .
+            Path on the localhost where SSIS packages will be deployed .
    
-    	.EXAMPLE
-    		PS C:\> Deploy-SSISPackage -PackageName 'MyPackage' -ConfigurationPath 'C:\MyPackages\Config\'
+        .EXAMPLE
+            PS C:\> Deploy-SSISPackage -PackageName 'MyPackage' -ConfigurationPath 'C:\MyPackages\Config\'
     #>
     [CmdletBinding()]
     [OutputType([void])]

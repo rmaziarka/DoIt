@@ -25,13 +25,13 @@ SOFTWARE.
 function Format-SSRSFolder {
     <#
     .SYNOPSIS
-    	Normalizes SSRS folder name.
+        Normalizes SSRS folder name.
 
     .DESCRIPTION
-    	Prefixes folder name with '/' if not there already.
+        Prefixes folder name with '/' if not there already.
 
-	.PARAMETER Folder
-		Path to Folder.
+    .PARAMETER Folder
+        Path to Folder.
 
     .EXAMPLE
         Format-SSRSFolder -Folder "JiraReporting"

@@ -28,10 +28,10 @@ function New-SSRSFolder {
         Creates new SSRS Reports Folder.
 
     .DESCRIPTION
-    	Creates new SSRS Reports Folder with the given Proxy and Folder Name.
+        Creates new SSRS Reports Folder with the given Proxy and Folder Name.
 
-	.PARAMETER Proxy
-		ReportingService2010 web service proxy.
+    .PARAMETER Proxy
+        ReportingService2010 web service proxy.
 
     .PARAMETER Name
         SSRS folder name.

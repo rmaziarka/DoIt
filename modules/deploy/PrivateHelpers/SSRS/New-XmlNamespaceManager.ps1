@@ -25,16 +25,16 @@ SOFTWARE.
 function New-XmlNamespaceManager {
     <#
     .SYNOPSIS
-    	Resolves Report xml namespaces to a collection for a given namespace prefix.
+        Resolves Report xml namespaces to a collection for a given namespace prefix.
 
     .DESCRIPTION
-    	Resolves Report xml namespaces to a collection and provides scope management for these namespaces.
+        Resolves Report xml namespaces to a collection and provides scope management for these namespaces.
 
-	.PARAMETER XmlDocument
-		SSRS Report RDL file.
+    .PARAMETER XmlDocument
+        SSRS Report RDL file.
 
     .PARAMETER DefaultNamespacePrefix
-    	[Optional] Namespace prefix.
+        [Optional] Namespace prefix.
 
     .LINK
         http://msdn.microsoft.com/pl-pl/library/system.xml.xmlnamespacemanager(v=vs.110).aspx

@@ -30,12 +30,12 @@ Describe -Tag "PSCI.unit" "Tokens" {
            It "should properly initialize internal structures" {
                 Initialize-Deployment
 
-			    Environment Default {
-			        Tokens WebConfig @{
+                Environment Default {
+                    Tokens WebConfig @{
                         SessionTimeout = '30'
-		                NLogLevels = 'Error,Fatal'
-	                }
-			    }
+                        NLogLevels = 'Error,Fatal'
+                    }
+                }
 
                 $Environments.Count | Should Be 1
                 $Environments.Default | Should Not Be $null
@@ -53,18 +53,18 @@ Describe -Tag "PSCI.unit" "Tokens" {
            It "should properly initialize internal structures" {
                 Initialize-Deployment
 
-			    Environment Default {
-			        Tokens WebConfig @{
+                Environment Default {
+                    Tokens WebConfig @{
                         SessionTimeout = '30'
-		                NLogLevels = 'Error,Fatal'
-	                }
-			    }
+                        NLogLevels = 'Error,Fatal'
+                    }
+                }
 
-			    Environment Local {
-			        Tokens DbConfig @{
+                Environment Local {
+                    Tokens DbConfig @{
                         ConnectionString = 'Server=${DbServer};Database=BSG;Integrated Security=SSPI;'
-	                }
-			    }
+                    }
+                }
 
                 $Environments.Count | Should Be 2
 
@@ -89,18 +89,18 @@ Describe -Tag "PSCI.unit" "Tokens" {
            It "should properly initialize internal structures" {
                 Initialize-Deployment
 
-			    Environment Default {
-			        Tokens WebConfig @{
+                Environment Default {
+                    Tokens WebConfig @{
                         SessionTimeout = '30'
-		                NLogLevels = 'Error,Fatal'
-	                }
+                        NLogLevels = 'Error,Fatal'
+                    }
                 }
 
-			    Environment Local {
-			        Tokens WebConfig @{
+                Environment Local {
+                    Tokens WebConfig @{
                         SessionTimeout = '31'
-	                }
-			    }
+                    }
+                }
 
                 $Environments.Count | Should Be 2
 
@@ -125,18 +125,18 @@ Describe -Tag "PSCI.unit" "Tokens" {
            It "should properly initialize internal structures" {
                 Initialize-Deployment
 
-			    Environment Default {
-			        Tokens WebConfig @{
+                Environment Default {
+                    Tokens WebConfig @{
                         SessionTimeout = '30'
-		                NLogLevels = 'Error,Fatal'
-	                }
+                        NLogLevels = 'Error,Fatal'
+                    }
 
-			        Server 's01' {
-			            Tokens WebConfig @{
+                    Server 's01' {
+                        Tokens WebConfig @{
                             SessionTimeout = '31'
-	                    }
-			        }
-			    }
+                        }
+                    }
+                }
 
                 $Environments.Count | Should Be 1
 
@@ -162,18 +162,18 @@ Describe -Tag "PSCI.unit" "Tokens" {
            It "should properly initialize internal structures" {
                 Initialize-Deployment
 
-			    Environment Parent {
-			        Tokens WebConfig @{
+                Environment Parent {
+                    Tokens WebConfig @{
                         SessionTimeout = '30'
-		                NLogLevels = 'Error,Fatal'
-	                }
+                        NLogLevels = 'Error,Fatal'
+                    }
                 }
 
-			    Environment Child -BasedOn Parent {
-			        Tokens WebConfig @{
+                Environment Child -BasedOn Parent {
+                    Tokens WebConfig @{
                         SessionTimeout = '40'
-		                NLogLevels = 'Error'
-	                }
+                        NLogLevels = 'Error'
+                    }
                 }
 
                 $Environments.Count | Should Be 3
@@ -188,11 +188,11 @@ Describe -Tag "PSCI.unit" "Tokens" {
            It "should properly initialize internal structures" {
                 Initialize-Deployment
 
-			    Environment Default {
-			        Tokens WebConfig @{
+                Environment Default {
+                    Tokens WebConfig @{
                         Credentials = ConvertTo-PSCredential -User "Test" -Password "Test"
                         Timeout = 60
-	                }
+                    }
                 }
 
                 $Environments.Count | Should Be 1

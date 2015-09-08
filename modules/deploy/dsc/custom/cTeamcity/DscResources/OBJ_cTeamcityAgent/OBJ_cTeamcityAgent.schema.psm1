@@ -26,51 +26,51 @@ Configuration cTeamCityAgent {
 
     param(
         [parameter(Mandatory = $true)]
-    	[string]
+        [string]
         $SourcePath,
 
         [parameter(Mandatory = $true)]
-    	[string]
+        [string]
         $DestinationPath,
 
         [parameter(Mandatory = $true)]
-    	[string]
+        [string]
         $ServerUrl, 
 
         [parameter(Mandatory = $false)]
-    	[string]
+        [string]
         $AgentName,
 
         [parameter(Mandatory = $false)]
-    	[string]
+        [string]
         $AgentPort = '9090',
 
         [parameter(Mandatory = $false)]
-    	[string]
+        [string]
         $Username,
 
         [parameter(Mandatory = $false)]
-    	[string]
+        [string]
         $JreZipPath,
        
         [parameter(Mandatory = $false)]
-    	[string]
+        [string]
         $CertificatesPath,
 
         [parameter(Mandatory = $false)]
-    	[switch]
+        [switch]
         $SetupFirewall = $true,
 
         [parameter(Mandatory = $false)]
-    	[switch]
+        [switch]
         $SetupWindowsService = $false,
 
         [parameter(Mandatory = $false)]
-    	[PSCredential]
+        [PSCredential]
         $Credential,
 
         [parameter(Mandatory = $false)]
-    	[PSCredential]
+        [PSCredential]
         $WindowsServiceCredential
 
     )

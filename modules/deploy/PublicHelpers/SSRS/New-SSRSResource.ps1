@@ -25,13 +25,13 @@ SOFTWARE.
 function New-SSRSResource {
     <#
     .SYNOPSIS
-    	Creates and returns new SSRS resource.
+        Creates and returns new SSRS resource.
 
     .DESCRIPTION
-    	Creates and returns new SSRS resource with the given Proxy and for given FilePath, Folder and mime-type.
+        Creates and returns new SSRS resource with the given Proxy and for given FilePath, Folder and mime-type.
 
-	.PARAMETER Proxy
-		ReportingService2010 web service proxy.
+    .PARAMETER Proxy
+        ReportingService2010 web service proxy.
 
     .PARAMETER FilePath
         Path to the file.
@@ -70,24 +70,24 @@ function New-SSRSResource {
 
     $RawDefinition = Get-AllBytes -Path $Path
 
-	$DescProp = New-Object -TypeName SSRS.ReportingService2010.Property
-	$DescProp.Name = 'Description'
-	$DescProp.Value = ''
-	$HiddenProp = New-Object -TypeName SSRS.ReportingService2010.Property
-	$HiddenProp.Name = 'Hidden'
-	$HiddenProp.Value = 'false'
-	$MimeProp = New-Object -TypeName SSRS.ReportingService2010.Property
-	$MimeProp.Name = 'MimeType'
-	$MimeProp.Value = $MimeType
-		
-	$Properties = @($DescProp, $HiddenProp, $MimeProp)
-		
-	if ($FilePath.StartsWith('_')) {
-		$HiddenProp.Value = 'true'
-	}
-        	
+    $DescProp = New-Object -TypeName SSRS.ReportingService2010.Property
+    $DescProp.Name = 'Description'
+    $DescProp.Value = ''
+    $HiddenProp = New-Object -TypeName SSRS.ReportingService2010.Property
+    $HiddenProp.Name = 'Hidden'
+    $HiddenProp.Value = 'false'
+    $MimeProp = New-Object -TypeName SSRS.ReportingService2010.Property
+    $MimeProp.Name = 'MimeType'
+    $MimeProp.Value = $MimeType
+        
+    $Properties = @($DescProp, $HiddenProp, $MimeProp)
+        
+    if ($FilePath.StartsWith('_')) {
+        $HiddenProp.Value = 'true'
+    }
+            
     Write-Log -Info "Creating resource $FilePath"
-	$Results = New-SSRSCatalogItem -Proxy $Proxy -ItemType 'Resource' -Name $FilePath -Parent $Folder -Overwrite $true -Definition $RawDefinition -Properties $Properties
+    $Results = New-SSRSCatalogItem -Proxy $Proxy -ItemType 'Resource' -Name $FilePath -Parent $Folder -Overwrite $true -Definition $RawDefinition -Properties $Properties
 
     return $Results
 }

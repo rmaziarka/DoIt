@@ -56,9 +56,9 @@ function Deploy-Cube {
         $ConnectionString
     )
 
-	# deploy cube by executing xmla
-	Write-Log -Info ("Deploying Cube ${ProjectName}...")
-			
+    # deploy cube by executing xmla
+    Write-Log -Info ("Deploying Cube ${ProjectName}...")
+            
     [void]([System.Reflection.Assembly]::LoadWithPartialName("Microsoft.AnalysisServices"))
     $server = New-Object -TypeName Microsoft.AnalysisServices.Server
     $server.Connect($ConnectionString)
@@ -177,12 +177,12 @@ function Get-TraceEvents {
     $eventIds = New-Object System.Collections.Generic.HashSet[System.String]
     try {
         [void](Get-Event -SourceIdentifier $OnEventSourceIdentifier -ErrorAction SilentlyContinue | ForEach-Object {
-		    if ($_.SourceEventArgs.TextData -and ($_.SourceEventArgs.TextData -inotlike "*select*")) {
+            if ($_.SourceEventArgs.TextData -and ($_.SourceEventArgs.TextData -inotlike "*select*")) {
                 Write-Log -Info ("[EventClass]={0} [TextData]={1}" -f $_.SourceEventArgs.EventClass, $_.SourceEventArgs.TextData)
-		    }
+            }
         
             [void]($eventIds.Add($_.EventIdentifier))
-	    })
+        })
     } catch {
         Write-Log -Warn ("Couldn't get events: {0}" -f $_)
     }

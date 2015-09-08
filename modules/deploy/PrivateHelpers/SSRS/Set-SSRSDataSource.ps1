@@ -24,22 +24,22 @@ SOFTWARE.
 
 function Set-SSRSDataSource { 
     <#
-	.SYNOPSIS
-		Updates SSRS data source configuration.
+    .SYNOPSIS
+        Updates SSRS data source configuration.
 
-	.DESCRIPTION
-		Updates properties of data source in given rds file.
+    .DESCRIPTION
+        Updates properties of data source in given rds file.
 
-	.PARAMETER  FilePath
-		Path to data source file (.rds).
+    .PARAMETER  FilePath
+        Path to data source file (.rds).
 
-	.PARAMETER  ConnectionString
-		Connection string of data source.
+    .PARAMETER  ConnectionString
+        Connection string of data source.
 
-	.PARAMETER  IntegratedSecurity
-		Whether to use integrated security.
+    .PARAMETER  IntegratedSecurity
+        Whether to use integrated security.
 
-	.EXAMPLE
+    .EXAMPLE
         Set-SSRSDataSource -FilePath 'c:\SSRSProject\MyDataSource.rds' -ConnectionString 'data source=.;initial catalog=master' -IntegratedSecurity $true
     #>
     [CmdletBinding()]

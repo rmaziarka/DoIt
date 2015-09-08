@@ -37,9 +37,9 @@ Describe -Tag "PSCI.unit" "Get-SSRSProjectConfiguration" {
             $Path = "Test.Reports.xxx"
             $Configuration = "Dev"
         
-	        It "should throw a validation error" {
-		        { Get-SSRSProjectConfiguration -Path $Path -Configuration $Configuration } | Should Throw
-	        }
+            It "should throw a validation error" {
+                { Get-SSRSProjectConfiguration -Path $Path -Configuration $Configuration } | Should Throw
+            }
         }
 
         Context "when used with valid, but empty project file" { 
@@ -48,9 +48,9 @@ Describe -Tag "PSCI.unit" "Get-SSRSProjectConfiguration" {
 
             Mock Get-Content {return "<Project></Project>" }
         
-	        It "should throw empty configuration error" {
-		        { Get-SSRSProjectConfiguration -Path $Path -Configuration $Configuration } | Should Throw
-	        }
+            It "should throw empty configuration error" {
+                { Get-SSRSProjectConfiguration -Path $Path -Configuration $Configuration } | Should Throw
+            }
         }
 
         Context "when used with valid project file" {
@@ -79,8 +79,8 @@ Describe -Tag "PSCI.unit" "Get-SSRSProjectConfiguration" {
             </Project>
 "@ }
 
-	        It "should return valid configuration object" {
-		        $ret = Get-SSRSProjectConfiguration -Path $Path -Configuration $Configuration
+            It "should return valid configuration object" {
+                $ret = Get-SSRSProjectConfiguration -Path $Path -Configuration $Configuration
             
                 $ret.ServerUrl | Should Be "http://localhost/reportserver"
                 $ret.Folder | Should Be "/MyReports"
@@ -88,7 +88,7 @@ Describe -Tag "PSCI.unit" "Get-SSRSProjectConfiguration" {
                 $ret.DataSetFolder | Should Be "/Datasets"
                 $ret.OverwriteDataSources | Should Be $false
                 $ret.OverwriteDatasets | Should Be $true
-	        }
+            }
         }
     }
 }

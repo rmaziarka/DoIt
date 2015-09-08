@@ -58,7 +58,7 @@ function New-SSASDeploymentTargetsFile {
     )
 
     $dbConnectionStringBuilder = New-Object -TypeName System.Data.SqlClient.SqlConnectionStringBuilder
-	$dbConnectionStringBuilder.set_ConnectionString($CubeConnectionString)
+    $dbConnectionStringBuilder.set_ConnectionString($CubeConnectionString)
     $cubeServer = $dbConnectionStringBuilder.DataSource
 
     $deploymentTargetsContent = @"

@@ -27,28 +27,28 @@ function Start-JsCoverServer {
     .SYNOPSIS
     Starts JsCover local web server.
     
-	.PARAMETER JsCoverPath
-	Path to JsCover (typically JsCover-all.jar).
+    .PARAMETER JsCoverPath
+    Path to JsCover (typically JsCover-all.jar).
 
     .PARAMETER DocumentRoot
-	Path to the root directory of tested scripts.
+    Path to the root directory of tested scripts.
 
     .PARAMETER OutputDir
-	Path to the directory where results will be stored. If exists it will be cleared.
+    Path to the directory where results will be stored. If exists it will be cleared.
 
-	.PARAMETER NoInstrumentPaths
-	URLs not to be instrumented by JsCover.
+    .PARAMETER NoInstrumentPaths
+    URLs not to be instrumented by JsCover.
 
-	.PARAMETER NoInstrumentRegExp
-	Regular expressions of URLs not to be instrumented by JsCover.
+    .PARAMETER NoInstrumentRegExp
+    Regular expressions of URLs not to be instrumented by JsCover.
 
-	.PARAMETER Port
-	The port to listen on
+    .PARAMETER Port
+    The port to listen on
 
-	.PARAMETER WaitForServerWarmup
-	Time to wait in seconds for JsCover server to stand up.
+    .PARAMETER WaitForServerWarmup
+    Time to wait in seconds for JsCover server to stand up.
 
-	.EXAMPLE			
+    .EXAMPLE            
     Start-JsCoverServer -JsCoverPath 'bin\JSCover-all.jar' -DocumentRoot 'Source' -OutputDir '.jscover' `
         -NoInstrumentPaths @('Web/Scripts', 'Web.Tests') -NoInstrumentRegExp '.*_test.js' -WaitForServerWarmup 4
     #>

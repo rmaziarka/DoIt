@@ -25,16 +25,16 @@ SOFTWARE.
 function New-SSRSWebServiceProxy {
     <#
     .SYNOPSIS
-    	Creates ReportingService2010 web service proxy.
+        Creates ReportingService2010 web service proxy.
 
     .DESCRIPTION
-    	Creates ReportingService2010 web service proxy for given Uri and Credentials.
+        Creates ReportingService2010 web service proxy for given Uri and Credentials.
 
-	.PARAMETER Uri
-		SSRS ReportingService2010 web service location.
+    .PARAMETER Uri
+        SSRS ReportingService2010 web service location.
 
     .PARAMETER Credential
-    	[Optional] Windows credentials used by web service proxy (current user credentials used by default).
+        [Optional] Windows credentials used by web service proxy (current user credentials used by default).
 
     .EXAMPLE
         New-SSRSWebServiceProxy -Uri "http://localhost/reportserver"

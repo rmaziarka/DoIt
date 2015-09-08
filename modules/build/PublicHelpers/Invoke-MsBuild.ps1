@@ -24,8 +24,8 @@ SOFTWARE.
 
 function Invoke-MsBuild {
     <#
-	.SYNOPSIS
-	Invokes msbuild to build the specified project, using given version of msbuild (or the latest one if not specified).
+    .SYNOPSIS
+    Invokes msbuild to build the specified project, using given version of msbuild (or the latest one if not specified).
 
     .PARAMETER ProjectPath
     Path to the project to build.

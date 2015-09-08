@@ -119,8 +119,8 @@ function New-DeploymentPlan {
 
         [Parameter(Mandatory=$false)]
         [ValidateSet('All', 'DSC', 'Functions', 'Adhoc')]
-	    [string]
-	    $DeployType = 'All'
+        [string]
+        $DeployType = 'All'
     )
 
     $deploymentPlan = New-Object -TypeName System.Collections.ArrayList

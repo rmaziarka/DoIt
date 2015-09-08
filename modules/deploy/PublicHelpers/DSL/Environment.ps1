@@ -39,14 +39,14 @@ function Environment {
     .EXAMPLE
     Environment Default {
         Tokens Category1 @{
-		    ADConnectionString = 'LDAP://IP:389/OU=User'
-		    DatabaseConnectionString = 'Server=${Node};Database=YourDB;Integrated Security=True;MultipleActiveResultSets=True'
-	    }
+            ADConnectionString = 'LDAP://IP:389/OU=User'
+            DatabaseConnectionString = 'Server=${Node};Database=YourDB;Integrated Security=True;MultipleActiveResultSets=True'
+        }
     }
-	Environment Local {
+    Environment Local {
         ServerRole WebServer -Configurations @('WebServerProvision', 'WebServerDeploy') -Nodes localhost
     }
-	Environment Tests -BasedOn Local {
+    Environment Tests -BasedOn Local {
         ServerRole WebServer -Nodes 'testNode'
     }
     #>

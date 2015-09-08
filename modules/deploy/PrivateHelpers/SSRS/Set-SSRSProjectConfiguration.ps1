@@ -24,31 +24,31 @@ SOFTWARE.
 
 function Set-SSRSProjectConfiguration { 
     <#
-	.SYNOPSIS
-		Updates SSRS project configuration.
+    .SYNOPSIS
+        Updates SSRS project configuration.
 
-	.DESCRIPTION
-		Updates properties of given configuration in SSRS project file.
+    .DESCRIPTION
+        Updates properties of given configuration in SSRS project file.
 
-	.PARAMETER  ProjectFilePath
-		Path to source project file.
+    .PARAMETER  ProjectFilePath
+        Path to source project file.
 
-	.PARAMETER  DeploymentFilePath
-		Path to target project file.
+    .PARAMETER  DeploymentFilePath
+        Path to target project file.
 
-	.PARAMETER  ConfigurationName
-		Name of project configuration.
+    .PARAMETER  ConfigurationName
+        Name of project configuration.
 
-	.PARAMETER  TargetFolder
-		SSRS target report folder name.
+    .PARAMETER  TargetFolder
+        SSRS target report folder name.
 
-	.PARAMETER  TargetServerURL
-		SSRS target URL of the server.
+    .PARAMETER  TargetServerURL
+        SSRS target URL of the server.
 
-	.PARAMETER  TargetDataSourceFolder
-		SSRS target data source folder name.
+    .PARAMETER  TargetDataSourceFolder
+        SSRS target data source folder name.
 
-	.EXAMPLE
+    .EXAMPLE
         Set-SSRSProjectConfiguration -ProjectFilePath 'c:\SSRSProject\Project.rptproj' -DeploymentFilePath 'c:\SSRSProject\Project.rptproj' -ConfigurationName 'Prod' -TargetFolder 'Reports' -TargetServerURL 'http://localhost/reportserver' -TargetDataSourceFolder 'Data Sources'
     #>
     [CmdletBinding()]

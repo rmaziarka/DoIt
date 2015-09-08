@@ -134,7 +134,7 @@ function WebServerDeploy {
                          Website = $Tokens.WebConfig.WebsiteName;
                          SkipDir = 'App_Data';
                          Environment = $Environment
-					   }
+                       }
 
     Deploy-MsDeployPackage @msDeployParams
 }

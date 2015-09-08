@@ -57,16 +57,16 @@ Describe -Tag "PSCI.unit" "New-DeploymentPlan" {
 
             Environment Default {
                 ServerConnection WebServers -Nodes 'machine0'
-			    ServerRole Web -Configurations @('config1') -ServerConnections WebServers
-		    }
+                ServerRole Web -Configurations @('config1') -ServerConnections WebServers
+            }
 
-		    Environment Local {
+            Environment Local {
                 ServerConnection DbServers -Nodes 'machine2'
                 ServerConnection WebServers -Nodes 'machine1','machine2' -PackageDirectory 'folder'
                 
                 ServerRole Database -Configurations @('config3') -ServerConnection DbServers
-			    ServerRole Web -Configurations @('config1', 'config2') -RunOn 'machine1' 
-		    }
+                ServerRole Web -Configurations @('config1', 'config2') -RunOn 'machine1' 
+            }
 
             It "should properly initialize internal structures for ServerRolesFilter = WebServer" {
                 $deploymentPlan = New-DeploymentPlan -AllEnvironments $Global:Environments -Environment 'Local' -DscOutputPath 'dscOutput' -ServerRolesFilter 'Web'
@@ -151,22 +151,22 @@ Describe -Tag "PSCI.unit" "New-DeploymentPlan" {
 
             Environment Default {
                 ServerConnection MyServers -Nodes @('machine0')
-			    ServerRole Web -Configurations @('config1') -ServerConnections MyServers
+                ServerRole Web -Configurations @('config1') -ServerConnections MyServers
                 ServerRole SSRSServer -Configurations @('config1') -ServerConnections MyServers          
-		    }
+            }
 
-		    Environment Local {
+            Environment Local {
                 ServerConnection WebServers -Nodes @('machine1','machine2') -RemotingMode WebDeployAgentService -RemotingCredential $cred -PackageDirectory 'folder'
                 ServerConnection DbServers -Nodes @('machine2')
-			    ServerRole Web -Configurations @('config1', 'config2') -RunOn 'machine1' -ServerConnections WebServers
+                ServerRole Web -Configurations @('config1', 'config2') -RunOn 'machine1' -ServerConnections WebServers
                 ServerRole Database -Configurations @('config3') -ServerConnection DbServers
-		    }
+            }
 
-		    Environment Tests -BasedOn Local {
-			    ServerRole Web -Configurations @('config1') -RunOn $null -RunRemotely
+            Environment Tests -BasedOn Local {
+                ServerRole Web -Configurations @('config1') -RunOn $null -RunRemotely
                 ServerRole SSAS -Configurations @('config4') -ServerConnections (ServerConnection SSASServers -Nodes machine4)
                 ServerRole SSRS -ServerConnections $null
-		    }
+            }
 
             It "should properly plan Web deployment" {
                 $deploymentPlan = New-DeploymentPlan -AllEnvironments $Global:Environments -Environment 'Tests' -DscOutputPath 'dscOutput' -ServerRolesFilter 'Web'
@@ -243,7 +243,7 @@ Describe -Tag "PSCI.unit" "New-DeploymentPlan" {
             Environment Tests {  
                 ServerConnection WebServers -Nodes @('machine1') -PackageDirectory {$Tokens.General.DeploymentPath} -RemotingCredential {$Tokens.General.Credentials}
                 ServerRole WebConfig -Configurations @('config1') -RunRemotely -ServerConnections WebServers
-		    }
+            }
 
             $deploymentPlan = New-DeploymentPlan -AllEnvironments $Global:Environments -Environment 'Tests' -DscOutputPath 'dscOutput' -ServerRolesFilter 'WebConfig'
 
@@ -267,27 +267,27 @@ Describe -Tag "PSCI.unit" "New-DeploymentPlan" {
             Initialize-Deployment
 
             Environment Tests {
-		        Tokens WebConfig @{
+                Tokens WebConfig @{
                     SessionTimeout = '30'
-		            DbConnectionString = 'Server={0};Database=Test;Integrated Security=SSPI;' -f '${Node}'
-	            }
+                    DbConnectionString = 'Server={0};Database=Test;Integrated Security=SSPI;' -f '${Node}'
+                }
 
                 Tokens General @{
                     DeploymentPath = 'C:\Deployment'
                     Credentials = ConvertTo-PSCredential -User "Test" -Password "Test"
                 }
 
-		        Server 's01' {
-			        Tokens General @{
+                Server 's01' {
+                    Tokens General @{
                         DeploymentPath = 'D:\Deployment'
-	                }
-		        }
+                    }
+                }
             }
 
             Environment Tests {
                 ServerConnection WebServers -Nodes @('s01', 's02') -PackageDirectory {$Tokens.General.DeploymentPath} -RemotingCredential {$Tokens.General.Credentials}
                 ServerRole Web -Configurations @('config1') -RunRemotely -ServerConnections WebServers
-		    }
+            }
 
             $deploymentPlan = New-DeploymentPlan -AllEnvironments $Global:Environments -Environment 'Tests' -DscOutputPath 'dscOutput'
 
@@ -328,14 +328,14 @@ Describe -Tag "PSCI.unit" "New-DeploymentPlan" {
             }
 
             Environment Test2 {
-                Tokens General @{			    
+                Tokens General @{                
                     AllNodes = $null
-		        }
+                }
             }
 
             Environment Default {
                 ServerRole Web -Configurations @('config1') -ServerConnections (ServerConnection WebServers -Nodes { $Tokens.General.AllNodes })
-		    }
+            }
 
             $deploymentPlan = New-DeploymentPlan -AllEnvironments $Global:Environments -Environment 'Test1' -DscOutputPath 'dscOutput'
 

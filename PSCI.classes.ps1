@@ -23,19 +23,19 @@ SOFTWARE.
 #>
 
 if (-not ('PSCI.LogSeverity' -as [System.Type])) {
-	$cSharpCode = "
+    $cSharpCode = "
 namespace PSCI
 {
-	public enum LogSeverity : int
-	{
-		DEBUG=0,
-		INFO,
-		WARN,
+    public enum LogSeverity : int
+    {
+        DEBUG=0,
+        INFO,
+        WARN,
         ERROR,
         CRITICAL
-	}
+    }
 }
 "
 
-	Add-Type -TypeDefinition $cSharpCode
+    Add-Type -TypeDefinition $cSharpCode
 }

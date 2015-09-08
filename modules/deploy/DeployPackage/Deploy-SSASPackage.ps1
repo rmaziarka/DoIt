@@ -128,9 +128,9 @@ function Deploy-SSASPackage {
     New-SSASConfigSettingsFile -DataSourceName $DataSourceName -DbConnectionString $DbConnectionString -OutputFilePath "$BinDirPath\$ProjectName.configsettings"
     New-SSASDeploymentTargetsFile -DatabaseName $DatabaseName -CubeConnectionString $CubeConnectionString -OutputFilePath "$BinDirPath\$ProjectName.deploymenttargets"
 
-	$generatedXmlaFilePath = "$BinDirPath\GeneratedScript.xmla"
+    $generatedXmlaFilePath = "$BinDirPath\GeneratedScript.xmla"
     New-XMLA -ASDatabasePath "$BinDirPath\$ProjectName.asdatabase" -CubeXmlaFilePath $generatedXmlaFilePath -ConnectionString $CubeConnectionString
-	
+    
     
     if ($RoleMembers -ne $null) {
         $deploymentXmlaWithRolesFilePath = "$BinDirPath\DeploymentScriptWithRolesApplied.xmla"

@@ -24,17 +24,17 @@ SOFTWARE.
 
 function Deploy-SSRSModule {
     <#
-    	.SYNOPSIS
-    		Deploys SSRS Module (.dlls) by copying files to Reporting Services and Visual Studio instances on the server.
+        .SYNOPSIS
+            Deploys SSRS Module (.dlls) by copying files to Reporting Services and Visual Studio instances on the server.
     
-    	.PARAMETER  PackageName
-    		Name of the package to be deployed.
+        .PARAMETER  PackageName
+            Name of the package to be deployed.
     
-    	.PARAMETER  PackagePath
-    		Path of the package.
+        .PARAMETER  PackagePath
+            Path of the package.
   
-    	.EXAMPLE
-    		PS C:\> Deploy-SSRSModule -PackageName 'MyPackage' -Server localhost
+        .EXAMPLE
+            PS C:\> Deploy-SSRSModule -PackageName 'MyPackage' -Server localhost
     #>
     [CmdletBinding()]
     [OutputType([void])]

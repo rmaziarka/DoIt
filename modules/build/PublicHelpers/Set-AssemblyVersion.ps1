@@ -113,10 +113,10 @@ function Set-AssemblyVersion {
         }
 
         Write-Log -Info "Setting $($VersionAttribute -join ', ')='$Version' in file '$p'"
-    	Disable-ReadOnlyFlag -Path $p
+        Disable-ReadOnlyFlag -Path $p
         
         $toReplace = New-Object System.Collections.ArrayList(,$VersionAttribute)
-    	(Get-Content -Path $p -Encoding UTF8 -ReadCount 0) | Foreach-Object {
+        (Get-Content -Path $p -Encoding UTF8 -ReadCount 0) | Foreach-Object {
             $line = $_
             foreach ($info in $replaceInfo.GetEnumerator()) {
                 $regex = $info.Value
@@ -125,8 +125,8 @@ function Set-AssemblyVersion {
                     [void]($toReplace.Remove($info.Key))
                 }
             }
-			$line
-	    } | Set-Content -Encoding UTF8 -Path $p
+            $line
+        } | Set-Content -Encoding UTF8 -Path $p
              
         if ($AppendVersionAttributeIfNotExists) { 
             foreach ($attr in $toReplace) {

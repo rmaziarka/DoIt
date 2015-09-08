@@ -100,31 +100,31 @@ function Publish-IISWebSite {
     }
 
     if (!(Test-Path -LiteralPath $PhysicalPath))
-	{
-	    Write-Log -Info "Creating physical directory '$PhysicalPath' for site '$SiteName'."
+    {
+        Write-Log -Info "Creating physical directory '$PhysicalPath' for site '$SiteName'."
         [void](New-Item -Path $PhysicalPath -ItemType directory)
-	}
+    }
     
-	if (!(Test-Path -LiteralPath $path))
-	{
-	    Write-Log -Info "Creating website '$SiteName'"
-			
-		# if there is no websites, we need to pass Id 1 (see http://forums.iis.net/t/1159761.aspx)
-		$websites = Get-Website
+    if (!(Test-Path -LiteralPath $path))
+    {
+        Write-Log -Info "Creating website '$SiteName'"
+            
+        # if there is no websites, we need to pass Id 1 (see http://forums.iis.net/t/1159761.aspx)
+        $websites = Get-Website
 
         if ($websites -eq $null) {
             [void](New-Website -Name $SiteName `
-					-Id 1 `
-					-PhysicalPath $PhysicalPath `
-					-ApplicationPool $ApplicationPool `
-					-Ssl:$Ssl)
+                    -Id 1 `
+                    -PhysicalPath $PhysicalPath `
+                    -ApplicationPool $ApplicationPool `
+                    -Ssl:$Ssl)
         } else {
             [void](New-Website -Name $SiteName `
-					-PhysicalPath $PhysicalPath `
-					-ApplicationPool $ApplicationPool `
-					-Ssl:$Ssl)
+                    -PhysicalPath $PhysicalPath `
+                    -ApplicationPool $ApplicationPool `
+                    -Ssl:$Ssl)
         }
-	}
+    }
     try { 
         $site = (Get-Item -Path $path)
     } catch {
@@ -138,12 +138,12 @@ function Publish-IISWebSite {
     }
         
     $currentApplicationPool = $site.ApplicationPool
-	if ($currentApplicationPool -ne $ApplicationPool) {
+    if ($currentApplicationPool -ne $ApplicationPool) {
         Write-Log -Info "Updating website '$SiteName' - ApplicationPool: '$currentApplicationPool' -> '$ApplicationPool'"
-		Set-ItemProperty -Path $path -Name ApplicationPool -Value $ApplicationPool        
-	}
+        Set-ItemProperty -Path $path -Name ApplicationPool -Value $ApplicationPool        
+    }
 
-	Publish-IISWebSiteBindings -SitePath $path -Protocols $Protocols -HttpPort $HttpPort -NetTcpPort $NetTcpPort
+    Publish-IISWebSiteBindings -SitePath $path -Protocols $Protocols -HttpPort $HttpPort -NetTcpPort $NetTcpPort
     Publish-IISAuthenticationMethods -SiteName $SiteName -AuthenticationMethods $AuthenticationMethods
 
     Start-IISWebsite -SiteName $SiteName

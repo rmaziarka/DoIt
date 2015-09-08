@@ -25,16 +25,16 @@ SOFTWARE.
 function Get-SSRSProjectConfiguration {
     <#
     .SYNOPSIS
-    	Gets SSRS Project configuration options for the given build configuration.
+        Gets SSRS Project configuration options for the given build configuration.
 
     .DESCRIPTION
-    	Gets SSRS Project configuration as custom PSObject for the given build configuration.
+        Gets SSRS Project configuration as custom PSObject for the given build configuration.
 
-	.PARAMETER Path
-		Path to the SSRS project file (rptproj)
+    .PARAMETER Path
+        Path to the SSRS project file (rptproj)
 
     .PARAMETER Configuration
-    	Project build configuration.
+        Project build configuration.
 
     .EXAMPLE
         Get-SSRSProjectConfiguration -Path "JiraReporting.Reports.rptproj" -Configuration "Dev"
@@ -80,7 +80,7 @@ function Get-SSRSProjectConfiguration {
         ServerUrl = $Config.Options.TargetServerUrl
         Folder = Format-SSRSFolder -Folder $Config.Options.TargetFolder
         DataSourceFolder = Format-SSRSFolder -Folder $Config.Options.TargetDataSourceFolder
-	    DataSetFolder = Format-SSRSFolder -Folder $Config.Options.TargetDataSetFolder
+        DataSetFolder = Format-SSRSFolder -Folder $Config.Options.TargetDataSetFolder
         OverwriteDataSources = $OverwriteDataSources
         OverwriteDatasets = $OverwriteDatasets
     }

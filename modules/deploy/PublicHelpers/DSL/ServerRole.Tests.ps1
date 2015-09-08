@@ -32,10 +32,10 @@ Describe -Tag "PSCI.unit" "ServerRole" {
 
                 $remotingDefaultCredential = (ConvertTo-PsCredential -User 'UserName' -Password 'Password')
 
-			    Environment Local {
+                Environment Local {
                     ServerConnection Web1 -Nodes @('machine1', 'machine2') -RemotingCredential $remotingDefaultCredential -PackageDirectory 'c:\dir'
-				    ServerRole Web -Configurations @('config1', 'config2') -ServerConnections Web1 -RunRemotely 
-			    }
+                    ServerRole Web -Configurations @('config1', 'config2') -ServerConnections Web1 -RunRemotely 
+                }
 
                 $Environments.Count | Should Be 2
                 $Environments.Local | Should Not Be $null
@@ -65,15 +65,15 @@ Describe -Tag "PSCI.unit" "ServerRole" {
                 $cred = ConvertTo-PSCredential -User "Test" -Password "Test"
                 $cred2 = ConvertTo-PSCredential -User "Test2" -Password "Test2"
 
-			    Environment Default {
+                Environment Default {
                     ServerConnection Web1 -Nodes @('machine1') -RemotingCredential $cred 
-				    ServerRole Web -Configurations @('config1') -ServerConnection Web1
-			    }
+                    ServerRole Web -Configurations @('config1') -ServerConnection Web1
+                }
 
-			    Environment Local {
+                Environment Local {
                     ServerConnection Web1 -Nodes @('machine1','machine2') -RemotingCredential $cred2 
-				    ServerRole Web -Configurations @('config1', 'config2') 
-			    }
+                    ServerRole Web -Configurations @('config1', 'config2') 
+                }
 
                 $Environments.Count | Should Be 2
                 $Environments.Default | Should Not Be $null
@@ -101,15 +101,15 @@ Describe -Tag "PSCI.unit" "ServerRole" {
                 Initialize-Deployment
                 $cred = ConvertTo-PSCredential -User "Test" -Password "Test"
 
-			    Environment Default {
+                Environment Default {
                     ServerConnection Web1 -Nodes @('machine1') -RemotingCredential $cred 
-				    ServerRole Web -Configurations @('config1') -ServerConnection Web1
-			    }
+                    ServerRole Web -Configurations @('config1') -ServerConnection Web1
+                }
 
-			    Environment Local {
+                Environment Local {
                     ServerConnection Web1 -Nodes $null -RemotingCredential $null -Authentication $null -PackageDirectory $null
-				    ServerRole Web -Configurations $null -RunOn $null
-			    }
+                    ServerRole Web -Configurations $null -RunOn $null
+                }
 
                 $Environments.Count | Should Be 2
                 $Environments.Default | Should Not Be $null
@@ -146,12 +146,12 @@ Describe -Tag "PSCI.unit" "ServerRole" {
                 Environment Default {
                     ServerConnection Web1 -Nodes @('machine1') 
                     ServerConnection Web2 -Nodes @('machine2') 
-				    ServerRole Web -Configurations @('config1') -ServerConnections Web1,Web2
-			    }
+                    ServerRole Web -Configurations @('config1') -ServerConnections Web1,Web2
+                }
 
-			    Environment Local {
-				    ServerRole Database -Configurations @('config2') -ServerConnections Web1
-			    }
+                Environment Local {
+                    ServerRole Database -Configurations @('config2') -ServerConnections Web1
+                }
 
                 $Environments.Count | Should Be 2
                 $Environments.Default | Should Not Be $null
@@ -177,14 +177,14 @@ Describe -Tag "PSCI.unit" "ServerRole" {
                 Initialize-Deployment
 
                 Environment Default {
-				    ServerRole Web -Configurations @('config1')
+                    ServerRole Web -Configurations @('config1')
                     ServerRole Database -Configurations @('config2')
-			    }
+                }
 
                 Environment Local {
                     ServerRole Database -Configurations @('config2')
-				    ServerRole Web -Configurations @('config1') 
-			    }
+                    ServerRole Web -Configurations @('config1') 
+                }
 
 
                 $Environments.Count | Should Be 2

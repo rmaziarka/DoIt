@@ -32,20 +32,20 @@ SOFTWARE.
 function Get-TargetResource
 {
     param
-    (	
-		[Parameter(Mandatory)]
+    (    
+        [Parameter(Mandatory)]
         [ValidateNotNullOrEmpty()]
-        [string]$Name		
+        [string]$Name        
     )
 
-	$path = GetNET32MachineConfigPath
-	$config32 = [xml] (Get-Content -Path $path -ReadCount 0)
-	
-	$path = GetNET64MachineConfigPath
-	$config64 = [xml] (Get-Content -Path $path -ReadCount 0)
+    $path = GetNET32MachineConfigPath
+    $config32 = [xml] (Get-Content -Path $path -ReadCount 0)
+    
+    $path = GetNET64MachineConfigPath
+    $config64 = [xml] (Get-Content -Path $path -ReadCount 0)
 
     return @{ 
-		Name = $Name;
+        Name = $Name;
         MinWorkerThreads32 = $config32.configuration.'system.web'.processModel.minWorkerThreads;
         MinWorkerThreads64 = $config64.configuration.'system.web'.processModel.minWorkerThreads;
     }
@@ -58,29 +58,29 @@ function Get-TargetResource
 function Set-TargetResource
 {
     param
-    (	
-		[Parameter(Mandatory)]
+    (    
+        [Parameter(Mandatory)]
         [ValidateNotNullOrEmpty()]
         [string]$Name,
-		
+        
         [parameter(Mandatory=$true)] 
         [string] 
         $MinWorkerThreads32,
-		
+        
         [parameter(Mandatory=$true)] 
         [string] 
         $MinWorkerThreads64
     )
 
     Write-Verbose "Transforming .NET machine.config(s)..."
-		
-	$path = GetNET32MachineConfigPath
-	$xsl = Get-MachineConfigXsl -MinWorkerThreads $MinWorkerThreads32
-	Transform-MachineConfig -xsl $xsl -path $path
-	
-	$path = GetNET64MachineConfigPath
-	$xsl = Get-MachineConfigXsl -MinWorkerThreads $MinWorkerThreads64
-	Transform-MachineConfig -xsl $xsl -path $path
+        
+    $path = GetNET32MachineConfigPath
+    $xsl = Get-MachineConfigXsl -MinWorkerThreads $MinWorkerThreads32
+    Transform-MachineConfig -xsl $xsl -path $path
+    
+    $path = GetNET64MachineConfigPath
+    $xsl = Get-MachineConfigXsl -MinWorkerThreads $MinWorkerThreads64
+    Transform-MachineConfig -xsl $xsl -path $path
 }
 
 #
@@ -89,42 +89,42 @@ function Set-TargetResource
 function Test-TargetResource
 {
     param
-    (	
-		[Parameter(Mandatory)]
+    (    
+        [Parameter(Mandatory)]
         [ValidateNotNullOrEmpty()]
         [string]$Name,
-		
+        
         [parameter(Mandatory=$true)] 
         [string] 
         $MinWorkerThreads32,
-		
+        
         [parameter(Mandatory=$true)] 
         [string] 
         $MinWorkerThreads64
     )
 
-	$path = GetNET32MachineConfigPath
-	$config32 = [xml] (Get-Content $path)
-	
-	if ($MinWorkerThreads32 -and $MinWorkerThreads32 -ne $config32.configuration.'system.web'.processModel.minWorkerThreads) {
-		return $false
-	}
-	
-	$path = GetNET64MachineConfigPath
-	$config64 = [xml] (Get-Content $path)
-	
-	if ($MinWorkerThreads64 -and $MinWorkerThreads64 -ne $config64.configuration.'system.web'.processModel.minWorkerThreads) {
-		return $false
-	}
-	
+    $path = GetNET32MachineConfigPath
+    $config32 = [xml] (Get-Content $path)
+    
+    if ($MinWorkerThreads32 -and $MinWorkerThreads32 -ne $config32.configuration.'system.web'.processModel.minWorkerThreads) {
+        return $false
+    }
+    
+    $path = GetNET64MachineConfigPath
+    $config64 = [xml] (Get-Content $path)
+    
+    if ($MinWorkerThreads64 -and $MinWorkerThreads64 -ne $config64.configuration.'system.web'.processModel.minWorkerThreads) {
+        return $false
+    }
+    
     return $true
 }
 
 function Get-MachineConfigXsl
 {
-	param($MinWorkerThreads)
-	
-	$xsl = @"
+    param($MinWorkerThreads)
+    
+    $xsl = @"
  <xsl:stylesheet version="1.0"
  xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
  <xsl:output omit-xml-declaration="yes" indent="yes"/>
@@ -137,12 +137,12 @@ function Get-MachineConfigXsl
  </xsl:template>
 "@
 
-	if ($MinWorkerThreads) {
+    if ($MinWorkerThreads) {
         $xsl += @"
  <xsl:template match="processModel/@minWorkerThreads">
     <xsl:attribute name="minWorkerThreads">
-		<xsl:value-of select="$MinWorkerThreads32"/>
-	</xsl:attribute>
+        <xsl:value-of select="$MinWorkerThreads32"/>
+    </xsl:attribute>
  </xsl:template>
 "@  }
 
@@ -150,42 +150,42 @@ function Get-MachineConfigXsl
 </xsl:stylesheet>
 "@ 
 
-	return $xsl
+    return $xsl
 }
 
 function GetNET32MachineConfigPath
 {
-	$path = [System.Runtime.InteropServices.RuntimeEnvironment]::SystemConfigurationFile;
-	if ($path.Contains("Framework64"))
-	{
-		return $path.Replace("Framework64", "Framework");
-	}
-	else
-	{
-		return $path;
-	}
+    $path = [System.Runtime.InteropServices.RuntimeEnvironment]::SystemConfigurationFile;
+    if ($path.Contains("Framework64"))
+    {
+        return $path.Replace("Framework64", "Framework");
+    }
+    else
+    {
+        return $path;
+    }
 }
 
 function GetNET64MachineConfigPath
 {
-	$path = [System.Runtime.InteropServices.RuntimeEnvironment]::SystemConfigurationFile;
-	if ($path.Contains("Framework64"))
-	{
-		return $path;
-	}
-	else
-	{
-		return $path.Replace("Framework", "Framework64");
-	}
+    $path = [System.Runtime.InteropServices.RuntimeEnvironment]::SystemConfigurationFile;
+    if ($path.Contains("Framework64"))
+    {
+        return $path;
+    }
+    else
+    {
+        return $path.Replace("Framework", "Framework64");
+    }
 }
 
 function Transform-MachineConfig
 {
-	param($xsl, $path)
-	
-	if (Test-Path $path)
-	{
-		$tempOutFile = $path.Replace(".config", ".config.bak")
+    param($xsl, $path)
+    
+    if (Test-Path $path)
+    {
+        $tempOutFile = $path.Replace(".config", ".config.bak")
         $tempXslFile = $path.Replace(".config", ".xsl")
 
         $xslt = New-Object System.Xml.Xsl.XslCompiledTransform
@@ -195,8 +195,8 @@ function Transform-MachineConfig
         Remove-Item $tempXslFile
 
         $xslt.Transform($path, $tempOutFile)
-		Move-Item $tempOutFile $path -Force
-	}
+        Move-Item $tempOutFile $path -Force
+    }
 }
 
 Export-ModuleMember -Function *-TargetResource

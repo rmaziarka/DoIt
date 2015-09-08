@@ -23,12 +23,12 @@ SOFTWARE.
 #>
 
 Configuration SimpleDscProvision {
-	param ($NodeName, $Environment, $Tokens)
+    param ($NodeName, $Environment, $Tokens)
 
     Import-DSCResource -Module xWebAdministration
     Import-DSCResource -Module cAutologon
 
-	Node $NodeName {
+    Node $NodeName {
 
         File TestFolder {
             DestinationPath = $Tokens.TestCategory.Directory

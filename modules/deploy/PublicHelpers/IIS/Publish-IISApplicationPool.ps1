@@ -109,17 +109,17 @@ function Publish-IISApplicationPool {
         $MaxMemoryInKBBeforeRecycle
     )
 
-	Import-Module WebAdministration
+    Import-Module WebAdministration
 
     $path = "IIS:\AppPools\$ApplicationPoolName"
 
-	if (!(Test-Path -LiteralPath $path)) {
-		Write-Log -Info "Creating application pool: $ApplicationPoolName"
-	    $appPool = New-WebAppPool -Name $ApplicationPoolName
-	} else {
-	    $appPool = Get-Item -Path $path
-	}
-	    
+    if (!(Test-Path -LiteralPath $path)) {
+        Write-Log -Info "Creating application pool: $ApplicationPoolName"
+        $appPool = New-WebAppPool -Name $ApplicationPoolName
+    } else {
+        $appPool = Get-Item -Path $path
+    }
+        
     if (!$appPool) {
         throw "Unable to access application pool named '$ApplicationPoolName'"
     }
@@ -139,7 +139,7 @@ function Publish-IISApplicationPool {
             Set-ItemProperty -Path $path -Name "processModel.IdentityType" -Value $identityTypeNum
         }
 
-		if ($IdentityType -ne "SpecificUser") {
+        if ($IdentityType -ne "SpecificUser") {
             $UserName = ""
             $Password = ""
         }

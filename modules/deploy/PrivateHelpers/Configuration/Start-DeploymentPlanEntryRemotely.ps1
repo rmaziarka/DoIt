@@ -50,8 +50,8 @@ function Start-DeploymentPlanEntryRemotely {
 
         [Parameter(Mandatory=$false)]
         [ValidateSet('All', 'DSC', 'Functions', 'Adhoc')]
-	    [string]
-	    $DeployType = 'All'
+        [string]
+        $DeployType = 'All'
     )    
  
     $configInfo = $DeploymentPlanGroupedEntry.GroupedConfigurationInfo

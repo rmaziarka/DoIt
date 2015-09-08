@@ -41,7 +41,7 @@ Environment Default {
     ServerConnection TestNodeMSDeploy -BasedOn TestNodePSRemoting -RemotingMode WebDeployAgentService
 
     ServerRole Web -Configurations @('WebServerProvision', 'WebServerIISConfig') -ServerConnections TestNodePSRemoting
-	ServerRole Database -Configurations @('DatabaseServerDeploy') -ServerConnections TestNodeDefault
+    ServerRole Database -Configurations @('DatabaseServerDeploy') -ServerConnections TestNodeDefault
 
     ServerRole RemotingTestPSRemoting -Configurations @('RemotingTestPrepare', 'RemotingTestValidate') -RunRemotely -ServerConnections TestNodePSRemoting
     ServerRole RemotingTestPSRemotingCredSSP -Configurations @('RemotingTestPrepare', 'RemotingTestValidate') -RunRemotely -ServerConnections TestNodePSRemotingCredSSP

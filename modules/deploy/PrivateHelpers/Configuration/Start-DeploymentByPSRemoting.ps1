@@ -104,8 +104,8 @@ function Start-DeploymentByPSRemoting {
 
         [Parameter(Mandatory=$false)]
         [ValidateSet('All', 'DSC', 'Functions', 'Adhoc')]
-	    [string]
-	    $DeployType = 'All',
+        [string]
+        $DeployType = 'All',
 
         [Parameter(Mandatory=$false)]
         [string[]]
