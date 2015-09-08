@@ -60,13 +60,17 @@ function Get-TargetResource {
 
     $entry = $acl.Access | Where-Object { $_.IdentityReference.Value -ieq $Username -and $_.FileSystemRights -imatch $Permission -and $_.AccessControlType -ieq $Type }
 
+    $returnEnsure = $false
+    if ($entry -ne $null) {
+        $returnEnsure = $true
+    }
     return @{
         Path = $Path
         Username = $Username
         Permission = $Permission
         Type = $Type
         Inherit = $Inherit
-        Ensure = $entry -ne $null
+        Ensure = $returnEnsure
     }   
 }
 

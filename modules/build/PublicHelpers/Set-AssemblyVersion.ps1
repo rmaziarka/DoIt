@@ -100,14 +100,6 @@ function Set-AssemblyVersion {
         }
     }
 
-    <#if ($CreateBackup) { 
-        foreach ($p in $resolvedPaths) {
-            if (Test-Path -LiteralPath "${p}.bak") {
-                throw "Backup file '${p}.bak' already exists. Please ensure you run Set-AssemblyVersion exactly once for each assembly info file."
-            }
-        }
-    }#>
-
     $replaceInfo = @{}
     foreach ($attr in $VersionAttribute) { 
         $replaceInfo[$attr] = ('({0})\(\"([^\"]*)\"\)' -f $attr)

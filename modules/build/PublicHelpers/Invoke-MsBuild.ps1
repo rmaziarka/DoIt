@@ -92,10 +92,19 @@ function Invoke-MsBuild {
 
     if ($Version) {
         if (!$AssemblyInfoFilePaths) {
-            throw "If version is set, the AssemblyInfoFiles parameter is required"
+            if (Test-Path -LiteralPath $ProjectPath -PathType Leaf) {
+                $projectDir = Split-Path -Path $ProjectPath -Parent
+            } else {
+                $projectDir = $ProjectPath
+            }
+            Write-Log -Info "AssemblyInfoFiles not defined - setting version in all *AssemblyInfo.cs files under '$projectDir'"
+            $AssemblyInfoFilePaths = Get-ChildItem -LiteralPath $projectDir -Filter '*AssemblyInfo.cs' -Recurse | Select-Object -ExpandProperty FullName
         }
-
-        Set-AssemblyVersion -Path $AssemblyInfoFilePaths -Version $Version -VersionAttribute AssemblyVersion,AssemblyFileVersion -CreateBackup
+        if (!$AssemblyInfoFilePaths) {
+            Write-Log -Warn "No AssemblyInfo files found"
+        } else { 
+            Set-AssemblyVersion -Path $AssemblyInfoFilePaths -Version $Version -VersionAttribute AssemblyVersion,AssemblyFileVersion -CreateBackup
+        }
     }
 
     if ($RestoreNuGet) {

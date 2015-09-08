@@ -81,7 +81,7 @@ function Get-TargetResource
             } -ClientOnly
         }
 
-        $allDefaultPage = @(Get-WebConfiguration //defaultDocument/files/*  -PSPath (Join-Path -Path 'IIS:\sites\' -ChildPath $Name) -ErrorAction SilentyContinue | ForEach-Object -Process {
+        $allDefaultPage = @(Get-WebConfiguration //defaultDocument/files/*  -PSPath (Join-Path -Path 'IIS:\sites\' -ChildPath $Name) -ErrorAction SilentlyContinue | ForEach-Object -Process {
                 Write-Output -InputObject $_.value
         })
     }
