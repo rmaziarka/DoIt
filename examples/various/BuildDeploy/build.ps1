@@ -84,12 +84,10 @@ try {
     }
     
     if (!(Test-Path -LiteralPath "$PSCILibraryPath\PSCI.psd1")) {
-        Write-Host -Object "Cannot find PSCI library at '$PSCILibraryPath' (current dir: '$PSScriptRoot')."
-
         if (Test-Path -LiteralPath "$PSScriptRoot\packages\PSCI\PSCI.psd1") {
             Write-Host -Object "PSCI library found at '$PSScriptRoot\packages\PSCI'."
         } else {
-            Write-Host -Object 'Downloading nuget.exe.'
+            Write-Host -Object "Cannot find PSCI library at '$PSCILibraryPath' (current dir: '$PSScriptRoot') - downloading nuget.exe."
 		    Invoke-WebRequest -Uri 'http://nuget.org/nuget.exe' -OutFile "$env:TEMP\NuGet.exe"
             if (!(Test-Path "$env:TEMP\NuGet.exe")) {
                 Write-Host -Object "Failed to download nuget.exe to '$env:TEMP'. Please download PSCI manually and set PSCILibraryPath parameter to an existing path."
@@ -106,6 +104,8 @@ try {
 		    }
         }
         $PSCILibraryPath = "$PSScriptRoot\packages\PSCI"
+    } else {
+        Write-Host -Object "PSCI library found at '$PSCILibraryPath'."
     }
     Import-Module "$PSCILibraryPath\PSCI.psd1" -Force 
 

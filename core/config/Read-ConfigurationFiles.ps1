@@ -43,6 +43,15 @@ function Read-ConfigurationFiles {
 
     $configPath = (Get-ConfigurationPaths).DeployConfigurationPath
 
+    $result = [PSCustomObject]@{
+        Files = @()
+        RequiredDSCModules = @()
+    }
+    if (!$configPath) {
+        Write-Log -Warn "No configuration files - dsc modules will not be packaged."
+        return $result
+    }
+
     Write-Log -Info "Reading configuration files from '$configPath'."
     # Load file with 'tokens' in the name first, since other files can make use of it
     $configScripts = Get-ChildItem -Recurse $configPath -Include *.ps*1 | Sort-Object -Property { $_.Name -inotmatch "tokens" }, { $_.Name }
@@ -50,10 +59,7 @@ function Read-ConfigurationFiles {
         throw "There are no configuration files at '$configPath'. Please ensure you have passed valid 'DeployConfigurationPath' parameter."
     }
 
-    $result = [PSCustomObject]@{
-        Files = @()
-        RequiredDSCModules = @()
-    }
+    
 
     $invalidLineRegex = '(Import-DSCResource.*`[\s\\r\\n$])'
     $dscResourceRegex = 'Import-DSCResource\s+(?:-Module)?(?:Name)?\s*([^-][^\s;]+)|Import-DSCResource.+-Module(?:Name)?\s*([^-][^\s;]+)'
