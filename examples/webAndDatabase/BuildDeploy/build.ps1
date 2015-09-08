@@ -55,8 +55,8 @@ param(
 	
 	[Parameter(Mandatory=$false)]
 	[string]
-	$PSCILibraryPath = '..\..', # Modify this path according to your project structure. This is absolute or relative to $ProjectRootPath.
-
+	$PSCILibraryPath = '..\..', # Modify this path according to your project structure. This is absolute or relative to $ProjectRootPath. 
+                                # If PSCI doesn't exist at this location, it will be downloaded from nuget.org.
 	[Parameter(Mandatory=$false)]
 	[string]
 	$PackagesPath = 'bin', # Modify this path according to your project structure. This is absolute or relative to $ProjectRootPath.
