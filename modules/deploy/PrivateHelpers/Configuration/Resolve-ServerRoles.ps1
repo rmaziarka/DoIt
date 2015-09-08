@@ -48,7 +48,7 @@ function Resolve-ServerRoles {
                }
             }
         }
-	}
+    }
 
     And creates following structure (when resolved for environment 'Dev'):
 
@@ -57,7 +57,7 @@ function Resolve-ServerRoles {
             Configurations = @((DSC configuration handle with name 'WebServerProvision'), (function handle with name 'WebServerDeploy')) 
             ServerConnections = (ServerConnection hashtable with name 'web1'')
         }
-		Name2 = ...
+        Name2 = ...
     }
    
     .PARAMETER AllEnvironments
@@ -121,8 +121,8 @@ function Resolve-ServerRoles {
 
         [Parameter(Mandatory=$false)]
         [ValidateSet('All', 'DSC', 'Functions', 'Adhoc')]
-	    [string]
-	    $DeployType = 'All'
+        [string]
+        $DeployType = 'All'
     )
 
     $envHierarchy = @(Resolve-BasedOnHierarchy -AllElements $AllEnvironments -SelectedElement $Environment -ConfigElementName 'Environment')

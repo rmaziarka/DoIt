@@ -25,13 +25,13 @@ SOFTWARE.
 function New-SSRSDataSourceDefinition {
     <#
     .SYNOPSIS
-    	Creates new SSRS Data Source definition, which will be later converted to ReportService2010.DataSourceDefinitionOrReference.
+        Creates new SSRS Data Source definition, which will be later converted to ReportService2010.DataSourceDefinitionOrReference.
 
     .DESCRIPTION
-    	See https://msdn.microsoft.com/en-us/library/reportservice2010.datasourcedefinition.aspx
+        See https://msdn.microsoft.com/en-us/library/reportservice2010.datasourcedefinition.aspx
 
-	.PARAMETER ConnectString
-		Connection string for a data source.
+    .PARAMETER ConnectString
+        Connection string for a data source.
 
     .PARAMETER Enabled
         Indicates whether a data source is enabled.

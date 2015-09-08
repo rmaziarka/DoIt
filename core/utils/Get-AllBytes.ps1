@@ -28,10 +28,10 @@ function Get-AllBytes {
         Gets the binary content of a file.
     
     .DESCRIPTION
-    	Get-AllBytes function gets the content of the file using System.IO.File.ReadAllBytes method.
+        Get-AllBytes function gets the content of the file using System.IO.File.ReadAllBytes method.
 
-	.PARAMETER Path
-		Path to a file.
+    .PARAMETER Path
+        Path to a file.
 
     .EXAMPLE
         Get-AllBytes -Path 'Download.zip'

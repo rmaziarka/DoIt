@@ -37,8 +37,8 @@ function Get-DscResourcesPaths {
     $dscModulesInfo = Get-DscResourcesPaths -ModuleNames @('xWebAdministration', 'cIIS')
     #>
 
-	[CmdletBinding()]
-	[OutputType([object[]])]
+    [CmdletBinding()]
+    [OutputType([object[]])]
     param(
         [Parameter(Mandatory=$false)]
         [string[]] 

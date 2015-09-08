@@ -41,7 +41,7 @@ function Test-LocalDSC {
     $localTestPath = 'c:\LocalDSCTest'
 
     Configuration LocalDSCTest {
-	    Node localhost {
+        Node localhost {
             File LocalDSCTestFile {
                 DestinationPath = Join-Path -Path $localTestPath -ChildPath 'test.txt'           
                 Type = 'File'

@@ -29,17 +29,17 @@ $profileFile = "$($env:USERPROFILE)\Documents\WindowsPowerShell\Microsoft.PowerS
 
 $copyToModules = Read-Host 'Install Pester to your Modules directory [y/n]?'
 if ($copyToModules -ieq 'y') {
-	if (!(Test-Path $pesterModuleDir)) {
-		Write-Host "Creating directory '$pesterModuleDir'..." -NoNewline
-		New-Item -Path $pesterModuleDir -ItemType Directory | Out-Null
+    if (!(Test-Path $pesterModuleDir)) {
+        Write-Host "Creating directory '$pesterModuleDir'..." -NoNewline
+        New-Item -Path $pesterModuleDir -ItemType Directory | Out-Null
         Write-Host "OK"
-	}
-	Write-Host "Unblocking Pester files..." -NoNewLine
-	Get-ChildItem (Join-Path $currentDir "Pester") | Unblock-File
-	Write-Host "OK"
+    }
+    Write-Host "Unblocking Pester files..." -NoNewLine
+    Get-ChildItem (Join-Path $currentDir "Pester") | Unblock-File
+    Write-Host "OK"
 
-	Write-Host "Copying Pester files to '$pesterModuleDir'..." -NoNewline
-	Copy-Item -Path (Join-Path $currentDir "Pester\*") -Destination $pesterModuleDir -Recurse -Force
+    Write-Host "Copying Pester files to '$pesterModuleDir'..." -NoNewline
+    Copy-Item -Path (Join-Path $currentDir "Pester\*") -Destination $pesterModuleDir -Recurse -Force
     Write-Host "OK"
 }
 
@@ -48,24 +48,24 @@ Write-Host ""
 $installToProfile = Read-Host 'Install Pester to ISE Profile (will start when ISE starts) [y/n]?'
 
 if ($installToProfile -ieq 'y') {
-	if (!(Test-Path $profileFile)) {
-		Write-Host "Creating file '$profileFile'..." -NoNewline
-		New-Item -Path $profileFile -ItemType file | Out-Null
+    if (!(Test-Path $profileFile)) {
+        Write-Host "Creating file '$profileFile'..." -NoNewline
+        New-Item -Path $profileFile -ItemType file | Out-Null
         Write-Host "OK"
-		$contents = ""
-	} else {
-		Write-Host "Reading file '$profileFile'..." -NoNewLine
-		$contents = Get-Content -Path $profileFile | Out-String
+        $contents = ""
+    } else {
+        Write-Host "Reading file '$profileFile'..." -NoNewLine
+        $contents = Get-Content -Path $profileFile | Out-String
         Write-Host "OK"
-	}
+    }
 
-	$importModule = "Import-Module Pester"
+    $importModule = "Import-Module Pester"
 
-	if ($contents -inotmatch $importModule) {
-		Write-Host "Adding '$importModule'..." -NoNewLine
-		Add-Content -Path $profileFile -Value $importModule | Out-Null
+    if ($contents -inotmatch $importModule) {
+        Write-Host "Adding '$importModule'..." -NoNewLine
+        Add-Content -Path $profileFile -Value $importModule | Out-Null
         Write-Host "OK"
-	} else {
-		Write-Host "Import command for Pester already exists in profile file."
-	}
+    } else {
+        Write-Host "Import command for Pester already exists in profile file."
+    }
 }

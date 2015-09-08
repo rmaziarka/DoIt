@@ -136,12 +136,12 @@ function New-DeploymentPlanEntry {
 
     $isLocalRun = $runOnNode -ieq $Node
 
-    if ($Configuration.Type -eq 'Configuration') {		
-		if ($isLocalRun) {
-			$dscNode = 'localhost'
-		} else {
-			$dscNode = $Node
-		}
+    if ($Configuration.Type -eq 'Configuration') {        
+        if ($isLocalRun) {
+            $dscNode = 'localhost'
+        } else {
+            $dscNode = $Node
+        }
 
         if (!$runOnNode -and $ServerConnection.RemotingMode -and $ServerConnection.RemotingMode -ne 'PSRemoting') {
             throw "Cannot deploy DSC configurations from localhost when RemotingMode is not PSRemoting. Please either change it to PSRemoting or add '-RunRemotely' switch to the ServerRole or ConfigurationSettings (Environment '$Environment' / ServerRole '$($ServerRole.Name)' / Configuration '$($Configuration.Name)')."

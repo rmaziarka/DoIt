@@ -34,7 +34,7 @@ function Tokens {
             Tokens = @{
                 Category1 = @{
                     ADConnectionString = 'LDAP://IP:389/OU=User'
-					DatabaseConnectionString = 'Server=${Node};Database=YourDB;Integrated Security=True;MultipleActiveResultSets=True'
+                    DatabaseConnectionString = 'Server=${Node};Database=YourDB;Integrated Security=True;MultipleActiveResultSets=True'
                 }
             }
         }
@@ -56,15 +56,15 @@ function Tokens {
     .EXAMPLE
     Environment Default {
         Tokens Category1 @{
-		    ADConnectionString = 'LDAP://IP:389/OU=User'
-		    DatabaseConnectionString = 'Server=${Node};Database=YourDB;Integrated Security=True;MultipleActiveResultSets=True'
-	    }
-    }	
+            ADConnectionString = 'LDAP://IP:389/OU=User'
+            DatabaseConnectionString = 'Server=${Node};Database=YourDB;Integrated Security=True;MultipleActiveResultSets=True'
+        }
+    }    
 
-	Environment Dev {
+    Environment Dev {
         Tokens Category2 @{
-    		...
-	    }
+            ...
+        }
     }
     #>
     

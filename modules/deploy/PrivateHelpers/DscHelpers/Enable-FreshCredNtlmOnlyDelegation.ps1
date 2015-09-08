@@ -23,20 +23,20 @@ SOFTWARE.
 #>
 
 function Enable-FreshCredNtlmOnlyDelegation {
-	<#
-	.SYNOPSIS
-    	Enables delegating fresh credentials with NTLM-only authentication.
+    <#
+    .SYNOPSIS
+        Enables delegating fresh credentials with NTLM-only authentication.
 
     .DESCRIPTION
-		Enables local policy: Allow delegating fresh credentials with NTLM-only server authentication.
+        Enables local policy: Allow delegating fresh credentials with NTLM-only server authentication.
 
     .EXAMPLE
-		Enable-FreshCredNtlmOnlyDelegation
+        Enable-FreshCredNtlmOnlyDelegation
 
-	#>
-	[CmdletBinding()]
-	[OutputType([void])]
-	param()
+    #>
+    [CmdletBinding()]
+    [OutputType([void])]
+    param()
 
     Write-Log -Info 'Enabling AllowFreshCredentialsWhenNTLMOnly'
 

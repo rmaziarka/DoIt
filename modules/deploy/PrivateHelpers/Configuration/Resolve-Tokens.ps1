@@ -34,12 +34,12 @@ function Resolve-Tokens {
             Tokens = @{
                Category1 = @{
                     LDAPServer = '192.168.0.1'
-				    ADConnectionString = 'LDAP://${LDAPServer}:389/OU=User'
+                    ADConnectionString = 'LDAP://${LDAPServer}:389/OU=User'
                     User = 'User'
                     Pass = 'Pass'
                }
                Category2 = @{
-					DatabaseConnectionString = 'Server=${Node};Database=YourDB;Integrated Security=True;MultipleActiveResultSets=True'
+                    DatabaseConnectionString = 'Server=${Node};Database=YourDB;Integrated Security=True;MultipleActiveResultSets=True'
                     Credentials = $null
                }
             }
@@ -51,18 +51,18 @@ function Resolve-Tokens {
                }
             }
         }
-	}
+    }
 
     And creates following structure (for 'Dev' environment, Node 'LOCALHOST'):
     $Tokens = @{ 
         Category1 = @{
             LDAPServer = '192.168.0.1'
-			ADConnectionString = 'LDAP://192.168.0.1:389/OU=User'
+            ADConnectionString = 'LDAP://192.168.0.1:389/OU=User'
             User = 'User'
             Pass = 'Pass'
         }
         Category2 = @{
-			DatabaseConnectionString = 'Server=LOCALHOST;Database=YourDB;Integrated Security=True;MultipleActiveResultSets=True'
+            DatabaseConnectionString = 'Server=LOCALHOST;Database=YourDB;Integrated Security=True;MultipleActiveResultSets=True'
             Credentials = [PSCredential object with user = 'User', pass = 'Pass']
         }
         All = @{ <all tokens from every category> }
@@ -70,7 +70,7 @@ function Resolve-Tokens {
             Node = 'LOCALHOST'; 
             Environment = 'Dev'
         }
-	}
+    }
 
     Apart from resolving Tokens based on Environment/Node, it additionally does the following:
     1) Adds 'All' category containing all tokens from every category (a flat hashtable of tokens)

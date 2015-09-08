@@ -35,12 +35,12 @@ If token value is a scriptblock, you can use variables $Tokens, $Node and $Envir
 Environment Default {
     Tokens TestCategory @{
         Directory = 'c:\test1'
-	}
+    }
 }
 
 Environment SecondEnv {
     Tokens TestCategory @{
         Directory = 'c:\test2'
-	}
+    }
 }
 

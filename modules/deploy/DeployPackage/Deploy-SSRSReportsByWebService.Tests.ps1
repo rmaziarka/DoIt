@@ -136,11 +136,11 @@ Describe -Tag "PSCI.SSRS" "Deploy-SSRSReportsByWebService" {
 
         Context "when deploying SSRS project file" { 
             Deploy-SSRSReportsByWebService -PackageName 'SSRSReports' -ProjectName 'ReportsProject' -ProjectConfigurationName 'Debug'
-	        It "should not throw any error" {
+            It "should not throw any error" {
                 Assert-MockCalled New-SSRSDataSource -Exactly 1
                 Assert-MockCalled New-SSRSDataSet -Exactly 1
                 Assert-MockCalled New-SSRSCatalogItem -Exactly 1 -ParameterFilter { $ItemType -eq 'Report' }
-	        }
+            }
         }
     }
 }

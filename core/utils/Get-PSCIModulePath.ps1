@@ -44,7 +44,7 @@ function Get-PSCIModulePath {
 
     $module = Get-Module -Name $ModuleName
     if (!$module) {
-		throw "Cannot find Powershell module named '$ModuleName'."
-	}
+        throw "Cannot find Powershell module named '$ModuleName'."
+    }
     return (Split-Path -Path $module.Path -Parent)
 }

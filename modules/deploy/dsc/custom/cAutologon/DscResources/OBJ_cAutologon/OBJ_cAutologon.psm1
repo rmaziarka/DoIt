@@ -25,11 +25,11 @@ SOFTWARE.
 $script:winLogonPath = 'HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon'
 
 function Get-TargetResource {
-    param(	
+    param(    
         [parameter(Mandatory=$true)] 
         [ValidateSet("Present", "Absent")]
-		[string]
-		$Ensure = "Present",
+        [string]
+        $Ensure = "Present",
 
         [parameter(Mandatory=$false)] 
         [string] 
@@ -70,11 +70,11 @@ function Get-TargetResource {
 }
 
 function Test-TargetResource {
-    param(	
+    param(    
         [parameter(Mandatory=$true)] 
         [ValidateSet("Present", "Absent")]
-		[string]
-		$Ensure = "Present",
+        [string]
+        $Ensure = "Present",
 
         [parameter(Mandatory=$false)] 
         [string] 
@@ -105,11 +105,11 @@ function Test-TargetResource {
 }
 
 function Set-TargetResource {
-    param(	
+    param(    
         [parameter(Mandatory=$true)] 
         [ValidateSet("Present", "Absent")]
-		[string]
-		$Ensure = "Present",
+        [string]
+        $Ensure = "Present",
 
         [parameter(Mandatory=$false)] 
         [string] 

@@ -29,7 +29,7 @@ Configuration SqlServer {
     Import-DSCResource -ModuleName xStorage
     Import-DSCResource -ModuleName xDatabase
 
-	Node $NodeName {
+    Node $NodeName {
         WindowsFeature Net35 {
             Name = 'NET-Framework-Core'
             Source = $Tokens.InstallPaths.WindowsServer2012Iso

@@ -23,18 +23,18 @@ SOFTWARE.
 #>
 
 function Copy-FilesToRemoteServer {
-	<#
-	.SYNOPSIS
-		Sends files or whole directories to remote server using 1mb chunks.
+    <#
+    .SYNOPSIS
+        Sends files or whole directories to remote server using 1mb chunks.
 
-	.PARAMETER Path
-		The file or directory path that should be sent to remote server.
+    .PARAMETER Path
+        The file or directory path that should be sent to remote server.
 
     .PARAMETER ConnectionParams
         Connection parameters created by [[New-ConnectionParameters]] function.
 
-	.PARAMETER Destination
-		The remote path where the file will be saved to (must be absolute path and always mean directory, not a file).
+    .PARAMETER Destination
+        The remote path where the file will be saved to (must be absolute path and always mean directory, not a file).
 
     .PARAMETER BlueGreenEnvVariableName
         If specified, this environment variable name will be used for blue-green deployment 
@@ -61,15 +61,15 @@ function Copy-FilesToRemoteServer {
     .PARAMETER ClearDestination
         If $true then all content from $Destination will be deleted.
 
-	.EXAMPLE			
+    .EXAMPLE            
         PS C:\> Copy-FilesToRemoteServer c:\temp\test.exe c:\temp\ (New-ConnectionParameters -Nodes server)
         PS C:\> Copy-FilesToRemoteServer c:\temp\*.* c:\temp\ (New-ConnectionParameters -Nodes @('server1', 'server2'))
         PS C:\> Copy-FilesToRemoteServer c:\temp\ c:\temp\ (New-ConnectionParameters -Nodes server1)
 
-	#>
-	[CmdletBinding(DefaultParametersetName='JustCopy')]
-	[OutputType([string[]])]
-	param(
+    #>
+    [CmdletBinding(DefaultParametersetName='JustCopy')]
+    [OutputType([string[]])]
+    param(
         
         [Parameter(Mandatory = $true)]
         [string[]]

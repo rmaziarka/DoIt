@@ -41,36 +41,36 @@ function Invoke-ScriptCop {
     #>
 
     [OutputType([int])]
-	Param(
-		[Parameter(Mandatory=$true)]
-		[string]
+    Param(
+        [Parameter(Mandatory=$true)]
+        [string]
         $Path,
 
         [Parameter(Mandatory=$false)]
-		[string[]]
+        [string[]]
         $ExcludeNames
-	)
+    )
 
-	begin {
-		$global:ErrorActionPreference = "Stop"
+    begin {
+        $global:ErrorActionPreference = "Stop"
 
-		$prerequisitesPaths = @("$PSScriptRoot\..\PSCI.classes.ps1", "$PSScriptRoot\..\core\utils\Write-ProgressExternal.ps1")
-		foreach ($prereq in $prerequisitesPaths) {
-			Write-Output -InputObject "Including '$prereq'"
-			. $prereq
-		}
+        $prerequisitesPaths = @("$PSScriptRoot\..\PSCI.classes.ps1", "$PSScriptRoot\..\core\utils\Write-ProgressExternal.ps1")
+        foreach ($prereq in $prerequisitesPaths) {
+            Write-Output -InputObject "Including '$prereq'"
+            . $prereq
+        }
         
         Write-ProgressExternal -Message 'Running ScriptCop' -ErrorMessage 'ScriptCop invocation error'
     }
-	process {
-		Import-Module -Name (Join-Path -Path $PSScriptRoot -ChildPath "ScriptCop\ScriptCop.psd1") -Force;
+    process {
+        Import-Module -Name (Join-Path -Path $PSScriptRoot -ChildPath "ScriptCop\ScriptCop.psd1") -Force;
         
         $testResults = New-Object System.Collections.ArrayList
         if ($ExcludeNames) {
             $excludeRegex = '.*\\(' + ($ExcludeNames -join "|") + ')\\.*'
         }
         
-		Get-ChildItem -Path $Path -Recurse -Filter "*.ps*1" -Exclude "deployConfiguration.ps1", "*.Tests.ps1" | Where-Object { !$excludeRegex -or $_.FullName -inotmatch $excludeRegex } | ForEach-Object { 
+        Get-ChildItem -Path $Path -Recurse -Filter "*.ps*1" -Exclude "deployConfiguration.ps1", "*.Tests.ps1" | Where-Object { !$excludeRegex -or $_.FullName -inotmatch $excludeRegex } | ForEach-Object { 
                $content = [IO.File]::ReadAllText($_.FullName)
                $cmd = "Test-Command -ScriptBlock { $content }" 
                $fileName = $_.Name
@@ -91,14 +91,14 @@ function Invoke-ScriptCop {
         }
          
         Remove-Item -LiteralPath 'ScriptCop.txt' -Force -ErrorAction SilentlyContinue
-		$testResults | ForEach-Object { Tee-Object -FilePath 'ScriptCop.txt' -InputObject "$($_.ItemWithProblem) - $($_.Rule) - $($_.Problem))" -Append  }
+        $testResults | ForEach-Object { Tee-Object -FilePath 'ScriptCop.txt' -InputObject "$($_.ItemWithProblem) - $($_.Rule) - $($_.Problem))" -Append  }
         $numErrors = $testResults.Count
-	}
-	end {
+    }
+    end {
         Write-ProgressExternal -Message '' -ErrorMessage ''
         if ($numErrors -gt 0) {
             Write-ProgressExternal -Message "ScriptCop errors ($numErrors)" -MessageType Problem
         }
-		exit $numErrors
-	}
+        exit $numErrors
+    }
 }

@@ -96,8 +96,8 @@ function Deploy-SqlServerAgentPackage {
         [Parameter(Mandatory=$false)]
         [System.Management.Automation.PSCredential] 
         $Credential,
-		
-		[Parameter(Mandatory=$false)]
+        
+        [Parameter(Mandatory=$false)]
         [int] 
         $QueryTimeoutInSeconds,
 
@@ -118,10 +118,10 @@ function Deploy-SqlServerAgentPackage {
 
     Write-Log -Info "Reading .sql files from directory '$PackagePath'"
     $sqlPaths = Get-ChildItem -Path $PackagePath -Filter *.sql | Select-Object -ExpandProperty FullName | Sort-Object
-	if (!$sqlPaths) {
-		Write-Log -Warn "Package '$packageName' - no sqls found in directory '$PackagePath'."
-		return
-	}
+    if (!$sqlPaths) {
+        Write-Log -Warn "Package '$packageName' - no sqls found in directory '$PackagePath'."
+        return
+    }
     
     $jobNameRegex = "@job_name\s*=[^']*'([^']+)'"
     $ownerLoginRegex = "(@owner_login_name\s*=[^']*')([^']+)'"

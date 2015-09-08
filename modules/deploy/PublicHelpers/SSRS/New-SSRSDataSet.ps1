@@ -25,13 +25,13 @@ SOFTWARE.
 function New-SSRSDataSet {
     <#
     .SYNOPSIS
-    	Creates and returns new SSRS Data Set.
+        Creates and returns new SSRS Data Set.
 
     .DESCRIPTION
-    	Creates and returns new SSRS Data Set with the given Proxy and for given DS Path, Folder and Data Source Paths.
+        Creates and returns new SSRS Data Set with the given Proxy and for given DS Path, Folder and Data Source Paths.
 
-	.PARAMETER Proxy
-		ReportingService2010 web service proxy.
+    .PARAMETER Proxy
+        ReportingService2010 web service proxy.
 
     .PARAMETER RsdPath
         Data set path.
@@ -67,7 +67,7 @@ function New-SSRSDataSet {
         [parameter(Mandatory=$true)]
         [string]
         $Folder,
-	    
+        
         [parameter(Mandatory=$true)]
         [System.Collections.Hashtable]
         $DataSourcePaths,
@@ -81,20 +81,20 @@ function New-SSRSDataSet {
 
     $Folder = Format-SSRSFolder -Folder $Folder
 
-	$Name =  [System.IO.Path]::GetFileNameWithoutExtension($RsdPath)
+    $Name =  [System.IO.Path]::GetFileNameWithoutExtension($RsdPath)
     $RawDefinition = Get-AllBytes $RsdPath
 
     $Results = New-SSRSCatalogItem -Proxy $Proxy -ItemType 'DataSet' -Name $Name -Parent $Folder -Overwrite $Overwrite -Definition $RawDefinition
-	
+    
     [xml]$Rsd = Get-Content -Path $RsdPath -ReadCount 0
     $DataSourcePath = $DataSourcePaths[$Rsd.SharedDataSet.DataSet.Query.DataSourceReference]
 
     if ($DataSourcePath) {
         $Reference = New-Object -TypeName SSRS.ReportingService2010.ItemReference
         $Reference.Reference = $DataSourcePath
-		$Reference.Name = 'DataSetDataSource'
-		Set-SSRSItemReferences -Proxy $Proxy -ItemPath ($Folder + '/' + $Name) -ItemReferences @($Reference)
-	}
+        $Reference.Name = 'DataSetDataSource'
+        Set-SSRSItemReferences -Proxy $Proxy -ItemPath ($Folder + '/' + $Name) -ItemReferences @($Reference)
+    }
 
     return $Results
 }

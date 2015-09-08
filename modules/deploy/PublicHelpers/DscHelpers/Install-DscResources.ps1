@@ -43,8 +43,8 @@ function Install-DscResources {
     
     #>
 
-	[CmdletBinding()]
-	[OutputType([void])]
+    [CmdletBinding()]
+    [OutputType([void])]
     param(
         [Parameter(Mandatory=$false)]
         [string[]] 

@@ -67,8 +67,8 @@ function Start-DeploymentPlan {
 
         [Parameter(Mandatory=$false)]
         [ValidateSet('All', 'DSC', 'Functions', 'Adhoc')]
-	    [string]
-	    $DeployType = 'All',
+        [string]
+        $DeployType = 'All',
 
         [Parameter(Mandatory=$false)]
         [switch]

@@ -25,11 +25,11 @@ SOFTWARE.
 function Get-VisualStudioCommandPromptPath {
     <#
     .SYNOPSIS
-	Gets the path to the given version of Visual Studio Command Prompt (or the latest one if not specified).
+    Gets the path to the given version of Visual Studio Command Prompt (or the latest one if not specified).
     
     .DESCRIPTION
     If Visual Studio Command Prompt cannot be found, returns null.
-	
+    
     .PARAMETER VisualStudioVersion
     Visual Studio version.
 

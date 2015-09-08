@@ -82,7 +82,7 @@ function Test-TargetResource
         [ValidateNotNullOrEmpty()]
         [System.String]
         $Name,
-		
+        
         [System.String]
         [ValidateSet("Automatic", "Manual", "Disabled")]
         $StartupType,
@@ -691,7 +691,7 @@ function StartService
             $svc.Start()
             #$twoSeconds = New-Object timespan 20000000
             #$svc.WaitForStatus("Running",$twoSeconds)
-			$thirtySeconds = New-Object timespan 300000000
+            $thirtySeconds = New-Object timespan 300000000
             $svc.WaitForStatus("Running",$thirtySeconds) 
 
         }

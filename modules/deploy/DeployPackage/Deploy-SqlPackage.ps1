@@ -108,8 +108,8 @@ function Deploy-SqlPackage {
         [Parameter(Mandatory=$false)]
         [System.Management.Automation.PSCredential] 
         $Credential,
-		
-		[Parameter(Mandatory=$false)]
+        
+        [Parameter(Mandatory=$false)]
         [int] 
         $QueryTimeoutInSeconds,
 
@@ -132,22 +132,22 @@ function Deploy-SqlPackage {
                     -DefaultPath (Join-Path -Path $configPaths.PackagesPath -ChildPath $PackageName) `
                     -ErrorMsg "Cannot find file '{0}' required for deployment of package '$PackageName'. Please ensure you have run the build and the package exists."
 
-	if ($SqlDirectories -and $SqlDirectories.Count -gt 0) {
-		$sqlPaths = @()
-		foreach ($sqlDir in $SqlDirectories) {
+    if ($SqlDirectories -and $SqlDirectories.Count -gt 0) {
+        $sqlPaths = @()
+        foreach ($sqlDir in $SqlDirectories) {
             $sqlPackageDir = Join-Path -Path $PackagePath -ChildPath $sqlDir
             Write-Log -Info "Adding .sql files from directory '$sqlPackageDir'."
             # SuppressScriptCop - adding small arrays is ok
-			$sqlPaths += Get-ChildItem -Path $sqlPackageDir -Filter *.sql -Recurse | Select-Object -ExpandProperty FullName | Sort-Object
-		}
-	} else {
+            $sqlPaths += Get-ChildItem -Path $sqlPackageDir -Filter *.sql -Recurse | Select-Object -ExpandProperty FullName | Sort-Object
+        }
+    } else {
         Write-Log -Info "Adding .sql files from directory '$PackagePath'"
-		$sqlPaths = Get-ChildItem -Path $PackagePath -Filter *.sql -Recurse | Select-Object -ExpandProperty FullName | Sort-Object
-		if (!$sqlPaths) {
-			Write-Log -Warn "Package '$packageName' - no sqls found in directory '$PackagePath'."
-			return
-		}
-	}
+        $sqlPaths = Get-ChildItem -Path $PackagePath -Filter *.sql -Recurse | Select-Object -ExpandProperty FullName | Sort-Object
+        if (!$sqlPaths) {
+            Write-Log -Warn "Package '$packageName' - no sqls found in directory '$PackagePath'."
+            return
+        }
+    }
 
     if ($Exclude) { 
         $sqlPaths = $sqlPaths | Where-Object -FilterScript { 

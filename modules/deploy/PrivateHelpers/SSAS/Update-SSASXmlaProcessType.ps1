@@ -23,8 +23,8 @@ SOFTWARE.
 #>
 
 function Update-SSASXmlaProcessType {
-	<#
-	.SYNOPSIS
+    <#
+    .SYNOPSIS
     Replaces process type in the .xmla file with the one specified in $ProcessType parameter.
 
     .PARAMETER GeneratedXmlaFilePath
@@ -42,11 +42,11 @@ function Update-SSASXmlaProcessType {
     .EXAMPLE
     Update-SSASXmlaProcessType -GeneratedXmlaFilePath $generatedXmlaFilePath -DeploymentXmlaFilePath $deploymentXmlaFilePath -ProcessType $ProcessType
 
-	#>
-	[CmdletBinding()]
-	[OutputType([void])]
-	param(
-		[Parameter(Mandatory=$true)]
+    #>
+    [CmdletBinding()]
+    [OutputType([void])]
+    param(
+        [Parameter(Mandatory=$true)]
         [string]
         $GeneratedXmlaFilePath,
 
@@ -61,7 +61,7 @@ function Update-SSASXmlaProcessType {
 
         [Switch]
         $Force
-	)
+    )
 
     $xmlaXdtTranformation = @"
 <Batch Transaction="false" xmlns="http://schemas.microsoft.com/analysisservices/2003/engine" xmlns:xdt="http://schemas.microsoft.com/XML-Document-Transform">

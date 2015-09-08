@@ -62,7 +62,7 @@ Describe -Tag "PSCI.unit" "Deploy-SqlPackage" {
                 Deploy-SqlPackage -PackageName 'sqls' -ConnectionString 'test'
 
                 It "should invoke sqls in appropriate order" {
-            	    $global:sqlsInvoked.Count | Should Be 4
+                    $global:sqlsInvoked.Count | Should Be 4
                     $global:sqlsInvoked[0] | Should Be (Resolve-Path -LiteralPath 'sqls\dir1\test1.sql').ProviderPath
                     $global:sqlsInvoked[1] | Should Be (Resolve-Path -LiteralPath 'sqls\dir1\test10.sql').ProviderPath
                     $global:sqlsInvoked[2] | Should Be (Resolve-Path -LiteralPath 'sqls\dir1\test2.sql').ProviderPath
@@ -80,7 +80,7 @@ Describe -Tag "PSCI.unit" "Deploy-SqlPackage" {
                 Deploy-SqlPackage -PackageName 'sqls' -ConnectionString 'test' -SqlDirectories 'dir1'
 
                 It "should invoke sqls in appropriate order" {
-            	    $global:sqlsInvoked.Count | Should Be 3
+                    $global:sqlsInvoked.Count | Should Be 3
                     $global:sqlsInvoked[0] | Should Be (Resolve-Path -LiteralPath 'sqls\dir1\test1.sql').ProviderPath
                     $global:sqlsInvoked[1] | Should Be (Resolve-Path -LiteralPath 'sqls\dir1\test10.sql').ProviderPath
                     $global:sqlsInvoked[2] | Should Be (Resolve-Path -LiteralPath 'sqls\dir1\test2.sql').ProviderPath
@@ -97,7 +97,7 @@ Describe -Tag "PSCI.unit" "Deploy-SqlPackage" {
                 Deploy-SqlPackage -PackageName 'sqls' -ConnectionString 'test' -CustomSortOrder @('test10.sql', 'dir2\\test1.sql')
 
                 It "should invoke sqls in appropriate order" {
-            	    $global:sqlsInvoked.Count | Should Be 4
+                    $global:sqlsInvoked.Count | Should Be 4
                     $global:sqlsInvoked[0] | Should Be (Resolve-Path -LiteralPath 'sqls\dir1\test10.sql').ProviderPath
                     $global:sqlsInvoked[1] | Should Be (Resolve-Path -LiteralPath 'sqls\dir2\test1.sql').ProviderPath
                     $global:sqlsInvoked[2] | Should Be (Resolve-Path -LiteralPath 'sqls\dir1\test1.sql').ProviderPath
@@ -116,7 +116,7 @@ Describe -Tag "PSCI.unit" "Deploy-SqlPackage" {
                 Deploy-SqlPackage -PackageName 'sqls' -ConnectionString 'test' -Exclude @('test10.sql', 'dir1\\test1.sql')
 
                 It "should not invoke excluded sqls" {
-            	    $global:sqlsInvoked.Count | Should Be 2
+                    $global:sqlsInvoked.Count | Should Be 2
                     $global:sqlsInvoked[0] | Should Be (Resolve-Path -LiteralPath 'sqls\dir1\test2.sql').ProviderPath
                     $global:sqlsInvoked[1] | Should Be (Resolve-Path -LiteralPath 'sqls\dir2\test1.sql').ProviderPath
                     

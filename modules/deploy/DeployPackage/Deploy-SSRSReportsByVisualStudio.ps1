@@ -28,14 +28,14 @@ function Deploy-SSRSReportsByVisualStudio {
         Deploys a SSRS project using Visual Studio.
 
     .DESCRIPTION
-    	Deploys a SSRS project using rptproj file using given project configuration (Configuration parameter set) or using given project settings (Target parameter set).
+        Deploys a SSRS project using rptproj file using given project configuration (Configuration parameter set) or using given project settings (Target parameter set).
         Compatible with SSRS versions 2008R2, 2012 and 2014.
 
-	.PARAMETER PackageName
-		Name of the SSRS package.
+    .PARAMETER PackageName
+        Name of the SSRS package.
 
-	.PARAMETER ProjectName
-		Name of .rptproj project.
+    .PARAMETER ProjectName
+        Name of .rptproj project.
 
     .PARAMETER TargetServerURL
         SSRS server url.
@@ -50,7 +50,7 @@ function Deploy-SSRSReportsByVisualStudio {
         Hashtable of data sources.
 
     .PARAMETER ProjectConfigurationName
-    	Name of the project configuration to be used while deploying.
+        Name of the project configuration to be used while deploying.
 
     .PARAMETER Credential
         Credentials

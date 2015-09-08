@@ -55,12 +55,12 @@ function Initialize-ConfigurationPaths {
         $PackagesPath,
 
         [Parameter(Mandatory=$false)]
-	    [string]
-	    $DeployConfigurationPath,
+        [string]
+        $DeployConfigurationPath,
 
         [Parameter(Mandatory=$false)]
-	    [switch]
-	    $ValidatePackagesPath
+        [switch]
+        $ValidatePackagesPath
     )
 
     $configPaths = [PSCustomObject]@{

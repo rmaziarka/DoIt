@@ -32,16 +32,16 @@ SOFTWARE.
 function Get-TargetResource
 {
     param
-    (	
-		[Parameter(Mandatory)][ValidateNotNullOrEmpty()][string] $InstanceName,
+    (    
+        [Parameter(Mandatory)][ValidateNotNullOrEmpty()][string] $InstanceName,
         [Parameter(Mandatory=$false)][string] $OLAPServiceName
     )
 
-	$path = GetCurrent-SSASConfigFilePath -InstanceName $InstanceName
-	$config = [xml] (Get-Content -Path $path -ReadCount 0)
+    $path = GetCurrent-SSASConfigFilePath -InstanceName $InstanceName
+    $config = [xml] (Get-Content -Path $path -ReadCount 0)
 
     return @{ 
-		InstanceName = $InstanceName;
+        InstanceName = $InstanceName;
         OLAPServiceName = $OLAPServiceName;
 
         DataDir = $config.ConfigurationSettings.DataDir;
@@ -83,8 +83,8 @@ function Get-TargetResource
 function Set-TargetResource
 {
     param
-    (	
-		[Parameter(Mandatory)][ValidateNotNullOrEmpty()][string] $InstanceName,
+    (    
+        [Parameter(Mandatory)][ValidateNotNullOrEmpty()][string] $InstanceName,
         [parameter(Mandatory=$false)][string] $OLAPServiceName,
         [parameter(Mandatory=$false)][string] $DataDir,
         [parameter(Mandatory=$false)][string] $LogDir,
@@ -120,8 +120,8 @@ function Set-TargetResource
 
     Write-Verbose "Transforming SSAS configuration file..."
 
-	$path = Get-CurrentSSASConfigFilePath -InstanceName $InstanceName
-	if (Test-Path $path) {
+    $path = Get-CurrentSSASConfigFilePath -InstanceName $InstanceName
+    if (Test-Path $path) {
 
         $xsl = @"
  <xsl:stylesheet version="1.0"
@@ -307,7 +307,7 @@ function Set-TargetResource
 </xsl:stylesheet>
 "@ 
 
-		$tempOutFile = $path.Replace(".ini", ".ini.bak")
+        $tempOutFile = $path.Replace(".ini", ".ini.bak")
         $tempXslFile = $path.Replace(".ini", ".xsl")
 
         $xslt = New-Object System.Xml.Xsl.XslCompiledTransform
@@ -317,14 +317,14 @@ function Set-TargetResource
         [void](Remove-Item $tempXslFile)
 
         $xslt.Transform($path, $tempOutFile)
-		Move-Item $tempOutFile $path -Force
+        Move-Item $tempOutFile $path -Force
 
         if ($OLAPServiceName) {
             # restart OLAP service in order to apply changes made to msmdsrv.ini
             $olapService = Get-Service -Name $OLAPServiceName
             Restart-Service -Name $olapService.ServiceName
         }
-	}
+    }
 }
 
 #
@@ -333,8 +333,8 @@ function Set-TargetResource
 function Test-TargetResource
 {
     param
-    (	
-		[Parameter(Mandatory)][ValidateNotNullOrEmpty()][string] $InstanceName,
+    (    
+        [Parameter(Mandatory)][ValidateNotNullOrEmpty()][string] $InstanceName,
   
         [parameter(Mandatory=$false)][string] $OLAPServiceName,
         [parameter(Mandatory=$false)][string] $DataDir,
@@ -369,8 +369,8 @@ function Test-TargetResource
         [parameter(Mandatory=$false)][string] $LimitSystemFileCachePeriod
     )
 
-	$path = Get-CurrentSSASConfigFilePath -InstanceName $InstanceName
-	$config = [xml] (Get-Content $path)
+    $path = Get-CurrentSSASConfigFilePath -InstanceName $InstanceName
+    $config = [xml] (Get-Content $path)
 
     if ($DataDir -and $DataDir -ne $config.ConfigurationSettings.DataDir) {
         return $false

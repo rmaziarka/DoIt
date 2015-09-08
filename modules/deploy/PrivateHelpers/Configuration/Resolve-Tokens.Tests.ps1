@@ -38,39 +38,39 @@ Describe -Tag "PSCI.unit" "Resolve-Tokens" {
         Context "when used with server" {
             Initialize-Deployment
 
-		    Environment Default {
-			    Tokens WebConfig @{
+            Environment Default {
+                Tokens WebConfig @{
                     SessionTimeout = '30'
-		            NLogLevels = 'Error,Fatal'
+                    NLogLevels = 'Error,Fatal'
                     DatabaseName = "Test"
-	            }
-		    }
+                }
+            }
 
             Environment Live {
-			    Tokens WebConfig @{
+                Tokens WebConfig @{
                     SessionTimeout = '40'
-		            NLogLevels = 'Fatal'
-	            }
+                    NLogLevels = 'Fatal'
+                }
 
-			    Server 's01' {
-			        Tokens WebConfig @{
+                Server 's01' {
+                    Tokens WebConfig @{
                         SessionTimeout = '35'
-	                }
-			    }
-		    }
+                    }
+                }
+            }
 
             Environment Live_Perf {
-			    Tokens WebConfig @{
+                Tokens WebConfig @{
                     SessionTimeout = '55'
-		            NLogLevels = 'Info'
-	            }
+                    NLogLevels = 'Info'
+                }
 
-			    Server 's01' {
-			        Tokens WebConfig @{
+                Server 's01' {
+                    Tokens WebConfig @{
                         SessionTimeout = '70'
-	                }
-			    }
-		    }
+                    }
+                }
+            }
 
             It "Resolve-Tokens: should properly resolve tokens for Default environment" {
                 $resolvedTokens = Resolve-Tokens -AllEnvironments $Global:Environments -Environment Default -Node 's01'
@@ -137,33 +137,33 @@ Describe -Tag "PSCI.unit" "Resolve-Tokens" {
             Initialize-Deployment
 
             Environment Live_Perf -BasedOn Live {
-			    Tokens WebConfig @{
-		            NLogLevels = 'Info'
+                Tokens WebConfig @{
+                    NLogLevels = 'Info'
                     LogDir = 'C:\Logs'
-	            }
-		    }
+                }
+            }
 
-		    Environment Default {
-			    Tokens WebConfig @{
+            Environment Default {
+                Tokens WebConfig @{
                     SessionTimeout = '30'
-		            NLogLevels = 'Warning,Error,Fatal'
+                    NLogLevels = 'Warning,Error,Fatal'
                     DatabaseName = 'Test'
-	            }
-		    }
+                }
+            }
 
             Environment Live_Perf2 -BasedOn Live_Perf {
-			    Tokens WebConfig @{
+                Tokens WebConfig @{
                     SessionTimeout = '100'
                 }
             }
 
             Environment Live {
-			    Tokens WebConfig @{
-		            NLogLevels = 'Fatal'
+                Tokens WebConfig @{
+                    NLogLevels = 'Fatal'
                     DatabaseName = 'Live'
                     Impersonate = 'true'
-	            }
-		    }
+                }
+            }
 
             It "Resolve-Tokens: should properly resolve tokens for children environment" {
                 $resolvedTokens = Resolve-Tokens -AllEnvironments $Global:Environments -Environment Live_Perf -Node 's01'
@@ -197,11 +197,11 @@ Describe -Tag "PSCI.unit" "Resolve-Tokens" {
         Context "when used with types other than string" {
             Initialize-Deployment
 
-		    Environment Default {
-			    Tokens WebConfig @{
+            Environment Default {
+                Tokens WebConfig @{
                     Credentials = ConvertTo-PSCredential -User "Test" -Password "Test"
                     Timeout = 60
-	            }
+                }
             }
 
             It "Resolve-Tokens: should properly resolve tokens" {
@@ -221,29 +221,29 @@ Describe -Tag "PSCI.unit" "Resolve-Tokens" {
         Context "with ciclomatic inheritance" {
             Initialize-Deployment
     
-		    Environment Default {
-			    Tokens WebConfig @{
+            Environment Default {
+                Tokens WebConfig @{
                     SessionTimeout = '30'
-	            }
-		    }
+                }
+            }
 
             Environment E1 -BasedOn E3 {
-			    Tokens WebConfig @{
+                Tokens WebConfig @{
                     SessionTimeout = '40'
-	            }
-		    }
+                }
+            }
 
             Environment E2 -BasedOn E1 {
-			    Tokens WebConfig @{
+                Tokens WebConfig @{
                     SessionTimeout = '40'
-	            }
-		    }
+                }
+            }
 
             Environment E3 -BasedOn E2 {
-			    Tokens WebConfig @{
+                Tokens WebConfig @{
                     SessionTimeout = '40'
-	            }
-		    }
+                }
+            }
 
             It "Resolve-Tokens: should properly throw exception" {
                 Try {
@@ -257,15 +257,15 @@ Describe -Tag "PSCI.unit" "Resolve-Tokens" {
         Context "with tokens substitution" {
             Initialize-Deployment
 
-		    Environment Default {
+            Environment Default {
 
                 Tokens Common @{
                     ConnectionString='Server=${Node};Database=Hub;Integrated Security=True;MultipleActiveResultSets=True'
-	            }
+                }
 
                 Tokens WebDeployConfig @{
                     'Some-Web.config Connection String'='${ConnectionString}'
-	            }
+                }
             }
 
             It "Resolve-Tokens: should properly substitute tokens" {
@@ -284,7 +284,7 @@ Describe -Tag "PSCI.unit" "Resolve-Tokens" {
         Context "with scriptblock as tokens value" {
             Initialize-Deployment
 
-		    Environment Default {
+            Environment Default {
 
                 Tokens Common @{
                     Domain = 'Domain'
@@ -293,7 +293,7 @@ Describe -Tag "PSCI.unit" "Resolve-Tokens" {
                     Credentials = { ConvertTo-PSCredential -User "$($Tokens.Common.Domain)\$($Tokens.Common.User)" -Password $Tokens.Common.Password }
                     NodeTest = { $Node }
                     EnvironmentTest = { $Environment }
-	            }
+                }
             }
 
             It "Resolve-Tokens: should properly evaluate scriptblock" {
@@ -323,7 +323,7 @@ Describe -Tag "PSCI.unit" "Resolve-Tokens" {
         Context "with 'double-hop' scriptblock as tokens value" {
             Initialize-Deployment
 
-		    Environment Default {
+            Environment Default {
 
                 Tokens Common @{
                     Domain = 'Domain'
@@ -336,7 +336,7 @@ Describe -Tag "PSCI.unit" "Resolve-Tokens" {
 
                     CredentialsSecondHop = { ConvertTo-PSCredential -User "$($Tokens.Common.DomainFirstHop)\$($Tokens.Common.UserFirstHop)" -Password $Tokens.Common.PasswordFirstHop }
 
-	            }
+                }
             }
 
             It "Resolve-Tokens: should properly evaluate scriptblock" {
@@ -359,11 +359,11 @@ Describe -Tag "PSCI.unit" "Resolve-Tokens" {
         Context "when used with TokensOverride" {
             Initialize-Deployment
 
-		    Environment Default {
-			    Tokens WebConfig @{
+            Environment Default {
+                Tokens WebConfig @{
                     Credentials = ''
                     Timeout = 60
-	            }
+                }
             }
 
             It "Resolve-Tokens: should properly resolve tokens" {
@@ -412,15 +412,15 @@ Describe -Tag "PSCI.unit" "Resolve-Tokens" {
         Context "when used in more complex scenarios" {
             Initialize-Deployment
 
-		    Environment Default {
-			    Tokens Credentials @{
+            Environment Default {
+                Tokens Credentials @{
                     User = 'user1' 
                     User2 = '${User}'
                     # this is why we need 3 passes of Resolve-Tokens - tokens, scripts, tokens again
                     PSCredential = { ConvertTo-PSCredential -User $Tokens.Credentials.User2 -Password 'test' } 
                     User3 = { $Tokens.Credentials.User2 }
                     User4 = '${User3}'
-	            }
+                }
             }
 
             $resolvedTokens = Resolve-Tokens -AllEnvironments $Global:Environments -Environment Default -Node 's01'
@@ -438,8 +438,8 @@ Describe -Tag "PSCI.unit" "Resolve-Tokens" {
         Context "when used with hashtables" {
             Initialize-Deployment
 
-		    Environment Default {
-			    Tokens DestinationNodes @{
+            Environment Default {
+                Tokens DestinationNodes @{
                     ExternalNodeValue = { 'localhost:e' }
                     NodesMap = @{ 
                         'localhost'  = @{ 
@@ -450,7 +450,7 @@ Describe -Tag "PSCI.unit" "Resolve-Tokens" {
                         ExternalNodeScriptBlock = { $Tokens.DestinationNodes.ExternalNodeValue }
                         ExternalNodeStringRef = '${ExternalNodeValue}'
                     }
-	            }
+                }
 
                 Tokens Node @{
                     SelectedNode = 'localhost'

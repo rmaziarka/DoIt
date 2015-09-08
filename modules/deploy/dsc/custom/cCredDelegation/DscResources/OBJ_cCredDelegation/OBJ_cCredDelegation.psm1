@@ -34,7 +34,7 @@ function Get-TargetResource
     [OutputType([void])]
     [CmdletBinding()]
     param
-    (	
+    (    
         [parameter(Mandatory=$true)] 
         [ValidateSet('Default','DefaultNtlmOnly','Fresh','FreshNtlmOnly','Saved','SavedNtlmOnly')]
         [string] 
@@ -42,10 +42,10 @@ function Get-TargetResource
     )
 
     @{
-		Allow               = Get-AllowSetting -CredentialType $CredentialType
-		DelegateComputers   = Get-Servers -CredentialType $CredentialType
-		ConcatenateDefaults = Get-ConcatenateSetting -CredentialType $CredentialType
-	}
+        Allow               = Get-AllowSetting -CredentialType $CredentialType
+        DelegateComputers   = Get-Servers -CredentialType $CredentialType
+        ConcatenateDefaults = Get-ConcatenateSetting -CredentialType $CredentialType
+    }
 }
 
 
@@ -57,7 +57,7 @@ function Set-TargetResource
     [OutputType([void])]
     [CmdletBinding()]
     param
-    (	
+    (    
         [parameter(Mandatory=$true)] 
         [ValidateSet('Default','DefaultNtlmOnly','Fresh','FreshNtlmOnly','Saved','SavedNtlmOnly')]
         [ValidateNotNullOrEmpty()]
@@ -97,7 +97,7 @@ function Test-TargetResource
     [OutputType([System.Boolean])]
     [CmdletBinding()]
     param
-    (	
+    (    
         [parameter(Mandatory=$true)] 
         [ValidateSet('Default','DefaultNtlmOnly','Fresh','FreshNtlmOnly','Saved','SavedNtlmOnly')]
         [string] 

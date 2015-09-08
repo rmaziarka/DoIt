@@ -41,7 +41,7 @@ function Clear-DscCache {
 
     #>
     [CmdletBinding()]
-	[OutputType([object[]])]
+    [OutputType([object[]])]
     param(
         [Parameter(Mandatory=$false)]
         [object] 

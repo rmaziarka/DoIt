@@ -23,25 +23,25 @@ SOFTWARE.
 #>
 
 function Disable-ReadOnlyFlag {
-	<#
-		.SYNOPSIS
-			Disables "IsReadOnly" attribute on a file.
+    <#
+        .SYNOPSIS
+            Disables "IsReadOnly" attribute on a file.
 
-		.PARAMETER  Path
-			Path to the file.
+        .PARAMETER  Path
+            Path to the file.
 
-		.EXAMPLE
-			PS C:\> Disable-ReadOnlyFlag -Path C:\test.txt
+        .EXAMPLE
+            PS C:\> Disable-ReadOnlyFlag -Path C:\test.txt
 
-	#>
-	[CmdletBinding()]
-	[OutputType([void])]
-	param(
-		[Parameter(Mandatory=$true)]
-		[ValidateNotNullOrEmpty()]
-		[System.String]
-		$Path
-	)
+    #>
+    [CmdletBinding()]
+    [OutputType([void])]
+    param(
+        [Parameter(Mandatory=$true)]
+        [ValidateNotNullOrEmpty()]
+        [System.String]
+        $Path
+    )
 
     if (!(Test-Path -LiteralPath $Path -PathType Leaf)) {
         throw "'$Path' does not exist or it is not a file"

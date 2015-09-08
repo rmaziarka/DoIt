@@ -23,15 +23,15 @@ SOFTWARE.
 #>
 
 function New-Zip {
-	<#
-	.SYNOPSIS
-		Compress file/directory to a zip file.
+    <#
+    .SYNOPSIS
+        Compress file/directory to a zip file.
 
     .PARAMETER Path
-		The path that will be compressed.
+        The path that will be compressed.
 
-	.PARAMETER OutputFile
-		The output zip file path.
+    .PARAMETER OutputFile
+        The output zip file path.
        
     .PARAMETER Include
         List of file / directory to include.
@@ -59,23 +59,23 @@ function New-Zip {
         If zip is created using .NET libraries it sometimes causes issues - e.g. for MsDeploy (always deletes everything and readds if such .zip is used) or DSC (can't unzip).
         7zip will not be used if passing more than one Path.
 
-	.EXAMPLE
-		New-Zip -Path 'C:\test' -OutputPath 'C:\test.zip'
+    .EXAMPLE
+        New-Zip -Path 'C:\test' -OutputPath 'C:\test.zip'
 
-	.EXAMPLE
-		New-Zip -Path 'C:\test' -OutputPath 'C:\test.zip' -Exclude 'test.sql'
+    .EXAMPLE
+        New-Zip -Path 'C:\test' -OutputPath 'C:\test.zip' -Exclude 'test.sql'
 
-	#>
-	[CmdletBinding()]
+    #>
+    [CmdletBinding()]
     [OutputType([void])]
-	param(
-		[Parameter(Mandatory=$true)]
-		[string[]]
-		$Path,
+    param(
+        [Parameter(Mandatory=$true)]
+        [string[]]
+        $Path,
 
-		[Parameter(Mandatory=$true)]
+        [Parameter(Mandatory=$true)]
         [string]
-		$OutputFile,
+        $OutputFile,
 
         [Parameter(Mandatory=$false)]
         [string[]] 
@@ -94,8 +94,8 @@ function New-Zip {
         $ExcludeRecurse,
 
         [Parameter(Mandatory=$false)]
-		[string[]]
-		$DestinationZipPath,
+        [string[]]
+        $DestinationZipPath,
 
         [Parameter(Mandatory=$false)]
         [ValidateSet('Fastest', 'NoCompression', 'Optimal')]
@@ -105,7 +105,7 @@ function New-Zip {
         [Parameter(Mandatory=$false)]
         [switch]
         $Try7Zip
-	)
+    )
 
     if ($Try7Zip -and $Path.Count -eq 1) {
         $pathTo7Zip = Get-PathTo7Zip

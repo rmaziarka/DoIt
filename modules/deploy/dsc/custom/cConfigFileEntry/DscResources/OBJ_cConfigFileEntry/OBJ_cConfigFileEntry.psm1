@@ -27,14 +27,14 @@ $script:configFileEntryRegex = "(^|`n)\s*({0}\s*=\s*)([^`r`n]*)"
 
 function Get-TargetResource {
     param
-    (	
+    (    
         [parameter(Mandatory=$true)] 
         [ValidateNotNullOrEmpty()]
         [string] 
         $Path,
 
         [parameter(Mandatory = $true)]
-    	[string]
+        [string]
         $Key
     )
 
@@ -56,18 +56,18 @@ function Get-TargetResource {
 }
 
 function Test-TargetResource {
-    param(	
+    param(    
         [parameter(Mandatory=$true)] 
         [ValidateNotNullOrEmpty()]
         [string] 
         $Path,
 
         [parameter(Mandatory = $true)]
-    	[string]
+        [string]
         $Key, 
 
         [parameter(Mandatory = $false)]
-    	[string]
+        [string]
         $Value,
 
         [parameter(Mandatory = $false)]
@@ -83,18 +83,18 @@ function Test-TargetResource {
 
 function Set-TargetResource {
     param
-    (	
+    (    
         [parameter(Mandatory=$true)] 
         [ValidateNotNullOrEmpty()]
         [string] 
         $Path,
 
         [parameter(Mandatory = $true)]
-    	[string]
+        [string]
         $Key, 
 
         [parameter(Mandatory = $false)]
-    	[string]
+        [string]
         $Value,
 
         [parameter(Mandatory = $false)]

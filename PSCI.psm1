@@ -61,12 +61,12 @@ Import-Module -Name "$curDir\core\PSCI.core.psd1" -Force -Global 3>$null
 $buildNumber = Get-PSCIBuildNumber -Path $curDir
 
 if (Test-Path -LiteralPath "$curDir\modules") {
-	$modulesToImport = Get-ChildItem -Path "$curDir\modules\*\*.psd1" | Where-Object { !$PSBoundParameters.ContainsKey('Submodules') -or $Submodules -icontains $_.BaseName }
+    $modulesToImport = Get-ChildItem -Path "$curDir\modules\*\*.psd1" | Where-Object { !$PSBoundParameters.ContainsKey('Submodules') -or $Submodules -icontains $_.BaseName }
     
     if ($modulesToImport) {
-	    foreach ($modulePath in $modulesToImport.FullName) {
+        foreach ($modulePath in $modulesToImport.FullName) {
             Import-Module -Name $modulePath -Force -Global 3>$null
-    	}
+        }
         $moduleNames = ($modulesToImport.Name -replace 'PSCI.(.*).psd1', '$1' -join ', ') 
         Write-Log -Info ("PSCI (build #{0}) started with modules: {1}. Path: '{2}'." -f $buildNumber, $moduleNames, $PSScriptRoot)
     } else {

@@ -32,7 +32,7 @@ SOFTWARE.
 function Get-TargetResource
 {
     param
-    (	
+    (    
         [parameter(Mandatory=$true)] 
         [ValidateNotNullOrEmpty()]
         [string] 
@@ -78,7 +78,7 @@ function Get-TargetResource
 function Set-TargetResource
 {
     param
-    (	
+    (    
         [parameter(Mandatory=$true)] 
         [ValidateNotNullOrEmpty()]
         [string] 
@@ -116,7 +116,7 @@ function Set-TargetResource
 function Test-TargetResource
 {
     param
-    (	
+    (    
         [parameter(Mandatory=$true)] 
         [ValidateNotNullOrEmpty()]
         [string] 

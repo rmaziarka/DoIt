@@ -92,9 +92,9 @@ function Build-SqlServerAgentPackage {
     Write-Log -Info "Copying SQL Server Agent scripts from $ScriptsPath."
     $sqlPaths = Get-ChildItem -Path $ScriptsPath -Filter *.sql | Select-Object -ExpandProperty FullName | Sort-Object
     if (!$sqlPaths) {
-		Write-Log -Warn "Package '$PackageName' - no sqls found in directory '$PackagePath'."
-		return
-	}
+        Write-Log -Warn "Package '$PackageName' - no sqls found in directory '$PackagePath'."
+        return
+    }
 
     $jobNameRegex = "@job_name\s*=[^']*'([^']+)'"
     $spDeleteJobRegex = "sp_delete_job.*job_id"

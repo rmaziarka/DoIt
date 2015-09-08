@@ -30,17 +30,17 @@ Describe -Tag "PSCI.unit" "Format-SSRSFolder" {
         Context "when used with Folder without '/' prefix" {
         $folder = "JiraReporting"
 
-		    It "adds '/' at the beginning" {
-		        Format-SSRSFolder -Folder $folder | Should Be ('/' + $folder)
-	        }
+            It "adds '/' at the beginning" {
+                Format-SSRSFolder -Folder $folder | Should Be ('/' + $folder)
+            }
         }
 
         Context "when used with Folder with '/' prefix" { 
         $folder = "/JiraReporting"
 
-		    It "leaves the folder path intact" {
-		        Format-SSRSFolder -Folder $folder | Should Be $folder
-	        }
+            It "leaves the folder path intact" {
+                Format-SSRSFolder -Folder $folder | Should Be $folder
+            }
         }
     }
 }

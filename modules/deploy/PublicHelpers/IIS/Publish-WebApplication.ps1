@@ -71,18 +71,18 @@ function Publish-WebApplication {
     )
 
     Import-Module WebAdministration
-	$path = "IIS:/sites/$SiteName/$AppPath"
+    $path = "IIS:/sites/$SiteName/$AppPath"
 
     if ($PhysicalPath -and !(Test-Path -LiteralPath $PhysicalPath))
-	{
-	    Write-Log -Info ("Creating physical directory '$PhysicalPath' for application '$SiteName/$AppPath'.")
+    {
+        Write-Log -Info ("Creating physical directory '$PhysicalPath' for application '$SiteName/$AppPath'.")
         [void](New-Item -Path $PhysicalPath -ItemType directory)
-	}
+    }
     
-	if (!(Test-Path -LiteralPath $path) -or !(Get-WebApplication -Site $SiteName -Name $AppPath)) {
-		Write-Log -Info "Creating application '$SiteName/$AppPath'"
-		[void](New-WebApplication -Site $SiteName -Name $AppPath -PhysicalPath $PhysicalPath -ApplicationPool $ApplicationPool)
-	} else {
+    if (!(Test-Path -LiteralPath $path) -or !(Get-WebApplication -Site $SiteName -Name $AppPath)) {
+        Write-Log -Info "Creating application '$SiteName/$AppPath'"
+        [void](New-WebApplication -Site $SiteName -Name $AppPath -PhysicalPath $PhysicalPath -ApplicationPool $ApplicationPool)
+    } else {
 
         $webApp = (Get-Item -Path $path)
         $currentPhysicalPath = $webApp.PhysicalPath
@@ -93,11 +93,11 @@ function Publish-WebApplication {
         }
         
         $currentApplicationPool = $webApp.ApplicationPool
-		if ($currentApplicationPool -ne $ApplicationPool) {
+        if ($currentApplicationPool -ne $ApplicationPool) {
             Write-Log -Info "Updating application '$SiteName/$AppPath' - ApplicationPool: '$currentApplicationPool' -> '$ApplicationPool'"
-		    Set-ItemProperty -Path $path -Name ApplicationPool -Value $ApplicationPool
-		}
-	}
+            Set-ItemProperty -Path $path -Name ApplicationPool -Value $ApplicationPool
+        }
+    }
 
     $pathSplit = $path.Split("/")
     $virtualDirs = ""

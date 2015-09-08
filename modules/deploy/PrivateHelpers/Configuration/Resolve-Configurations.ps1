@@ -80,8 +80,8 @@ function Resolve-Configurations {
 
         [Parameter(Mandatory=$false)]
         [ValidateSet('All', 'DSC', 'Functions', 'Adhoc')]
-	    [string]
-	    $DeployType = 'All',
+        [string]
+        $DeployType = 'All',
 
         [Parameter(Mandatory=$false)]
         [hashtable]

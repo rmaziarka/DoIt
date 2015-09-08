@@ -53,11 +53,11 @@ function Set-SSISVersion {
     $vNumbers = $Version.Split('.')
 
     $versionTable = @(
-						("VersionMajor",$vNumbers[0]), 
-						("VersionMinor", $vNumbers[1]), 
-						("VersionComments", $vNumbers[2]),
-						("VersionBuild", $vNumbers[3])
-					 )
+                        ("VersionMajor",$vNumbers[0]), 
+                        ("VersionMinor", $vNumbers[1]), 
+                        ("VersionComments", $vNumbers[2]),
+                        ("VersionBuild", $vNumbers[3])
+                     )
     
     [xml] $packageXml = Get-Content -Path $FilePath -ReadCount 0
     

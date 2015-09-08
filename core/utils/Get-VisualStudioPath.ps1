@@ -25,11 +25,11 @@ SOFTWARE.
 function Get-VisualStudioPath {
     <#
     .SYNOPSIS
-	Gets the path to the given version of Visual Studio (or all of them in descending order if $VisualStudioVersion is not specified).
+    Gets the path to the given version of Visual Studio (or all of them in descending order if $VisualStudioVersion is not specified).
     
     .DESCRIPTION
     If Visual Studio cannot be found, returns empty array.
-	
+    
     .PARAMETER VisualStudioVersion
     Visual Studio version.
 

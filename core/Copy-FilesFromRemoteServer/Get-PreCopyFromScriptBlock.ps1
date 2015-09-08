@@ -25,7 +25,7 @@ SOFTWARE.
 function Get-PreCopyFromScriptBlock {
     <#
     .SYNOPSIS
-	    Returns a scriptblock that prepares zip file and creates arrays required for copying.
+        Returns a scriptblock that prepares zip file and creates arrays required for copying.
 
     .EXAMPLE
         $preCopyScriptBlock = Get-PreCopyFromScriptBlock
@@ -37,8 +37,8 @@ function Get-PreCopyFromScriptBlock {
     return {
 
         [CmdletBinding()]
-	    [OutputType([string])]
-	    param(
+        [OutputType([string])]
+        param(
             [Parameter(Mandatory = $true)]
             [string[]]
             $RemotePath,

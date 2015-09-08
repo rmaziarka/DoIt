@@ -23,18 +23,18 @@ SOFTWARE.
 #>
 
 function Get-TargetResource {
-    param(	
+    param(    
         [parameter(Mandatory=$true)] 
         [ValidateNotNullOrEmpty()]
         [string] 
         $DestinationPath,
 
         [parameter(Mandatory = $true)]
-    	[string]
+        [string]
         $SourcePath, 
 
         [parameter(Mandatory = $false)]
-    	[string]
+        [string]
         $Path7zip
     )
 
@@ -46,18 +46,18 @@ function Get-TargetResource {
 }
 
 function Test-TargetResource {
-    param(	
+    param(    
         [parameter(Mandatory=$true)] 
         [ValidateNotNullOrEmpty()]
         [string] 
         $DestinationPath,
 
         [parameter(Mandatory = $true)]
-    	[string]
+        [string]
         $SourcePath, 
 
         [parameter(Mandatory = $false)]
-    	[string]
+        [string]
         $Path7zip
     )
 
@@ -67,18 +67,18 @@ function Test-TargetResource {
 
 
 function Set-TargetResource {
-    param(	
+    param(    
         [parameter(Mandatory=$true)] 
         [ValidateNotNullOrEmpty()]
         [string] 
         $DestinationPath,
 
         [parameter(Mandatory = $true)]
-    	[string]
+        [string]
         $SourcePath, 
 
         [parameter(Mandatory = $false)]
-    	[string]
+        [string]
         $Path7zip
     )
 

@@ -33,7 +33,7 @@ SOFTWARE.
 function Get-TargetResource
 {
     param
-    (	
+    (    
         [parameter(Mandatory)] 
         [string] $InstanceName = "MSSQLSERVER",
         
@@ -79,7 +79,7 @@ function Get-TargetResource
 function Set-TargetResource
 {
     param
-    (	
+    (    
         [parameter(Mandatory)] 
         [string] $InstanceName = "MSSQLSERVER",
         
@@ -131,7 +131,7 @@ function Set-TargetResource
 function Test-TargetResource
 {
     param
-    (	
+    (    
         [parameter(Mandatory)] 
         [string] $InstanceName = "MSSQLSERVER",
         
@@ -156,7 +156,7 @@ function Test-TargetResource
 function NetUse
 {
     param
-    (	   
+    (       
         [parameter(Mandatory)] 
         [string] $SharePath,
         

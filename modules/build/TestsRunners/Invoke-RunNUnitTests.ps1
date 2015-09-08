@@ -24,7 +24,7 @@ SOFTWARE.
 
 function Invoke-RunNUnitTests {
     <#
-	.SYNOPSIS
+    .SYNOPSIS
     A helper that runs NUnit unit tests.
 
     .DESCRIPTION
@@ -32,35 +32,35 @@ function Invoke-RunNUnitTests {
     Returns 0 if all tests succeeded, positive values give a count of failed tests in the run, negative values indicate internal error.
 
     .PARAMETER NUnitRunnerPath
-	Path to NUnit console runner executable. If not specified NUnit runners will be downloaded from Nuget.
+    Path to NUnit console runner executable. If not specified NUnit runners will be downloaded from Nuget.
 
-	.PARAMETER TestsDirectory
-	Path to the directory which is root of assemblies with tests. If not specified project root will be used.
+    .PARAMETER TestsDirectory
+    Path to the directory which is root of assemblies with tests. If not specified project root will be used.
 
-	.PARAMETER RunTestsFrom
-	Array of assemblies with tests to run. Wildcards are allowed.
+    .PARAMETER RunTestsFrom
+    Array of assemblies with tests to run. Wildcards are allowed.
 
-	.PARAMETER DoNotRunTestsFrom
-	Array of assemblies to exclude from running tests. Wildcards are allowed.
+    .PARAMETER DoNotRunTestsFrom
+    Array of assemblies to exclude from running tests. Wildcards are allowed.
 
     .PARAMETER CategoriesInclude
-	NUnit test categories to include.
+    NUnit test categories to include.
 
     .PARAMETER CategoriesExclude
-	NUnit test categories to exclude.
+    NUnit test categories to exclude.
 
-	.PARAMETER NetFrameworkVersion
-	The version of .NEt runtime to be used in executing tests.
+    .PARAMETER NetFrameworkVersion
+    The version of .NEt runtime to be used in executing tests.
 
-	.PARAMETER ResultPath
-	Path to the xml file with tests results.
+    .PARAMETER ResultPath
+    Path to the xml file with tests results.
 
-	.EXAMPLE
+    .EXAMPLE
     Invoke-RunNUnitTests -ProjectRoot 'Source' -ResultPath testResult.xml -RunTestsFrom '*.UnitTests.*','*.WebTests.*' -DoNotRunTestsFrom '*\obj\*', '*\Debug\*'
 
-	#>
-	[CmdletBinding()]
-	[OutputType([int])]
+    #>
+    [CmdletBinding()]
+    [OutputType([int])]
     param(
         [Parameter(Mandatory=$false)]
         [string]

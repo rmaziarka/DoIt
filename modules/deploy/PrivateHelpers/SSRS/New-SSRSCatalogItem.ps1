@@ -25,13 +25,13 @@ SOFTWARE.
 function New-SSRSCatalogItem {
     <#
     .SYNOPSIS
-    	Creates and returns new SSRS item
+        Creates and returns new SSRS item
 
     .DESCRIPTION
-    	Adds a new item to a report server database or SharePoint library. This function applies to the Report, Model, Dataset, Component, Resource, and DataSource item types.
+        Adds a new item to a report server database or SharePoint library. This function applies to the Report, Model, Dataset, Component, Resource, and DataSource item types.
 
-	.PARAMETER Proxy
-		ReportingService2010 web service proxy.
+    .PARAMETER Proxy
+        ReportingService2010 web service proxy.
 
     .PARAMETER ItemType
         The item type.
@@ -89,7 +89,7 @@ function New-SSRSCatalogItem {
     
     Write-Log -Info "Creating $ItemType '$Name'"
     
-  	$warnings = $null
-	$Results = $Proxy.CreateCatalogItem($ItemType, $Name, $Parent, $Overwrite, $Definition, $Properties, [ref]$Warnings)
+      $warnings = $null
+    $Results = $Proxy.CreateCatalogItem($ItemType, $Name, $Parent, $Overwrite, $Definition, $Properties, [ref]$Warnings)
     return $Results
 }

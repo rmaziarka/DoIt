@@ -91,8 +91,8 @@ function Start-SqlServerAgentJob {
         [Parameter(Mandatory=$false)]
         [System.Management.Automation.PSCredential] 
         $Credential,
-		
-		[Parameter(Mandatory=$false)]
+        
+        [Parameter(Mandatory=$false)]
         [int] 
         $QueryTimeoutInSeconds
     )
