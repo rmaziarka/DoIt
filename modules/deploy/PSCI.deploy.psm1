@@ -24,44 +24,13 @@ SOFTWARE.
 
 
 $curDir = Split-Path -Parent $MyInvocation.MyCommand.Definition
+$publicFunctions = @()
 Get-ChildItem -Recurse $curDir -Include *.ps1 | Where-Object { $_ -notmatch '\.Tests.ps1' -and $_ -notmatch '\\Configurations\\' -and $_ -notmatch '\\dsc\\'} | Foreach-Object {
-    . $_.FullName      
+    . $_.FullName
+    if ($_.FullName -match 'PublicHelpers|DeployPackage') {
+        $publicFunctions += ($_.Name -replace '.ps1', '')
+    }
+     
 }
 
-
-Export-ModuleMember -Function `
-    Environment, `
-    ServerRole, `
-    Tokens, `
-    Import-DeploymentConfiguration, `
-    Start-Deployment, `
-    New-MsDeployConfiguration, `
-    Clear-DscCache, `
-    Deploy-EntityFrameworkMigratePackage, `
-    Deploy-MsDeployPackage, `
-    Deploy-SSASPackage, `
-    Deploy-SqlPackage, `
-    Deploy-SqlServerAgentPackage, `
-    Deploy-SSDTDacpac, `
-    Deploy-SSISIspac, `
-    Deploy-SSISPackage, `
-    Deploy-SSRSModule, `
-    Deploy-SSRSReportsByVisualStudio, `
-    Deploy-SSRSReportsByWebService, `
-    Install-DscResources, `
-    Update-ConfigFile, `
-    Update-TokensInAllFiles, `
-    Update-TokensInZipFile, `
-    Sync-MsDeployDirectory, `
-    Get-SSRSProjectConfiguration, `
-    New-EventLogSource, `
-    New-SSRSDataSet, `
-    New-SSRSDataSource, `
-    New-SSRSDataSourceDefinition, `
-    New-SSRSResource, `
-    New-SSRSFolder, `
-    New-SSRSWebServiceProxy, `
-    Start-SqlServerAgentJob, `
-    Write-DscErrorsFromEventLog
-
-    
+Export-ModuleMember -Function $publicFunctions

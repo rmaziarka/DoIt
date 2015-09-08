@@ -23,33 +23,12 @@ SOFTWARE.
 #>
 
 $curDir = Split-Path -Parent $MyInvocation.MyCommand.Definition 
+$publicFunctions = @()
 Get-ChildItem -Recurse $curDir -Include *.ps1 | Where-Object { $_ -notmatch '\.Tests.ps1' } | Foreach-Object {
-    . $_.FullName      
+    . $_.FullName 
+    if ($_.FullName -match 'PublicHelpers|BuildPackage') {
+        $publicFunctions += ($_.Name -replace '.ps1', '')
+    }
 }
 
-Export-ModuleMember -Function `
-    Build-SSASPackage, `
-    Build-DeploymentScriptsPackage, `
-    Build-DirPackage, `
-    Build-EntityFrameworkMigratePackage, `
-    Build-MsBuildPackage, `
-    Build-WebPackage, `
-    Build-DBDeployPackage, `
-    Build-SqlScriptsPackage, `
-    Build-SSDTDacpac, `
-    Build-SSISIspac, `
-    Build-SSISPackage, `
-    Build-SSRSModulePackage, `
-    Build-SSRSReportsPackage, `
-    Build-SqlServerAgentPackage, `
-    Get-AssemblyVersion, `
-    Remove-PackagesDir, `
-    New-MsBuildOptions, `
-    Invoke-MsBuild, `
-    Set-AssemblVersion, `
-    Restore-AssemblyVersionBackups, `
-    Start-Build, `
-    Backup-Files, `
-    Restore-Files, `
-    Start-NugetRestore, `
-    Install-NugetPackage
+Export-ModuleMember -Function $publicFunctions

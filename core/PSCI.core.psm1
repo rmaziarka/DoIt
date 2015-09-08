@@ -23,79 +23,18 @@ SOFTWARE.
 #>
 
 $curDir = Split-Path -Parent $MyInvocation.MyCommand.Definition 
+$publicFunctions = @()
 Get-ChildItem -Recurse $curDir -Include *.ps1 | Where-Object { $_ -notmatch '\.Tests.ps1' } | Foreach-Object {
-    . $_.FullName      
+    . $_.FullName
+    if ($_.FullName -match '(utils|importLibs|zip|sql|csv|config)\\' -and $_FullName -inotmatch 'utils\\build') {
+        $publicFunctions += ($_.Name -replace '.ps1', '')
+    }   
 }
 
-Export-ModuleMember -Function `
-    Add-QuotesToPaths, `
-    Convert-LocalUncPathToLocalPath, `
-    Convert-XmlUsingXdt, `
-    Get-CurrentUser, `
-    Get-PSCIBuildNumber, `
-    Get-PSCIModulePath, `
-    Get-ProgramFilesx86Path, `
-    Import-Carbon, `
-    Import-SQLPSXSSIS, `
-    Get-PathToExternalLib, `
-    Import-ExternalLib, `
-    Invoke-ExternalCommand, `
-    Start-ExternalProcess, `
-    Invoke-WebRequestWrapper, `
-    New-TempDirectory, `
-    Remove-TempDirectory, `
-    Request-UserInputToContinue, `
-    Stop-Execution, `
-    Sync-DirectoriesWithRobocopy, `
-    Test-IsAdmin, `
-    Update-EnvironmentVariables, `
-    Write-ErrorRecord, `
-    Write-Log, `
-    Compress-With7Zip, `
-	Expand-Zip, `
-    Expand-With7Zip, `
-    Invoke-Sql, `
-    Remove-SqlDatabase, `
-    Restore-SqlDatabase, `
-    New-SqlDatabase, `
-    Update-SqlLogin, `
-    Update-SqlUser, `
-    Convert-ConfigurationPaths, `
-    Read-ConfigFiles, 
-    Copy-FilesToRemoteServer, `
-    Copy-FilesFromRemoteServer, `
-    ConvertTo-PSCredential, `
-    New-Zip, `
-    Disable-ReadOnlyFlag, `
-    Get-FlatFileList, `
-    Get-Hash, `
-    Convert-FunctionToScriptBlock, `
-    Test-ComputerNameIsLocalhost, `
-    Get-AllBytes, `
-    Write-ProgressExternal, `
-    New-ConnectionParameters, `
-    Compare-ConnectionParameters, `
-    New-MsDeployDestinationString, `
-    Convert-HashtableToString, `
-    Test-IsSubdirectory, `
-    Read-ConfigurationFiles, `
-    Get-DscResourcesPaths, `
-    Copy-Directory, `
-    Get-ConfigurationPaths, `
-    Initialize-ConfigurationPaths, `
-    Resolve-PathRelativeToProjectRoot, `
-    Connect-Share, `
-    Disconnect-Share, `
-    Set-SimpleAcl, `
-    Convert-BytesToSize, `
-    Build-DeploymentScriptsPackage, `
-    Test-Integer, `
-    ConvertTo-Integer, `
-    Get-VisualStudioPath, `
-	Backup-SqlDatabase, `
-    Convert-FileEncoding, `
-    ConvertTo-Date, `
-    Remove-DiacriticChars, `
-    Test-WhatIf, `
-    Get-CsvData, `
-    Test-ColumnIsValid
+$publicFunctions += @(
+    'Build-DeploymentScriptsPackage',
+    'Copy-FilesFromRemoteServer',
+    'Copy-FilesToRemoteServer'
+)
+
+Export-ModuleMember -Function $publicFunctions
