@@ -23,18 +23,18 @@ SOFTWARE.
 #>
 
 function Copy-FilesFromRemoteServer {
-	<#
-	.SYNOPSIS
-		Downloads files or whole directories from a remote server using 1mb chunks.
+    <#
+    .SYNOPSIS
+        Downloads files or whole directories from a remote server using 1mb chunks.
 
-	.PARAMETER RemotePath
-		The file or directory path that should be downloaded from remote server.
+    .PARAMETER RemotePath
+        The file or directory path that should be downloaded from remote server.
 
     .PARAMETER ConnectionParams
         Connection parameters created by [[New-ConnectionParameters]] function.
 
-	.PARAMETER Destination
-		The local path where the file will be saved to (must be a directory - existing or non-existing).
+    .PARAMETER Destination
+        The local path where the file will be saved to (must be a directory - existing or non-existing).
 
     .PARAMETER Include
         List of file / directory to include.
@@ -51,12 +51,12 @@ function Copy-FilesFromRemoteServer {
     .PARAMETER ClearDestination
         If $true then all content at $Destination will be deleted.
 
-	.EXAMPLE			
+    .EXAMPLE            
         Copy-FilesFromRemoteServer -ConnectionParams (New-ConnectionParameters -Nodes server) -RemotePath 'c:\temp\test.exe' -Destination 'c:\temp'
-	#>
-	[CmdletBinding()]
-	[OutputType([void])]
-	param(
+    #>
+    [CmdletBinding()]
+    [OutputType([void])]
+    param(
         
         [Parameter(Mandatory = $true)]
         [string[]]
