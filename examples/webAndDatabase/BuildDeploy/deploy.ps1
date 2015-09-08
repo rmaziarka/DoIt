@@ -69,6 +69,7 @@ Adhoc     - don't use configuration files, but deploy configurations $Configurat
 .PARAMETER ValidateOnly
 If true, deployment plan will be created but actual deployment will not run.
 #>
+[CmdletBinding()]
 param(
 	[Parameter(Mandatory=$false)]
 	[string]

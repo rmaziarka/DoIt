@@ -47,7 +47,7 @@ List of tasks (function names) to invoke for this build. If this is not specifie
 .PARAMETER Version
 Version number of the current build.
 #>
-
+[CmdletBinding()]
 param(
 	[Parameter(Mandatory=$false)]
 	[string]
@@ -64,50 +64,75 @@ param(
     [Parameter(Mandatory=$false)]
 	[string]
 	$DeployConfigurationPath = '', # Modify this path according to your project structure. This is absolute or relative to $ProjectRootPath (by default '<script directory>\configuration').
-    
+
     [Parameter(Mandatory=$false)]
 	[string[]]
 	$Tasks,
-
+    
     [Parameter(Mandatory=$false)]
 	[string]
-	$Version = '1.0.0' # This should be passed from your CI server
+	$Version = '1.0.0'
 )
 
 $global:ErrorActionPreference = 'Stop'
 
-try { 
-    ############# Initialization
+try {
+    ############# PSCI initialization
     Push-Location -Path $PSScriptRoot
     if (![System.IO.Path]::IsPathRooted($PSCILibraryPath)) {
     	$PSCILibraryPath = Join-Path -Path $ProjectRootPath -ChildPath $PSCILibraryPath
     }
-    if (!(Test-Path "$PSCILibraryPath\PSCI.psd1")) {
-        Write-Output -InputObject "Cannot find PSCI library at '$PSCILibraryPath' (current dir: '$PSScriptRoot'). Please ensure your ProjectRootPath and PSCILibraryPath parameters are correct."
-    	exit 1
+    
+    if (!(Test-Path -LiteralPath "$PSCILibraryPath\PSCI.psd1")) {
+        Write-Host -Object "Cannot find PSCI library at '$PSCILibraryPath' (current dir: '$PSScriptRoot')."
+
+        if (Test-Path -LiteralPath "$PSScriptRoot\packages\PSCI\PSCI.psd1") {
+            Write-Host -Object "PSCI library found at '$PSScriptRoot\packages\PSCI'."
+        } else {
+            Write-Host -Object 'Downloading nuget.exe.'
+		    Invoke-WebRequest -Uri 'http://nuget.org/nuget.exe' -OutFile "$env:TEMP\NuGet.exe"
+            if (!(Test-Path "$env:TEMP\NuGet.exe")) {
+                Write-Host -Object "Failed to download nuget.exe to '$env:TEMP'. Please download PSCI manually and set PSCILibraryPath parameter to an existing path."
+                exit 1
+            }
+            Write-Host -Object 'Nuget.exe downloaded successfully - installing PSCI.'
+
+            & "$env:TEMP\NuGet.exe" install PSCI -ExcludeVersion -OutputDirectory "$PSScriptRoot\packages"
+		    $PSCILibraryPath = "$PSScriptRoot\packages\PSCI"
+
+	        if (!(Test-Path -LiteralPath "$PSCILibraryPath\PSCI.psd1")) {
+                Write-Host -Object "Cannot find PSCI library at '$PSCILibraryPath' (current dir: '$PSScriptRoot'). PSCI was not properly installed as nuget."
+    	        exit 1
+		    }
+        }
+        $PSCILibraryPath = "$PSScriptRoot\packages\PSCI"
     }
     Import-Module "$PSCILibraryPath\PSCI.psd1" -Force 
 
-    $PSCIGlobalConfiguration.LogFile = "$PSScriptRoot\build.log.txt"
-    Remove-Item -LiteralPath $PSCIGlobalConfiguration.LogFile -ErrorAction SilentlyContinue
+    ############# Running build
+    try { 
+        $PSCIGlobalConfiguration.LogFile = "$PSScriptRoot\build.log.txt"
+        Remove-Item -LiteralPath $PSCIGlobalConfiguration.LogFile -ErrorAction SilentlyContinue
 
-    Initialize-ConfigurationPaths -ProjectRootPath $ProjectRootPath -PackagesPath $PackagesPath -DeployConfigurationPath $DeployConfigurationPath
-    Remove-PackagesDir
+        Initialize-ConfigurationPaths -ProjectRootPath $ProjectRootPath -PackagesPath $PackagesPath -DeployConfigurationPath $DeployConfigurationPath
+        if (!$Tasks) { 
+            Remove-PackagesDir
+        }
 
-    <# 
-      All powershell files available at 'build' directory will be included and custom functions will be invoked based on $Tasks variable.
-      For example if $Tasks = 'Build-Package1', 'Build-Package2', functions 'Build-Package1' and 'Build-Package2' will be invoked.
-      If $Tasks is null, default task will be invoked (Build-All).
-      Any additional parameters in build.ps1 will be automatically passed to custom build functions.
-    #>
-    $cmdName = $PSCmdlet.MyInvocation.MyCommand.Path
-    Write-Log -Info "Starting build at '$cmdName'" -Emphasize
-    $buildParams = (Get-Command -Name $cmdName).ParameterSets[0].Parameters | Where-Object { $_.Position -ge 0 } | Foreach-Object { Get-Variable -Name $_.Name }
+        <# 
+          All powershell files available at 'build' directory will be included and custom functions will be invoked based on $Tasks variable.
+          For example if $Tasks = 'Build-Package1', 'Build-Package2', functions 'Build-Package1' and 'Build-Package2' will be invoked.
+          If $Tasks is null, default task will be invoked (Build-All).
+          Any additional parameters in build.ps1 will be automatically passed to custom build functions.
+        #>
+        $cmdName = $PSCmdlet.MyInvocation.MyCommand.Path
+        Write-Log -Info "Starting build at '$cmdName'" -Emphasize
+        $buildParams = (Get-Command -Name $cmdName).ParameterSets[0].Parameters | Where-Object { $_.Position -ge 0 } | Foreach-Object { Get-Variable -Name $_.Name }
 
-    Start-Build -BuildParams $buildParams -ScriptsDirectory 'build' -DefaultTask 'Build-All'
-} catch {
-    Write-ErrorRecord -ErrorRecord $_
+        Start-Build -BuildParams $buildParams -ScriptsDirectory 'build' -DefaultTask 'Build-All'
+    } catch {
+        Write-ErrorRecord -ErrorRecord $_
+    }
 } finally {
     Pop-Location
 }
-
