@@ -180,10 +180,11 @@ function Invoke-RunJasmineTests {
     try{
         Write-Log -Info "Running phantomjs with following command line: $phantomExe $phantomJsArgs"
         $phantomExitCode = (Start-ExternalProcess -Command $phantomExe -ArgumentList $phantomJsArgs -WorkingDirectory (Get-Location) -CheckLastExitCode:$false)
-        Start-Sleep -Seconds 2
     } finally {
         Pop-Location
         if ($getCoverage) {
+            # Give JsCover some time to process the tests output before stopping it
+            Start-Sleep -Seconds 2
             Stop-JsCoverServer -Process $process -Port $JsCoverServerPort
         }
     }
