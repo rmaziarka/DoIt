@@ -56,7 +56,7 @@ function Invoke-RunNUnitTests {
 	Path to the xml file with tests results.
 
 	.EXAMPLE
-    Invoke-RunNUnit -ProjectRoot 'Source' -ResultPath testResult.xml -RunTestsFrom '*.UnitTests.*','*.WebTests.*' -DoNotRunTestsFrom '*\obj\*', '*\Debug\*'
+    Invoke-RunNUnitTests -ProjectRoot 'Source' -ResultPath testResult.xml -RunTestsFrom '*.UnitTests.*','*.WebTests.*' -DoNotRunTestsFrom '*\obj\*', '*\Debug\*'
 
 	#>
 	[CmdletBinding()]
