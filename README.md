@@ -22,4 +22,4 @@ PSCI provides following features:
 - Look into `topology.ps1` - this is where you configure what should be deployed where. Note there are three environments defined - `Default`, `SecondEnv` and `RemoteRun`. 
 - Go into `deploy.ps1`, change parameter value `$Environment = 'Default'` to  `$Environment = 'SecondEnv'` and run the file. It will create 'c:\test2' (thanks to different variable value for `SecondEnv` in `tokens.ps1`).
 - Set `$Environment = 'RemoteRun'` and run it again. This time, PSCI will firstly copy itself to the remote server (`localhost` in our case) and then run the configurations remotely (using PSRemoting). This is thanks to `-RunRemotely` flag in `topology.ps1`.
-- Look at more complex `examples`.
+- Look at more complex [examples](https://github.com/ObjectivityBSS/PSCI/tree/master/examples).
