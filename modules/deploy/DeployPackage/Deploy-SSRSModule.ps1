@@ -33,8 +33,11 @@ function Deploy-SSRSModule {
         .PARAMETER  PackagePath
             Path of the package.
   
+        .PARAMETER  SSRSExtensionDir
+            The directory of SSRS extension where DLL is copied.
+
         .EXAMPLE
-            PS C:\> Deploy-SSRSModule -PackageName 'MyPackage' -Server localhost
+            PS C:\> Deploy-SSRSModule -PackageName 'MyPackage' -SSRSExtensionDir 'ReportServer'
     #>
     [CmdletBinding()]
     [OutputType([void])]
@@ -45,7 +48,13 @@ function Deploy-SSRSModule {
 
         [Parameter(Mandatory=$false)]
         [string] 
-        $PackagePath
+        $PackagePath,
+
+        [Parameter(Mandatory=$true)]
+        [ValidateSet('ReportManager','ReportServer')]
+        [string] 
+        $SSRSExtensionDir
+
     )
 
     $PackagePath = Resolve-PathRelativeToProjectRoot `
@@ -59,7 +68,7 @@ function Deploy-SSRSModule {
     # Get MSRS paths
     foreach ($instance in $instances) {
         $msrsInstanceName = (Get-ItemProperty -Path 'HKLM:\SOFTWARE\Microsoft\Microsoft SQL Server\Instance Names\RS').$instance
-        $sqlPath = Join-Path -Path (Get-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\Microsoft SQL Server\$msrsInstanceName\Setup").SQLPath -ChildPath "\bin\"
+        $sqlPath = Join-Path -Path (Get-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\Microsoft SQL Server\$msrsInstanceName\Setup").SQLPath -ChildPath "\$SSRSExtensionDir\bin\"
         [void]$paths.Add($sqlPath)
     }
 

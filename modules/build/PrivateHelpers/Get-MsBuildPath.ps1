@@ -49,7 +49,7 @@ function Get-MsBuildPath {
     param(
         [Parameter(Mandatory=$false)]
         [string] 
-        [ValidateSet("2015","2013","2012","2010","")]
+        [ValidateSet("2015","2013","2012","2010","2008", "")]
         $VisualStudioVersion,
 
         [Parameter(Mandatory=$false)]
@@ -65,6 +65,7 @@ function Get-MsBuildPath {
 
     if ($VisualStudioVersion) {
         switch ($VisualStudioVersion) {
+            "2008"              { $MsBuildVersion = "3.5" }
             {"2010" -or "2012"} { $MsBuildVersion = "4.0" }
             "2013"              { $MsBuildVersion = "12.0" }
             "2015"              { $MsBuildVersion = "14.0" }

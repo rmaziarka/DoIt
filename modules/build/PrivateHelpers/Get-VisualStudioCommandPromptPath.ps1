@@ -42,11 +42,12 @@ function Get-VisualStudioCommandPromptPath {
     param(
         [Parameter(Mandatory=$false)]
         [string] 
-        [ValidateSet($null, '2015', '2013', '2012', '2010')]
+        [ValidateSet($null, '2015', '2013', '2012', '2010', '2008')]
         $VisualStudioVersion
     )
 
     $envVars = @{
+        '2008' = $env:VS90COMNTOOLS
         '2010' = $env:VS100COMNTOOLS
         '2012' = $env:VS110COMNTOOLS
         '2013' = $env:VS120COMNTOOLS

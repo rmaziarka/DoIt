@@ -149,6 +149,7 @@ function Invoke-MsBuild {
 
     if ($VisualStudioVersion) {
         $vsVersionMap = @{ `
+            "2008" = "9.0"; `
             "2010" = "10.0"; `
             "2012" = "11.0"; `
             "2013" = "12.0"; `

@@ -38,6 +38,9 @@ function Build-SSASPackage {
     .PARAMETER ProjectPath
     Path to the cube project (.dwproj) that will be built and packaged.
 
+    .PARAMETER CubeName
+    Name of the cube in SSAS database.
+
     .PARAMETER Version
     Version number which will be written to the cube file.
 
@@ -45,7 +48,7 @@ function Build-SSASPackage {
     Deploy-SSASPackage
 
     .EXAMPLE
-    Build-SSASPackage -PackageName 'MyProject.SSAS'
+    Build-SSASPackage -PackageName 'MyProject.SSAS' -CubeName 'MyCube'
 
     #>
     [CmdletBinding()]
@@ -54,6 +57,10 @@ function Build-SSASPackage {
         [Parameter(Mandatory=$true)]
         [string]
         $PackageName,
+
+        [Parameter(Mandatory=$true)]
+        [string]
+        $CubeName,        
 
         [Parameter(Mandatory=$true)]
         [string]
@@ -77,7 +84,7 @@ function Build-SSASPackage {
 
     if ($Version) {
         Write-Log -info "Setting cube version.."
-        Set-SSASVersion -FilePath (Join-Path -Path $SourceDir -ChildPath "$ProjectName.cube") -Version $Version
+        Set-SSASVersion -FilePath (Join-Path -Path $SourceDir -ChildPath "$CubeName.cube") -Version $Version
     }
 
     Build-Cube -ProjectDirPath $SourceDir -ProjectName $ProjectName

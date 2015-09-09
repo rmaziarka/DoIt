@@ -103,11 +103,11 @@ function Build-DirPackage {
     if (Test-Path -LiteralPath $SourcePath -PathType Container) {
         $SourcePath = Join-Path -Path $SourcePath -ChildPath "*"
     }
-    [void](Copy-Item -Path $SourcePath -Include $Include -Exclude $Exclude -Destination $OutputPath -Recurse)
+    [void](Copy-Item -Path $SourcePath -Include $Include -Exclude $Exclude -Destination $OutputPath -Recurse -Force)
 
     if ($zipPath) {
         New-Zip -Path $OutputPath -OutputFile $zipPath -Try7Zip -Exclude "*.zip"
-        Remove-Item -Path "$OutputPath\*" -Exclude "*.zip" -Force -Recurse
+        Remove-Item -Path "$OutputPath\*" -Exclude "*.zip" -Recurse -Force
     }
 
     Write-ProgressExternal -Message ''
