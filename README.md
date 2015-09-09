@@ -3,6 +3,12 @@
 PSCI is a build and deployment automation library, that provides a simple Powershell DSC-like language that allows to express configuration as code. The general flow is presented on the image below:
 ![PSCI overview](https://github.com/ObjectivityBSS/PSCI/wiki/images/PSCI_overview.png)
 
+There are several possibilities to run the deployment code - see [Remoting configuration](https://github.com/ObjectivityBSS/PSCI/wiki/Remoting-configuration) for diagrams:
+- Powershell function run on local machine
+- Powershell function run on destination machine
+- DSC configuration run on destination machine
+- Double-hop deployments - e.g. WebDeploy + DSC.
+
 PSCI provides following features:
 - simple DSL to describe Environments, Server Roles, Server Connections, Configurations and Tokens (per-environment parameters), 
 - written entirely in Powershell (requires Powershell 3.0, or 4.0 for DSC support),
