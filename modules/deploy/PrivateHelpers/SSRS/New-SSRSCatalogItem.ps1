@@ -87,7 +87,7 @@ function New-SSRSCatalogItem {
         $Properties
     ) 
     
-    Write-Log -Info "Creating $ItemType '$Name'"
+    Write-Log -Info "Creating $ItemType '$Name' at '$Parent'"
     
       $warnings = $null
     $Results = $Proxy.CreateCatalogItem($ItemType, $Name, $Parent, $Overwrite, $Definition, $Properties, [ref]$Warnings)
