@@ -67,13 +67,6 @@ Environment Default {
 
 Environment Test {
 
-    Tokens Remoting @{
-        MSDeployDestination = { New-MsDeployDestinationString `
-									-Url ('https://{0}:8172/msdeploy.axd' -f $Node) `
-									-UserName $Tokens.Remoting.UserName `
-                                    -Password $Tokens.Remoting.Password `
-									-AuthType 'Basic' }
-    }
 }
 
 Environment UAT {
