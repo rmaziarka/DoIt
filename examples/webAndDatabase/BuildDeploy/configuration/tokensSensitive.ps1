@@ -22,10 +22,10 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 #>
 
-Environment Default {
+Environment Local {
 
-    Tokens Credentials @{
-        Username = '<TODO>'
+    Tokens Remoting @{
+        UserName = '<TODO>'
         Password = '<TODO>'
     }
     
