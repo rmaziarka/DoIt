@@ -33,12 +33,7 @@ If token value is a scriptblock, you can use variables $Tokens, $Node and $Envir
 #>
 
 Environment Default {
-
-    Tokens Local @{
-        # normally nodes would not be tokenized but put directly to ServerConnection - this configuration is useful for tests run from CI server
-        Nodes = 'localhost'
-    }
-    
+   
     # Credentials used during deployment - sensitive data can be stored in separate file (e.g. tokensSensitive.ps1)
     Tokens Remoting @{
         RemotingCredential = { ConvertTo-PSCredential -User $Tokens.Remoting.UserName -Password $Tokens.Remoting.Password }
@@ -71,9 +66,6 @@ Environment Default {
 }
 
 Environment Test {
-    Tokens Topology @{
-        Nodes = 'objplbuild-exp.objectivity.co.uk'
-    }
 
     Tokens Remoting @{
         MSDeployDestination = { New-MsDeployDestinationString `
