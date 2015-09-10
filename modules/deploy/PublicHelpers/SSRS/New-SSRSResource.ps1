@@ -36,15 +36,18 @@ function New-SSRSResource {
     .PARAMETER FilePath
         Path to the file.
 
-    .PARAMETER Folder
-        Target folder.
+    .PARAMETER SourceFolder
+        Source folder.
+
+    .PARAMETER DestinationFolder
+        Destination folder.
 
     .PARAMETER MimeType
         Mime-type of the file.
 
     .EXAMPLE
         $Proxy = New-SSRSWebServiceProxy -Uri "http://localhost/reportserver"
-        $resource = New-SSRSResource -Proxy $Proxy -FilePath 'C:\image.jpg' -Folder '/Images' -MimeType 'image/jpeg'
+        $resource = New-SSRSResource -Proxy $Proxy -FilePath 'C:\image.jpg' -DestinationFolder '/Images' -MimeType 'image/jpeg'
     #>
     [CmdletBinding()]
     [OutputType([Object])]
@@ -58,17 +61,18 @@ function New-SSRSResource {
 
         [parameter(Mandatory=$true)]
         [string]
-        $Folder,
+        $SourceFolder,
+
+        [parameter(Mandatory=$true)]
+        [string]
+        $DestinationFolder,
 
         [parameter(Mandatory=$true)]
         [string]
         $MimeType
     ) 
-    
-    Write-Log -_debug "Creating SSRS resource '$FilePath' at '$Folder'"
-    $Path = $Folder | Join-Path -ChildPath $FilePath
 
-    $RawDefinition = Get-AllBytes -Path $Path
+    $RawDefinition = Get-AllBytes -Path (Join-Path -Path $SourceFolder -ChildPath $FilePath)
 
     $DescProp = New-Object -TypeName SSRS.ReportingService2010.Property
     $DescProp.Name = 'Description'
@@ -86,8 +90,7 @@ function New-SSRSResource {
         $HiddenProp.Value = 'true'
     }
             
-    Write-Log -Info "Creating resource $FilePath"
-    $Results = New-SSRSCatalogItem -Proxy $Proxy -ItemType 'Resource' -Name $FilePath -Parent $Folder -Overwrite $true -Definition $RawDefinition -Properties $Properties
+    $Results = New-SSRSCatalogItem -Proxy $Proxy -ItemType 'Resource' -Name $FilePath -Parent $DestinationFolder -Overwrite $true -Definition $RawDefinition -Properties $Properties
 
     return $Results
 }
