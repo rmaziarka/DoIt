@@ -22,25 +22,17 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 #>
 
+function ValidateDeploy {
+    param ($NodeName, $Environment, $Tokens, $ConnectionParams)
 
-<#
-.SYNOPSIS
-Builds database package.
-
-.PARAMETER Version
-Version number of the current build.
-#>
-
-function Build-Database {
-    param(
-        [Parameter(Mandatory=$false)]
-        [string]
-        $Version
-    )
-
-    Build-EntityFrameworkMigratePackage -PackageName 'Migrations' `
-                                    -ProjectPath 'SampleWebApplication\DataModel\DataModel.csproj' `
-                                    -MigrationsDir 'SampleWebApplication\DataModel\bin\Release' `
-                                    -EntityFrameworkDir 'SampleWebApplication\packages\EntityFramework.6.1.2' 
-
+    $url = "http://${NodeName}:$($Tokens.WebConfig.WebsitePort)"
+    Write-Log -Info "Sending HTTP GET request to '$url'"
+    $result = Invoke-WebRequest -Uri $url -UseBasicParsing
+    if ($result.StatusCode -ne 200) {
+        throw "Web page at $url is not available - response status code: $($result.StatusCode)."
+    }
+    if ($result.Content -inotmatch 'id: 1, name: OrderFromDatabase') {
+        throw "Web page at $url returns invalid response - does not include order information from database."
+    }
+    Write-Log -Info 'HTTP response contains information from database - deployment successful.'
 }

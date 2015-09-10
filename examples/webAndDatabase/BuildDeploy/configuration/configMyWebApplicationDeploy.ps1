@@ -22,47 +22,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 #>
 
-Configuration WebServerProvision {
-    param ($NodeName, $Environment, $Tokens)
-
-    Import-DSCResource -Module xDismFeature
-
-    Node $NodeName {
-     if ($Environment -eq "Local") {
-            
-            xDismFeature IISWebServer { 
-                Name = "IIS-WebServerRole"
-            }
-
-            xDismFeature IISASPNET45 { 
-                Name = "IIS-ASPNET45"
-            }
-
-            xDismFeature IISWindowsAuthentication { 
-                Name = "IIS-WindowsAuthentication"
-            }
-        } else {
-            WindowsFeature IIS {
-                Ensure = "Present"
-                Name = "Web-Server"
-            }
-
-            WindowsFeature IISAuth {
-                Ensure = "Present"
-                Name = "Web-Windows-Auth"
-                DependsOn = "[WindowsFeature]IIS"
-            }
-                     
-            WindowsFeature IISASP { 
-              Ensure = "Present"
-              Name = "Web-Asp-Net45"
-              DependsOn = "[WindowsFeature]IIS"
-            } 
-        }
-    }
-}
-
-Configuration WebServerIISConfig {
+Configuration MyWebApplicationIISConfig {
     param ($NodeName, $Environment, $Tokens)
 
     Import-DSCResource -Module cIIS
@@ -70,8 +30,6 @@ Configuration WebServerIISConfig {
     Import-DSCResource -Module xNetworking
 
     Node $NodeName {
-
-        #TODO: install IIS features
 
         # configure application pool
         cAppPool $Tokens.WebConfig.AppPoolName { 
@@ -121,14 +79,13 @@ Configuration WebServerIISConfig {
     }
 }
 
-
-function WebServerDeploy {
+function MyWebApplicationDeploy {
     param ($NodeName, $Environment, $Tokens, $ConnectionParams)
 
-    $msDeployParams = @{ PackageName = 'SampleWebApplication';
+    $msDeployParams = @{ PackageName = 'MyWebApplication';
                          PackageType = 'Web';
                          Node = $NodeName;
-                         MsDeployDestinationString = $ConnectionParams.MsDeployDestinationString
+                         MsDeployDestinationString = $Tokens.Remoting.MsDeployDestination
                          TokensForConfigFiles = $Tokens.WebTokens;
                          FilesToIgnoreTokensExistence = @( 'NLog.config' );
                          Website = $Tokens.WebConfig.WebsiteName;
@@ -137,35 +94,4 @@ function WebServerDeploy {
                        }
 
     Deploy-MsDeployPackage @msDeployParams
-}
-
-function DatabaseDeploy {
-    param ($NodeName, $Environment, $Tokens, $ConnectionParams)
-
-    $databaseName = $Tokens.DatabaseConfig.DatabaseName
-    $connectionString = $Tokens.DatabaseConfig.ConnectionString
-    if ($Tokens.DatabaseConfig.DropDatabase) { 
-        Remove-SqlDatabase -DatabaseName $databaseName -ConnectionString $connectionString
-    }
-
-    Deploy-EntityFrameworkMigratePackage -PackageName 'Migrations' -ConnectionString $connectionString -MigrateAssembly 'DataModel.dll'
-
-    $defaultAppPoolUserName = "IIS AppPool\$($Tokens.WebConfig.AppPoolName)"
-    Update-SqlLogin -ConnectionString $connectionString -Username $defaultAppPoolUserName -WindowsAuthentication
-    Update-SqlUser -ConnectionString $connectionString -DatabaseName $databaseName -Username $defaultAppPoolUserName -DbRole 'db_datareader'
-}
-
-function ValidateDeploy {
-    param ($NodeName, $Environment, $Tokens, $ConnectionParams)
-
-    $url = "http://${NodeName}:$($Tokens.WebConfig.WebsitePort)"
-    Write-Log -Info "Sending HTTP GET request to '$url'"
-    $result = Invoke-WebRequest -Uri $url -UseBasicParsing
-    if ($result.StatusCode -ne 200) {
-        throw "Web page at $url is not available - response status code: $($result.StatusCode)."
-    }
-    if ($result.Content -inotmatch 'id: 1, name: OrderFromDatabase') {
-        throw "Web page at $url returns invalid response - does not include order information from database."
-    }
-    Write-Log -Info 'HTTP response contains information from database - deployment successful.'
 }

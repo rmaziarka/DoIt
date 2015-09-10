@@ -67,11 +67,11 @@ param(
 
     [Parameter(Mandatory=$false)]
     [string[]]
-    $Tasks,
+    $Tasks, # This can be used to run partial builds (if not empty, specified functions will be run instead of Build-All)
     
     [Parameter(Mandatory=$false)]
     [string]
-    $Version = '1.0.0'
+    $Version # This should be passed from your CI server
 )
 
 $global:ErrorActionPreference = 'Stop'
@@ -105,6 +105,7 @@ try {
         }
         $PSCILibraryPath = "$PSScriptRoot\packages\PSCI"
     } else {
+        $PSCILibraryPath = (Resolve-Path -Path $PSCILibraryPath).ProviderPath
         Write-Host -Object "PSCI library found at '$PSCILibraryPath'."
     }
     Import-Module "$PSCILibraryPath\PSCI.psd1" -Force 

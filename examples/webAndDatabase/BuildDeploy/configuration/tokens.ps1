@@ -33,12 +33,23 @@ If token value is a scriptblock, you can use variables $Tokens, $Node and $Envir
 #>
 
 Environment Default {
+
+    Tokens Local @{
+        # normally nodes would not be tokenized but put directly to ServerConnection - this configuration is useful for tests run from CI server
+        Nodes = 'localhost'
+    }
     
-    Tokens Credentials @{
-        # Username and Password are defined in tokensSensitive.ps1
-        DefaultCredentials = { ConvertTo-PSCredential -User $Tokens.Credentials.UserName -Password $Tokens.Credentials.Password }
+    # Credentials used during deployment - sensitive data can be stored in separate file (e.g. tokensSensitive.ps1)
+    Tokens Remoting @{
+        RemotingCredential = { ConvertTo-PSCredential -User $Tokens.Remoting.UserName -Password $Tokens.Remoting.Password }
+        MSDeployDestination = { New-MsDeployDestinationString `
+							-Url ('http://{0}/MsDeployAgentService' -f $Node) `
+							-UserName $Tokens.Remoting.UserName `
+                            -Password $Tokens.Remoting.Password `
+							-AuthType 'NTLM' }
     }
 
+    # IIS configuration
     Tokens WebConfig @{
         AppPoolName = 'PSCI_TestAppPool'
         WebsiteName = 'PSCI_TestWebsite'
@@ -46,14 +57,30 @@ Environment Default {
         WebsitePhysicalPath = 'c:\inetpub\wwwroot\PSCI_TestWebsite'
     }
 
+    # Tokens used to update Web.config file - all occurrences of '${TestConnectionString}' string will be replaced
     Tokens WebTokens @{
         TestConnectionString = { $Tokens.DatabaseConfig.ConnectionString }
     }
 
+    # Tokens related to database deployment
     Tokens DatabaseConfig @{
         DatabaseName = 'PSCITest'
         ConnectionString = 'Server=localhost\SQLEXPRESS;Database=${DatabaseName};Integrated Security=SSPI'
         DropDatabase = $true
+    }
+}
+
+Environment Test {
+    Tokens Topology @{
+        Nodes = 'objplbuild-exp.objectivity.co.uk'
+    }
+
+    Tokens Remoting @{
+        MSDeployDestination = { New-MsDeployDestinationString `
+									-Url ('https://{0}:8172/msdeploy.axd' -f $Node) `
+									-UserName $Tokens.Remoting.UserName `
+                                    -Password $Tokens.Remoting.Password `
+									-AuthType 'Basic' }
     }
 }
 

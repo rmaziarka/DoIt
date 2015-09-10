@@ -25,34 +25,25 @@ SOFTWARE.
 
 <#
 .SYNOPSIS
-Builds all packages.
+Builds database package.
 
 .PARAMETER Version
 Version number of the current build.
 #>
 
-function Build-All {
+function Build-MyDatabase {
     param(
         [Parameter(Mandatory=$false)]
         [string]
         $Version
     )
 
-    <# Get-ConfigurationPaths returns an object with the following properties:
-       ProjectRootPath         - base directory of the project, relative to the directory where this script resides (it is used as a base directory for other directories)
-       PackagesPath            - path to directory with packages
-       PackagesContainDeployScripts - $true if $PackagesPath exists and contains DeployScripts / PSCI
-       DeployConfigurationPath - path to directory with configuration files
-       DeployScriptsPath       - path to directory with deploy.ps1
-    #>
+    $params = @{
+        PackageName = 'MyDatabase'
+        ProjectPath = 'SampleWebApplication\DataModel\DataModel.csproj'
+        MigrationsDir = 'SampleWebApplication\DataModel\bin\Release'
+        EntityFrameworkDir = 'SampleWebApplication\packages\EntityFramework.6.1.2' 
+    }
 
-    $configPaths = Get-ConfigurationPaths
-    $projectRootPath = $configPaths.ProjectRootPath
-    $packagesPath = $configPaths.PackagesPath
-
-    Build-MyWebApplication @PSBoundParameters
-    Build-MyDatabase @PSBoundParameters
-
-    # Package configuration scripts and PSCI itself
-    Build-DeploymentScriptsPackage 
+    Build-EntityFrameworkMigratePackage @params
 }

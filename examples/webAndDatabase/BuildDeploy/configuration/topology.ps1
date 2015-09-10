@@ -35,25 +35,25 @@ For ServerRole examples, see .EXAMPLES section in PSCI\deployment\Configuration\
 
 # Default environment, parent for all others
 Environment Default {
-    ServerConnection WebServer -Nodes localhost -RemotingMode WebDeployAgentService -Authentication NTLM
-    ServerConnection DatabaseServer -Nodes localhost
+    ServerConnection WebServer -Nodes { $Tokens.Topology.Nodes }
+    ServerConnection DatabaseServer -BasedOn WebServer
 
-    ServerRole Web -Configurations WebServerProvision,WebServerIISConfig,WebServerDeploy -ServerConnections WebServer
-    ServerRole Database -Configurations DatabaseDeploy -ServerConnections DatabaseServer
+    ServerRole Web -Configurations 'WebServerProvision','MyWebApplicationIISConfig','MyWebApplicationDeploy' -ServerConnections WebServer
+    ServerRole Database -Configurations 'MyDatabaseDeploy' -ServerConnections DatabaseServer
+    ServerRole DeploymentValidation -Configurations 'ValidateDeploy' -ServerConnections WebServer
+}
 
-    ServerRole DeploymentValidation -Configurations ValidateDeploy -ServerConnections WebServer
+Environment Local {
 
 }
 
 Environment Test {
-    ServerConnection WebServer -Nodes { $Tokens.Topology.Nodes } -RemotingMode WebDeployAgentService
-    ServerConnection DatabaseServer -BasedOn WebServer
-    ServerRole Web -RunRemotely
+    ServerConnection WebServer -RemotingCredential { $Tokens.Remoting.RemotingCredential }
+
+    ServerRole Database -RunRemotely -RequiredPackages 'MyDatabase'
 }
 
 Environment UAT -BasedOn Test {
     # this serves just as an example
     ServerConnection DatabaseServer -Nodes UATDB.remote.domain -Authentication CredSSP -Protocol HTTPS 
 }
-
-

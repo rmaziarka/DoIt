@@ -22,22 +22,42 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 #>
 
+Configuration WebServerProvision {
+    param ($NodeName, $Environment, $Tokens)
 
-<#
-.SYNOPSIS
-Builds web package.
+    Import-DSCResource -Module xDismFeature
 
-.PARAMETER Version
-Version number of the current build.
-#>
+    Node $NodeName {
+        if ($Environment -eq "Local") {
+            
+            xDismFeature IISWebServer { 
+                Name = "IIS-WebServerRole"
+            }
 
-function Build-Web {
-    param(
-        [Parameter(Mandatory=$false)]
-        [string]
-        $Version
-    )
+            xDismFeature IISASPNET45 { 
+                Name = "IIS-ASPNET45"
+            }
 
-    Build-WebPackage -PackageName 'SampleWebApplication' -RestoreNuGet -Version $Version
+            xDismFeature IISWindowsAuthentication { 
+                Name = "IIS-WindowsAuthentication"
+            }
+        } else {
+            WindowsFeature IIS {
+                Ensure = "Present"
+                Name = "Web-Server"
+            }
 
+            WindowsFeature IISAuth {
+                Ensure = "Present"
+                Name = "Web-Windows-Auth"
+                DependsOn = "[WindowsFeature]IIS"
+            }
+                     
+            WindowsFeature IISASP { 
+              Ensure = "Present"
+              Name = "Web-Asp-Net45"
+              DependsOn = "[WindowsFeature]IIS"
+            } 
+        }
+    }
 }
