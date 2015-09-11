@@ -88,10 +88,10 @@ function Deploy-SSISPackage {
     $ConfigurationSourcePath = Join-Path -Path ($PackagePath | Split-Path -Parent) -ChildPath "Config"
     Update-TokensInAllFiles -BaseDir $ConfigurationSourcePath -Tokens $Tokens -TokenWildcard "*.dtsConfig"
 
+    Import-SQLPSXSSIS
     if ($DeleteExistingPackages) {
 
         Write-Log -Info "Deleting existing packages"
-        Import-SQLPSXSSIS
 
         $packagesToRemove = Get-IsItem -Path $FolderPath -TopLevelFolder 'msdb' -ServerName localhost | 
             Where-Object { $_.Flags -eq [Microsoft.SqlServer.Dts.Runtime.DTSPackageInfoFlags]::Package }

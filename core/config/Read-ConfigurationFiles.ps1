@@ -46,6 +46,7 @@ function Read-ConfigurationFiles {
     $result = [PSCustomObject]@{
         Files = @()
         RequiredDSCModules = @()
+        RequiredExternalLibs = @()
     }
     if (!$configPath) {
         Write-Log -Warn "No configuration files - dsc modules will not be packaged."
@@ -63,7 +64,7 @@ function Read-ConfigurationFiles {
 
     $invalidLineRegex = '(Import-DSCResource.*`[\s\\r\\n$])'
     $dscResourceRegex = 'Import-DSCResource\s+(?:-Module)?(?:Name)?\s*([^-][^\s;]+)|Import-DSCResource.+-Module(?:Name)?\s*([^-][^\s;]+)'
-
+    $sqlpsxSsisRegex = 'Deploy-SSISPackage|Import-SQLPSXSSIS'
     foreach ($script in $configScripts) {
         $contents = Get-Content -Path $script.FullName -ReadCount 0 | Out-String
         if ($contents -imatch $invalidLineRegex) {
@@ -86,6 +87,11 @@ function Read-ConfigurationFiles {
             $moduleName = $moduleName -replace "'", ''
             if ($result.RequiredDSCModules -inotcontains $moduleName) {
                 $result.RequiredDSCModules += $moduleName
+            }
+        }
+        if ($contents -imatch $sqlpsxSsisRegex) {
+            if ($result.RequiredExternalLibs -inotcontains 'SQLPSX\SSIS') {
+                $result.RequiredExternalLibs += 'SQLPSX\SSIS'
             }
         }
     }

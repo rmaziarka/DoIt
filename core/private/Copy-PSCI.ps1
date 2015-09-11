@@ -72,7 +72,7 @@ function Copy-PSCI {
     $mustHaveModules = @('PSCI.core')
     $modules = @($ModulesToInclude) + $mustHaveModules | Where-Object { $_ -ine 'PSCI.deploy' } | Select-Object -Unique 
     $mustHaveExternalLibs = @('Carbon\Carbon\bin', 'Carbon\Carbon\Path', 'Carbon\Carbon\Xml')
-    $externalLibs = @($ExternalLibsToInclude) + $mustHaveExternalLibs | Select-Object -Unique
+    $externalLibs = @($ExternalLibsToInclude) + $mustHaveExternalLibs + ($configInfo.RequiredExternalLibs) | Select-Object -Unique
 
     Write-Log -Info "Copying PSCI library from '$psciRootPath' to '$OutputPathPsci'"
     [void](New-Item -Path $OutputPathPsci -ItemType Directory -Force)
