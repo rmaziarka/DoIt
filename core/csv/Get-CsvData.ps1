@@ -153,12 +153,26 @@ function Get-CsvData {
         }
         Write-Log -Info "Read $($inputData.Length) rows."
 
+        $emptyRows = @()
+        $rowNum = 2
         foreach ($row in $inputData) { 
+            $isRowEmpty = $true
             foreach ($prop in $row.PSObject.Properties.Name) {
                 $row.$prop = $row.$prop.Trim()
+                if ($row.$prop) {
+                    $isRowEmpty = $false
+                }
             }
+            if ($isRowEmpty) {
+                $emptyRows += $rowNum
+            }
+            $rowNum++
         }
     
+        if ($emptyRows) {
+            Write-Log -Info "Ignoring empty row numbers: $($rowNum -join ', ')."
+        }
+
         # Run Validation Rules
         if ($CsvValidationRules) {
             $errorArray = New-Object -TypeName System.Collections.ArrayList
@@ -166,6 +180,10 @@ function Get-CsvData {
 
             Write-Log -Info 'Validating CSV data.'
             foreach ($row in $inputData) {
+                if ($emptyRows -contains $rowNum) {
+                    $rowNum++
+                    continue
+                }
 
                 try { 
                     $errors = Invoke-Command -ScriptBlock $CsvValidationRules -ArgumentList $row, $rowNum
@@ -194,6 +212,11 @@ function Get-CsvData {
 
             Write-Log -Info 'Transforming CSV data.'
             foreach ($row in $inputData) {
+                if ($emptyRows -contains $rowNum) {
+                    $rowNum++
+                    $ignored++
+                    continue
+                }
                 try { 
                     $resultRow = Invoke-Command -ScriptBlock $CsvTransformRules -ArgumentList $row, $rowNum
                 } catch {
@@ -205,6 +228,7 @@ function Get-CsvData {
                 } else {
                     $ignored++
                 }
+                $rowNum++
             }
             Write-Log -Info "CSV file read successfully ($added rows returned, $ignored rows ignored)."
             return $resultArray

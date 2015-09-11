@@ -25,11 +25,7 @@ SOFTWARE.
 Configuration SimpleDscProvision {
     param ($NodeName, $Environment, $Tokens)
 
-    Import-DSCResource -Module xWebAdministration
-    Import-DSCResource -Module cAutologon
-
     Node $NodeName {
-
         File TestFolder {
             DestinationPath = $Tokens.TestCategory.Directory
             Type = 'Directory'
@@ -42,7 +38,8 @@ Configuration SimpleDscProvision {
 function SimpleFunctionProvision {
     param ($NodeName, $Environment, $Tokens, $ConnectionParams)
 
-    Write-Host ("Hello from SimpleFunctionProvision. I'm running at {0}." -f [system.environment]::MachineName, $ConnectionParams.NodesAsString)
+    Write-Host ("Hello from SimpleFunctionProvision. I'm running at {0}." -f `
+        [System.Environment]::MachineName, $ConnectionParams.NodesAsString)
 }
 
 
