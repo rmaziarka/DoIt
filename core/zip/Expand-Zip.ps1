@@ -84,6 +84,9 @@ function Expand-Zip {
             $7zipPath = (Get-ItemProperty -Path $regEntry).Path + '7z.exe'
         } else {
             $7zipPath = 'C:\Program Files\7-Zip\7z.exe'
+            if (!(Test-Path -LiteralPath $7zipPath)) {
+                $7zipPath = 'C:\Program Files (x86)\7-Zip\7z.exe'
+            }
         }
         if (Test-Path -LiteralPath $7zipPath) {
             $7zipPath = '"{0}"' -f $7zipPath
