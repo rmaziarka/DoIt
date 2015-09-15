@@ -206,6 +206,7 @@ function Copy-FilesToRemoteServer {
         }
         $zipItem = Get-Item -Path $zipToCopy
         foreach ($session in $sessions) { 
+           Invoke-Command -Session $session -ScriptBlock (Convert-FunctionToScriptBlock -FunctionName Expand-ZipShell)
            Invoke-Command -Session $session -ScriptBlock (Convert-FunctionToScriptBlock -FunctionName Expand-Zip)
            $destZipFile = Invoke-Command -Session $session -ScriptBlock $preCopyScriptBlock -ArgumentList $zipItem.Name, $Destination, $BlueGreenEnvVariableName, $ClearDestination
            Send-FileStream -Session $session -ItemToCopy $zipItem -DestinationPath $destZipFile
