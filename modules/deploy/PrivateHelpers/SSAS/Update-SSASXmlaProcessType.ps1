@@ -28,19 +28,13 @@ function Update-SSASXmlaProcessType {
     Replaces process type in the .xmla file with the one specified in $ProcessType parameter.
 
     .PARAMETER GeneratedXmlaFilePath
-    Output file that will be created by this cmdlet.
-
-    .PARAMETER DeploymentXmlaFilePath
-    Input file that will be converted by this cmdlet.
+    File that will be updated by this cmdlet.
 
     .PARAMETER ProcessType
     Name of the type of processing that will be applied during deployment.
 
-    .PARAMETER Force
-    If $true then $DeploymentXmlaFilePath will be overwritten
-
     .EXAMPLE
-    Update-SSASXmlaProcessType -GeneratedXmlaFilePath $generatedXmlaFilePath -DeploymentXmlaFilePath $deploymentXmlaFilePath -ProcessType $ProcessType
+    Update-SSASXmlaProcessType -GeneratedXmlaFilePath $generatedXmlaFilePath -ProcessType $ProcessType
 
     #>
     [CmdletBinding()]
@@ -50,26 +44,29 @@ function Update-SSASXmlaProcessType {
         [string]
         $GeneratedXmlaFilePath,
 
-        [Parameter(Mandatory=$true)]
-        [string] 
-        $DeploymentXmlaFilePath,
-
-        [Parameter(Mandatory=$true)]
-        [ValidateSet("ProcessDefault", "ProcessFull")]
+        [Parameter(Mandatory=$false)]
+        [ValidateSet('ProcessDefault', 'ProcessFull', 'DoNotProcess')]
         [string]
-        $ProcessType = "ProcessFull",
-
-        [Switch]
-        $Force
+        $ProcessType = 'ProcessDefault'
     )
 
-    $xmlaXdtTranformation = @"
-<Batch Transaction="false" xmlns="http://schemas.microsoft.com/analysisservices/2003/engine" xmlns:xdt="http://schemas.microsoft.com/XML-Document-Transform">
-  <Process>
-    <Type xdt:Transform="Replace">$ProcessType</Type>
-  </Process>
-</Batch>
-"@
+    $xmla = New-Object System.Xml.XmlDocument
+    $xmla.PreserveWhitespace = $true
+    $xmla.Load($GeneratedXmlaFilePath)
+    
+    if ($ProcessType -eq 'DoNotProcess' -and ($xmla.Batch.Process)) {
+        $xmla.Batch.RemoveChild($xmla.Batch.Process)
+    } 
+    elseif ($xmla.Batch.Process) {
+        $xmla.Batch.Process.Type = $ProcessType
+    } 
+    else {
+        $databaseId = $xmla.Batch.Alter.Object.DatabaseID
+        $newProcessNode = $xmla.CreateElement('Process')
+        $newProcessNode.InnerXML = "<Type>$ProcessType</Type><Object><DatabaseID>$databaseId</DatabaseID></Object>"
+        $xmla.Batch.AppendChild($newProcessNode)
+    }
 
-    [void](Convert-XmlUsingXdt -Path $GeneratedXmlaFilePath -XdtXml $xmlaXdtTranformation -Destination $DeploymentXmlaFilePath -Force:$Force)
+    $xmla.Save($GeneratedXmlaFilePath)
+
 }

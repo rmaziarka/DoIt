@@ -59,11 +59,8 @@ function Deploy-SSASPackage {
     .PARAMETER DbConnectionString
     Connection string to the SQL database to be used during cube processing.
 
-    .PARAMETER RoleName
-    Name of the role which will be added to the cube.
-
-    .PARAMETER RoleMembers
-    List of role members which will be added to the role specified in RoleName.
+    .PARAMETER RolesMapping
+    Hashtable of roles and their members.
 
     .PARAMETER ProcessType
     Name of the type of processing that will be applied during deployment.
@@ -104,17 +101,13 @@ function Deploy-SSASPackage {
         $DbConnectionString,
 
         [Parameter(Mandatory=$false)]
-        [string] 
-        $RoleName,
+        [hashtable] 
+        $RolesMapping,
 
         [Parameter(Mandatory=$false)]
-        [string[]] 
-        $RoleMembers,
-
-        [Parameter(Mandatory=$true)]
-        [ValidateSet("ProcessDefault", "ProcessFull")]
+        [ValidateSet('ProcessDefault', 'ProcessFull', 'DoNotProcess')]
         [string]
-        $ProcessType = "ProcessFull"
+        $ProcessType = 'ProcessDefault'
     )
 
     $configPaths = Get-ConfigurationPaths
@@ -129,19 +122,15 @@ function Deploy-SSASPackage {
     New-SSASDeploymentTargetsFile -DatabaseName $DatabaseName -CubeConnectionString $CubeConnectionString -OutputFilePath "$BinDirPath\$ProjectName.deploymenttargets"
 
     $generatedXmlaFilePath = "$BinDirPath\GeneratedScript.xmla"
-    New-XMLA -ASDatabasePath "$BinDirPath\$ProjectName.asdatabase" -CubeXmlaFilePath $generatedXmlaFilePath -ConnectionString $CubeConnectionString
     
-    
-    if ($RoleMembers -ne $null) {
-        $deploymentXmlaWithRolesFilePath = "$BinDirPath\DeploymentScriptWithRolesApplied.xmla"
-        Update-SSASXmlaRoleMembers -GeneratedXmlaFilePath $generatedXmlaFilePath -DeploymentXmlaFilePath $deploymentXmlaWithRolesFilePath -RoleName $RoleName -RoleMembers $RoleMembers
-    } else {
-        $deploymentXmlaWithRolesFilePath = $generatedXmlaFilePath
-    }
+    New-XMLA -ASDatabasePath "$BinDirPath\$ProjectName.asdatabase" -CubeXmlaFilePath  $generatedXmlaFilePath -ConnectionString $CubeConnectionString
+
+    if ($RolesMapping) {
+        Update-SSASXmlaRoleMembers -GeneratedXmlaFilePath $generatedXmlaFilePath -RolesMapping $RolesMapping
+    } 
 
     # set desierd 'ProcessType'
-    $deploymentXmlaFilePath = "$BinDirPath\DeploymentScript.xmla"
-    Update-SSASXmlaProcessType -GeneratedXmlaFilePath $deploymentXmlaWithRolesFilePath -DeploymentXmlaFilePath $deploymentXmlaFilePath -ProcessType $ProcessType
+    Update-SSASXmlaProcessType -GeneratedXmlaFilePath $generatedXmlaFilePath -ProcessType $ProcessType
 
-    Deploy-Cube -ProjectName $ProjectName -CubeXmlaFilePath $deploymentXmlaFilePath -ConnectionString $CubeConnectionString
+    Deploy-Cube -ProjectName $ProjectName -CubeXmlaFilePath $generatedXmlaFilePath -ConnectionString $CubeConnectionString
 }

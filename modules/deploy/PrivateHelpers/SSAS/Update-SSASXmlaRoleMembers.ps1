@@ -28,22 +28,13 @@ function Update-SSASXmlaRoleMembers {
     Replaces roles in the .xmla file with the ones specified in $RoleName and $RoleMembers parameters.
 
     .PARAMETER GeneratedXmlaFilePath
-    Output file that will be created by this cmdlet.
+    File that will be updated by this cmdlet.
 
-    .PARAMETER DeploymentXmlaFilePath
-    Input file that will be converted by this cmdlet.
-
-    .PARAMETER RoleName
-    Name of the role which will be added to the cube.
-
-    .PARAMETER RoleMembers
-    List of role members which will be added to the role specified in RoleName.
-
-    .PARAMETER Force
-    If $true then $DeploymentXmlaFilePath will be overwritten
+    .PARAMETER RolesMapping
+    Hashtable of roles and their members.
 
     .EXAMPLE
-    Update-SSASXmlaRoleMembers -GeneratedXmlaFilePath $generatedXmlaFilePath -DeploymentXmlaFilePath $deploymentXmlaFilePath -RoleName $RoleName -RoleMembers $RoleMembers
+    Update-SSASXmlaRoleMembers -GeneratedXmlaFilePath $generatedXmlaFilePath -RolesMapping $RolesMapping
 
     #>
     [CmdletBinding()]
@@ -54,43 +45,22 @@ function Update-SSASXmlaRoleMembers {
         $GeneratedXmlaFilePath,
 
         [Parameter(Mandatory=$true)]
-        [string] 
-        $DeploymentXmlaFilePath,
-
-        [Parameter(Mandatory=$true)]
-        [string] 
-        $RoleName,
-
-        [Parameter(Mandatory=$true)]
-        [string[]] 
-        $RoleMembers,
-
-        [Switch]
-        $Force
+        [hashtable] 
+        $RolesMapping
     )
-
-    $Members = $RoleMembers | Foreach-Object { "<Member><Name>$_</Name></Member>" }
-
-    $xmlaXdtTranformation = @"
-<Batch Transaction="false" xmlns="http://schemas.microsoft.com/analysisservices/2003/engine" xmlns:xdt="http://schemas.microsoft.com/XML-Document-Transform">
-  <Alter AllowCreate="true" ObjectExpansion="ExpandFull">
-    <ObjectDefinition>
-      <Database xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:ddl2="http://schemas.microsoft.com/analysisservices/2003/engine/2" xmlns:ddl2_2="http://schemas.microsoft.com/analysisservices/2003/engine/2/2" xmlns:ddl100_100="http://schemas.microsoft.com/analysisservices/2008/engine/100/100" xmlns:ddl200="http://schemas.microsoft.com/analysisservices/2010/engine/200" xmlns:ddl200_200="http://schemas.microsoft.com/analysisservices/2010/engine/200/200"> 
-        <Roles>
-          <Role xdt:Transform="Replace">
-              <ID>Role</ID>
-              <Name>$RoleName</Name>
-              <Description></Description>
-              <Members>
-                $Members
-              </Members>
-            </Role>
-        </Roles>
-      </Database>
-    </ObjectDefinition>
-  </Alter>
-</Batch>
-"@
-
-    [void](Convert-XmlUsingXdt -Path $GeneratedXmlaFilePath -XdtXml $xmlaXdtTranformation -Destination $DeploymentXmlaFilePath -Force:$Force)
+    
+    $xmla = New-Object System.Xml.XmlDocument
+    $xmla.PreserveWhitespace = $true
+    $xmla.Load($GeneratedXmlaFilePath)
+    
+    foreach ($role in $xmla.Batch.Alter.ObjectDefinition.Database.Roles.ChildNodes) {
+        if ($RolesMapping.ContainsKey($role.Name)) {
+            $members = ''
+            foreach ($member in $RolesMapping[$role.Name]) {
+                $members += "<Member><Name>$member</Name></Member>"
+            }
+            $role.Members.InnerXml = $members
+        }
+    }
+    $xmla.Save($GeneratedXmlaFilePath)
 }
