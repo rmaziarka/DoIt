@@ -130,13 +130,11 @@ function Invoke-RunNUnitTests {
     }
 
     if ($CategoriesInclude) {
-        [void]($runnerArgs.Append(' /include:'))
-        [void]($runnerArgs.Append($CategoriesInclude))
+        [void]($runnerArgs.Append(" /include:$CategoriesInclude"))
     }
 
     if ($CategoriesExclude) {
-        [void]($runnerArgs.Append(' /exclude:'))
-        [void]($runnerArgs.Append($CategoriesExclude))
+        [void]($runnerArgs.Append(" /exclude:$CategoriesExclude"))
     }
 
     $allAssemblies = Get-ChildItem -Path $TestsDirectory -Filter '*.dll' -Recurse `
