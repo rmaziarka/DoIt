@@ -53,7 +53,7 @@ function Deploy-RoundhouseSqlScriptsPackage {
     
      $dbParams = @{ PackageName = 'MySqlScriptsPackage';
                     RoundhouseArgs = $rhArgs
-				  }
+                  }
 
      Deploy-RoundhouseSqlScriptsPackage @dbParams 
 
