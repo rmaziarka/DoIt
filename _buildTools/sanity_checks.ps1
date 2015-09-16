@@ -71,7 +71,7 @@ if ($licenseNotMatching) {
     $errMsg += 'There are {0} files without valid license header: {1}' -f $licenseNotMatching.Count, ($licenseNotMatching -join ', ')
 }
 if ($tabsNotMatching) {
-    $errMsg += 'There are {0} files with tabs: {1}' -f $customSources.Count, ($tabsNotMatching -join ', ')
+    $errMsg += 'There are {0} files with tabs: {1}' -f $tabsNotMatching.Count, ($tabsNotMatching -join ', ')
 }
 
 if ($errMsg) {

@@ -26,6 +26,12 @@ function Expand-Zip {
     <#
     .SYNOPSIS
     Decompresses an archive file without using any external libraries.
+
+    .DESCRIPTION
+    It uses following methods to decompress the file (when first fails it tries the second etc.):
+    1) .NET ZipFile      - fails if destination exists
+    2) 7zip              - must be installed to succeed
+    3) Shell.Application - should always work, but can be slow.
     
     .PARAMETER ArchiveFile
     File to uncompress.
@@ -50,7 +56,7 @@ function Expand-Zip {
     )
     
     # this function can be run remotely without PSCI available
-    
+
 
     # try decompressing with .NET first (only if destination does not exist - otherwise it fails)
     if (!(Test-Path -Path $OutputDirectory)) { 
@@ -110,11 +116,6 @@ function Expand-Zip {
         Write-Verbose -Message $msg
     }
     
-    # then shell - which can be slow when running remotely for unknown reasons
-    $shell = New-Object -ComObject Shell.Application
-    $zip = $shell.Namespace($ArchiveFile)
-    $dst = $shell.Namespace($OutputDirectory)
-    # 0x14 = overwrite and don't show dialogs
-    $dst.Copyhere($zip.Items(), 0x14)
-    
+    # then shell - as a last resort
+    Expand-ZipShell -SourcePath $ArchiveFile -OutputDirectory $OutputDirectory   
 }
