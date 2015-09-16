@@ -39,7 +39,7 @@ Base directory where PSCI library resides, relative to $ProjectRootPath.
 Path to the directory where packages will be created, relative to $ProjectRootPath.
 
 .PARAMETER DeployConfigurationPath
-Path to the directory where configuration files reside, relative to $ProjectRootPath. By default '<script directory>\configuration'.
+Path to the directory where configuration files reside, relative to $ProjectRootPath. By default '<script directory>\deploy'.
 
 .PARAMETER Tasks
 List of tasks (function names) to invoke for this build. If this is not specified, default task will be invoked (Build-All).
@@ -63,7 +63,7 @@ param(
 
     [Parameter(Mandatory=$false)]
     [string]
-    $DeployConfigurationPath = '', # Modify this path according to your project structure. This is absolute or relative to $ProjectRootPath (by default '<script directory>\configuration').
+    $DeployConfigurationPath = '', # Modify this path according to your project structure. This is absolute or relative to $ProjectRootPath (by default '<script directory>\deploy').
     
     [Parameter(Mandatory=$false)]
     [string[]]

@@ -34,7 +34,7 @@ function Copy-DeploymentScripts {
     Output path for configuration scripts.
 
     .EXAMPLE
-    Copy-DeploymentScripts -OutputDeployScriptsPath $OutputPathDeploymentScripts -OutputDeployConfigurationPath "$OutputPathDeploymentScripts\configuration"
+    Copy-DeploymentScripts -OutputDeployScriptsPath $OutputPathDeploymentScripts -OutputDeployConfigurationPath "$OutputPathDeploymentScripts\deploy"
 
     #>
     [CmdletBinding()]

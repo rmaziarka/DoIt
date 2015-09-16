@@ -39,7 +39,7 @@ Base directory where PSCI library resides, relative to $ProjectRootPath.
 Path to the directory where packages reside, relative to $ProjectRootPath.
 
 .PARAMETER DeployConfigurationPath
-Path to the directory where configuration files reside, relative to $ProjectRootPath. By default '$PackagePath\DeployScripts\configuration'.
+Path to the directory where configuration files reside, relative to $ProjectRootPath. By default '$ProjectRootPath\deploy' or '$PackagePath\DeployScripts\deploy'.
 
 .PARAMETER Environment
 Environment where the packages should be deployed (chooses ServerRoles / Tokens specified in the configuration scripts).
@@ -84,7 +84,7 @@ param(
     
     [Parameter(Mandatory=$false)]
     [string]
-    $DeployConfigurationPath = '', # Modify this path according to your project structure. This is absolute or relative to $ProjectRootPath (by default '$PackagePath\DeployScripts\configuration').
+    $DeployConfigurationPath = '', # Modify this path according to your project structure. This is absolute or relative to $ProjectRootPath (by default '$ProjectRootPath\deploy' or '$PackagePath\DeployScripts\deploy').
 
     [Parameter(Mandatory=$false)]
     [string[]]

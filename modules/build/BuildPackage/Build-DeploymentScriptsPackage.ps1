@@ -33,7 +33,7 @@ It copies the following to the destination package:
 - PSCI library to $OutputPathPsci - by default only core functions, PSCI.deploy module and DSC modules that are used in configuration files will be copied.
     If you need additional modules or external libraries, use $ModulesToInclude or $ExternalLibsToInclude parameters.
 - deploy.ps1 from current directory to $OutputPathDeploymentScripts
-- project configuration files (tokens / server roles) from $deployConfigurationPath to $OutputPathDeploymentScripts\configuration.
+- project configuration files (tokens / server roles) from $deployConfigurationPath to $OutputPathDeploymentScripts\deploy.
 These files are required for any deployment that is to be run by PSCI.
 
 If $OutputPathPsci is not provided, it will be set to $PackagesPath\PSCI.
