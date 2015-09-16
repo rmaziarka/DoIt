@@ -112,7 +112,7 @@ function Deploy-DBDeploySqlScriptsPackage {
 
     Start-ExternalProcess -Command $DbDeployPath -ArgumentList $argumentList -Credential $Credential -FailOnStringPresence "ERROR"
 
-    if (Test-Path($OutputScriptPath)) {
+    if (Test-Path -Path $OutputScriptPath) {
         Invoke-Sql -ConnectionString $ConnectionString -InputFile $OutputScriptPath -QueryTimeoutInSeconds $QueryTimeoutInSeconds -Credential $Credential -Mode $Mode
     }
 }
