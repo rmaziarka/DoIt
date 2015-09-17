@@ -132,11 +132,10 @@ function Initialize-ConfigurationPaths {
     } else {
         $pathsToCheck = @((Join-Path -Path $configPaths.DeployScriptsPath -ChildPath 'deploy'), `
                           (Join-Path -Path $configPaths.ProjectRootPath -ChildPath 'deploy'), `
-                          (Join-Path -Path $configPaths.PackagesPath -ChildPath 'DeployScripts\deploy'), `
-                          (Join-Path -Path $configPaths.ProjectRootPath -ChildPath 'DeployScripts\deploy'), `
-                          # these are present for backward compatibility (to be removed in future)    
                           (Join-Path -Path $configPaths.DeployScriptsPath -ChildPath 'configuration'), `
                           (Join-Path -Path $configPaths.ProjectRootPath -ChildPath 'configuration'), `
+                          (Join-Path -Path $configPaths.PackagesPath -ChildPath 'DeployScripts\deploy'), `
+                          (Join-Path -Path $configPaths.ProjectRootPath -ChildPath 'DeployScripts\deploy'), `
                           (Join-Path -Path $configPaths.PackagesPath -ChildPath 'DeployScripts\configuration'), `
                           (Join-Path -Path $configPaths.ProjectRootPath -ChildPath 'DeployScripts\configuration')                          
                         )
