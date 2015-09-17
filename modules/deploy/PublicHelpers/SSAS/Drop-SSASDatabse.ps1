@@ -34,7 +34,7 @@ function Drop-SSASDatabase {
     Connection string to SSAS database.
 
     .EXAMPLE
-    Drop-SSASDatabse -ConnectionString 'Data Source=localhost;Integrated Security=SSPI' -DatabaseName 'MySSASDb'
+    Drop-SSASDatabase -ConnectionString 'Data Source=localhost;Integrated Security=SSPI' -DatabaseName 'MySSASDb'
 
     #>
     [CmdletBinding()]
