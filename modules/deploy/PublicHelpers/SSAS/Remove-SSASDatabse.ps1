@@ -22,7 +22,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 #>
 
-function Drop-SSASDatabase {
+function Remove-SSASDatabse {
     <#
     .SYNOPSIS
     Drops a SSAS database if exists.
@@ -34,7 +34,7 @@ function Drop-SSASDatabase {
     Connection string to SSAS database.
 
     .EXAMPLE
-    Drop-SSASDatabase -ConnectionString 'Data Source=localhost;Integrated Security=SSPI' -DatabaseName 'MySSASDb'
+    Remove-SSASDatabse -ConnectionString 'Data Source=localhost;Integrated Security=SSPI' -DatabaseName 'MySSASDb'
 
     #>
     [CmdletBinding()]
