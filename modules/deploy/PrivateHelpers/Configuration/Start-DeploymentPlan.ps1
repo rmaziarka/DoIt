@@ -40,8 +40,8 @@ function Start-DeploymentPlan {
     Deployment type:
     All       - deploy everything according to configuration files (= Provision + Deploy)
     DSC       - deploy only DSC configurations
-    Functions - deploy only non-DSC configurations
-    Adhoc     - override configurations and nodes with $ConfigurationsFilter and $NodesFilter (they don't have to be defined in ServerRoles - useful for adhoc deployments)
+    Functions - deploy only Powershell functions
+    Adhoc     - override steps and nodes with $StepsFilter and $NodesFilter (they don't have to be defined in ServerRoles - useful for adhoc deployments)
 
     .PARAMETER AutoInstallDscResources
     If true, custom DSC resources included in PSCI will be automatically copied to localhost (required for parsing DSC configurations)
@@ -129,7 +129,7 @@ function Start-DeploymentPlan {
 
     # Install DSC resources where required - on nodes where DSC will be applied to different nodes (remotely)
     if (!$PSCIGlobalConfiguration.RemotingMode -and $AutoInstallDscResources) {
-        $entriesToInstallDSC = $DeploymentPlan | Where-Object { $_.ConfigurationType -eq 'Configuration' -and !$_.IsLocalRun }
+        $entriesToInstallDSC = $DeploymentPlan | Where-Object { $_.StepType -eq 'Configuration' -and !$_.IsLocalRun }
         if ($entriesToInstallDSC) {
             $dscInstalledNodes = @()
             Write-ProgressExternal -Message 'Installing DSC resources' -ErrorMessage 'DSC resources install error'

@@ -46,8 +46,8 @@ function Start-DeploymentByMSDeploy {
     Deployment type:
     All       - deploy everything according to configuration files (= Provision + Deploy)
     DSC       - deploy only DSC configurations
-    Functions - deploy only non-DSC configurations
-    Adhoc     - override configurations and nodes with $ConfigurationsFilter and $NodesFilter (they don't have to be defined in ServerRoles - useful for adhoc deployments)
+    Functions - deploy only Powershell functions
+    Adhoc     - override steps and nodes with $StepsFilter and $NodesFilter (they don't have to be defined in ServerRoles - useful for adhoc deployments)
 
     .PARAMETER RequiredPackages
     List of packages that will be copied to the remote server.
@@ -56,12 +56,12 @@ function Start-DeploymentByMSDeploy {
     If true then packages will be copied to the remote server. If false then deployment assumes that packages are already there.
 
     .PARAMETER NodesFilter
-    List of Nodes where configurations have to be deployed - can be used if you don't want to deploy to all nodes defined in the configuration files.
-    If not set, configurations will be deployed to all nodes according to the ServerRoles defined in the configuration files.
+    List of Nodes where steps have to be deployed - can be used if you don't want to deploy to all nodes defined in the configuration files.
+    If not set, steps will be deployed to all nodes according to the ServerRoles defined in the configuration files.
 
-    .PARAMETER ConfigurationsFilter
-    List of Configurations to deploy - can be used if you don't want to deploy all configurations defined in the configuration files.
-    If not set, configurations will be deployed according to the ServerRoles defined in the configuration files.
+    .PARAMETER StepsFilter
+    List of Steps to deploy - can be used if you don't want to deploy all steps defined in the configuration files.
+    If not set, steps will be deployed according to the ServerRoles defined in the configuration files.
 
     .PARAMETER TokensOverride
     A list of tokens to override. Token defined in the configuration files will be overrided with values specified in this array 
@@ -113,7 +113,7 @@ function Start-DeploymentByMSDeploy {
 
         [Parameter(Mandatory=$false)]
         [string[]]
-        $ConfigurationsFilter,
+        $StepsFilter,
 
         [Parameter(Mandatory=$false)]
         [hashtable]
@@ -126,8 +126,8 @@ function Start-DeploymentByMSDeploy {
     if ($NodesFilter) {
         $deployScript += " -NodesFilter '{0}'" -f ($NodesFilter -join "','")
     }
-    if ($ConfigurationsFilter) {
-        $deployScript += " -ConfigurationsFilter '{0}'" -f ($ConfigurationsFilter -join "','")
+    if ($StepsFilter) {
+        $deployScript += " -StepsFilter '{0}'" -f ($StepsFilter -join "','")
     }
     if ($TokensOverride) {
        $tokensOverrideString = Convert-HashtableToString -Hashtable $TokensOverride

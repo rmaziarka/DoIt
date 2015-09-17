@@ -37,18 +37,18 @@ function Resolve-ServerConnections {
     List of names of ServerConnections to resolve.
 
     .PARAMETER NodesFilter
-    List of Nodes where configurations have to be deployed - can be used if you don't want to deploy to all nodes defined in the configuration files.
-    If not set, configurations will be deployed to all nodes according to the ServerRoles defined in the configuration files.
+    List of Nodes where steps have to be deployed - can be used if you don't want to deploy to all nodes defined in the configuration files.
+    If not set, steps will be deployed to all nodes according to the ServerRoles defined in the configuration files.
 
     .PARAMETER DeployType
     Deployment type:
     All       - deploy everything according to configuration files (= Provision + Deploy)
     DSC       - deploy only DSC configurations
-    Functions - deploy only non-DSC configurations
-    Adhoc     - override configurations and nodes with $ConfigurationsFilter and $NodesFilter (they don't have to be defined in ServerRoles - useful for adhoc deployments)
+    Functions - deploy only Powershell functions
+    Adhoc     - override steps and nodes with $StepsFilter and $NodesFilter (they don't have to be defined in ServerRoles - useful for adhoc deployments)
 
     .PARAMETER ServerRole
-    ServerRole containing the configurations to resolve.
+    ServerRole containing the steps to resolve.
 
     .PARAMETER ResolvedTokens
     Resolved tokens.

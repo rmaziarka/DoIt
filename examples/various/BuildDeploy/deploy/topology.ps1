@@ -28,8 +28,8 @@ This file defines two entities:
 Environments can inherit from one another by using -BasedOn parameter. If no -BasedOn in specified, environment will inherit from 'Default' environment.
 ServerRoles 'go down' from parent to child environments, but any ServerRole parameter can be overriden in child environment.
 
-2) ServerRoles, defining which computers belong to which ServerRoles, and which configurations are to be deployed to which ServerRoles.
-By default configurations are run locally, but this behavior can be modified by using -RunOn / -RunOnCurrentNode parameters.
+2) ServerRoles, defining which computers belong to which ServerRoles, and which steps are to be deployed to which ServerRoles.
+By default steps are run locally, but this behavior can be modified by using -RunOn / -RunOnCurrentNode parameters.
 For ServerRole examples, see .EXAMPLES section in PSCI\deployment\Configuration\ConfigElements\ServerRole.ps1.
 #>
 
@@ -40,14 +40,14 @@ Environment Default {
     ServerConnection TestNodePSRemotingCredSSP -BasedOn TestNodePSRemoting -Authentication CredSSP -Protocol HTTPS -CrossDomain
     ServerConnection TestNodeMSDeploy -BasedOn TestNodePSRemoting -RemotingMode WebDeployAgentService
 
-    ServerRole Web -Configurations @('WebServerProvision', 'WebServerIISConfig') -ServerConnections TestNodePSRemoting
-    ServerRole Database -Configurations @('DatabaseServerDeploy') -ServerConnections TestNodeDefault
+    ServerRole Web -Steps @('WebServerProvision', 'WebServerIISConfig') -ServerConnections TestNodePSRemoting
+    ServerRole Database -Steps @('DatabaseServerDeploy') -ServerConnections TestNodeDefault
 
-    ServerRole RemotingTestPSRemoting -Configurations @('RemotingTestPrepare', 'RemotingTestValidate') -RunRemotely -ServerConnections TestNodePSRemoting
-    ServerRole RemotingTestPSRemotingCredSSP -Configurations @('RemotingTestPrepare', 'RemotingTestValidate') -RunRemotely -ServerConnections TestNodePSRemotingCredSSP
-    ServerRole RemotingTestMSDeploy -Configurations @('RemotingTestPrepare', 'RemotingTestValidate') -RunRemotely -ServerConnections TestNodeMSDeploy
+    ServerRole RemotingTestPSRemoting -Steps @('RemotingTestPrepare', 'RemotingTestValidate') -RunRemotely -ServerConnections TestNodePSRemoting
+    ServerRole RemotingTestPSRemotingCredSSP -Steps @('RemotingTestPrepare', 'RemotingTestValidate') -RunRemotely -ServerConnections TestNodePSRemotingCredSSP
+    ServerRole RemotingTestMSDeploy -Steps @('RemotingTestPrepare', 'RemotingTestValidate') -RunRemotely -ServerConnections TestNodeMSDeploy
 
-    ConfigurationSettings RemotingTestPrepare -RequiredPackages RemotingTest
+    StepSettings RemotingTestPrepare -RequiredPackages RemotingTest
 }
 
 

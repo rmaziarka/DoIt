@@ -34,7 +34,7 @@ Describe -Tag "PSCI.unit" "ServerRole" {
 
                 Environment Local {
                     ServerConnection Web1 -Nodes @('machine1', 'machine2') -RemotingCredential $remotingDefaultCredential -PackageDirectory 'c:\dir'
-                    ServerRole Web -Configurations @('config1', 'config2') -ServerConnections Web1 -RunRemotely 
+                    ServerRole Web -Steps @('config1', 'config2') -ServerConnections Web1 -RunRemotely 
                 }
 
                 $Environments.Count | Should Be 2
@@ -52,11 +52,41 @@ Describe -Tag "PSCI.unit" "ServerRole" {
                 $Environments.Local.ServerRoles | Should Not Be $null
                 $Environments.Local.ServerRoles.Count | Should Be 1
                 $Environments.Local.ServerRoles.Web | Should Not Be $null
-                $Environments.Local.ServerRoles.Web.Configurations | Should Be @('config1', 'config2')
+                $Environments.Local.ServerRoles.Web.Steps | Should Be @('config1', 'config2')
                 $Environments.Local.ServerRoles.Web.ServerConnections | Should Be @('Web1')
                 $Environments.Local.ServerRoles.Web.RunRemotely | Should Be $true
                 
             }
+        }
+
+        It "ServerRole: should properly initialize internal structures with -Configurations alias" {
+            Initialize-Deployment
+
+            $remotingDefaultCredential = (ConvertTo-PsCredential -User 'UserName' -Password 'Password')
+
+            Environment Local {
+                ServerConnection Web1 -Nodes @('machine1', 'machine2') -RemotingCredential $remotingDefaultCredential -PackageDirectory 'c:\dir'
+                ServerRole Web -Configurations @('config1', 'config2') -ServerConnections Web1 -RunRemotely 
+            }
+
+            $Environments.Count | Should Be 2
+            $Environments.Local | Should Not Be $null
+            $Environments.Local.BasedOn | Should Be 'Default'
+
+            $Environments.Local.ServerConnections | Should Not Be $null
+            $Environments.Local.ServerConnections.Count | Should Be 1
+            $Environments.Local.ServerConnections.Web1 | Should Not Be $null
+            $Environments.Local.ServerConnections.Web1.Nodes | Should Be @('machine1', 'machine2')
+            $Environments.Local.ServerConnections.Web1.PackageDirectory | Should Be 'c:\dir'
+            $Environments.Local.ServerConnections.Web1.RemotingCredential | Should Be $remotingDefaultCredential
+               
+
+            $Environments.Local.ServerRoles | Should Not Be $null
+            $Environments.Local.ServerRoles.Count | Should Be 1
+            $Environments.Local.ServerRoles.Web | Should Not Be $null
+            $Environments.Local.ServerRoles.Web.Steps | Should Be @('config1', 'config2')
+            $Environments.Local.ServerRoles.Web.ServerConnections | Should Be @('Web1')
+            $Environments.Local.ServerRoles.Web.RunRemotely | Should Be $true    
         }
 
         Context "when used with single role and environment inheritance" {
@@ -67,19 +97,19 @@ Describe -Tag "PSCI.unit" "ServerRole" {
 
                 Environment Default {
                     ServerConnection Web1 -Nodes @('machine1') -RemotingCredential $cred 
-                    ServerRole Web -Configurations @('config1') -ServerConnection Web1
+                    ServerRole Web -Steps @('config1') -ServerConnection Web1
                 }
 
                 Environment Local {
                     ServerConnection Web1 -Nodes @('machine1','machine2') -RemotingCredential $cred2 
-                    ServerRole Web -Configurations @('config1', 'config2') 
+                    ServerRole Web -Steps @('config1', 'config2') 
                 }
 
                 $Environments.Count | Should Be 2
                 $Environments.Default | Should Not Be $null
                 $Environments.Default.BasedOn | Should Be ''
                 $Environments.Default.ServerRoles.Count | Should Be 1
-                $Environments.Default.ServerRoles.Web.Configurations | Should Be 'config1'
+                $Environments.Default.ServerRoles.Web.Steps | Should Be 'config1'
                 $Environments.Default.ServerRoles.Web.ServerConnections | Should Be 'Web1'
 
                 $Environments.Default.ServerConnections.Count | Should Be 1
@@ -89,7 +119,7 @@ Describe -Tag "PSCI.unit" "ServerRole" {
                 $Environments.Local | Should Not Be $null
                 $Environments.Local.BasedOn | Should Be 'Default'
                 $Environments.Local.ServerRoles.Count | Should Be 1
-                $Environments.Local.ServerRoles.Web.Configurations | Should Be @('config1', 'config2')
+                $Environments.Local.ServerRoles.Web.Steps | Should Be @('config1', 'config2')
                 $Environments.Local.ServerRoles.Web.ServerConnections | Should Be $null
 
                 $Environments.Local.ServerConnections.Count | Should Be 1
@@ -103,12 +133,12 @@ Describe -Tag "PSCI.unit" "ServerRole" {
 
                 Environment Default {
                     ServerConnection Web1 -Nodes @('machine1') -RemotingCredential $cred 
-                    ServerRole Web -Configurations @('config1') -ServerConnection Web1
+                    ServerRole Web -Steps @('config1') -ServerConnection Web1
                 }
 
                 Environment Local {
                     ServerConnection Web1 -Nodes $null -RemotingCredential $null -Authentication $null -PackageDirectory $null
-                    ServerRole Web -Configurations $null -RunOn $null
+                    ServerRole Web -Steps $null -RunOn $null
                 }
 
                 $Environments.Count | Should Be 2
@@ -116,7 +146,7 @@ Describe -Tag "PSCI.unit" "ServerRole" {
                 $Environments.Default.BasedOn | Should Be ''
                 $Environments.Default.ServerRoles.Count | Should Be 1
                 $Environments.Default.ServerConnections.Count | Should Be 1
-                $Environments.Default.ServerRoles.Web.Configurations | Should Be 'config1'
+                $Environments.Default.ServerRoles.Web.Steps | Should Be 'config1'
                 $Environments.Default.ServerRoles.Web.ServerConnections | Should Be 'Web1'
                 $Environments.Default.ServerConnections.Web1.Nodes | Should Be 'machine1'
                 $Environments.Default.ServerConnections.Web1.RemotingCredential | Should Be $cred
@@ -125,7 +155,7 @@ Describe -Tag "PSCI.unit" "ServerRole" {
                 $Environments.Local.BasedOn | Should Be 'Default'
                 $Environments.Local.ServerRoles.Count | Should Be 1
                 $Environments.Local.ServerConnections.Count | Should Be 1
-                $Environments.Local.ServerRoles.Web.Configurations | Should Be $null
+                $Environments.Local.ServerRoles.Web.Steps | Should Be $null
                 $Environments.Local.ServerRoles.Web.ContainsKey('RunOn') | Should Be $true
                 $Environments.Local.ServerRoles.Web.RunOn | Should Be ''
                 $Environments.Local.ServerConnections.Web1.ContainsKey('Nodes') | Should Be $true
@@ -146,11 +176,11 @@ Describe -Tag "PSCI.unit" "ServerRole" {
                 Environment Default {
                     ServerConnection Web1 -Nodes @('machine1') 
                     ServerConnection Web2 -Nodes @('machine2') 
-                    ServerRole Web -Configurations @('config1') -ServerConnections Web1,Web2
+                    ServerRole Web -Steps @('config1') -ServerConnections Web1,Web2
                 }
 
                 Environment Local {
-                    ServerRole Database -Configurations @('config2') -ServerConnections Web1
+                    ServerRole Database -Steps @('config2') -ServerConnections Web1
                 }
 
                 $Environments.Count | Should Be 2
@@ -158,7 +188,7 @@ Describe -Tag "PSCI.unit" "ServerRole" {
                 $Environments.Default.BasedOn | Should Be ''
                 $Environments.Default.ServerRoles.Count | Should Be 1
                 $Environments.Default.ServerConnections.Count | Should Be 2
-                $Environments.Default.ServerRoles.Web.Configurations | Should Be 'config1'
+                $Environments.Default.ServerRoles.Web.Steps | Should Be 'config1'
                 $Environments.Default.ServerRoles.Web.ServerConnections | Should Be @('Web1','Web2')
                 $Environments.Default.ServerConnections.Web1.Nodes | Should Be 'machine1'
                 $Environments.Default.ServerConnections.Web2.Nodes | Should Be 'machine2'
@@ -167,7 +197,7 @@ Describe -Tag "PSCI.unit" "ServerRole" {
                 $Environments.Local.BasedOn | Should Be 'Default'
                 $Environments.Local.ServerRoles.Count | Should Be 1
                 $Environments.Local.ServerConnections.Count | Should Be 0
-                $Environments.Local.ServerRoles.Database.Configurations | Should Be 'config2'
+                $Environments.Local.ServerRoles.Database.Steps | Should Be 'config2'
                 $Environments.Local.ServerRoles.Database.ServerConnections | Should Be 'Web1'
             }
         }
@@ -177,13 +207,13 @@ Describe -Tag "PSCI.unit" "ServerRole" {
                 Initialize-Deployment
 
                 Environment Default {
-                    ServerRole Web -Configurations @('config1')
-                    ServerRole Database -Configurations @('config2')
+                    ServerRole Web -Steps @('config1')
+                    ServerRole Database -Steps @('config2')
                 }
 
                 Environment Local {
-                    ServerRole Database -Configurations @('config2')
-                    ServerRole Web -Configurations @('config1') 
+                    ServerRole Database -Steps @('config2')
+                    ServerRole Web -Steps @('config1') 
                 }
 
 
@@ -194,11 +224,11 @@ Describe -Tag "PSCI.unit" "ServerRole" {
                 $Environments.Default.ServerRoles[0].Name | Should Be 'Web'
                 $Environments.Default.ServerRoles[1].Name | Should Be 'Database'
 
-                $Environments.Default.ServerRoles.Web.Configurations | Should Be 'config1'
-                $Environments.Default.ServerRoles.Database.Configurations | Should Be 'config2'
+                $Environments.Default.ServerRoles.Web.Steps | Should Be 'config1'
+                $Environments.Default.ServerRoles.Database.Steps | Should Be 'config2'
 
-                $Environments.Local.ServerRoles.Web.Configurations | Should Be 'config1'
-                $Environments.Local.ServerRoles.Database.Configurations | Should Be 'config2'
+                $Environments.Local.ServerRoles.Web.Steps | Should Be 'config1'
+                $Environments.Local.ServerRoles.Database.Steps | Should Be 'config2'
             }
         }
     }

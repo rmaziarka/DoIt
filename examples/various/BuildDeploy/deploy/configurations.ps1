@@ -23,7 +23,7 @@ SOFTWARE.
 #>
 
 <#
-This file contains configurations which will be deployed on each node defined in ServerRoles belonging to given environment.
+This file contains steps which will be deployed on each node defined in ServerRoles belonging to given environment.
 Configuration can be one of the following:
    a) DSC configuration (example - WebServerProvision). It will be run on each node defined in ServerRole.
    b) Normal powershell functions - will be run locally. This is useful for example if you want to run msdeploy without using Powershell remoting.

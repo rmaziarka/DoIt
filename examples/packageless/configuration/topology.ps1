@@ -28,8 +28,8 @@ This file defines two entities:
 Environments can inherit from one another by using -BasedOn parameter. If no -BasedOn in specified, environment will inherit from 'Default' environment.
 ServerRoles 'go down' from parent to child environments, but any ServerRole parameter can be overriden in child environment.
 
-2) ServerRoles, defining which computers belong to which ServerRoles, and which configurations are to be deployed to which ServerRoles.
-By default configurations are run locally, but this behavior can be modified by using -RunOn / -RunOnCurrentNode parameters.
+2) ServerRoles, defining which computers belong to which ServerRoles, and which steps are to be deployed to which ServerRoles.
+By default steps are run locally, but this behavior can be modified by using -RunOn / -RunOnCurrentNode parameters.
 For ServerRole examples, see .EXAMPLES section in PSCI\deployment\Configuration\ConfigElements\ServerRole.ps1.
 #>
 
@@ -38,7 +38,7 @@ For ServerRole examples, see .EXAMPLES section in PSCI\deployment\Configuration\
 Environment Default {
     ServerConnection TestServer -Nodes localhost 
 
-    ServerRole TestRole -Configurations SimpleDscProvision, SimpleFunctionProvision -ServerConnections TestServer
+    ServerRole TestRole -Steps SimpleDscProvision, SimpleFunctionProvision -ServerConnections TestServer
 
 }
 

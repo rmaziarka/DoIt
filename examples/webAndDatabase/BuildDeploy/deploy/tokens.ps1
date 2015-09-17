@@ -24,7 +24,7 @@ SOFTWARE.
 
 <#
 This file contains tokens, i.e. variables that can be different across environments or nodes.
-Resolved $Tokens variable is available in configurations (DSC and functions).
+Resolved $Tokens variable is available in steps (DSC and functions).
 Tokens are inherited from parent environments, so e.g. all Tokens defined in 'Default' environment (default parent of all environments) are available in 'Local' environment,
 and child tokens can override parent tokens.
 

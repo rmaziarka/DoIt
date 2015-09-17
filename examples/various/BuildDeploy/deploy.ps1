@@ -52,19 +52,19 @@ you can pass them using this parameter. It should be a 'flat' hashtable containi
 Allows to limit server roles to deploy.
 
 .PARAMETER NodesFilter
-List of Nodes where configurations will be deployed - can be used if you don't want to deploy to all nodes defined in the configuration files.
-If not set, configurations will be deployed to all nodes according to the ServerRoles defined in the configuration files.
+List of Nodes where steps will be deployed - can be used if you don't want to deploy to all nodes defined in the configuration files.
+If not set, steps will be deployed to all nodes according to the ServerRoles defined in the configuration files.
 
-.PARAMETER ConfigurationsFilter
-List of Configurations to deploy - can be used if you don't want to deploy all configurations defined in the configuration files.
-If not set, configurations will be deployed according to the ServerRoles defined in the configuration files.
+.PARAMETER StepsFilter
+List of Steps to deploy - can be used if you don't want to deploy all steps defined in the configuration files.
+If not set, steps will be deployed according to the ServerRoles defined in the configuration files.
 
 .PARAMETER DeployType
 Deployment type:
 All       - deploy everything according to configuration files (= Provision + Deploy)
 DSC       - deploy only DSC configurations
-Functions - deploy only non-DSC configurations
-Adhoc     - don't use configuration files, but deploy configurations $ConfigurationsFilter to nodes $NodesFilter
+Functions - deploy only Powershell functions
+Adhoc     - don't use configuration files, but deploy steps $StepsFilter to nodes $NodesFilter
 
 .PARAMETER ValidateOnly
 If true, deployment plan will be created but actual deployment will not run.
@@ -100,7 +100,7 @@ param(
 
     [Parameter(Mandatory=$false)]
     [string[]]
-    $ConfigurationsFilter,
+    $StepsFilter,
 
     [Parameter(Mandatory=$false)]
     [string[]]
@@ -160,7 +160,7 @@ try {
     ############# Deployment - no custom code here, you need to put your configuration scripts under 'configuration' directory
     Start-Deployment -Environment $Environment `
                      -ServerRolesFilter $ServerRolesFilter `
-                     -ConfigurationsFilter $ConfigurationsFilter `
+                     -StepsFilter $StepsFilter `
                      -NodesFilter $NodesFilter `
                      -TokensOverride $TokensOverride `
                      -DeployType $DeployType `

@@ -22,21 +22,21 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 #>
 
-function Invoke-ConfigurationOrFunction {
+function Invoke-DeploymentStep {
     <#
     .SYNOPSIS
     Invokes a DSC configuration or function.
 
     .DESCRIPTION
     It passes the parameters through to the DSC configuration/function if it expects them.
-    Returns path to the generated .MOF file if ConfigurationName is a DSC configuration or empty string if it's a function.
+    Returns path to the generated .MOF file if StepName is a DSC configuration or empty string if it's a function.
 
-    .PARAMETER ConfigurationName
+    .PARAMETER StepName
     Name of the DSC configuration or function to invoke.
 
     .PARAMETER OutputPath
-    Base output path for MOF files that will be generated - only relevent if ConfigurationName is a DSC configuration.
-    A specific folder structure will be created for the ConfigurationName / Node.
+    Base output path for MOF files that will be generated - only relevent if StepName is a DSC configuration.
+    A specific folder structure will be created for the StepName / Node.
 
     .PARAMETER Node
     Name of the node - will be passed as 'NodeName' to the configuration.
@@ -51,7 +51,7 @@ function Invoke-ConfigurationOrFunction {
     Connection parameters as defined in server roles (object created by [[New-ConnectionParameters]]).
 
     .EXAMPLE
-    $mofDir = Invoke-ConfigurationOrFunction -ConfigurationName $ConfigurationName -OutputPath $DscOutputPath -Node $Node -Environment $Environment -ResolvedTokens $resolvedTokens
+    $mofDir = Invoke-DeploymentStep -StepName $StepName -OutputPath $DscOutputPath -Node $Node -Environment $Environment -ResolvedTokens $resolvedTokens
 
     #>
     [CmdletBinding()]
@@ -59,7 +59,7 @@ function Invoke-ConfigurationOrFunction {
     param(
         [Parameter(Mandatory=$true)]
         [string]
-        $ConfigurationName,
+        $StepName,
 
         [Parameter(Mandatory=$false)]
         [string]
@@ -82,42 +82,42 @@ function Invoke-ConfigurationOrFunction {
         $ConnectionParams
     )  
 
-    $configurationCommand = Get-Command -Name $ConfigurationName
+    $stepCommand = Get-Command -Name $StepName
 
-    $expr = "$ConfigurationName"
-    if ($configurationCommand.Parameters.ContainsKey("nodeName")) {
+    $expr = "$StepName"
+    if ($stepCommand.Parameters.ContainsKey("nodeName")) {
         $expr += " -NodeName `"$Node`""
     }
 
-    if ($configurationCommand.Parameters.ContainsKey("environment")) {
+    if ($stepCommand.Parameters.ContainsKey("environment")) {
         $expr += " -Environment `"$Environment`""
     }
 
-    if ($configurationCommand.Parameters.ContainsKey("tokens")) {
+    if ($stepCommand.Parameters.ContainsKey("tokens")) {
         $expr += ' -Tokens $ResolvedTokens'
     }
 
-    if ($configurationCommand.Parameters.ContainsKey("connectionParams")) {
+    if ($stepCommand.Parameters.ContainsKey("connectionParams")) {
         $expr += ' -ConnectionParams $ConnectionParams'
     }
 
-    if ($configurationCommand.CommandType -eq "Configuration") {
+    if ($stepCommand.CommandType -eq "Configuration") {
         # Set PSDscAllowPlainTextPassword to $true in order to pass credentials into dsc configuration. It will be stored as plain text in a .mof file.
         # The better way is to use certificate and its thumbprint to decrypt the credentials on the target node.
         $configurationData = "@{ AllNodes = @( @{  NodeName = `"$Node`"; PSDscAllowPlainTextPassword = `$true }) }"
 
         $dir = Join-Path -Path $OutputPath -ChildPath $Node
-        $dir = Join-Path -Path $dir -ChildPath $ConfigurationName
+        $dir = Join-Path -Path $dir -ChildPath $StepName
 
         $expr += " -OutputPath `"$dir`" -ConfigurationData $configurationData"
         Write-Log -Info "Running custom configuration: $expr"
         [void](Invoke-Expression -Command $expr)
         return $dir
-    } elseif ($configurationCommand.CommandType -eq "Function") {
+    } elseif ($stepCommand.CommandType -eq "Function") {
         Write-Log -Info "Running custom function: $expr"
         ([void](Invoke-Expression -Command $expr))
         return ""
     } else {
-        throw "Command '$ConfigurationName' is of unsupported type: $($configurationCommand.commandType)"
+        throw "Command '$StepName' is of unsupported type: $($stepCommand.commandType)"
     }  
 }

@@ -35,8 +35,8 @@ Describe -Tag "PSCI.unit" "Group-DeploymentPlan" {
             IsLocalRun = $false
             Environment = 'env1'
             ServerRole = 'serverRole1'
-            ConfigurationName = 'remoteCredSSP1'
-            ConfigurationType = 'Configuration'
+            StepName = 'remoteCredSSP1'
+            StepType = 'Configuration'
             ConfigurationMofDir = 'c:\mof'
             Tokens = @{'token1' = 'value1'}
             TokensOverride = @{'token1' = 'overridenValue1'}
@@ -52,8 +52,8 @@ Describe -Tag "PSCI.unit" "Group-DeploymentPlan" {
             IsLocalRun = $false
             Environment = 'env2'
             ServerRole = 'serverRole2'
-            ConfigurationName = 'remoteCredSSP2'
-            ConfigurationType = 'Function'
+            StepName = 'remoteCredSSP2'
+            StepType = 'Function'
             ConfigurationMofDir = ''
             Tokens = @{'token1' = 'value2'}
             TokensOverride = @{'token1' = 'overridenValue1'}
@@ -69,8 +69,8 @@ Describe -Tag "PSCI.unit" "Group-DeploymentPlan" {
             IsLocalRun = $true
             Environment = 'env1'
             ServerRole = 'serverRole2'
-            ConfigurationName = 'local'
-            ConfigurationType = 'Function'
+            StepName = 'local'
+            StepType = 'Function'
             ConfigurationMofDir = ''
             Tokens = @{'token1' = 'value1'}
             TokensOverride = @{'token1' = 'overridenValue1'}
@@ -86,8 +86,8 @@ Describe -Tag "PSCI.unit" "Group-DeploymentPlan" {
             IsLocalRun = $false
             Environment = 'env1'
             ServerRole = 'serverRole1'
-            ConfigurationName = 'remoteCredSSP3'
-            ConfigurationType = 'Function'
+            StepName = 'remoteCredSSP3'
+            StepType = 'Function'
             ConfigurationMofDir = 'c:\mof2'
             Tokens = @{'token1' = 'value1'}
             TokensOverride = @{'token1' = 'overridenValue1'}
@@ -103,8 +103,8 @@ Describe -Tag "PSCI.unit" "Group-DeploymentPlan" {
             IsLocalRun = $false
             Environment = 'env1'
             ServerRole = 'serverRole1'
-            ConfigurationName = 'remoteCredSSP4'
-            ConfigurationType = 'Function'
+            StepName = 'remoteCredSSP4'
+            StepType = 'Function'
             ConfigurationMofDir = 'c:\mof2'
             Tokens = @{'token1' = 'value1'}
             TokensOverride = @{'token1' = 'overridenValue1'}
@@ -120,8 +120,8 @@ Describe -Tag "PSCI.unit" "Group-DeploymentPlan" {
             IsLocalRun = $false
             Environment = 'env1'
             ServerRole = 'serverRole1'
-            ConfigurationName = 'remoteCredSSP4'
-            ConfigurationType = 'Function'
+            StepName = 'remoteCredSSP4'
+            StepType = 'Function'
             ConfigurationMofDir = 'c:\mof2'
             Tokens = @{'token1' = 'value1'}
             TokensOverride = @{'token1' = 'overridenValue1'}
@@ -148,8 +148,8 @@ Describe -Tag "PSCI.unit" "Group-DeploymentPlan" {
                 $configInfo.IsLocalRun | Should Be $originalEntry.IsLocalRun
                 $configInfo.Environment | Should Be $originalEntry.Environment
                 $configInfo.ServerRole | Should Be $originalEntry.ServerRole
-                $configInfo.Name | Should Be $originalEntry.ConfigurationName
-                $configInfo.Type | Should Be $originalEntry.ConfigurationType
+                $configInfo.Name | Should Be $originalEntry.StepName
+                $configInfo.Type | Should Be $originalEntry.StepType
                 $configInfo.MofDir | Should Be $originalEntry.ConfigurationMofDir
                 $configInfo.Tokens.Count | Should Be $originalEntry.Tokens.Count
                 foreach ($tokenKey in $originalEntry.Tokens.Keys) {

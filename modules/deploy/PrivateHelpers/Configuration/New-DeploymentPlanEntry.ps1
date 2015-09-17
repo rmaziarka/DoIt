@@ -46,8 +46,8 @@ function New-DeploymentPlanEntry {
     .PARAMETER Node
     Name of the node to add to the deployment plan.
 
-    .PARAMETER Configuration
-    Configuration object containing information about DSC configuration or function to be added to the deployment plan (created in Resolve-Configurations).
+    .PARAMETER Step
+    Step object containing information about DSC configuration or function to be added to the deployment plan (created in Resolve-Steps).
 
     .PARAMETER DscOutputPath
     Path where the .MOF files will be generated.
@@ -92,7 +92,7 @@ function New-DeploymentPlanEntry {
 
         [Parameter(Mandatory=$true)]
         [object]
-        $Configuration,
+        $Step,
 
         [Parameter(Mandatory=$true)]
         [string]
@@ -123,9 +123,9 @@ function New-DeploymentPlanEntry {
 
     $connectionParamsObj = New-ConnectionParameters @connectionParams
     
-    if ($Configuration.RunOn) {
-        $runOnNode = $Configuration.RunOn
-    } elseif ($Configuration.RunRemotely) {
+    if ($Step.RunOn) {
+        $runOnNode = $Step.RunOn
+    } elseif ($Step.RunRemotely) {
         $runOnNode = $Node
     }
 
@@ -136,7 +136,7 @@ function New-DeploymentPlanEntry {
 
     $isLocalRun = $runOnNode -ieq $Node
 
-    if ($Configuration.Type -eq 'Configuration') {        
+    if ($Step.Type -eq 'Configuration') {        
         if ($isLocalRun) {
             $dscNode = 'localhost'
         } else {
@@ -144,12 +144,12 @@ function New-DeploymentPlanEntry {
         }
 
         if (!$runOnNode -and $ServerConnection.RemotingMode -and $ServerConnection.RemotingMode -ne 'PSRemoting') {
-            throw "Cannot deploy DSC configurations from localhost when RemotingMode is not PSRemoting. Please either change it to PSRemoting or add '-RunRemotely' switch to the ServerRole or ConfigurationSettings (Environment '$Environment' / ServerRole '$($ServerRole.Name)' / Configuration '$($Configuration.Name)')."
+            throw "Cannot deploy DSC configurations from localhost when RemotingMode is not PSRemoting. Please either change it to PSRemoting or add '-RunRemotely' switch to the ServerRole or StepSettings (Environment '$Environment' / ServerRole '$($ServerRole.Name)' / Step '$($Step.Name)')."
         }
     
-        $mofDir = Invoke-ConfigurationOrFunction -ConfigurationName $Configuration.Name -OutputPath $DscOutputPath -Node $dscNode -Environment $Environment -ResolvedTokens $ResolvedTokens -ConnectionParams $connectionParamsObj
+        $mofDir = Invoke-DeploymentStep -StepName $Step.Name -OutputPath $DscOutputPath -Node $dscNode -Environment $Environment -ResolvedTokens $ResolvedTokens -ConnectionParams $connectionParamsObj
         if (!(Get-ChildItem -Path $mofDir -Filter "*.mof")) {
-            Write-Log -Warn "Mof file has not been generated for configuration named '$($Configuration.Name)' (Environment '$Environment' / ServerRole '$($ServerRole.Name)'). Please ensure your configuration definition is correct."
+            Write-Log -Warn "Mof file has not been generated for step named '$($Step.Name)' (Environment '$Environment' / ServerRole '$($ServerRole.Name)'). Please ensure your configuration definition is correct."
             continue
         }
         $mofDir = Resolve-Path -LiteralPath $mofDir
@@ -161,18 +161,18 @@ function New-DeploymentPlanEntry {
         $packageDirectory = 'auto'
     }
 
-    $requiredPackages = @((Resolve-ScriptedToken -ScriptedToken $Configuration.RequiredPackages -ResolvedTokens $ResolvedTokens -Environment $Environment -Node $Node))
+    $requiredPackages = @((Resolve-ScriptedToken -ScriptedToken $Step.RequiredPackages -ResolvedTokens $ResolvedTokens -Environment $Environment -Node $Node))
     if ($requiredPackages) {
         $packagePath = (Get-ConfigurationPaths).PackagesPath
         foreach ($package in $requiredPackages) {
             $dir = Join-Path -Path $packagePath -ChildPath $package
             if (!(Test-Path -LiteralPath $dir)) {
-                throw "A required package named '$package' does not exist at '$dir' (defined in environment '$Environment' / ServerRole '$($ServerRole.Name)' / Configuration '$($Configuration.Name)'."
+                throw "A required package named '$package' does not exist at '$dir' (defined in environment '$Environment' / ServerRole '$($ServerRole.Name)' / Step '$($Step.Name)'."
             }
         }
     }
 
-    $rebootHandlingMode = Resolve-ScriptedToken -ScriptedToken $Configuration.RebootHandlingMode -ResolvedTokens $ResolvedTokens -Environment $Environment -Node $Node
+    $rebootHandlingMode = Resolve-ScriptedToken -ScriptedToken $Step.RebootHandlingMode -ResolvedTokens $ResolvedTokens -Environment $Environment -Node $Node
 
     return [PSCustomObject]@{ 
         EntryNo = $entryNo
@@ -182,8 +182,8 @@ function New-DeploymentPlanEntry {
         IsLocalRun = $isLocalRun
         Environment = $Environment;
         ServerRole = $ServerRole.Name;
-        ConfigurationName = $Configuration.Name
-        ConfigurationType = $Configuration.Type
+        StepName = $Step.Name
+        StepType = $Step.Type
         ConfigurationMofDir = $mofDir
         Tokens = $ResolvedTokens; 
         TokensOverride = $TokensOverride;

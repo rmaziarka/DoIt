@@ -28,25 +28,25 @@ function New-DeploymentPlan {
     Creates a deployment plan basing on global variables $Tokens, $ServerRoles and parameters passed to this function.
 
     .DESCRIPTION
-    It iterates through resolved ServerRoles (created for given environment with Resolve-ServerRoles) and Configurations defined in each ServerRole,
-    and creates a deployment plan entry for each of such configuration.
-    If the configuration is a DSC configuration (as opposed to function), it will be run and MOF files will be created for each node.
+    It iterates through resolved ServerRoles (created for given environment with Resolve-ServerRoles) and Steps defined in each ServerRole,
+    and creates a deployment plan entry for each of such step.
+    If the step is a DSC configuration (as opposed to function), it will be run and MOF files will be created for each node.
     The deployment plan has a form of array of hashtables @( $hashTableForNode1, $hashTableForNode2, ...) where each hashTable has the structure you can
     see in New-DeploymentPlanEntry:
 
     ConnectionParams = <ConnectionParameters object containing connection information for the destination server (where the packages will be deployed)>
-    RunOnConnectionParams = <ConnectionParameters object containing connection information for the server where the deployment configurations will run>
-    IsLocalRun = <$True if destination server is the same as the server where the deployment configurations will run>
+    RunOnConnectionParams = <ConnectionParameters object containing connection information for the server where the deployment steps will run>
+    IsLocalRun = <$True if destination server is the same as the server where the deployment steps will run>
     Environment = <Environment name>
     ServerRole = <ServerRole name>
-    ConfigurationName = <Name of DSC configuration or custom function that will be run on the destination server>
-    ConfigurationType = <'Configuration' for DSC configuration or 'Function' for custom function>
-    ConfigurationMofDir = <Directory where the generated .mof file resides - only used if ConfigurationType = 'Configuration'>
+    StepName = <Name of DSC configuration or custom function that will be run on the destination server>
+    StepType = <'Configuration' for DSC configuration or 'Function' for custom function>
+    ConfigurationMofDir = <Directory where the generated .mof file resides - only used if StepType = 'Configuration'>
     Tokens = <Hashtable containing resolved tokens - they can be varying between Environment/Nodes combinations>
     TokensOverride = <Hashtable containing tokens overriden by user - passed directly to deploy.ps1>
-    PackageDirectory = <Path to the directory where the files required for the deployment will be copied - only used if deployment configurations will not run locally>
+    PackageDirectory = <Path to the directory where the files required for the deployment will be copied - only used if deployment steps will not run locally>
     RequiredPackages = <List of packages required for the deployment as specified by the user in the configuration files>
-    RebootHandlingMode = <Determines how to handle reboot requests - only used if ConfigurationType = 'Configuration'>
+    RebootHandlingMode = <Determines how to handle reboot requests - only used if StepType = 'Configuration'>
 
     .PARAMETER AllEnvironments
     Hashtable containing all environment definitions.
@@ -57,13 +57,13 @@ function New-DeploymentPlan {
     .PARAMETER ServerRolesFilter
     List of ServerRole names that should be included in the deployment plan.
 
-    .PARAMETER ConfigurationsFilter
-    List of Configurations to deploy - can be used if you don't want to deploy all configurations defined in the configuration files.
-    If not set, configurations will be deployed according to the ServerRoles defined in the configuration files.
+    .PARAMETER StepsFilter
+    List of Steps to deploy - can be used if you don't want to deploy all steps defined in the configuration files.
+    If not set, steps will be deployed according to the ServerRoles defined in the configuration files.
 
     .PARAMETER NodesFilter
-    List of Nodes where configurations have to be deployed - can be used if you don't want to deploy to all nodes defined in the configuration files.
-    If not set, configurations will be deployed to all nodes according to the ServerRoles defined in the configuration files.
+    List of Nodes where steps have to be deployed - can be used if you don't want to deploy to all nodes defined in the configuration files.
+    If not set, steps will be deployed to all nodes according to the ServerRoles defined in the configuration files.
 
     .PARAMETER TokensOverride
     A list of tokens to override. Token defined in the configuration files will be overrided with values specified in this array 
@@ -76,14 +76,14 @@ function New-DeploymentPlan {
     Deployment type:
     All       - deploy everything according to configuration files (= Provision + Deploy)
     DSC       - deploy only DSC configurations
-    Functions - deploy only non-DSC configurations
-    Adhoc     - override configurations and nodes with $ConfigurationsFilter and $NodesFilter (they don't have to be defined in ServerRoles - useful for adhoc deployments)
+    Functions - deploy only Powershell functions
+    Adhoc     - override steps and nodes with $StepsFilter and $NodesFilter (they don't have to be defined in ServerRoles - useful for adhoc deployments)
 
     .LINK
     Resolve-ServerRoles
 
     .EXAMPLE
-    $Global:DeploymentPlan = New-DeploymentPlan -AllEnvironments $AllEnvironments -Environment $Environment -ConfigurationsFilter $ConfigurationsFilter
+    $Global:DeploymentPlan = New-DeploymentPlan -AllEnvironments $AllEnvironments -Environment $Environment -StepsFilter $StepsFilter
 
     #>
     [CmdletBinding()]
@@ -103,7 +103,7 @@ function New-DeploymentPlan {
 
         [Parameter(Mandatory=$false)]
         [string[]]
-        $ConfigurationsFilter,
+        $StepsFilter,
 
         [Parameter(Mandatory=$false)]
         [string[]]
@@ -134,8 +134,8 @@ function New-DeploymentPlan {
     }
 
     foreach ($env in $Environment) {
-        Write-Log -Info ("Processing environment '{0}', server roles filter '{1}', configurations filter '{2}', nodes filter '{3}', deploy type '{4}'" -f `
-            $env, ($ServerRolesFilter -join ','), ($ConfigurationsFilter -join ','), ($NodesFilter -join ','), $DeployType) -Emphasize
+        Write-Log -Info ("Processing environment '{0}', server roles filter '{1}', steps filter '{2}', nodes filter '{3}', deploy type '{4}'" -f `
+            $env, ($ServerRolesFilter -join ','), ($StepsFilter -join ','), ($NodesFilter -join ','), $DeployType) -Emphasize
 
         $resolvedTokens = Resolve-Tokens -AllEnvironments $AllEnvironments -Environment $env -TokensOverride $TokensOverride
         
@@ -145,13 +145,13 @@ function New-DeploymentPlan {
             -ResolvedTokens $resolvedTokens `
             -ServerRolesFilter $ServerRolesFilter `
             -NodesFilter $NodesFilter `
-            -ConfigurationsFilter $ConfigurationsFilter `
+            -StepsFilter $StepsFilter `
             -DeployType $deployType
 
         $entryNo = 1
         foreach ($serverRoleName in $serverRoles.Keys) {
             $serverRole = $serverRoles[$serverRoleName]
-            foreach ($config in $serverRole.Configurations) {
+            foreach ($step in $serverRole.Steps) {
                 foreach ($serverConnection in $serverRole.ServerConnections) {
                     foreach ($node in $serverConnection.Nodes) {
 
@@ -162,7 +162,7 @@ function New-DeploymentPlan {
                             ServerRole = $serverRole
                             ServerConnection = $serverConnection
                             Node = $node
-                            Configuration = $config
+                            Step = $step
                             DscOutputPath = $DscOutputPath
                             ResolvedTokens = $resolvedTokens
                             TokensOverride = $TokensOverride

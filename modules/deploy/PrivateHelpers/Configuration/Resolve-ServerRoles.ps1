@@ -34,7 +34,7 @@ function Resolve-ServerRoles {
         Default = @{
             ServerRoles = @{
                Name1 = @{
-                    Configurations = @('WebServerProvision', 'WebServerDeploy')
+                    Steps = @('WebServerProvision', 'WebServerDeploy')
                     ServerConnections = $null
                }
                Name2 = ...
@@ -43,7 +43,7 @@ function Resolve-ServerRoles {
         Dev = @{
             ServerRoles = @{
                 Name1 = @{
-                    Configurations = @('WebServerProvision', 'WebServerDeploy')
+                    Steps = @('WebServerProvision', 'WebServerDeploy')
                     ServerConnections = 'web1'
                }
             }
@@ -54,7 +54,7 @@ function Resolve-ServerRoles {
 
     $ServerRoles = @{ 
         Name1 = @{ 
-            Configurations = @((DSC configuration handle with name 'WebServerProvision'), (function handle with name 'WebServerDeploy')) 
+            Steps = @((DSC configuration handle with name 'WebServerProvision'), (function handle with name 'WebServerDeploy')) 
             ServerConnections = (ServerConnection hashtable with name 'web1'')
         }
         Name2 = ...
@@ -72,24 +72,24 @@ function Resolve-ServerRoles {
     .PARAMETER ServerRolesFilter
     Filter for server roles - can be used if you don't want to deploy all server roles defined in the configuration files.
 
-    .PARAMETER ConfigurationsFilter
-    List of Configurations to deploy - can be used if you don't want to deploy all configurations defined in the configuration files.
-    If not set, configurations will be deployed according to the ServerRoles defined in the configuration files.
+    .PARAMETER StepsFilter
+    List of Steps to deploy - can be used if you don't want to deploy all steps defined in the configuration files.
+    If not set, steps will be deployed according to the ServerRoles defined in the configuration files.
 
     .PARAMETER NodesFilter
-    List of Nodes where configurations have to be deployed - can be used if you don't want to deploy to all nodes defined in the configuration files.
-    If not set, configurations will be deployed to all nodes according to the ServerRoles defined in the configuration files.
+    List of Nodes where steps have to be deployed - can be used if you don't want to deploy to all nodes defined in the configuration files.
+    If not set, steps will be deployed to all nodes according to the ServerRoles defined in the configuration files.
 
     .PARAMETER DeployType
     Deployment type:
     All       - deploy everything according to configuration files (= Provision + Deploy)
     DSC       - deploy only DSC configurations
-    Functions - deploy only non-DSC configurations
-    Adhoc     - override configurations and nodes with $ConfigurationsFilter and $NodesFilter (they don't have to be defined in ServerRoles - useful for adhoc deployments)
+    Functions - deploy only Powershell functions
+    Adhoc     - override steps and nodes with $StepsFilter and $NodesFilter (they don't have to be defined in ServerRoles - useful for adhoc deployments)
 
     .EXAMPLE
     $serverRoles = Resolve-ServerRoles -AllEnvironments $AllEnvironments -Environment $env -ServerConnections $serverConnections `
-                    -ServerRolesFilter $ServerRolesFilter -NodesFilter $NodesFilter -ConfigurationsFilter $ConfigurationsFilter -DeployType $deployType
+                    -ServerRolesFilter $ServerRolesFilter -NodesFilter $NodesFilter -StepsFilter $StepsFilter -DeployType $deployType
 
     #>
     [CmdletBinding()]
@@ -113,7 +113,7 @@ function Resolve-ServerRoles {
 
         [Parameter(Mandatory=$false)]
         [string[]]
-        $ConfigurationsFilter,
+        $StepsFilter,
 
         [Parameter(Mandatory=$false)]
         [string[]]
@@ -144,22 +144,22 @@ function Resolve-ServerRoles {
 
     $allServerConnections = Resolve-ServerConnectionsConfigElements -AllEnvironments $AllEnvironments -Environment $Environment -ResolvedTokens $resolvedTokens
 
-    $configurationsSettings = Resolve-ConfigurationsSettings -AllEnvironments $AllEnvironments -Environment $Environment -ConfigurationsFilter $ConfigurationsFilter
+    $StepsSettings = Resolve-StepsSettings -AllEnvironments $AllEnvironments -Environment $Environment -StepsFilter $StepsFilter
 
     $serverRolesToRemove = @()
     foreach ($serverRole in $result.Values) {
         
-        $serverRole.Configurations = Resolve-Configurations `
+        $serverRole.Steps = Resolve-Steps `
                                         -Environment $Environment `
-                                        -Configurations $serverRole.Configurations `
-                                        -ConfigurationsFilter $ConfigurationsFilter `
-                                        -ConfigurationsSettings $configurationsSettings `
+                                        -Steps $serverRole.Steps `
+                                        -StepsFilter $StepsFilter `
+                                        -StepsSettings $StepsSettings `
                                         -DeployType $DeployType `
                                         -ServerRole $serverRole `
                                         -ResolvedTokens $resolvedTokens 
 
         
-        if (!$serverRole.Configurations) {
+        if (!$serverRole.Steps) {
             Write-Log -Info "Environment '$Environment' / ServerRole '$($serverRole.Name)' has no configurations and will not be deployed."
             $serverRolesToRemove += $serverRole.Name
             continue

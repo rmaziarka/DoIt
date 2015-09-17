@@ -34,8 +34,8 @@ function Start-DeploymentPlanEntryRemotely {
     Deployment type:
     All       - deploy everything according to configuration files (= Provision + Deploy)
     DSC       - deploy only DSC configurations
-    Functions - deploy only non-DSC configurations
-    Adhoc     - override configurations and nodes with $ConfigurationsFilter and $NodesFilter (they don't have to be defined in ServerRoles - useful for adhoc deployments)
+    Functions - deploy only Powershell functions
+    Adhoc     - override steps and nodes with $StepsFilter and $NodesFilter (they don't have to be defined in ServerRoles - useful for adhoc deployments)
 
     .EXAMPLE
     Start-DeploymentPlanEntryRemotely -DeploymentPlan $Global:DeploymentPlan -Environment $Environment -CopyPackage
@@ -74,7 +74,7 @@ function Start-DeploymentPlanEntryRemotely {
             PackageDirectoryAutoRemove = $packageDirectoryAutoRemove
             RequiredPackages = $DeploymentPlanGroupedEntry.RequiredPackages
             DeployType = $DeployType
-            ConfigurationsFilter = $configInfo.Name
+            StepsFilter = $configInfo.Name
             NodesFilter = $configInfo.ConnectionParams.Nodes | Select-Object -Unique
             TokensOverride = $DeploymentPlanGroupedEntry.TokensOverride
             CopyPackages = $true

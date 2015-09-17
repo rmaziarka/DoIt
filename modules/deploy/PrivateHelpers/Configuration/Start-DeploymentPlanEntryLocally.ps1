@@ -70,7 +70,7 @@ function Start-DeploymentPlanEntryLocally {
             try { 
                 $packagePath = (Get-ConfigurationPaths).PackagesPath
                 Push-Location -Path $packagePath
-                Invoke-ConfigurationOrFunction -ConfigurationName $configInfo.Name `
+                Invoke-DeploymentStep -StepName $configInfo.Name `
                                                -Node $configInfo.ConnectionParams.Nodes[0] `
                                                -Environment $configInfo.Environment `
                                                -ResolvedTokens $configInfo.Tokens `

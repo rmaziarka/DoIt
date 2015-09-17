@@ -22,10 +22,10 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 #>
 
-function Resolve-ConfigurationsSettings {
+function Resolve-StepsSettings {
     <#
     .SYNOPSIS
-    Resolves ConfigurationSettings inside Environment.
+    Resolves StepsSettings inside Environment.
             
     .PARAMETER AllEnvironments
     Hashtable containing all environment definitions.
@@ -33,12 +33,12 @@ function Resolve-ConfigurationsSettings {
     .PARAMETER Environment
     Name of the environment which the ServerRoles should be resolved for.
 
-    .PARAMETER ConfigurationsFilter
-    List of Configurations to deploy - can be used if you don't want to deploy all configurations defined in the configuration files.
-    If not set, configurations will be deployed according to the ServerRoles defined in the configuration files.
+    .PARAMETER StepsFilter
+    List of Steps to deploy - can be used if you don't want to deploy all steps defined in the configuration files.
+    If not set, steps will be deployed according to the ServerRoles defined in the configuration files.
 
     .EXAMPLE
-    $configurationsSettings = Resolve-ConfigurationsSettings -AllEnvironments $AllEnvironments -Environment $Environment -ConfigurationsFilter $ConfigurationsFilter
+    $StepsSettings = Resolve-StepsSettings -AllEnvironments $AllEnvironments -Environment $Environment -StepsFilter $StepsFilter
     
     #>
     [CmdletBinding()]
@@ -54,16 +54,16 @@ function Resolve-ConfigurationsSettings {
 
         [Parameter(Mandatory=$false)]
         [string[]]
-        $ConfigurationsFilter
+        $StepsFilter
     )
 
     $envHierarchy = @(Resolve-BasedOnHierarchy -AllElements $AllEnvironments -SelectedElement $Environment -ConfigElementName 'Environment')
 
     $result = @{}
 
-    # traverse environments from top to bottom to set / override ConfigurationSettings properties
+    # traverse environments from top to bottom to set / override StepSettings properties
     foreach ($env in $envHierarchy) {
-        $configSettings = $AllEnvironments[$env].ConfigurationSettings.Values | Where-Object { !$ConfigurationsFilter -or $ConfigurationsFilter -icontains $_.Name }
+        $configSettings = $AllEnvironments[$env].StepSettings.Values | Where-Object { !$StepsFilter -or $StepsFilter -icontains $_.Name }
         foreach ($configSetting in $configSettings) {
             if (!$result.Contains($configSetting.Name)) {
                 $result[$configSetting.Name] = @{}

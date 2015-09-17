@@ -41,13 +41,13 @@ function Start-Deployment {
     List of ServerRoles to deploy - can be used if you don't want to deploy all server roles defined in the configuration files.
     If not set, all server roles will be deployed.
 
-    .PARAMETER ConfigurationsFilter
-    List of Configurations to deploy - can be used if you don't want to deploy all configurations defined in the configuration files.
-    If not set, configurations will be deployed according to the ServerRoles defined in the configuration files.
+    .PARAMETER StepsFilter
+    List of Steps to deploy - can be used if you don't want to deploy all steps defined in the configuration files.
+    If not set, steps will be deployed according to the ServerRoles defined in the configuration files.
 
     .PARAMETER NodesFilter
-    List of Nodes where configurations have to be deployed - can be used if you don't want to deploy to all nodes defined in the configuration files.
-    If not set, configurations will be deployed to all nodes according to the ServerRoles defined in the configuration files.
+    List of Nodes where steps have to be deployed - can be used if you don't want to deploy to all nodes defined in the configuration files.
+    If not set, steps will be deployed to all nodes according to the ServerRoles defined in the configuration files.
 
     .PARAMETER ValidateOnly
     If set, configuration files will be loaded and deployment plan created, but no actual deployment will run.
@@ -68,8 +68,8 @@ function Start-Deployment {
     Deployment type:
     All       - deploy everything according to configuration files (= Provision + Deploy)
     DSC       - deploy only DSC configurations
-    Functions - deploy only non-DSC configurations
-    Adhoc     - override configurations and nodes with $ConfigurationsFilter and $NodesFilter (they don't have to be defined in ServerRoles - useful for adhoc deployments)
+    Functions - deploy only Powershell functions
+    Adhoc     - override steps and nodes with $StepsFilter and $NodesFilter (they don't have to be defined in ServerRoles - useful for adhoc deployments)
 
     .PARAMETER DeployConfigurationPath
     Path to the directory where configuration files reside, relative to current directory. 
@@ -92,7 +92,7 @@ function Start-Deployment {
 
         [Parameter(Mandatory=$false)]
         [string[]]
-        $ConfigurationsFilter,
+        $StepsFilter,
 
         [Parameter(Mandatory=$false)]
         [string[]]
@@ -157,13 +157,13 @@ function Start-Deployment {
 
     $dscOutputPath = Join-Path -Path $packagesPath -ChildPath "_DscOutput"
     $Global:DeploymentPlan = New-DeploymentPlan -AllEnvironments $Global:Environments -Environment $Environment -ServerRolesFilter $ServerRolesFilter `
-                                                -ConfigurationsFilter $ConfigurationsFilter -NodesFilter $NodesFilter -TokensOverride $TokensOverride `
+                                                -StepsFilter $StepsFilter -NodesFilter $NodesFilter -TokensOverride $TokensOverride `
                                                 -DscOutputPath $dscOutputPath -DeployType $DeployType
 
     Write-Log -Info 'Variable $Global:DeploymentPlan has been created.' -Emphasize
     Write-Log -Info "[END] BUILD DEPLOYMENT PLAN" -Emphasize
     if (!$Global:DeploymentPlan) {
-        Write-Log -Warn "No configurations to deploy anywhere. Please ensure your ServerRoles are properly defined and the ServerRoles / Configurations / Nodes filters are correct."
+        Write-Log -Warn "No steps to run anywhere. Please ensure your ServerRoles are properly defined and the ServerRoles / Configurations / Nodes filters are correct."
         return
     }
 

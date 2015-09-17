@@ -44,7 +44,7 @@ function Environment {
         }
     }
     Environment Local {
-        ServerRole WebServer -Configurations @('WebServerProvision', 'WebServerDeploy') -Nodes localhost
+        ServerRole WebServer -Steps @('WebServerProvision', 'WebServerDeploy') -Nodes localhost
     }
     Environment Tests -BasedOn Local {
         ServerRole WebServer -Nodes 'testNode'
@@ -78,7 +78,7 @@ function Environment {
             $Global:Environments[$Name] = @{
                 ServerConnections = @{}
                 ServerRoles = [ordered]@{}
-                ConfigurationSettings = @{}
+                StepSettings = @{}
                 Tokens = @{}
                 TokensChildren = @{}
                 BasedOn = 'Default'

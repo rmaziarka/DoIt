@@ -33,7 +33,7 @@ function ServerRole {
         Default = @{
             ServerRoles = @{
                 WebServer = @{
-                    Configurations = @('WebServerProvision', 'WebServerDeploy')
+                    Steps = @('WebServerProvision', 'WebServerDeploy')
                     ServerConnections = $null
                 }
             }
@@ -60,11 +60,11 @@ function ServerRole {
     .PARAMETER ServerConnections
     List of ServerConnections where current ServerRole will be deployed. Can be array of strings or scriptblock.
 
-    .PARAMETER Configurations
-    List of configurations which will be deployed to the $Nodes.
+    .PARAMETER Steps
+    List of steps (Powershell functions / DSC configurations) which will be deployed to the $Nodes.
 
     .PARAMETER RequiredPackages
-    List of packages that will be copied to remote server before running actual configurations.
+    List of packages that will be copied to remote server before running actual steps.
 
     .PARAMETER RunRemotely
     If set then each configuration is run remotely (on nodes defined in $ServerConnections, or on specified $RunOn node).
@@ -74,7 +74,7 @@ function ServerRole {
 
     .PARAMETER RebootHandlingMode
     Specifies what to do when a reboot is required by DSC resource:
-    None (default)     - don't check if reboot is required - leave it up to DSC (by default it stops current configuration, but next configurations will run)
+    None (default)     - don't check if reboot is required - leave it up to DSC (by default it stops current step, but next steps will run)
     Stop               - stop and fail the deployment
     RetryWithoutReboot - retry several times without reboot
     AutoReboot         - reboot the machine and continue deployment
@@ -82,8 +82,8 @@ function ServerRole {
 
     .EXAMPLE
     Environment Default {
-        ServerRole WebServer -Configurations @('WebServerProvision')
-        ServerRole DatabaseServer -Configurations @('DatabaseServerDeploy') #-RemotingCredential { $Tokens.Credentials.RemotingCredential }
+        ServerRole WebServer -Steps @('WebServerProvision')
+        ServerRole DatabaseServer -Steps @('DatabaseServerDeploy') #-RemotingCredential { $Tokens.Credentials.RemotingCredential }
     }
 
     Environment Local {
@@ -96,34 +96,34 @@ function ServerRole {
         ServerRole DatabaseServer -Nodes 'server2'
     }
 
-    a) ServerRole WebServer -Configurations 'WebServerProvision' -ServerConnections 'WebServer1'
+    a) ServerRole WebServer -Steps 'WebServerProvision' -ServerConnections 'WebServer1'
 
        Run DSC configuration 'WebServerProvision' locally (on machine where deploy script runs), which will connect to remote machine
        using connection options defined in ServerConnection 'WebServer1'. The DSC configuration will be deployed on nodes defined in 'WebServer1'.
 
-    b) ServerRole WebServer -Configurations 'DatabaseServerDeploy' -ServerConnections 'DbServer1'
+    b) ServerRole WebServer -Steps 'DatabaseServerDeploy' -ServerConnections 'DbServer1'
 
        Run 'function' configuration 'DatabaseServerDeploy' locally. Note this function will be run locally and no connection will be opened to a
        node defined in 'DbServer1' (but its name will be passed in $NodeName argument).
 
-    c) ServerRole WebServer -Configurations 'DatabaseServerDeploy' -ServerConnections @('DbServer1', 'DbServer2') -RunRemotely
+    c) ServerRole WebServer -Steps 'DatabaseServerDeploy' -ServerConnections @('DbServer1', 'DbServer2') -RunRemotely
 
        Run configuration 'DatabaseServerDeploy' remotely on nodes defined in DbServer1 (let's say NODE1) and DbServer2 (NODE2). 
        Deployment package will be copied to both nodes using PSRemoting (to "c:\PSCIPackage"), 
        and then function 'DatabaseServerDeploy' will be run on NODE1 (with $NodeName = NODE1) and NODE2 (with $NodeName = NODE2).
 
-    d) ServerRole WebServer -Configurations 'DatabaseServerDeploy' -ServerConnections @('DbServer1', 'DbServer2') -RunOnNode 'NODE1'
+    d) ServerRole WebServer -Steps 'DatabaseServerDeploy' -ServerConnections @('DbServer1', 'DbServer2') -RunOnNode 'NODE1'
 
        Run configuration 'DatabaseServerDeploy' remotely on nodes defined in DbServer1 (NODE1) and DbServer2 (NODE2). 
        Deployment package will be copied to both nodes using PSRemoting (to "c:\PSCIPackage"), 
        and then function 'DatabaseServerDeploy' will be run on NODE1 (with $NodeName = NODE1) and again on NODE1 (with $NodeName = NODE2).
 
-    e) ServerRole WebServer -Configurations 'WebServerProvision' -ServerConnections @('DbServer1', 'DbServer2') -RebootHandlingMode AutoReboot
+    e) ServerRole WebServer -Steps 'WebServerProvision' -ServerConnections @('DbServer1', 'DbServer2') -RebootHandlingMode AutoReboot
    
        By default when DSC resource requires a reboot, deployment is stopped and will not run all steps. 
        By specifying -RebootHandlingMode AutoReboot, machine will be rebooted automatically and deployment will continue.
 
-    f) ServerRole WebServer -Configurations 'WebServerProvision' -ServerConnections @('DbServer1', 'DbServer2') -RebootHandlingMode RetryWithoutReboot
+    f) ServerRole WebServer -Steps 'WebServerProvision' -ServerConnections @('DbServer1', 'DbServer2') -RebootHandlingMode RetryWithoutReboot
 
        By default when DSC resource requires a reboot, deployment is stopped and will not run all steps. 
        By specifying -RebootHandlingMode RetryWithoutReboot, deployment will continue without rebooting and all steps will run.
@@ -141,9 +141,10 @@ function ServerRole {
         [object]
         $ServerConnections,
 
+        [Alias('Configurations')]
         [Parameter(Mandatory=$false)]
         [object]
-        $Configurations,
+        $Steps,
 
         [Parameter(Mandatory=$false)]
         [object]
@@ -176,8 +177,8 @@ function ServerRole {
         if ($PSBoundParameters.ContainsKey('ServerConnections')) {
             $serverRole.ServerConnections = $ServerConnections
         }
-        if ($PSBoundParameters.ContainsKey('Configurations')) {
-            $serverRole.Configurations = $Configurations
+        if ($PSBoundParameters.ContainsKey('Steps')) {
+            $serverRole.Steps = $Steps
         }
         if ($PSBoundParameters.ContainsKey('RequiredPackages')) {
             $serverRole.RequiredPackages = $RequiredPackages

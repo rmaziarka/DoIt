@@ -83,8 +83,8 @@ function Group-DeploymentPlan {
                   IsLocalRun = $entry.IsLocalRun
                   Environment = $entry.Environment
                   ServerRole = $entry.ServerRole
-                  Name = $entry.ConfigurationName
-                  Type = $entry.ConfigurationType
+                  Name = $entry.StepName
+                  Type = $entry.StepType
                   MofDir = $entry.ConfigurationMofDir
                   Tokens = $entry.Tokens
                   RebootHandlingMode = $entry.RebootHandlingMode

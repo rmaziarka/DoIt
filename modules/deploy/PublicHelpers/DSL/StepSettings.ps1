@@ -22,13 +22,13 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 #>
 
-function ConfigurationSettings {
+function StepSettings {
     <#
     .SYNOPSIS
-    Element of configuration DSL that defines settings for particular Configuration. It is invoked inside 'Environment' element.
+    Element of configuration DSL that defines settings for particular step. It is invoked inside 'Environment' element.
 
     .DESCRIPTION
-    It can be used to override default ServerRole values per configuration.
+    It can be used to override default ServerRole values per step.
 
     .PARAMETER Name
     Name of the server role.
@@ -37,14 +37,14 @@ function ConfigurationSettings {
     List of packages that will be copied to remote server before running actual configurations.
 
     .PARAMETER RunRemotely
-    If set then each configuration is run remotely (on nodes defined in $ServerConnections, or on specified $RunOn node).
+    If set then each step is run remotely (on nodes defined in $ServerConnections, or on specified $RunOn node).
 
     .PARAMETER RunOn
     Defines on which machine run deployment of given server role.
 
     .PARAMETER RebootHandlingMode
     Specifies what to do when a reboot is required by DSC resource:
-    None (default)     - don't check if reboot is required - leave it up to DSC (by default it stops current configuration, but next configurations will run)
+    None (default)     - don't check if reboot is required - leave it up to DSC (by default it stops current step, but next configurations will run)
     Stop               - stop and fail the deployment
     RetryWithoutReboot - retry several times without reboot
     AutoReboot         - reboot the machine and continue deployment
@@ -52,8 +52,8 @@ function ConfigurationSettings {
 
     .EXAMPLE
     Environment Default {
-        ServerRole Web -Configurations 'config1', 'config2' -RequiredPackages 'all'
-        ConfigurationSettings config1 -RequiredPackages 'package1' -RunRemotely
+        ServerRole Web -Steps 'config1', 'config2' -RequiredPackages 'all'
+        StepSettings config1 -RequiredPackages 'package1' -RunRemotely
     }
 #>
 
@@ -84,7 +84,7 @@ function ConfigurationSettings {
 
     if ((Test-Path variable:Env_Name) -and $Env_Name) {
 
-        $configSettingsDef = $Global:Environments[$Env_Name].ConfigurationSettings
+        $configSettingsDef = $Global:Environments[$Env_Name].StepSettings
 
         if (!$configSettingsDef.Contains($Name)) {
             $configSettingsDef[$Name] = @{ Name = $Name }
@@ -106,6 +106,8 @@ function ConfigurationSettings {
         }
 
     } else {
-        throw "'ConfigurationSettings' function cannot be invoked outside 'Environment' function (invalid invocation: 'ConfigurationSettings $Name')."
+        throw "'StepSettings' function cannot be invoked outside 'Environment' function (invalid invocation: 'StepSettings $Name')."
     }
 }
+
+Set-Alias ConfigurationSettings StepSettings
