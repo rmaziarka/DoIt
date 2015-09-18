@@ -90,6 +90,7 @@ function Start-Deployment {
         [string[]]
         $ServerRolesFilter,
 
+        [Alias('ConfigurationsFilter')]
         [Parameter(Mandatory=$false)]
         [string[]]
         $StepsFilter,
