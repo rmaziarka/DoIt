@@ -67,18 +67,18 @@ function ServerConnection {
 
     .PARAMETER RemotingMode
     Defines type of remoting protocol to be used for remote deployment:
-    PSRemoting - Powershell remoting (HTTP or HTTPS)
-    WebDeployHandler - MSDeploy IIS Deployment Handler
-    WebDeployAgentService - MSDeploy Web Management Service
+    - **PSRemoting** - Powershell remoting (HTTP or HTTPS)
+    - **WebDeployHandler** - MSDeploy IIS Deployment Handler
+    - **WebDeployAgentService*8 - MSDeploy Web Management Service
 
     .PARAMETER RemotingCredential
     A PSCredential object that will be used when opening a remoting session to any of the $Nodes specified in this ServerConnection.
 
     .PARAMETER Authentication
     Defines type of authentication that will be used to establish remote connection. Allowed values:
-    For $RemotingMode = PSRemoting - Basic, Credssp, Default, Digest, Kerberos, Negotiate, NegotiateWithImplicitCredential
-    For $RemotingMode = WebDeployHandler - Basic, NTLM
-    For $RemotingMode = WebDeployAgentService - NTLM
+    - For $RemotingMode = PSRemoting - Basic, Credssp, Default, Digest, Kerberos, Negotiate, NegotiateWithImplicitCredential
+    - For $RemotingMode = WebDeployHandler - Basic, NTLM
+    - For $RemotingMode = WebDeployAgentService - NTLM
 
     .PARAMETER Protocol
     Defines the transport protocol used for establishing remote connection (HTTP or HTTPS).

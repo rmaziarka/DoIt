@@ -27,23 +27,54 @@ function New-ConnectionParameters {
     .SYNOPSIS
     Creates an universal connection parameters object that can be conveniently used for opening connections.
 
+    .DESCRIPTION
+    It returns following hashtable:
+    ```
+    @{
+        Nodes = <array of nodes>
+        NodesAsString = <nodes in string format>
+        RemotingMode = <RemotingMode>
+        Credential = <Credential>
+        Authentication = <Authentication>
+        Port = <Port>
+        Protocol = <Protocol>
+        PSSessionParams = <hashtable that can be used for splatting in Invoke-Command>
+        CimSessionParams = <hashtable that can be used for splatting in New-CimSession>
+        MsDeployDestinationString = <string that can be used for opening msdeploy connections>
+        OptionsAsString = <string describing all options for logging purposes>
+    }
+    ```
+
     .PARAMETER Nodes
     Names of remote nodes where the connection will be established.
 
     .PARAMETER RemotingMode
-    Defines type of remoting protocol to be used for remote connection.
+    Defines type of remoting protocol to be used for remote connection. Available values:
+    - **PSRemoting** (default)
+    - **WebDeployHandler** - https://<server>:<8172>/msdeploy.axd
+    - **WebDeployAgentService** - http://<server>/MsDeployAgentService
 
     .PARAMETER Credential
     A PSCredential object that will be used when opening a remoting session to any of the $Nodes specified.
 
     .PARAMETER Authentication
-    Defines type of authentication that will be used to establish remote conncetion.
+    Defines type of authentication that will be used to establish remote connection. Available values:
+    - **Basic**
+    - **NTLM**
+    - **CredSSP**
+    - **Default** (default)
+    - **Digest**
+    - **Kerberos**
+    - **Negotiate**
+    - **NegotiateWithImplicitCredential**
 
     .PARAMETER Port
     Defines the port used for establishing remote connection.
 
     .PARAMETER Protocol
-    Defines the transport protocol used for establishing remote connection (HTTP or HTTPS).
+    Defines the transport protocol used for establishing remote connection (HTTP or HTTPS). Available values:
+    - **HTTP** (default)
+    - **HTTPS**
 
     .PARAMETER CrossDomain
     Should be on when destination nodes are outside current domain.

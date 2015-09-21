@@ -84,57 +84,39 @@ function ServerRole {
     Note that any setting apart from 'None' will cause output messages not to log in real-time.
 
     .EXAMPLE
-    ```
-    Environment Default {
-        ServerRole WebServer -Steps @('WebServerProvision')
-        ServerRole DatabaseServer -Steps @('DatabaseServerDeploy') #-RemotingCredential { $Tokens.Credentials.RemotingCredential }
-    }
+    ServerRole Web -Steps 'ConfigureIISProvision' -ServerConnections 'WebServer1'
 
-    Environment Local {
-        ServerRole WebServer -Nodes 'localhost'
-        ServerRole DatabaseServer -Nodes 'localhost'
-    }
-
-    Environment Dev { 
-        ServerRole WebServer -Nodes 'server1'
-        ServerRole DatabaseServer -Nodes 'server2'
-    }
-    ```
-
-    .EXAMPLE
-    ServerRole WebServer -Steps 'WebServerProvision' -ServerConnections 'WebServer1'
-
-    Run DSC configuration 'WebServerProvision' locally (on machine where deploy script runs), which will connect to remote machine
+    Run DSC configuration 'ConfigureIISProvision' locally (on machine where deploy script runs), which will connect to remote machine
     using connection options defined in ServerConnection 'WebServer1'. The DSC configuration will be deployed on nodes defined in 'WebServer1'.
     
     .EXAMPLE
-    ServerRole WebServer -Steps 'DatabaseServerDeploy' -ServerConnections 'DbServer1'
+    ServerRole Web -Steps 'Deploy-Database' -ServerConnections 'DbServer1'
 
-    Run 'function' configuration 'DatabaseServerDeploy' locally. Note this function will be run locally and no connection will be opened to a
+    Run 'function' configuration 'Deploy-Database' locally. Note this function will be run locally and no connection will be opened to a
     node defined in 'DbServer1' (but its name will be passed in $NodeName argument).
 
     .EXAMPLE
-    ServerRole WebServer -Steps 'DatabaseServerDeploy' -ServerConnections @('DbServer1', 'DbServer2') -RunRemotely
+    ServerRole Web -Steps 'Deploy-Database' -ServerConnections @('DbServer1', 'DbServer2') -RunRemotely
 
-    Run configuration 'DatabaseServerDeploy' remotely on nodes defined in DbServer1 (let's say NODE1) and DbServer2 (NODE2). 
-    Deployment package will be copied to both nodes using PSRemoting (to "c:\PSCIPackage"), 
-    and then function 'DatabaseServerDeploy' will be run on NODE1 (with $NodeName = NODE1) and NODE2 (with $NodeName = NODE2).
-
-    .EXAMPLE
-    ServerRole WebServer -Steps 'DatabaseServerDeploy' -ServerConnections @('DbServer1', 'DbServer2') -RunOnNode 'NODE1'
-
-    Run configuration 'DatabaseServerDeploy' remotely on nodes defined in DbServer1 (NODE1) and DbServer2 (NODE2). 
-    Deployment package will be copied to both nodes using PSRemoting (to "c:\PSCIPackage"), 
-    and then function 'DatabaseServerDeploy' will be run on NODE1 (with $NodeName = NODE1) and again on NODE1 (with $NodeName = NODE2).
+    Run step 'Deploy-Database' remotely on nodes defined in DbServer1 (let's say NODE1) and DbServer2 (NODE2). 
+    Deployment package will be copied to both nodes (to "c:\PSCIPackage_<hash>"), 
+    and then function 'Deploy-Database' will be run on NODE1 (with $NodeName = NODE1) and NODE2 (with $NodeName = NODE2).
 
     .EXAMPLE
-    ServerRole WebServer -Steps 'WebServerProvision' -ServerConnections @('DbServer1', 'DbServer2') -RebootHandlingMode AutoReboot
+    ServerRole Web -Steps 'Deploy-Database' -ServerConnections @('DbServer1', 'DbServer2') -RunOn 'DbServer3'
+
+    Run step 'Deploy-Database' remotely on nodes defined in DbServer1 (NODE1) and DbServer2 (NODE2). 
+    Deployment package will be copied to both nodes  (to "c:\PSCIPackage_<hash>"), 
+    and then function 'Deploy-Database' will be run on NODE1 (with $NodeName = NODE1) and again on NODE1 (with $NodeName = NODE2).
+
+    .EXAMPLE
+    ServerRole Web -Steps 'ConfigureIISWebServer' -ServerConnections @('DbServer1', 'DbServer2') -RebootHandlingMode AutoReboot
    
     By default when DSC resource requires a reboot, deployment is stopped and will not run all steps. 
     By specifying -RebootHandlingMode AutoReboot, machine will be rebooted automatically and deployment will continue.
 
     .EXAMPLE
-    ServerRole WebServer -Steps 'WebServerProvision' -ServerConnections @('DbServer1', 'DbServer2') -RebootHandlingMode RetryWithoutReboot
+    ServerRole Web -Steps 'ConfigureIISWebServer' -ServerConnections @('DbServer1', 'DbServer2') -RebootHandlingMode RetryWithoutReboot
 
     By default when DSC resource requires a reboot, deployment is stopped and will not run all steps. 
     By specifying -RebootHandlingMode RetryWithoutReboot, deployment will continue without rebooting and all steps will run.

@@ -101,6 +101,11 @@ function Invoke-DeploymentStep {
         $expr += ' -ConnectionParams $ConnectionParams'
     }
 
+    if ($stepCommand.Parameters.ContainsKey("packagesPath")) {
+        $packagesPath = (Get-ConfigurationPaths).PackagesPath
+        $expr += ' -PackagesPath `"$packagesPath`"'
+    }
+
     if ($stepCommand.CommandType -eq "Configuration") {
         # Set PSDscAllowPlainTextPassword to $true in order to pass credentials into dsc configuration. It will be stored as plain text in a .mof file.
         # The better way is to use certificate and its thumbprint to decrypt the credentials on the target node.
