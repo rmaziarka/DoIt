@@ -33,9 +33,6 @@ function Start-DeploymentPlanEntryLocally {
     .PARAMETER DeploymentPlanGroupedEntry
     Deployment plan entry (grouped).
 
-    .PARAMETER DscForce
-    If true, '-Force' parameter will be passed to 'Start-DscConfiguration'. It is required e.g. when last attempt failed and is still running.
-
     .EXAMPLE
     Start-DeploymentPlanEntryLocally -DeploymentPlanEntry $deploymentPlanEntry -Environment $Environment -DscForce:$DscForce
     
@@ -60,7 +57,7 @@ function Start-DeploymentPlanEntryLocally {
             $params = @{
                 ConnectionParams = $configInfo.ConnectionParams
                 MofDir = $configInfo.MofDir
-                DscForce = $DscForce
+                DscForce = $true
                 RebootHandlingMode = $configInfo.RebootHandlingMode
             }
 

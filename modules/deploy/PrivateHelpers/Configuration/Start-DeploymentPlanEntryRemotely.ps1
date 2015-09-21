@@ -32,10 +32,10 @@ function Start-DeploymentPlanEntryRemotely {
 
     .PARAMETER DeployType
     Deployment type:
-    All       - deploy everything according to configuration files (= Provision + Deploy)
-    DSC       - deploy only DSC configurations
-    Functions - deploy only Powershell functions
-    Adhoc     - override steps and nodes with $StepsFilter and $NodesFilter (they don't have to be defined in ServerRoles - useful for adhoc deployments)
+    - **All**       - deploy everything according to configuration files (= Provision + Deploy)
+    - **DSC**       - deploy only DSC configurations
+    - **Functions** - deploy only Powershell functions
+    - **Adhoc**     - override steps and nodes with $StepsFilter and $NodesFilter (they don't have to be defined in ServerRoles - useful for adhoc deployments)
 
     .EXAMPLE
     Start-DeploymentPlanEntryRemotely -DeploymentPlan $Global:DeploymentPlan -Environment $Environment -CopyPackage

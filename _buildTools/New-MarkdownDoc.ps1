@@ -140,7 +140,11 @@ function New-MarkdownDoc {
                 [void]($outputString.Append("`r`n#### $example`r`n"))
                 if ($item.Code) {
                     [void]($outputString.Append("``````PowerShell`r`n"))
-                    [void]($outputString.Append("$($item.Code)`r`n```````r`n"))
+                    # if code starts with ``` it means it special case - we need to put remarks inside ```. See https://connect.microsoft.com/PowerShell/feedbackdetail/view/952833.
+                    if (!$item.Code.StartsWith('```')) {
+                        [void]($outputString.Append("$($item.Code)`r`n"))
+                        [void]($outputString.Append("```````r`n"))
+                    }
                 }
                 if ($item.Remarks) {
                     foreach ($remark in $item.Remarks.Text) { 
@@ -148,6 +152,9 @@ function New-MarkdownDoc {
                             [void]($outputString.Append("$($remark.Trim())`r`n"))
                         }
                     }
+                }
+                if ($item.Code.StartsWith('```')) {
+                       [void]($outputString.Append("```````r`n"))
                 }
             }
         }
@@ -159,4 +166,3 @@ function New-MarkdownDoc {
     $outputIndexPath = Join-Path -Path $outputBasePath -ChildPath "$ModuleName.md"
     $outputIndexString.ToString() | Out-File -FilePath $OutputIndexPath
 }
-

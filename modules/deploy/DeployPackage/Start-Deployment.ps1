@@ -55,10 +55,7 @@ function Start-Deployment {
 
     .PARAMETER AutoInstallDscResources
     If true (default), custom DSC resources included in PSCI will be automatically copied to localhost (required for parsing DSC configurations)
-    and to the destination servers (required for running DSC configurations).
-
-    .PARAMETER DscForce
-    If true (default), '-Force' parameter will be passed to 'Start-DscConfiguration'. It is required e.g. when last attempt failed and is still running.
+    and to the destination servers (required for running DSC configurations).  
 
     .PARAMETER TokensOverride
     A list of tokens to override. Token defined in the configuration files will be overrided with values specified in this array 
@@ -66,10 +63,10 @@ function Start-Deployment {
 
     .PARAMETER DeployType
     Deployment type:
-    All       - deploy everything according to configuration files (= Provision + Deploy)
-    DSC       - deploy only DSC configurations
-    Functions - deploy only Powershell functions
-    Adhoc     - override steps and nodes with $StepsFilter and $NodesFilter (they don't have to be defined in ServerRoles - useful for adhoc deployments)
+    - **All**       - deploy everything according to configuration files (= Provision + Deploy)
+    - **DSC**       - deploy only DSC configurations
+    - **Functions** - deploy only Powershell functions
+    - **Adhoc**     - override steps and nodes with $StepsFilter and $NodesFilter (they don't have to be defined in ServerRoles - useful for adhoc deployments)
 
     .PARAMETER DeployConfigurationPath
     Path to the directory where configuration files reside, relative to current directory. 
@@ -106,10 +103,6 @@ function Start-Deployment {
         [Parameter(Mandatory=$false)]
         [switch]
         $AutoInstallDscResources = $true,
-
-        [Parameter(Mandatory=$false)]
-        [switch]
-        $DscForce = $true,
 
         [Parameter(Mandatory=$false)]
         [hashtable]
@@ -169,7 +162,7 @@ function Start-Deployment {
     }
 
     if (!$ValidateOnly) {
-        Start-DeploymentPlan -DeploymentPlan $Global:DeploymentPlan -DscForce:$DscForce -DeployType $DeployType -AutoInstallDscResources:$AutoInstallDscResources -DscModuleNames $configInfo.RequiredDSCModules
+        Start-DeploymentPlan -DeploymentPlan $Global:DeploymentPlan -DeployType $DeployType -AutoInstallDscResources:$AutoInstallDscResources -DscModuleNames $configInfo.RequiredDSCModules
     }
 
     # if running remotely, return a string to let know that everything went ok (checked in Start-DeploymentByPSRemoting)

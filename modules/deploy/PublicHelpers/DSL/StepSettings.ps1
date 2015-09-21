@@ -44,10 +44,10 @@ function StepSettings {
 
     .PARAMETER RebootHandlingMode
     Specifies what to do when a reboot is required by DSC resource:
-    None (default)     - don't check if reboot is required - leave it up to DSC (by default it stops current step, but next configurations will run)
-    Stop               - stop and fail the deployment
-    RetryWithoutReboot - retry several times without reboot
-    AutoReboot         - reboot the machine and continue deployment
+    - **None** (default)     - don't check if reboot is required - leave it up to DSC (by default it stops current step, but next configurations will run)
+    - **Stop**               - stop and fail the deployment
+    - **RetryWithoutReboot** - retry several times without reboot
+    - **AutoReboot**         - reboot the machine and continue deployment
     Note that any setting apart from 'None' will cause output messages not to log in real-time.
 
     .EXAMPLE

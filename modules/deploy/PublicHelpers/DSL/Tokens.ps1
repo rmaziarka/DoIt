@@ -28,7 +28,8 @@ function Tokens {
     Element of configuration DSL that allows for creating $Tokens hashtable. It is invoked inside 'Environment' or 'Server' element.
 
     .DESCRIPTION
-    It can be used as a convenient way to define $Tokens hashtables as in the following example:
+    Internally it is stored as $Tokens hashtables as in the following example:
+    ```
     $Environments = @{
         Default = @{
             Tokens = @{
@@ -46,6 +47,7 @@ function Tokens {
             }
         }
     }
+    ```
 
     .PARAMETER Category
     A category - used for separating various parts of configurations.
@@ -54,6 +56,7 @@ function Tokens {
     A hashtable containing tokens.
 
     .EXAMPLE
+    ```
     Environment Default {
         Tokens Category1 @{
             ADConnectionString = 'LDAP://IP:389/OU=User'
@@ -66,6 +69,7 @@ function Tokens {
             ...
         }
     }
+    ```
     #>
     
     [CmdletBinding()]

@@ -28,7 +28,8 @@ function ServerConnection {
     Element of configuration DSL that allows to create ServerConnection hashtable. It is invoked inside 'Environment' element.
 
     .DESCRIPTION
-    It can be used as a convenient way to define ServerConnection hashtables as in the following example:
+    Internally it is stored as ServerConnection hashtables as in the following example:
+    ```
     $Environments = @{
         Default = @{
             ServerConnections = @{
@@ -53,6 +54,7 @@ function ServerConnection {
             }
         }
     }
+    ```
 
     .PARAMETER Name
     Name of the server connection. It is used for referencing ServerConnections from ServerRoles.
@@ -91,27 +93,31 @@ function ServerConnection {
     Defines location on remote machine where deployment package will be copied to.
 
     .EXAMPLE
-    a) ServerConnection WebServer1 -Node 'NODE1'
+    ServerConnection WebServer1 -Node 'NODE1'
 
-       Connections to 'NODE1' will be opened using PSRemoting / HTTP.
+    Connections to 'NODE1' will be opened using PSRemoting / HTTP.
 
-    b) ServerConnection WebServer1 -Node @('NODE1', 'NODE2')
+    .EXAMPLE
+    ServerConnection WebServer1 -Node @('NODE1', 'NODE2')
 
-       Connections to 'NODE1' and 'NODE2' will be opened using PSRemoting / HTTP.
+    Connections to 'NODE1' and 'NODE2' will be opened using PSRemoting / HTTP.
 
-    c) ServerConnection WebServer1 -Node 'NODE1' -PackageDirectory 'c:\dir'
+    .EXAMPLE
+    ServerConnection WebServer1 -Node 'NODE1' -PackageDirectory 'c:\dir'
 
-       Deployment package will be copied to directory 'c:\dir' (instead of default 'c:\PSCIPackage').
+    Deployment package will be copied to directory 'c:\dir' (instead of default 'c:\PSCIPackage').
 
-    d) ServerConnection WebServer1 -Node 'NODE1' -RemotingMode WebDeployHandler -Authentication Basic `
+    .EXAMPLE
+    ServerConnection WebServer1 -Node 'NODE1' -RemotingMode WebDeployHandler -Authentication Basic `
                     -RemotingCredential { $Tokens.Credentials.RemotingCredential } -Port 8192
 
-       Connections to 'NODE1' will be opened using MSDeploy (WebDeployHandler) with specified credentials, authentication Basic and port 8192.
-
-    e) ServerConnection WebServer1 -Node 'NODE1' -RemotingMode PSRemoting -Authentication CredSsp `
+    Connections to 'NODE1' will be opened using MSDeploy (WebDeployHandler) with specified credentials, authentication Basic and port 8192.
+    
+    .EXAMPLE
+    ServerConnection WebServer1 -Node 'NODE1' -RemotingMode PSRemoting -Authentication CredSsp `
                           -RemotingCredential { $Tokens.Credentials.RemotingCredential } -Protocol HTTPS
 
-       Connections to 'NODE1' will be opened using PSRemoting / CredSSP / HTTPS with specified credentials
+    Connections to 'NODE1' will be opened using PSRemoting / CredSSP / HTTPS with specified credentials
 
 #>
 

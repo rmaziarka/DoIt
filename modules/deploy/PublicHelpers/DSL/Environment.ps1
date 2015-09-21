@@ -27,7 +27,7 @@ function Environment {
     .SYNOPSIS
     Element of configuration DSL used to define environment context for 'Tokens' or 'ServerRole' elements.
 
-   .PARAMETER Name
+    .PARAMETER Name
     Name of the environment.
 
     .PARAMETER BasedOn
@@ -37,6 +37,7 @@ function Environment {
     A script block that contains 'Tokens' and 'ServerRole' invocations.
 
     .EXAMPLE
+    ```
     Environment Default {
         Tokens Category1 @{
             ADConnectionString = 'LDAP://IP:389/OU=User'
@@ -49,6 +50,7 @@ function Environment {
     Environment Tests -BasedOn Local {
         ServerRole WebServer -Nodes 'testNode'
     }
+    ```
     #>
     
     [CmdletBinding()]

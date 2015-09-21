@@ -33,15 +33,12 @@ function Start-DeploymentPlan {
     .PARAMETER DeploymentPlan
     Deployment plan which defines the deployment.
 
-    .PARAMETER DscForce
-    If true, '-Force' parameter will be passed to 'Start-DscConfiguration'. It is required e.g. when last attempt failed and is still running.
-
     .PARAMETER DeployType
     Deployment type:
-    All       - deploy everything according to configuration files (= Provision + Deploy)
-    DSC       - deploy only DSC configurations
-    Functions - deploy only Powershell functions
-    Adhoc     - override steps and nodes with $StepsFilter and $NodesFilter (they don't have to be defined in ServerRoles - useful for adhoc deployments)
+    - **All**       - deploy everything according to configuration files (= Provision + Deploy)
+    - **DSC**       - deploy only DSC configurations
+    - **Functions** - deploy only Powershell functions
+    - **Adhoc**     - override steps and nodes with $StepsFilter and $NodesFilter (they don't have to be defined in ServerRoles - useful for adhoc deployments)
 
     .PARAMETER AutoInstallDscResources
     If true, custom DSC resources included in PSCI will be automatically copied to localhost (required for parsing DSC configurations)
@@ -60,10 +57,6 @@ function Start-DeploymentPlan {
         [Parameter(Mandatory=$true)]
         [PSCustomObject[]]
         $DeploymentPlan,
-
-        [Parameter(Mandatory=$true)]
-        [switch]
-        $DscForce,
 
         [Parameter(Mandatory=$false)]
         [ValidateSet('All', 'DSC', 'Functions', 'Adhoc')]
@@ -149,7 +142,7 @@ function Start-DeploymentPlan {
         if ($entry.GroupedConfigurationInfo[0].RunOnConnectionParams -and !$PSCIGlobalConfiguration.RemotingMode) {   
             Start-DeploymentPlanEntryRemotely -DeploymentPlanGroupedEntry $entry -DeployType $DeployType           
         } else {
-            Start-DeploymentPlanEntryLocally -DeploymentPlanGroupedEntry $entry -DscForce:$DscForce
+            Start-DeploymentPlanEntryLocally -DeploymentPlanGroupedEntry $entry
         }
     }
     if (!$PSCIGlobalConfiguration.RemotingMode) {
