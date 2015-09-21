@@ -29,6 +29,7 @@ function Start-Deployment {
 
     .DESCRIPTION
     It does the following steps:
+
     1. Loads configuration files containing environments and tokens to global variable $Environments.
     2. Creates a deployment plan basing on $Environments and parameters passed to this function. 
        Each node gets its own resolved tokens. The deployment plan can be accessed by querying $Global:DeploymentPlan variable.

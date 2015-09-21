@@ -114,7 +114,7 @@ function New-MarkdownDoc {
 
         if ($help.Description) {
             [void]($outputString.Append("### Description`r`n"))
-            [void]($outputString.Append("$($help.Description.Text)`r`n"))
+            [void]($outputString.Append("$($help.Description.Text)`r`n`r`n"))
         }
 
         if ($help.Parameters) {

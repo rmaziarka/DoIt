@@ -147,7 +147,7 @@ function Start-DeploymentByPSRemoting {
     if ($StepsFilter) {
         # needed for backward compatibility - to be removed in future
         $deployScriptPath = Join-Path -Path ((Get-ConfigurationPaths).DeployScriptsPath) -ChildPath 'deploy.ps1'
-        $scriptContents = Get-Content -LiteralPath $deployScriptPath -ReadCount 0
+        $scriptContents = Get-Content -LiteralPath $deployScriptPath -ReadCount 0 | Out-String
         if ($scriptContents -inotmatch '\$StepsFilter' -and $scriptContents -imatch '\$ConfigurationsFilter') {
             $deployScript += " -ConfigurationsFilter '{0}'" -f ($StepsFilter -join "','")
         #end
