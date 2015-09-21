@@ -38,7 +38,7 @@ For ServerRole examples, see .EXAMPLES section in PSCI\deployment\Configuration\
 Environment Default {
     ServerConnection TestServer -Nodes localhost 
 
-    ServerRole TestRole -Steps SimpleDscProvision, SimpleFunctionProvision -ServerConnections TestServer
+    ServerRole TestRole -Steps SimpleDscProvision, Deploy-SimpleFunction -ServerConnections TestServer
 
 }
 

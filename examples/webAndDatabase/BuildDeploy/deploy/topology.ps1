@@ -38,9 +38,9 @@ Environment Default {
     ServerConnection WebServer -Nodes { $Tokens.Topology.Nodes }
     ServerConnection DatabaseServer -BasedOn WebServer
 
-    ServerRole Web -Steps 'WebServerProvision','MyWebApplicationIISConfig','MyWebApplicationDeploy' -ServerConnections WebServer
-    ServerRole Database -Steps 'MyDatabaseDeploy' -ServerConnections DatabaseServer
-    ServerRole DeploymentValidation -Steps 'ValidateDeploy' -ServerConnections WebServer
+    ServerRole Web -Steps 'ConfigureIISProvision','ConfigureMyWebApplicationIIS','Deploy-MyWebApplication' -ServerConnections WebServer
+    ServerRole Database -Steps 'Deploy-MyDatabase' -ServerConnections DatabaseServer
+    ServerRole DeploymentValidation -Steps 'Validate-Deploy' -ServerConnections WebServer
 }
 
 Environment Local {

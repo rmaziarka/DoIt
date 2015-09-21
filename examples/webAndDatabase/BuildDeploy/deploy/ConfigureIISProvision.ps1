@@ -22,7 +22,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 #>
 
-Configuration WebServerProvision {
+Configuration ConfigureIISProvision {
     param ($NodeName, $Environment, $Tokens)
 
     Import-DSCResource -Module xDismFeature

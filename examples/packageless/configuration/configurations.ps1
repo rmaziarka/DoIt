@@ -35,10 +35,10 @@ Configuration SimpleDscProvision {
 }
 
 
-function SimpleFunctionProvision {
+function Deploy-SimpleFunction {
     param ($NodeName, $Environment, $Tokens, $ConnectionParams)
 
-    Write-Host ("Hello from SimpleFunctionProvision. I'm running at {0}." -f `
+    Write-Host ("Hello from Deploy-SimpleFunction. I'm running at {0}." -f `
         [System.Environment]::MachineName, $ConnectionParams.NodesAsString)
 }
 

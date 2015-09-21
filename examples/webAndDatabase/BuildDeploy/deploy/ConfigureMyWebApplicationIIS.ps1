@@ -22,7 +22,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 #>
 
-Configuration MyWebApplicationIISConfig {
+Configuration ConfigureMyWebApplicationIIS {
     param ($NodeName, $Environment, $Tokens)
 
     Import-DSCResource -Module cIIS
@@ -79,19 +79,3 @@ Configuration MyWebApplicationIISConfig {
     }
 }
 
-function MyWebApplicationDeploy {
-    param ($NodeName, $Environment, $Tokens, $ConnectionParams)
-
-    $msDeployParams = @{ PackageName = 'MyWebApplication';
-                         PackageType = 'Web';
-                         Node = $NodeName;
-                         MsDeployDestinationString = $Tokens.Remoting.MsDeployDestination
-                         TokensForConfigFiles = $Tokens.WebTokens;
-                         FilesToIgnoreTokensExistence = @( 'NLog.config' );
-                         Website = $Tokens.WebConfig.WebsiteName;
-                         SkipDir = 'App_Data';
-                         Environment = $Environment
-                       }
-
-    Deploy-MsDeployPackage @msDeployParams
-}

@@ -22,54 +22,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 #>
 
-<#
-This file contains steps which will be deployed on each node defined in ServerRoles belonging to given environment.
-Configuration can be one of the following:
-   a) DSC configuration (example - WebServerProvision). It will be run on each node defined in ServerRole.
-   b) Normal powershell functions - will be run locally. This is useful for example if you want to run msdeploy without using Powershell remoting.
-#>
-
-Configuration WebServerProvision {
-    param ($NodeName, $Environment, $Tokens)
-
-    Import-DSCResource -Module xDismFeature
-
-    Node $NodeName {
-     if ($Environment -eq "Local") {
-            
-            xDismFeature IISWebServer { 
-                Name = "IIS-WebServerRole"
-            }
-
-            xDismFeature IISASPNET45 { 
-                Name = "IIS-ASPNET45"
-            }
-
-            xDismFeature IISWindowsAuthentication { 
-                Name = "IIS-WindowsAuthentication"
-            }
-        } else {
-            WindowsFeature IIS {
-                Ensure = "Present"
-                Name = "Web-Server"
-            }
-
-            WindowsFeature IISAuth {
-                Ensure = "Present"
-                Name = "Web-Windows-Auth"
-                DependsOn = "[WindowsFeature]IIS"
-            }
-                     
-            WindowsFeature IISASP { 
-              Ensure = "Present"
-              Name = "Web-Asp-Net45"
-              DependsOn = "[WindowsFeature]IIS"
-            } 
-        }
-    }
-}
-
-Configuration WebServerIISConfig {
+Configuration ConfigureIISWebApp {
     param ($NodeName, $Environment, $Tokens)
     
     Import-DSCResource -Module cIIS
@@ -118,34 +71,4 @@ Configuration WebServerIISConfig {
         }
 
     }
-}
-
-function DatabaseServerDeploy {
-    param ($NodeName, $Tokens, $Environment)
-
-    $databaseName = $Tokens.DatabaseConfig.DatabaseName
-    $connectionString = $Tokens.DatabaseConfig.DatabaseDeploymentConnectionString
-    $credential = $Tokens.Credentials.RemoteCredential
-
-    Remove-SqlDatabase -DatabaseName $databaseName -ConnectionString $connectionString
-    New-SqlDatabase -DatabaseName $databaseName -ConnectionString $connectionString
-
-    Invoke-Sql -ConnectionString $connectionString -Query "USE ${databaseName}; PRINT 'Test'"
-
-    Deploy-SqlPackage -PackageName 'sql' -ConnectionString $connectionString -Credential $credential
-}
-
-function RemotingTestPrepare {
-    param ($NodeName, $Tokens, $Environment, $ConnectionParams)
-
-    .\RemotingTest\test.ps1
-}
-
-function RemotingTestValidate {
-    param ($NodeName, $Tokens, $Environment, $ConnectionParams)
-
-    if (!(Test-Path -LiteralPath 'c:\PSCITest\RemotingTestEvidence')) {
-        throw 'Test evidence does not exist at c:\PSCITest\RemotingTestEvidence.'
-    }
-    Remove-Item -LiteralPath 'c:\PSCITest' -Force -Recurse
 }

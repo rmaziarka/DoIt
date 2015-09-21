@@ -40,12 +40,12 @@ Environment Default {
     ServerConnection TestNodePSRemotingCredSSP -BasedOn TestNodePSRemoting -Authentication CredSSP -Protocol HTTPS -CrossDomain
     ServerConnection TestNodeMSDeploy -BasedOn TestNodePSRemoting -RemotingMode WebDeployAgentService
 
-    ServerRole Web -Steps @('WebServerProvision', 'WebServerIISConfig') -ServerConnections TestNodePSRemoting
-    ServerRole Database -Steps @('DatabaseServerDeploy') -ServerConnections TestNodeDefault
+    ServerRole Web -Steps @('ConfigureIISProvision', 'ConfigureIISWebApp') -ServerConnections TestNodePSRemoting
+    ServerRole Database -Steps @('Deploy-Database') -ServerConnections TestNodeDefault
 
-    ServerRole RemotingTestPSRemoting -Steps @('RemotingTestPrepare', 'RemotingTestValidate') -RunRemotely -ServerConnections TestNodePSRemoting
-    ServerRole RemotingTestPSRemotingCredSSP -Steps @('RemotingTestPrepare', 'RemotingTestValidate') -RunRemotely -ServerConnections TestNodePSRemotingCredSSP
-    ServerRole RemotingTestMSDeploy -Steps @('RemotingTestPrepare', 'RemotingTestValidate') -RunRemotely -ServerConnections TestNodeMSDeploy
+    ServerRole RemotingTestPSRemoting -Steps @('Prepare-RemotingTest', 'Validate-RemotingTest') -RunRemotely -ServerConnections TestNodePSRemoting
+    ServerRole RemotingTestPSRemotingCredSSP -Steps @('Prepare-RemotingTest', 'Validate-RemotingTest') -RunRemotely -ServerConnections TestNodePSRemotingCredSSP
+    ServerRole RemotingTestMSDeploy -Steps @('Prepare-RemotingTest', 'Validate-RemotingTest') -RunRemotely -ServerConnections TestNodeMSDeploy
 
     StepSettings RemotingTestPrepare -RequiredPackages RemotingTest
 }
