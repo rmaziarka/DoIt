@@ -42,11 +42,7 @@ function Start-DeploymentPlanEntryLocally {
     param(
         [Parameter(Mandatory=$true)]
         [PSCustomObject]
-        $DeploymentPlanGroupedEntry,
-
-        [Parameter(Mandatory=$true)]
-        [switch]
-        $DscForce
+        $DeploymentPlanGroupedEntry
     )
 
     foreach ($configInfo in $DeploymentPlanGroupedEntry.GroupedConfigurationInfo) {
