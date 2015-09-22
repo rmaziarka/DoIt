@@ -138,7 +138,7 @@ function Start-Deployment {
     }
 
     # Clear global variables before including configuration files
-    Initialize-Deployment
+    $Global:Environments = @{}
     
     # We need to include the configuration files in this function. We can't do it in separate Import-Configuration cmdlet, due to scoping issues (see http://stackoverflow.com/questions/15187510/dot-sourcing-functions-from-file-to-global-scope-inside-of-function)... 
     foreach ($configScript in $configInfo.Files) {

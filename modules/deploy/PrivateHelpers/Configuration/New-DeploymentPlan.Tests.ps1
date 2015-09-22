@@ -53,7 +53,7 @@ Describe -Tag "PSCI.unit" "New-DeploymentPlan" {
 
 
         Context "when used with two environments and two server roles" {
-            Initialize-Deployment
+            $Global:Environments = @{}
 
             Environment Default {
                 ServerConnection WebServers -Nodes 'machine0'
@@ -146,7 +146,7 @@ Describe -Tag "PSCI.unit" "New-DeploymentPlan" {
         }
 
         Context "when used with three environments inheritance" {
-            Initialize-Deployment
+            $Global:Environments = @{}
             $cred = ConvertTo-PSCredential -User "Test" -Password "Test"
 
             Environment Default {
@@ -224,7 +224,7 @@ Describe -Tag "PSCI.unit" "New-DeploymentPlan" {
         }
 
         Context "when used with credentials" {
-            Initialize-Deployment
+            $Global:Environments = @{}
         
             Environment Default {
                 Tokens General @{
@@ -264,7 +264,7 @@ Describe -Tag "PSCI.unit" "New-DeploymentPlan" {
         }
 
         Context "when used with token replacements" {
-            Initialize-Deployment
+            $Global:Environments = @{}
 
             Environment Tests {
                 Tokens WebConfig @{
@@ -319,7 +319,7 @@ Describe -Tag "PSCI.unit" "New-DeploymentPlan" {
        }
 
         Context "when used with nodes as scriptblock" {
-            Initialize-Deployment
+            $Global:Environments = @{}
 
             Environment Test1 {
                 Tokens General @{
@@ -358,7 +358,7 @@ Describe -Tag "PSCI.unit" "New-DeploymentPlan" {
 
         Context "when used with DSC configuration" {
             try { 
-                Initialize-Deployment
+                $Global:Environments = @{}
 
                 Environment Test1 {
                     ServerRole Web -Steps 'dsc1' -ServerConnections (ServerConnection WebServers -Nodes @('node1', 'node2'))
@@ -395,7 +395,7 @@ Describe -Tag "PSCI.unit" "New-DeploymentPlan" {
 
          Context "when used with DSC configuration and WebDeploy handler" {
             try { 
-                Initialize-Deployment
+                $Global:Environments = @{}
 
                 Environment Test1 {
                     ServerRole Web -Steps 'dsc1' -ServerConnections (ServerConnection WebServers -Nodes @('node1', 'node2') -RemotingMode WebDeployHandler)
@@ -418,7 +418,7 @@ Describe -Tag "PSCI.unit" "New-DeploymentPlan" {
 
         Context "when used with StepSettings" {
             try { 
-                Initialize-Deployment
+                $Global:Environments = @{}
 
                 New-Item -Path 'package1' -ItemType Directory -Force
                 New-Item -Path 'package2' -ItemType Directory -Force

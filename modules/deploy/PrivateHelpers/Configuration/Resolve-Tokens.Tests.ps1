@@ -36,7 +36,7 @@ Describe -Tag "PSCI.unit" "Resolve-Tokens" {
         }
 
         Context "when used with server" {
-            Initialize-Deployment
+            $Global:Environments = @{}
 
             Environment Default {
                 Tokens WebConfig @{
@@ -134,7 +134,7 @@ Describe -Tag "PSCI.unit" "Resolve-Tokens" {
         }
 
         Context "with inheritance" {
-            Initialize-Deployment
+            $Global:Environments = @{}
 
             Environment Live_Perf -BasedOn Live {
                 Tokens WebConfig @{
@@ -195,7 +195,7 @@ Describe -Tag "PSCI.unit" "Resolve-Tokens" {
         }
     
         Context "when used with types other than string" {
-            Initialize-Deployment
+            $Global:Environments = @{}
 
             Environment Default {
                 Tokens WebConfig @{
@@ -219,7 +219,7 @@ Describe -Tag "PSCI.unit" "Resolve-Tokens" {
         }
 
         Context "with ciclomatic inheritance" {
-            Initialize-Deployment
+            $Global:Environments = @{}
     
             Environment Default {
                 Tokens WebConfig @{
@@ -255,7 +255,7 @@ Describe -Tag "PSCI.unit" "Resolve-Tokens" {
         }
     
         Context "with tokens substitution" {
-            Initialize-Deployment
+            $Global:Environments = @{}
 
             Environment Default {
 
@@ -282,7 +282,7 @@ Describe -Tag "PSCI.unit" "Resolve-Tokens" {
         }
 
         Context "with scriptblock as tokens value" {
-            Initialize-Deployment
+            $Global:Environments = @{}
 
             Environment Default {
 
@@ -321,7 +321,7 @@ Describe -Tag "PSCI.unit" "Resolve-Tokens" {
 
         <# TODO: this is not implemented yet
         Context "with 'double-hop' scriptblock as tokens value" {
-            Initialize-Deployment
+            $Global:Environments = @{}
 
             Environment Default {
 
@@ -357,7 +357,7 @@ Describe -Tag "PSCI.unit" "Resolve-Tokens" {
         #>
 
         Context "when used with TokensOverride" {
-            Initialize-Deployment
+            $Global:Environments = @{}
 
             Environment Default {
                 Tokens WebConfig @{
@@ -410,7 +410,7 @@ Describe -Tag "PSCI.unit" "Resolve-Tokens" {
         }
 
         Context "when used in more complex scenarios" {
-            Initialize-Deployment
+            $Global:Environments = @{}
 
             Environment Default {
                 Tokens Credentials @{
@@ -436,7 +436,7 @@ Describe -Tag "PSCI.unit" "Resolve-Tokens" {
         }
 
         Context "when used with hashtables" {
-            Initialize-Deployment
+            $Global:Environments = @{}
 
             Environment Default {
                 Tokens DestinationNodes @{

@@ -69,6 +69,20 @@ function Environment {
         $Definition
     )
 
+    if (!$Global:Environments) {
+        $Global:Environments = @{}
+    }
+    if (!$Global:Environments['Default']) {
+        $Global:Environments['Default'] = @{
+            ServerConnections = @{}
+            ServerRoles = [ordered]@{}
+            StepSettings = @{}
+            Tokens = @{}
+            TokensChildren = @{}
+            BasedOn = ''
+        }
+    }
+
     # if $Env_Name is already defined then it means that it is a 'Server' node inside of Environment node
     if ((Test-Path variable:Env_Name) -and $Env_Name) {
         $Node_Name = $Name

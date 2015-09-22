@@ -28,7 +28,7 @@ Describe -Tag "PSCI.unit" "Tokens" {
     InModuleScope PSCI.deploy {
         Context "when used with single group and environment" {
            It "should properly initialize internal structures" {
-                Initialize-Deployment
+                $Global:Environments = @{}
 
                 Environment Default {
                     Tokens WebConfig @{
@@ -51,7 +51,7 @@ Describe -Tag "PSCI.unit" "Tokens" {
 
         Context "when used with multiple groups" {
            It "should properly initialize internal structures" {
-                Initialize-Deployment
+                $Global:Environments = @{}
 
                 Environment Default {
                     Tokens WebConfig @{
@@ -87,7 +87,7 @@ Describe -Tag "PSCI.unit" "Tokens" {
 
         Context "when used with multiple environments" {
            It "should properly initialize internal structures" {
-                Initialize-Deployment
+                $Global:Environments = @{}
 
                 Environment Default {
                     Tokens WebConfig @{
@@ -123,7 +123,7 @@ Describe -Tag "PSCI.unit" "Tokens" {
 
         Context "when used with server" {
            It "should properly initialize internal structures" {
-                Initialize-Deployment
+                $Global:Environments = @{}
 
                 Environment Default {
                     Tokens WebConfig @{
@@ -160,7 +160,7 @@ Describe -Tag "PSCI.unit" "Tokens" {
     
         Context "when child environment inherits from its parent" {
            It "should properly initialize internal structures" {
-                Initialize-Deployment
+                $Global:Environments = @{}
 
                 Environment Parent {
                     Tokens WebConfig @{
@@ -186,7 +186,7 @@ Describe -Tag "PSCI.unit" "Tokens" {
 
         Context "when used with types other than string" {
            It "should properly initialize internal structures" {
-                Initialize-Deployment
+                $Global:Environments = @{}
 
                 Environment Default {
                     Tokens WebConfig @{

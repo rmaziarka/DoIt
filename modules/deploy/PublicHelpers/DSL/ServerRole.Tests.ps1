@@ -28,7 +28,7 @@ Describe -Tag "PSCI.unit" "ServerRole" {
     InModuleScope PSCI.deploy {
         Context "when used with single role and environment" {
            It "ServerRole: should properly initialize internal structures" {
-                Initialize-Deployment
+                $Global:Environments = @{}
 
                 $remotingDefaultCredential = (ConvertTo-PsCredential -User 'UserName' -Password 'Password')
 
@@ -60,7 +60,7 @@ Describe -Tag "PSCI.unit" "ServerRole" {
         }
 
         It "ServerRole: should properly initialize internal structures with -Configurations alias" {
-            Initialize-Deployment
+            $Global:Environments = @{}
 
             $remotingDefaultCredential = (ConvertTo-PsCredential -User 'UserName' -Password 'Password')
 
@@ -91,7 +91,7 @@ Describe -Tag "PSCI.unit" "ServerRole" {
 
         Context "when used with single role and environment inheritance" {
            It "ServerRole: should properly initialize internal structures" {
-                Initialize-Deployment
+                $Global:Environments = @{}
                 $cred = ConvertTo-PSCredential -User "Test" -Password "Test"
                 $cred2 = ConvertTo-PSCredential -User "Test2" -Password "Test2"
 
@@ -128,7 +128,7 @@ Describe -Tag "PSCI.unit" "ServerRole" {
             }
 
             It "ServerRole: should override with empty parameter" {
-                Initialize-Deployment
+                $Global:Environments = @{}
                 $cred = ConvertTo-PSCredential -User "Test" -Password "Test"
 
                 Environment Default {
@@ -171,7 +171,7 @@ Describe -Tag "PSCI.unit" "ServerRole" {
 
         Context "when used with multiple roles and connections" {
            It "ServerRole: should properly initialize internal structures" {
-                Initialize-Deployment
+                $Global:Environments = @{}
 
                 Environment Default {
                     ServerConnection Web1 -Nodes @('machine1') 
@@ -204,7 +204,7 @@ Describe -Tag "PSCI.unit" "ServerRole" {
 
           Context "when multiple roles defined in one environment" {
            It "ServerRole: roles order should be retained" {
-                Initialize-Deployment
+                $Global:Environments = @{}
 
                 Environment Default {
                     ServerRole Web -Steps @('config1')

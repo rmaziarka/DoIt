@@ -43,7 +43,7 @@ Describe -Tag "PSCI.unit" "ServerRole" {
         $remotingDefaultCredential = (ConvertTo-PsCredential -User 'UserName' -Password 'Password')
 
         Context "when using single role and environment" {
-            Initialize-Deployment
+            $Global:Environments = @{}
 
             Environment Local {
                 ServerConnection Web1 -Nodes @('machine1','machine2') -RemotingCredential $remotingDefaultCredential -PackageDirectory 'c:\dir'
@@ -66,7 +66,7 @@ Describe -Tag "PSCI.unit" "ServerRole" {
 
         Context "when using scriptblocks instead of actual values" {
 
-            Initialize-Deployment
+            $Global:Environments = @{}
 
             Environment Local {
                 ServerConnection Web1 -Nodes { @('machine1','machine2') } -RemotingCredential { $remotingDefaultCredential }
@@ -87,7 +87,7 @@ Describe -Tag "PSCI.unit" "ServerRole" {
         }
 
         Context "when using in-place ServerConnection" {
-            Initialize-Deployment
+            $Global:Environments = @{}
 
             Environment Local {   
                 ServerRole Web -Steps { 'TestFunc' } -ServerConnections (ServerConnection Web1 -Nodes { @('machine1','machine2') } -RemotingCredential { $remotingDefaultCredential })
@@ -108,7 +108,7 @@ Describe -Tag "PSCI.unit" "ServerRole" {
         }
 
         Context "when referencing a non-existing Configuration" {
-            Initialize-Deployment
+            $Global:Environments = @{}
 
             Environment Local {
                 ServerRole Web -Steps @('NotExisting')
@@ -127,7 +127,7 @@ Describe -Tag "PSCI.unit" "ServerRole" {
         }
 
         Context "when using a single role and environment inheritance" {
-            Initialize-Deployment
+            $Global:Environments = @{}
             $cred = ConvertTo-PSCredential -User "Test" -Password "Test"
 
             Environment Default {
@@ -163,7 +163,7 @@ Describe -Tag "PSCI.unit" "ServerRole" {
         }
 
         Context "when used with multiple roles" {
-            Initialize-Deployment
+            $Global:Environments = @{}
 
             Environment Default {
                 ServerRole Web -Steps @('TestFunc') -ServerConnections (ServerConnection machine1 -Nodes machine1)
@@ -202,7 +202,7 @@ Describe -Tag "PSCI.unit" "ServerRole" {
         }
         
         Context "when used with multiple rules and environment inheritance" {
-            Initialize-Deployment
+            $Global:Environments = @{}
             $cred = ConvertTo-PSCredential -User "Test" -Password "Test"
 
             Environment Default {
@@ -281,7 +281,7 @@ Describe -Tag "PSCI.unit" "ServerRole" {
         }
 
         Context "when used with BasedOn" {
-            Initialize-Deployment
+            $Global:Environments = @{}
 
             Environment Default {
                 ServerConnection WebServer -Nodes machine1 -RemotingMode WebDeployHandler
@@ -354,7 +354,7 @@ Describe -Tag "PSCI.unit" "ServerRole" {
         }
 
         Context "when used with invalid BasedOn" {
-            Initialize-Deployment
+            $Global:Environments = @{}
 
             Environment Default {
                 ServerConnection WebServer -Nodes machine1 -RemotingMode WebDeployHandler
@@ -375,7 +375,7 @@ Describe -Tag "PSCI.unit" "ServerRole" {
         }
 
         Context "when used with tokens" {
-            Initialize-Deployment
+            $Global:Environments = @{}
 
             Environment Default {
                 ServerConnection WebServer -Nodes { $Tokens.nodes.node } -RemotingMode WebDeployHandler
@@ -397,7 +397,7 @@ Describe -Tag "PSCI.unit" "ServerRole" {
         }
 
         Context "when used with filters" {
-            Initialize-Deployment
+            $Global:Environments = @{}
 
             Environment Default {
                 ServerConnection WebServer -Nodes @('node1', 'node2')
@@ -427,7 +427,7 @@ Describe -Tag "PSCI.unit" "ServerRole" {
         }
 
         Context "when used with StepSettings" {
-            Initialize-Deployment
+            $Global:Environments = @{}
 
             Environment Default {
                 ServerConnection WebServer -Nodes 'node1'
