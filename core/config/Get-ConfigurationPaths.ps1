@@ -36,7 +36,10 @@ function Get-ConfigurationPaths {
     - **PackagesContainDeployScripts** - $true if $PackagesPath exists and contains DeployScripts / PSCI (used internally)
 
     .PARAMETER DefaultDeployConfigurationPath
-    Default DeployConfigurationPath to use if configuration paths have not been initialized yet.
+    (internal use) Default DeployConfigurationPath to use if configuration paths have not been initialized yet.
+
+    .PARAMETER NoConfigFiles
+    (internal use) If set, configuration files will not be read. You will need to run Environment blocks and Deployment Steps yourself.
 
     .EXAMPLE
     $configPaths = Get-ConfigurationPaths
@@ -47,7 +50,11 @@ function Get-ConfigurationPaths {
     param(
         [Parameter(Mandatory=$false)]
         [string]
-        $DefaultDeployConfigurationPath
+        $DefaultDeployConfigurationPath,
+
+        [Parameter(Mandatory=$false)]
+        [switch]
+        $NoConfigFiles
     )
 
     if (!(Test-Path -LiteralPath variable:global:PSCIGlobalConfiguration)) {
@@ -56,7 +63,7 @@ function Get-ConfigurationPaths {
 
     $configPaths = $Global:PSCIGlobalConfiguration.ConfigurationPaths
     if (!$configPaths) {
-        Initialize-ConfigurationPaths -DeployConfigurationPath $DefaultDeployConfigurationPath
+        Initialize-ConfigurationPaths -DeployConfigurationPath $DefaultDeployConfigurationPath -NoConfigFiles:$NoConfigFiles
     }
     return $Global:PSCIGlobalConfiguration.ConfigurationPaths
 }

@@ -39,6 +39,9 @@ function Initialize-ConfigurationPaths {
     .PARAMETER ValidatePackagesPath
     If set, $PackagesPath will be validated for existence of folders DeployScripts and PSCI.
 
+    .PARAMETER NoConfigFiles
+    If set, configuration files will not be read. You will need to run Environment blocks and Deployment Steps yourself.
+
     .EXAMPLE
     $configPaths = Initialize-ConfigurationPaths -ProjectRootPath $ProjectRootPath -PackagesPath $PackagesPath -DeployConfigurationPath $DeployConfigurationPath
     #>
@@ -60,7 +63,11 @@ function Initialize-ConfigurationPaths {
 
         [Parameter(Mandatory=$false)]
         [switch]
-        $ValidatePackagesPath
+        $ValidatePackagesPath,
+
+        [Parameter(Mandatory=$false)]
+        [switch]
+        $NoConfigFiles
     )
 
     $configPaths = [PSCustomObject]@{
@@ -72,7 +79,7 @@ function Initialize-ConfigurationPaths {
     }
 
     # DeployScriptsPath - validate deploy.ps1 exists in current directory
-    if (!(Test-Path -LiteralPath 'deploy.ps1')) {
+    if (!$NoConfigFiles -and !(Test-Path -LiteralPath 'deploy.ps1')) {
         Write-Log -Warn "deploy.ps1 has not been found in current directory '($((Get-Location).Path))'"
     }
 
@@ -123,32 +130,34 @@ function Initialize-ConfigurationPaths {
     }
 
     # DeployConfigurationPath - if not empty validate it exists, if empty try convention
-    if ($DeployConfigurationPath) {
-        if (![System.IO.Path]::IsPathRooted($DeployConfigurationPath)) {
-            $pathsToCheck = Join-Path -Path ($configPaths.ProjectRootPath) -ChildPath $DeployConfigurationPath
+    if (!$NoConfigFiles) { 
+        if ($DeployConfigurationPath) {
+            if (![System.IO.Path]::IsPathRooted($DeployConfigurationPath)) {
+                $pathsToCheck = Join-Path -Path ($configPaths.ProjectRootPath) -ChildPath $DeployConfigurationPath
+            } else {
+                $pathsToCheck = $DeployConfigurationPath
+            }
         } else {
-            $pathsToCheck = $DeployConfigurationPath
+            $pathsToCheck = @((Join-Path -Path $configPaths.DeployScriptsPath -ChildPath 'deploy'), `
+                              (Join-Path -Path $configPaths.ProjectRootPath -ChildPath 'deploy'), `
+                              (Join-Path -Path $configPaths.DeployScriptsPath -ChildPath 'configuration'), `
+                              (Join-Path -Path $configPaths.ProjectRootPath -ChildPath 'configuration'), `
+                              (Join-Path -Path $configPaths.PackagesPath -ChildPath 'DeployScripts\deploy'), `
+                              (Join-Path -Path $configPaths.ProjectRootPath -ChildPath 'DeployScripts\deploy'), `
+                              (Join-Path -Path $configPaths.PackagesPath -ChildPath 'DeployScripts\configuration'), `
+                              (Join-Path -Path $configPaths.ProjectRootPath -ChildPath 'DeployScripts\configuration')                          
+                            )
         }
-    } else {
-        $pathsToCheck = @((Join-Path -Path $configPaths.DeployScriptsPath -ChildPath 'deploy'), `
-                          (Join-Path -Path $configPaths.ProjectRootPath -ChildPath 'deploy'), `
-                          (Join-Path -Path $configPaths.DeployScriptsPath -ChildPath 'configuration'), `
-                          (Join-Path -Path $configPaths.ProjectRootPath -ChildPath 'configuration'), `
-                          (Join-Path -Path $configPaths.PackagesPath -ChildPath 'DeployScripts\deploy'), `
-                          (Join-Path -Path $configPaths.ProjectRootPath -ChildPath 'DeployScripts\deploy'), `
-                          (Join-Path -Path $configPaths.PackagesPath -ChildPath 'DeployScripts\configuration'), `
-                          (Join-Path -Path $configPaths.ProjectRootPath -ChildPath 'DeployScripts\configuration')                          
-                        )
-    }
 
-    foreach ($path in $pathsToCheck) {
-        if ((Test-Path -Path "$path\*.ps*1")) {
-            $configPaths.DeployConfigurationPath = (Resolve-Path -LiteralPath $path).ProviderPath
-            break
+        foreach ($path in $pathsToCheck) {
+            if ((Test-Path -Path "$path\*.ps*1")) {
+                $configPaths.DeployConfigurationPath = (Resolve-Path -LiteralPath $path).ProviderPath
+                break
+            }
         }
-    }
-    if (!$configPaths.DeployConfigurationPath) {
-        Write-Log -Warn "Cannot find configuration scripts - tried following locations: $($pathsToCheck -join ', ')."
+        if (!$configPaths.DeployConfigurationPath) {
+            Write-Log -Warn "Cannot find configuration scripts - tried following locations: $($pathsToCheck -join ', ')."
+        }
     }
 
     $Global:PSCIGlobalConfiguration.ConfigurationPaths = $configPaths

@@ -73,6 +73,9 @@ function Start-Deployment {
     Path to the directory where configuration files reside, relative to current directory. 
     Can be used for ad-hoc deployments (without Initialize-ConfigurationPaths invocation).
 
+    .PARAMETER NoConfigFiles
+    If specified, configuration files will not be read. You will need to run Environment blocks and Deployment Steps yourself.
+
     .EXAMPLE
     Start-Deployment -Environment $Environment -TokensOverride $TokensOverride
 
@@ -116,38 +119,44 @@ function Start-Deployment {
 
         [Parameter(Mandatory=$false)]
         [string]
-        $DeployConfigurationPath
+        $DeployConfigurationPath,
+
+        [Parameter(Mandatory=$false)]
+        [switch]
+        $NoConfigFiles
      )  
 
     if (!$PSCIGlobalConfiguration.RemotingMode) {
         Write-ProgressExternal -Message ("Starting deployment to env {0}" -f ($Environment -join ',')) -ErrorMessage "Deployment init error"
     }
-    $configPaths = Get-ConfigurationPaths -DefaultDeployConfigurationPath $DeployConfigurationPath
-    if (!$configPaths.DeployConfigurationPath) {
-        throw "No `$DeployConfigurationPath defined. Please pass it to Start-Deployment function or invoke Initialize-ConfigurationPaths function."
+    $configPaths = Get-ConfigurationPaths -DefaultDeployConfigurationPath $DeployConfigurationPath -NoConfigFiles:$NoConfigFiles
+    if (!$configPaths.DeployConfigurationPath -and !$NoConfigFiles) {
+        throw "No `$DeployConfigurationPath defined. Please pass it to Start-Deployment function, invoke Initialize-ConfigurationPaths function or add switch -NoConfigFiles."
     }
 
     $packagesPath = $configPaths.PackagesPath
     
-    Write-Log -Info "[START] PARSE CONFIG FILES - environment(s) '$($Environment -join ',')'" -Emphasize
-    $configInfo = Read-ConfigurationFiles
+    if (!$NoConfigFiles) { 
+        Write-Log -Info "[START] PARSE CONFIG FILES - environment(s) '$($Environment -join ',')'" -Emphasize
+        $configInfo = Read-ConfigurationFiles
 
-    # need to install DSC resources locally in order to be able to parse configurations
-    if ($AutoInstallDscResources) {
-        Install-DscResources -ModuleNames $configInfo.RequiredDSCModules
-    }
+        # need to install DSC resources locally in order to be able to parse configurations
+        if ($AutoInstallDscResources) {
+            Install-DscResources -ModuleNames $configInfo.RequiredDSCModules
+        }
 
-    # Clear global variables before including configuration files
-    $Global:Environments = @{}
+        # Clear global variables before including configuration files
+        $Global:Environments = @{}
     
-    # We need to include the configuration files in this function. We can't do it in separate Import-Configuration cmdlet, due to scoping issues (see http://stackoverflow.com/questions/15187510/dot-sourcing-functions-from-file-to-global-scope-inside-of-function)... 
-    foreach ($configScript in $configInfo.Files) {
-        Write-Log -Info "Including file $configScript"
-        . $configScript 
+        # We need to include the configuration files in this function. We can't do it in separate Import-Configuration cmdlet, due to scoping issues (see http://stackoverflow.com/questions/15187510/dot-sourcing-functions-from-file-to-global-scope-inside-of-function)... 
+        foreach ($configScript in $configInfo.Files) {
+            Write-Log -Info "Including file $configScript"
+            . $configScript 
+        }
+        # here $Global:Environments should be populated
+        Write-Log -Info "[END] PARSE CONFIG FILES" -Emphasize
     }
-    # here $Global:Environments should be populated
     
-    Write-Log -Info "[END] PARSE CONFIG FILES" -Emphasize
     Write-Log -Info "[START] BUILD DEPLOYMENT PLAN" -Emphasize
 
     $dscOutputPath = Join-Path -Path $packagesPath -ChildPath "_DscOutput"
