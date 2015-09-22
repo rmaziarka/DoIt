@@ -111,7 +111,7 @@ function New-ConnectionParameters {
         [Parameter(Mandatory=$false)]
         [string]
         [ValidateSet($null, 'HTTP', 'HTTPS')]
-        $Protocol = 'HTTP',
+        $Protocol,
 
         [Parameter(Mandatory=$false)]
         [switch]
@@ -173,13 +173,23 @@ function New-ConnectionParameters {
                 # default port
                 $Port = '8172'
             }
-            $url = "https://{0}:{1}/msdeploy.axd" -f $Nodes[0], $Port
+            if ($Protocol -eq 'HTTP') {
+                $urlProtocol = 'http'
+            } else {
+                $urlProtocol = 'https'
+            }
+            $url = "{0}://{1}:{2}/msdeploy.axd" -f $urlProtocol, $Nodes[0], $Port
         } else {
             if (!$Port) {
                 # default port
                 $Port = '80'
             }
-            $url = "http://{0}:{1}/MsDeployAgentService" -f $Nodes[0], $Port
+            if ($Protocol -eq 'HTTPS') {
+                $urlProtocol = 'https'
+            } else {
+                $urlProtocol = 'http'
+            }
+            $url = "{0}://{1}:{2}/MsDeployAgentService" -f $urlProtocol, $Nodes[0], $Port
         }
         $msDeployDestinationStringParams = @{ Url = $url; Offline = $false }
 

@@ -161,7 +161,7 @@ Function Write-Log {
             } else {
                 $remotingFlag = ''
             }
-            $outputHeader = "[$severityChar] $timestamp ${remotingFlag}[$currentHostname/${currentUsername}]: ($callerInfo)`t"
+            $outputHeader = "[$severityChar] $timestamp ${remotingFlag}[$currentHostname/${currentUsername}]: ($callerInfo) "
         }
         if ($Critical) {
             throw $Message

@@ -40,8 +40,7 @@ Environment Default {
         MSDeployDestination = { New-MsDeployDestinationString `
 							-Url ('http://{0}/MsDeployAgentService' -f $Node) `
 							-UserName $Tokens.Remoting.UserName `
-                            -Password $Tokens.Remoting.Password `
-							-AuthType 'NTLM' }
+                            -Password $Tokens.Remoting.Password }
     }
 
     # IIS configuration

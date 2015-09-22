@@ -75,7 +75,7 @@ function New-MsDeployDestinationString {
         $Password,
 
         [Parameter(Mandatory=$false)]
-        [ValidateSet("NTLM","Basic","")]
+        [ValidateSet('NTLM','Basic','')]
         [string] 
         $AuthType,
 
