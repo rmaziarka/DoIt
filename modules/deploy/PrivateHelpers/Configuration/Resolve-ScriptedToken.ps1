@@ -75,7 +75,7 @@ function Resolve-ScriptedToken {
 
     $i = 0
     while ($ScriptedToken -is [ScriptBlock] -and $i -lt 20) {
-        $ScriptedToken = $ScriptedToken.InvokeWithContext($null, $contextVariables, $null)
+        $ScriptedToken = ($ScriptedToken.InvokeWithContext($null, $contextVariables, $null))[0]
         $i++
     }
     if ($i -eq 20) {
