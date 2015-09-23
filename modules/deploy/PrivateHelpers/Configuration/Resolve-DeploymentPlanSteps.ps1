@@ -59,23 +59,18 @@ function Resolve-DeploymentPlanSteps {
     )
 
     $filteredDeploymentPlan = New-Object -TypeName System.Collections.ArrayList
-    $stepCommandMapping = @{}
 
     # get command for each entry and filter by DeployType
     foreach ($entry in $DeploymentPlan) {
         $stepName = $entry.StepName
-        $command = $stepCommandMapping[$stepName]
+        $command = Get-Command -Name $stepName -ErrorAction SilentlyContinue
         if (!$command) {
-            $command = Get-Command -Name $stepName -ErrorAction SilentlyContinue
-            if (!$command) {
-                throw "Invalid Step reference ('$stepName') - Environment '$($entry.Environment)' / ServerRole '$($entry.ServerRole)'. Please ensure there is a DSC configuration or Powershell function named '$stepName'."
-            }
-            if ($DeployType -eq 'Functions' -and $command.CommandType -eq 'Configuration') {
-                continue
-            } elseif ($DeployType -eq 'DSC' -and $command.CommandType -ne 'Configuration') {
-                continue
-            }
-            $stepCommandMapping[$entry.StepName] = $command
+            throw "Invalid Step reference ('$stepName') - Environment '$($entry.Environment)' / ServerRole '$($entry.ServerRole)'. Please ensure there is a DSC configuration or Powershell function named '$stepName'."
+        }
+        if ($DeployType -eq 'Functions' -and $command.CommandType -eq 'Configuration') {
+            continue
+        } elseif ($DeployType -eq 'DSC' -and $command.CommandType -ne 'Configuration') {
+            continue
         }
         $entry.StepType = $command.CommandType
         [void]($filteredDeploymentPlan.Add($entry))
