@@ -49,9 +49,6 @@ function New-DeploymentPlanEntry {
     .PARAMETER Step
     Step object containing information about DSC configuration or function to be added to the deployment plan (created in Resolve-Steps).
 
-    .PARAMETER DscOutputPath
-    Path where the .MOF files will be generated.
-
     .PARAMETER ResolvedTokens
     Resolved tokens.
 
@@ -95,10 +92,6 @@ function New-DeploymentPlanEntry {
         $Step,
 
         [Parameter(Mandatory=$true)]
-        [string]
-        $DscOutputPath,
-
-        [Parameter(Mandatory=$true)]
         [hashtable]
         $ResolvedTokens,
 
@@ -107,8 +100,6 @@ function New-DeploymentPlanEntry {
         $TokensOverride
         
     )
-
-    $mofDir = ''
 
     # note that only parameters that are of type [object] in ServerRole can be scriptblock (otherwise scriptblock will be converted to string)
     $connectionParams = @{
@@ -135,26 +126,6 @@ function New-DeploymentPlanEntry {
     }
 
     $isLocalRun = $runOnNode -ieq $Node
-
-    if ($Step.Type -eq 'Configuration') {        
-        if ($isLocalRun) {
-            $dscNode = 'localhost'
-        } else {
-            $dscNode = $Node
-        }
-
-        if (!$runOnNode -and $ServerConnection.RemotingMode -and $ServerConnection.RemotingMode -ne 'PSRemoting') {
-            throw "Cannot deploy DSC configurations from localhost when RemotingMode is not PSRemoting. Please either change it to PSRemoting or add '-RunRemotely' switch to the ServerRole or StepSettings (Environment '$Environment' / ServerRole '$($ServerRole.Name)' / Step '$($Step.Name)')."
-        }
-    
-        $mofDir = Invoke-DeploymentStep -StepName $Step.Name -OutputPath $DscOutputPath -Node $dscNode -Environment $Environment -ResolvedTokens $ResolvedTokens -ConnectionParams $connectionParamsObj
-        if (!(Get-ChildItem -Path $mofDir -Filter "*.mof")) {
-            Write-Log -Warn "Mof file has not been generated for step named '$($Step.Name)' (Environment '$Environment' / ServerRole '$($ServerRole.Name)'). Please ensure your configuration definition is correct."
-            continue
-        }
-        $mofDir = Resolve-Path -LiteralPath $mofDir
-
-    }
 
     $packageDirectory = (Resolve-ScriptedToken -ScriptedToken $ServerConnection.PackageDirectory -ResolvedTokens $ResolvedTokens -Environment $Environment -Node $Node)
     if (!$packageDirectory) {
@@ -183,10 +154,10 @@ function New-DeploymentPlanEntry {
         Environment = $Environment;
         ServerRole = $ServerRole.Name;
         StepName = $Step.Name
-        StepType = $Step.Type
-        ConfigurationMofDir = $mofDir
+        StepType = $null # will be updated by Resolve-DeploymentPlanSteps
+        ConfigurationMofDir = $null # will be updated by Resolve-DeploymentPlanSteps
         Tokens = $ResolvedTokens; 
-        TokensOverride = $TokensOverride;
+        TokensOverride = $TokensOverride; # used only for passing parameters to deploy.ps1 in remote runs
         RequiredPackages = $requiredPackages
         RebootHandlingMode = $rebootHandlingMode
     }

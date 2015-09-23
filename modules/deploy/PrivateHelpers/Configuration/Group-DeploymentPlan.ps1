@@ -59,7 +59,7 @@ function Group-DeploymentPlan {
 
     )
 
-    $result = New-Object System.Collections.ArrayList
+    $result = New-Object -TypeName System.Collections.ArrayList
 
     $currentEntryNo = 0
     foreach ($entry in $DeploymentPlan) {

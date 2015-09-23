@@ -105,27 +105,12 @@ function Resolve-Steps {
 
     $result = @()
     foreach ($stepName in $Steps) {
-        $cmd = Get-Command -Name $stepName -ErrorAction SilentlyContinue
-        if (!$cmd) {
-            throw "Invalid Step reference ('$stepName') - Environment '$Environment' / ServerRole '$($ServerRole.Name)'. Please ensure there is a DSC configuration or Powershell function named '$stepName'."
-        }
-        if ($cmd.CommandType -eq 'Configuration') {
-            if ($DeployType -eq 'Functions') {
-                continue
-            }
-        } elseif ($cmd.CommandType -eq 'Function') {
-            if ($DeployType -eq 'DSC') {
-                continue
-            }
-        } else {
-            throw "Command '$stepName' is of unrecognized type ('$($cmd.CommandType)') - neither 'Configuration' nor 'Function'."
-        }
+        
 
         $stepSettings = $StepsSettings[$stepName]
 
         $stepObject = [PSCustomObject]@{
             Name = $stepName
-            Type = $cmd.CommandType
             RequiredPackages = if ($stepSettings -and $stepSettings.ContainsKey('RequiredPackages')) { $stepSettings.RequiredPackages } else { $ServerRole.RequiredPackages }
             RunRemotely = if ($stepSettings -and $stepSettings.ContainsKey('RunRemotely')) { $stepSettings.RunRemotely } else { $ServerRole.RunRemotely }
             RunOn = if ($stepSettings -and $stepSettings.ContainsKey('RunOn')) { $stepSettings.RunOn } else { $ServerRole.RunOn }
