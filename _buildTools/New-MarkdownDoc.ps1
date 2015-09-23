@@ -94,6 +94,7 @@ function New-MarkdownDoc {
         if (!$help -or $help -is [string]) {
             throw "Function '$funcName' does not have help."
         }
+        $cmd = Get-Command -Name $funcName
         
         $outputString = New-Object -TypeName System.Text.StringBuilder
         [void]($outputIndexString.Append("* [[$funcName]]"))
@@ -120,9 +121,27 @@ function New-MarkdownDoc {
         if ($help.Parameters) {
             [void]($outputString.Append("### Parameters`r`n"))
             foreach ($item in $help.Parameters.Parameter) {
-                [void]($outputString.Append("#### -$($item.Name)\<$($item.Type.Name)\>`r`n"))
-                [void]($outputString.Append($($item.Description.Text)))
+                [void]($outputString.Append("#### -$($item.Name)\<$($item.Type.Name)\>"))
+
+                if ($item.defaultValue) {
+                    [void]($outputString.Append(" (default: $($item.defaultValue))"))
+                }
                 [void]($outputString.Append("`r`n"))
+                if ($item.Description.Text) { 
+                    $escapedDescription = Escape-Markdown -String $item.Description.Text
+                    [void]($outputString.Append($escapedDescription))
+                    [void]($outputString.Append("`r`n"))
+                }
+                [void]($outputString.Append("`r`n"))
+
+                $validateSetAttributes = $cmd.Parameters.$($item.Name).Attributes | Where-Object { $_.TypeId.FullName -eq 'System.Management.Automation.ValidateSetAttribute' }
+                if ($validateSetAttributes) {
+                    $validateSetStr = ($validateSetAttributes.ValidValues -replace '^$', '\<empty\>') -join ', '
+                    if ($validateSetStr.StartsWith(',')) {
+                        $validateSetStr = '$null' + $validateSetStr
+                    }
+                    [void]($outputString.Append("- **Valid values**: $validateSetStr`r`n"))
+                }
 
                 foreach ($arrParamProperty in $arrParameterProperties){
                     if ($item.$arrParamProperty){
@@ -165,4 +184,28 @@ function New-MarkdownDoc {
 
     $outputIndexPath = Join-Path -Path $outputBasePath -ChildPath "$ModuleName.md"
     $outputIndexString.ToString() | Out-File -FilePath $OutputIndexPath
+}
+
+function Escape-Markdown {
+    <#
+    .SYNOPSIS
+    Escapes special characters for markdown.
+
+    .PARAMETER String
+    String to escape.
+
+    .EXAMPLE
+    Escape-Markdown -String '<test>'
+    #>
+
+    [CmdletBinding()]
+    [OutputType([void])]
+    param(
+        [Parameter(Mandatory=$true)]
+        [string]
+        $String
+    )
+
+    return $String -replace '([^\\])<', '$1\<' `
+                   -replace '([^\\])>', '$1\>'
 }

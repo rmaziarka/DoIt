@@ -75,7 +75,7 @@ function New-MsBuildOptions {
 
         [Parameter(Mandatory=$false)]
         [string]
-        $Configuration = "Release",
+        $Configuration = 'Release',
 
         [Parameter(Mandatory=$false)]
         [hashtable]
@@ -87,17 +87,17 @@ function New-MsBuildOptions {
 
         [Parameter(Mandatory=$false)]
         [string]
-        [ValidateSet("2015","2013","2012","2010","2008","")]
+        [ValidateSet('2015', '2013', '2012', '2010', '2008', '')]
         $VisualStudioVersion,
 
         [Parameter(Mandatory=$false)]
         [string]
-        [ValidateSet("14.0","12.0","4.0","3.5","2.0","")]
+        [ValidateSet('14.0', '12.0', '4.0', '3.5', '2.0', '')]
         $MsBuildVersion,
 
         [Parameter(Mandatory=$false)]
         [string]
-        [ValidateSet("x86","x64","")]
+        [ValidateSet('x86', 'x64', '')]
         $MsBuildForceArchitecture,
 
         [Parameter(Mandatory=$false)]
