@@ -85,20 +85,25 @@ function Update-TokensInStream {
         while ($streamReader.Peek() -gt 0) {
             $line = $streamReader.ReadLine()
             $totalLen += ($line.Length)
-            if ($line -match $TokenRegex) {
-                if ($matches.Count -lt 2) {
-                    throw "Invalid TokenRegex: '$TokenRegex' - there must be at least one capture group that matches the name of the token"
-                }
-                $tokenName = $matches[1]
-                if (!$Tokens.ContainsKey($tokenName)) {
-                    if ($ValidateTokensExistence) {
-                        throw ("Token '{0}' ({1}) is missing from configuration files." -f $tokenName, $InputStreamDescription)
+            $allMatches = Select-String -InputObject $line -AllMatches $TokenRegex | Foreach-Object { $_.Matches }
+            if ($allMatches) {
+                foreach ($tokenMatch in $allMatches) { 
+                    if ($tokenMatch.Groups.Count -lt 2) {
+                        throw "Invalid TokenRegex: '$TokenRegex' - there must be at least one capture group that matches the name of the token"
                     }
-                } else {
-                    $newValue = $Tokens[$tokenName]
-                    #Write-Log -_debug "Replacing token '$tokenName' -> '$newValue'"
-                    $line = $line.Replace($matches[0], $newValue)
-                    $numChanged++
+                
+                    $stringToReplace = $tokenMatch.Groups[0].Value
+                    $tokenName = $tokenMatch.Groups[1].Value
+                    if (!$Tokens.ContainsKey($tokenName)) {
+                        if ($ValidateTokensExistence) {
+                            throw ("Token '{0}' ({1}) is missing from configuration files." -f $tokenName, $InputStreamDescription)
+                        }
+                    } else {
+                        $newValue = $Tokens[$tokenName]
+                        #Write-Log -_debug "Replacing token '$tokenName' -> '$newValue'"
+                        $line = $line.Replace($stringToReplace, $newValue)
+                        $numChanged++
+                    }
                 }
             }
             $memStream.WriteLine($line)
