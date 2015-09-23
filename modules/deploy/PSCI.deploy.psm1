@@ -25,7 +25,7 @@ SOFTWARE.
 
 $curDir = Split-Path -Parent $MyInvocation.MyCommand.Definition
 $publicFunctions = @()
-Get-ChildItem -Recurse $curDir -Include *.ps1 | Where-Object { $_ -notmatch '\.Tests.ps1' -and $_ -notmatch '\\Configurations\\' -and $_ -notmatch '\\dsc\\'} | Foreach-Object {
+Get-ChildItem -Recurse $curDir -Include *.ps1 | Where-Object { $_ -notmatch '\.Tests.ps1' -and $_ -notmatch '\\BuiltinSteps\\' -and $_ -notmatch '\\dsc\\'} | Foreach-Object {
     . $_.FullName
     if ($_.FullName -match 'PublicHelpers|DeployPackage') {
         $publicFunctions += ($_.Name -replace '.ps1', '')

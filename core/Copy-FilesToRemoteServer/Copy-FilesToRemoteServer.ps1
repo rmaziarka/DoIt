@@ -63,7 +63,11 @@ function Copy-FilesToRemoteServer {
 
     .EXAMPLE            
         PS C:\> Copy-FilesToRemoteServer c:\temp\test.exe c:\temp\ (New-ConnectionParameters -Nodes server)
+
+    .EXAMPLE
         PS C:\> Copy-FilesToRemoteServer c:\temp\*.* c:\temp\ (New-ConnectionParameters -Nodes @('server1', 'server2'))
+
+    .EXAMPLE
         PS C:\> Copy-FilesToRemoteServer c:\temp\ c:\temp\ (New-ConnectionParameters -Nodes server1)
 
     #>
