@@ -132,7 +132,7 @@ function New-MarkdownDoc {
                     [void]($outputString.Append($escapedDescription))
                     [void]($outputString.Append("`r`n"))
                 }
-                [void]($outputString.Append("`r`n"))
+                [void]($outputString.Append("`r`n<!---->`r`n"))
 
                 $validateSetAttributes = $cmd.Parameters.$($item.Name).Attributes | Where-Object { $_.TypeId.FullName -eq 'System.Management.Automation.ValidateSetAttribute' }
                 if ($validateSetAttributes) {
