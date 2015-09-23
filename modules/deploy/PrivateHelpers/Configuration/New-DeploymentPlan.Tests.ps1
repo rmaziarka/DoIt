@@ -69,7 +69,8 @@ Describe -Tag "PSCI.unit" "New-DeploymentPlan" {
             }
 
             It "should properly initialize internal structures for ServerRolesFilter = WebServer" {
-                $deploymentPlan = New-DeploymentPlan -AllEnvironments $Global:Environments -Environment 'Local' -DscOutputPath 'dscOutput' -ServerRolesFilter 'Web'
+                $deploymentPlan = New-DeploymentPlan -AllEnvironments $Global:Environments -Environment 'Local' -ServerRolesFilter 'Web'
+                $deploymentPlan = Resolve-DeploymentPlanSteps -DeploymentPlan $deploymentPlan
 
                 $deploymentPlan.Count | Should Be 4
 
@@ -118,7 +119,7 @@ Describe -Tag "PSCI.unit" "New-DeploymentPlan" {
             }
 
             It "should properly initialize internal structures for ServerRolesFilter = empty" {
-                $deploymentPlan = New-DeploymentPlan -AllEnvironments $Global:Environments -Environment 'Local' -DscOutputPath 'dscOutput'
+                $deploymentPlan = New-DeploymentPlan -AllEnvironments $Global:Environments -Environment 'Local'
 
                 $deploymentPlan.Count | Should Be 5
 
@@ -169,7 +170,7 @@ Describe -Tag "PSCI.unit" "New-DeploymentPlan" {
             }
 
             It "should properly plan Web deployment" {
-                $deploymentPlan = New-DeploymentPlan -AllEnvironments $Global:Environments -Environment 'Tests' -DscOutputPath 'dscOutput' -ServerRolesFilter 'Web'
+                $deploymentPlan = New-DeploymentPlan -AllEnvironments $Global:Environments -Environment 'Tests' -ServerRolesFilter 'Web'
 
                 $deploymentPlan.Count | Should Be 2
 
@@ -193,7 +194,7 @@ Describe -Tag "PSCI.unit" "New-DeploymentPlan" {
             }
 
             It "should properly plan Database deployment" {
-                $deploymentPlan = New-DeploymentPlan -AllEnvironments $Global:Environments -Environment 'Tests' -DscOutputPath 'dscOutput' -ServerRolesFilter 'Database'
+                $deploymentPlan = New-DeploymentPlan -AllEnvironments $Global:Environments -Environment 'Tests' -ServerRolesFilter 'Database'
 
                 $deploymentPlan.Count | Should Be 1
 
@@ -205,7 +206,7 @@ Describe -Tag "PSCI.unit" "New-DeploymentPlan" {
             }
 
             It "should properly plan SSAS deployment" {
-                $deploymentPlan = New-DeploymentPlan -AllEnvironments $Global:Environments -Environment 'Tests' -DscOutputPath 'dscOutput' -ServerRolesFilter 'SSAS'
+                $deploymentPlan = New-DeploymentPlan -AllEnvironments $Global:Environments -Environment 'Tests' -ServerRolesFilter 'SSAS'
 
                 $deploymentPlan.Count | Should Be 1
 
@@ -217,7 +218,7 @@ Describe -Tag "PSCI.unit" "New-DeploymentPlan" {
             }
  
             It "should properly plan SSRS deployment" {
-                $deploymentPlan = New-DeploymentPlan -AllEnvironments $Global:Environments -Environment 'Tests' -DscOutputPath 'dscOutput' -ServerRolesFilter 'SSRS'
+                $deploymentPlan = New-DeploymentPlan -AllEnvironments $Global:Environments -Environment 'Tests' -ServerRolesFilter 'SSRS'
 
                 $deploymentPlan.Count | Should Be 0
             }
@@ -245,7 +246,7 @@ Describe -Tag "PSCI.unit" "New-DeploymentPlan" {
                 ServerRole WebConfig -Steps @('config1') -RunRemotely -ServerConnections WebServers
             }
 
-            $deploymentPlan = New-DeploymentPlan -AllEnvironments $Global:Environments -Environment 'Tests' -DscOutputPath 'dscOutput' -ServerRolesFilter 'WebConfig'
+            $deploymentPlan = New-DeploymentPlan -AllEnvironments $Global:Environments -Environment 'Tests' -ServerRolesFilter 'WebConfig'
 
             It "should properly assign credentials" {
                 $deploymentPlan.Count | Should Be 1
@@ -289,7 +290,7 @@ Describe -Tag "PSCI.unit" "New-DeploymentPlan" {
                 ServerRole Web -Steps @('config1') -RunRemotely -ServerConnections WebServers
             }
 
-            $deploymentPlan = New-DeploymentPlan -AllEnvironments $Global:Environments -Environment 'Tests' -DscOutputPath 'dscOutput'
+            $deploymentPlan = New-DeploymentPlan -AllEnvironments $Global:Environments -Environment 'Tests'
 
             It "should properly plan deployment" {
                 $deploymentPlan.Count | Should Be 2
@@ -337,7 +338,7 @@ Describe -Tag "PSCI.unit" "New-DeploymentPlan" {
                 ServerRole Web -Steps @('config1') -ServerConnections (ServerConnection WebServers -Nodes { $Tokens.General.AllNodes })
             }
 
-            $deploymentPlan = New-DeploymentPlan -AllEnvironments $Global:Environments -Environment 'Test1' -DscOutputPath 'dscOutput'
+            $deploymentPlan = New-DeploymentPlan -AllEnvironments $Global:Environments -Environment 'Test1'
 
             It "should properly plan deployment" {
                 $deploymentPlan.Count | Should Be 2
@@ -364,15 +365,16 @@ Describe -Tag "PSCI.unit" "New-DeploymentPlan" {
                     ServerRole Web -Steps 'dsc1' -ServerConnections (ServerConnection WebServers -Nodes @('node1', 'node2'))
                 }
 
-                $deploymentPlan = New-DeploymentPlan -AllEnvironments $Global:Environments -Environment 'Test1' -DscOutputPath 'dscOutput'
+                $deploymentPlan = New-DeploymentPlan -AllEnvironments $Global:Environments -Environment 'Test1'
+                $deploymentPlan = Resolve-DeploymentPlanSteps -DeploymentPlan $deploymentPlan
 
                 It "should properly plan deployment" {
                     $deploymentPlan.Count | Should Be 2
 
                     $deploymentPlan[0].StepName | Should Be 'dsc1'
                     $deploymentPlan[0].StepType | Should Be 'Configuration'
-                    Test-Path -LiteralPath 'dscOutput\node1\dsc1\node1.mof' -PathType Leaf | Should Be $true
-                    $deploymentPlan[0].ConfigurationMofDir | Should Be (Resolve-Path -LiteralPath 'dscOutput\node1\dsc1').Path
+                    Test-Path -LiteralPath '_dscOutput\node1\dsc1\node1.mof' -PathType Leaf | Should Be $true
+                    $deploymentPlan[0].ConfigurationMofDir | Should Be (Resolve-Path -LiteralPath '_dscOutput\node1\dsc1').Path
                     
                     $deploymentPlan[0].ConnectionParams | Should Not Be $null
                     $deploymentPlan[0].ConnectionParams.Nodes[0] | Should Be 'node1'
@@ -381,15 +383,35 @@ Describe -Tag "PSCI.unit" "New-DeploymentPlan" {
 
                     $deploymentPlan[1].StepName | Should Be 'dsc1'
                     $deploymentPlan[1].StepType | Should Be 'Configuration'
-                    Test-Path -LiteralPath 'dscOutput\node2\dsc1\node2.mof' -PathType Leaf | Should Be $true
-                    $deploymentPlan[1].ConfigurationMofDir | Should Be (Resolve-Path -LiteralPath 'dscOutput\node2\dsc1').Path
+                    Test-Path -LiteralPath '_dscOutput\node2\dsc1\node2.mof' -PathType Leaf | Should Be $true
+                    $deploymentPlan[1].ConfigurationMofDir | Should Be (Resolve-Path -LiteralPath '_dscOutput\node2\dsc1').Path
                     $deploymentPlan[1].ConnectionParams | Should Not Be $null
                     $deploymentPlan[1].ConnectionParams.Nodes[0] | Should Be 'node2'
                     $deploymentPlan[1].RunOnConnectionParams | Should Be $null
                     $deploymentPlan[1].IsLocalRun | Should Be $false
                 }
             } finally {
-                Remove-Item -LiteralPath 'dscOutput' -Force -Recurse -ErrorAction SilentlyContinue
+                Remove-Item -LiteralPath '_dscOutput' -Force -Recurse -ErrorAction SilentlyContinue
+            }
+        }
+
+        Context "when referencing a non-existing Configuration" {
+            $Global:Environments = @{}
+
+            Environment Local {
+                ServerRole Web -Steps @('NotExisting') -ServerConnections (ServerConnection WebServers -Nodes @('node1', 'node2'))
+            }
+
+            $fail = $false
+            try  {
+                $deploymentPlan = New-DeploymentPlan -AllEnvironments $Global:Environments -Environment 'Local'
+                $deploymentPlan = Resolve-DeploymentPlanSteps -DeploymentPlan $deploymentPlan
+            } catch { 
+                $fail = $true
+            }
+
+            It "should fail" {
+                $fail | Should Be $true
             }
         }
 
@@ -403,7 +425,8 @@ Describe -Tag "PSCI.unit" "New-DeploymentPlan" {
                 
                 $fail = $false
                 try { 
-                    $deploymentPlan = New-DeploymentPlan -AllEnvironments $Global:Environments -Environment 'Test1' -DscOutputPath 'dscOutput'
+                    $deploymentPlan = New-DeploymentPlan -AllEnvironments $Global:Environments -Environment 'Test1'
+                    $deploymentPlan = Resolve-DeploymentPlanSteps -DeploymentPlan $deploymentPlan
                 } catch {
                     $fail = $true
                 }
@@ -439,7 +462,7 @@ Describe -Tag "PSCI.unit" "New-DeploymentPlan" {
                 }
 
                 It "should properly plan deployment for Environment Default" {
-                    $deploymentPlan = New-DeploymentPlan -AllEnvironments $Global:Environments -Environment Default -DscOutputPath 'dscOutput'
+                    $deploymentPlan = New-DeploymentPlan -AllEnvironments $Global:Environments -Environment Default
                     $deploymentPlan.Count | Should Be 4
 
                     $deploymentPlan[0].StepName | Should Be 'dsc1'
@@ -464,7 +487,7 @@ Describe -Tag "PSCI.unit" "New-DeploymentPlan" {
                 }
                 
                 It "should properly plan deployment for Environment Test1" {
-                    $deploymentPlan = New-DeploymentPlan -AllEnvironments $Global:Environments -Environment 'Test1' -DscOutputPath 'dscOutput'
+                    $deploymentPlan = New-DeploymentPlan -AllEnvironments $Global:Environments -Environment 'Test1'
                     $deploymentPlan.Count | Should Be 4
 
                     $deploymentPlan[0].StepName | Should Be 'dsc1'
@@ -489,7 +512,7 @@ Describe -Tag "PSCI.unit" "New-DeploymentPlan" {
                 }
 
                 It "should properly plan deployment for Environment Test1" {
-                    $deploymentPlan = New-DeploymentPlan -AllEnvironments $Global:Environments -Environment Test2 -DscOutputPath 'dscOutput'
+                    $deploymentPlan = New-DeploymentPlan -AllEnvironments $Global:Environments -Environment Test2
                     $deploymentPlan.Count | Should Be 4
 
                     $deploymentPlan[0].StepName | Should Be 'dsc1'

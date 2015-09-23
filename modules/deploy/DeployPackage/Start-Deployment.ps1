@@ -133,8 +133,6 @@ function Start-Deployment {
     if (!$configPaths.DeployConfigurationPath -and !$NoConfigFiles) {
         throw "No `$DeployConfigurationPath defined. Please pass it to Start-Deployment function, invoke Initialize-ConfigurationPaths function or add switch -NoConfigFiles."
     }
-
-    $packagesPath = $configPaths.PackagesPath
     
     if (!$NoConfigFiles) { 
         Write-Log -Info "[START] PARSE CONFIG FILES - environment(s) '$($Environment -join ',')'" -Emphasize
@@ -145,7 +143,7 @@ function Start-Deployment {
             Install-DscResources -ModuleNames $configInfo.RequiredDSCModules
         }
 
-        # Clear global variables before including configuration files
+        # clear global variables before including configuration files
         $Global:Environments = @{}
     
         # We need to include the configuration files in this function. We can't do it in separate Import-Configuration cmdlet, due to scoping issues (see http://stackoverflow.com/questions/15187510/dot-sourcing-functions-from-file-to-global-scope-inside-of-function)... 
@@ -158,11 +156,21 @@ function Start-Deployment {
     }
     
     Write-Log -Info "[START] BUILD DEPLOYMENT PLAN" -Emphasize
-
-    $dscOutputPath = Join-Path -Path $packagesPath -ChildPath "_DscOutput"
     $Global:DeploymentPlan = New-DeploymentPlan -AllEnvironments $Global:Environments -Environment $Environment -ServerRolesFilter $ServerRolesFilter `
                                                 -StepsFilter $StepsFilter -NodesFilter $NodesFilter -TokensOverride $TokensOverride `
-                                                -DscOutputPath $dscOutputPath -DeployType $DeployType
+                                                -DeployType $DeployType
+    
+    # include required builtin steps
+    $builtinStepsPath = "$PSScriptRoot\..\BuiltinSteps"
+    $availableBuiltinSteps = Get-ChildItem -Path $builtinStepsPath -File
+    $requiredBuiltinSteps = $Global:DeploymentPlan.StepName | Where-Object { $availableBuiltinSteps.BaseName -icontains $_ } | Select-Object -Unique
+    foreach ($requiredBuiltinStep in $requiredBuiltinSteps) {
+        Write-Log -Info "Including builtin step '$requiredBuiltinStep'"
+        . (Join-Path -Path $builtinStepsPath -ChildPath $requiredBuiltinStep)
+    }
+
+    # resolve each step - run Get-Command to validate command exists and run DSC configurations
+    $Global:DeploymentPlan = Resolve-DeploymentPlanSteps -DeploymentPlan $Global:DeploymentPlan
 
     Write-Log -Info 'Variable $Global:DeploymentPlan has been created.' -Emphasize
     Write-Log -Info "[END] BUILD DEPLOYMENT PLAN" -Emphasize

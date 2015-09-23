@@ -107,25 +107,6 @@ Describe -Tag "PSCI.unit" "ServerRole" {
             }
         }
 
-        Context "when referencing a non-existing Configuration" {
-            $Global:Environments = @{}
-
-            Environment Local {
-                ServerRole Web -Steps @('NotExisting')
-            }
-
-            $fail = $false
-            try  {
-                $resolvedRoles = Resolve-ServerRoles -AllEnvironments $Global:Environments -Environment Local -ResolvedTokens @{}
-            } catch { 
-                $fail = $true
-            }
-
-            It "should fail" {
-                $fail | Should Be $true
-            }
-        }
-
         Context "when using a single role and environment inheritance" {
             $Global:Environments = @{}
             $cred = ConvertTo-PSCredential -User "Test" -Password "Test"
@@ -445,7 +426,6 @@ Describe -Tag "PSCI.unit" "ServerRole" {
                 $resolvedRoles.Count | Should Be 1
                 $resolvedRoles.Web | Should Not Be $null
                 $resolvedRoles.Web.Steps.Name | Should Be @('TestFunc', 'TestDSC')
-                $resolvedRoles.Web.Steps.Type | Should Be @('Configuration', 'Function')
                 $resolvedRoles.Web.Steps[0].RequiredPackages | Should Be 'package1'
                 $resolvedRoles.Web.Steps[1].RequiredPackages | Should Be $null
                 $resolvedRoles.Web.Steps[0].RunRemotely | Should Be $true
@@ -458,7 +438,6 @@ Describe -Tag "PSCI.unit" "ServerRole" {
                 $resolvedRoles.Count | Should Be 1
                 $resolvedRoles.Web | Should Not Be $null
                 $resolvedRoles.Web.Steps.Name | Should Be @('TestFunc', 'TestDSC')
-                $resolvedRoles.Web.Steps.Type | Should Be @('Configuration', 'Function')
                 $resolvedRoles.Web.Steps[0].RequiredPackages | Should Be @('package1')
                 $resolvedRoles.Web.Steps[1].RequiredPackages | Should Be $null
                 $resolvedRoles.Web.Steps[0].RunRemotely | Should Be $false

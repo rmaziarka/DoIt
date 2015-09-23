@@ -69,9 +69,6 @@ function New-DeploymentPlan {
     A list of tokens to override. Token defined in the configuration files will be overrided with values specified in this array 
     (tokens will be matched by name, ignoring categories).
 
-    .PARAMETER DscOutputPath
-    Path where the .MOF files will be generated.
-
     .PARAMETER DeployType
     Deployment type:
     All       - deploy everything according to configuration files (= Provision + Deploy)
@@ -113,10 +110,6 @@ function New-DeploymentPlan {
         [hashtable]
         $TokensOverride,
 
-        [Parameter(Mandatory=$true)]
-        [string]
-        $DscOutputPath,
-
         [Parameter(Mandatory=$false)]
         [ValidateSet('All', 'DSC', 'Functions', 'Adhoc')]
         [string]
@@ -127,10 +120,6 @@ function New-DeploymentPlan {
     if ($TokensOverride) {
         $log = ($TokensOverride.GetEnumerator() | Foreach-Object { "$($_.Key)=$($_.Value)" }) -join ','
         Write-Log -Info "TokensOverride: $log"
-    }
-
-    if (Test-Path -LiteralPath $dscOutputPath) {
-        [void](Remove-Item -LiteralPath $dscOutputPath -Force -Recurse)
     }
 
     foreach ($env in $Environment) {
@@ -163,7 +152,6 @@ function New-DeploymentPlan {
                             ServerConnection = $serverConnection
                             Node = $node
                             Step = $step
-                            DscOutputPath = $DscOutputPath
                             ResolvedTokens = $resolvedTokens
                             TokensOverride = $TokensOverride
                         }
