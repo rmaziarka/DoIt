@@ -435,6 +435,31 @@ Describe -Tag "PSCI.unit" "Resolve-Tokens" {
             }
         }
 
+        Context "when used with array" {
+            $Global:Environments = @{}
+
+            Environment Default {
+                Tokens DestinationNodes @{
+                    ExternalNodeValue = 'localhost:e', 'localhost:e2'
+                }
+
+                Tokens Node @{
+                    SelectedNode = 'localhost:i', 'localhost:i2'
+                    ExternalNode = { $Tokens.DestinationNodes.ExternalNodeValue }
+                }
+            }
+
+            $resolvedTokens = Resolve-Tokens -AllEnvironments $Global:Environments -Environment Default -Node 's01'
+
+            It "Should properly resolve tokens" {
+                $resolvedTokens.Count | Should Be 4
+                $resolvedTokens.Node.SelectedNode.Count | should Be 2
+                $resolvedTokens.Node.SelectedNode | should Be @('localhost:i', 'localhost:i2')
+                $resolvedTokens.Node.ExternalNode.Count | should Be 2
+                $resolvedTokens.Node.ExternalNode | should Be @('localhost:e', 'localhost:e2')
+            }
+        }
+
         Context "when used with hashtables" {
             $Global:Environments = @{}
 

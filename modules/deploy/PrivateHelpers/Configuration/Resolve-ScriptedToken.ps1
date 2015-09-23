@@ -75,7 +75,14 @@ function Resolve-ScriptedToken {
 
     $i = 0
     while ($ScriptedToken -is [ScriptBlock] -and $i -lt 20) {
-        $ScriptedToken = ($ScriptedToken.InvokeWithContext($null, $contextVariables, $null))[0]
+        $ScriptedToken = $ScriptedToken.InvokeWithContext($null, $contextVariables, $null)
+        # InvokeWithContext always returns a collection, but there are following cases:
+        # - if scriptblock returns another scriptblock, we need to get it from first element of the array
+        # - if scriptblock returns array, we need to get it as it is (it doesn't return collection of collections but just a collection)
+        # - if scriptblock returns any other value, we can get it as it is (PS will automatically unbox it from one-element collection)
+        if ($ScriptedToken[0] -is [ScriptBlock]) {
+            $ScriptedToken = $ScriptedToken[0]
+        }
         $i++
     }
     if ($i -eq 20) {
