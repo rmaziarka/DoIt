@@ -65,21 +65,22 @@ function Resolve-ScriptedToken {
     )
 
     # Add 'NodeName' and 'Tokens' variables
-    $NodeName = $Node
-    $Tokens = $ResolvedTokens
+
+    $contextVariables = @(
+        (New-Object -TypeName System.Management.Automation.PSVariable -ArgumentList 'NodeName', $Node),
+        (New-Object -TypeName System.Management.Automation.PSVariable -ArgumentList 'Node', $Node),
+        (New-Object -TypeName System.Management.Automation.PSVariable -ArgumentList 'Tokens', $ResolvedTokens)
+        (New-Object -TypeName System.Management.Automation.PSVariable -ArgumentList 'Environment', $Environment)
+    )
 
     $i = 0
     while ($ScriptedToken -is [ScriptBlock] -and $i -lt 20) {
-        $ScriptedToken = & $ScriptedToken
+        $ScriptedToken = $ScriptedToken.InvokeWithContext($null, $contextVariables, $null)
         $i++
     }
     if ($i -eq 20) {
         throw 'Too many nested script tokens (more than 20 loops). Ensure you don''t have circular reference in your tokens (e.g. a={ $ResolvedTokens.b }, b={ $ResolvedTokens.a })'
     }
-
-    # suppression for ScriptCop unused variables
-    [void]$NodeName
-    [void]$Tokens
 
     return $ScriptedToken
 }
