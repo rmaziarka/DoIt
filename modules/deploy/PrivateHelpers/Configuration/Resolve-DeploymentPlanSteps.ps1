@@ -25,22 +25,25 @@ SOFTWARE.
 function Resolve-DeploymentPlanSteps {
     <#
     .SYNOPSIS
-    Groups deployment plan entries by specified properties.
+    Prepares each Step in DeploymentPlan.
+
+    .DESCRIPTION
+    It runs Get-Command for each step, filters steps that should not run due to DeployType and runs DSC configurations 
+    to create mof files.
 
     .PARAMETER DeploymentPlan
-    Deployment plan to group.
+    Deployment plan.
 
-    .PARAMETER GroupByConnectionParams
-    If true, result will be grouped by ConnectionParams.
-
-    .PARAMETER GroupByRunOnConnectionParamsAndPackage
-    If true, result will be grouped by RunOnConnectionParams and PackageDirectory.
-
-    .PARAMETER PreserveOrder
-    If true, original order is always preserved, even if it means there will be less entries in each group.
+    .PARAMETER DeployType
+    Deployment type:
+    - **All**       - deploy everything according to configuration files (= Provision + Deploy)
+    - **DSC**       - deploy only DSC configurations
+    - **Functions** - deploy only Powershell functions
+    - **Adhoc**     - override steps and nodes with $StepsFilter and $NodesFilter (they don't have to be defined in ServerRoles - useful for adhoc deployments)
 
     .EXAMPLE
-      $planByRunOn = Group-DeploymentPlan -DeploymentPlan $DeploymentPlan -GroupByRunOnConnectionParamsAndPackage -PreserveOrder
+    $Global:DeploymentPlan = Resolve-DeploymentPlanSteps -DeploymentPlan $Global:DeploymentPlan
+
     #>
     [CmdletBinding()]
     [OutputType([PSCustomObject[]])]
@@ -52,11 +55,7 @@ function Resolve-DeploymentPlanSteps {
         [Parameter(Mandatory=$false)]
         [ValidateSet('All', 'DSC', 'Functions', 'Adhoc')]
         [string]
-        $DeployType = 'All',
-
-        [Parameter(Mandatory=$true)]
-        [string]
-        $DscOutputPath
+        $DeployType = 'All'
     )
 
     $filteredDeploymentPlan = New-Object -TypeName System.Collections.ArrayList
@@ -78,20 +77,22 @@ function Resolve-DeploymentPlanSteps {
             }
             $stepCommandMapping[$entry.StepName] = $command
         }
-        $entry.StepType = $command.Type
+        $entry.StepType = $command.CommandType
         [void]($filteredDeploymentPlan.Add($entry))
     }
 
     # run DSC configurations to create .MOF files
+    $packagesPath = (Get-ConfigurationPaths).PackagesPath
+    $dscOutputPath = Join-Path -Path $packagesPath -ChildPath "_DscOutput"
     if (Test-Path -LiteralPath $DscOutputPath) {
         [void](Remove-Item -LiteralPath $DscOutputPath -Force -Recurse)
     }
-    $dscEntries = $filteredDeploymentPlan | Where-Object { $_.StepCommandObject.CommandType -eq 'Configuration' }
+    $dscEntries = $filteredDeploymentPlan | Where-Object { $_.StepType -eq 'Configuration' }
     foreach ($entry in $dscEntries) {
-        if ($entry.IsLocalRun) {
+        if ($entry.IsLocalRun -or !$entry.ConnectionParams -or $entry.ConnectionParams.Count -eq 0) {
             $dscNode = 'localhost'
         } else {
-            $dscNode = $entry.ConnectionParams.Nodes
+            $dscNode = $entry.ConnectionParams.Nodes[0]
         }
 
         if (!$entry.RunOnConnectionParams -and $entry.ConnectionParams.RemotingMode -and $entry.ConnectionParams.RemotingMode -ne 'PSRemoting') {
@@ -113,8 +114,6 @@ function Resolve-DeploymentPlanSteps {
         $mofDir = Resolve-Path -LiteralPath $mofDir
         $entry.ConfigurationMofDir = $mofDir
     }
-
-    #TODO: search&replace StepName / StepType
 
     return $filteredDeploymentPlan
 }

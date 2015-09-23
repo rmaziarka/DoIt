@@ -133,8 +133,6 @@ function Start-Deployment {
     if (!$configPaths.DeployConfigurationPath -and !$NoConfigFiles) {
         throw "No `$DeployConfigurationPath defined. Please pass it to Start-Deployment function, invoke Initialize-ConfigurationPaths function or add switch -NoConfigFiles."
     }
-
-    $packagesPath = $configPaths.PackagesPath
     
     if (!$NoConfigFiles) { 
         Write-Log -Info "[START] PARSE CONFIG FILES - environment(s) '$($Environment -join ',')'" -Emphasize
@@ -160,20 +158,19 @@ function Start-Deployment {
     Write-Log -Info "[START] BUILD DEPLOYMENT PLAN" -Emphasize
     $Global:DeploymentPlan = New-DeploymentPlan -AllEnvironments $Global:Environments -Environment $Environment -ServerRolesFilter $ServerRolesFilter `
                                                 -StepsFilter $StepsFilter -NodesFilter $NodesFilter -TokensOverride $TokensOverride `
-                                                -DscOutputPath $dscOutputPath -DeployType $DeployType
+                                                -DeployType $DeployType
     
     # include required builtin steps
     $builtinStepsPath = "$PSScriptRoot\..\BuiltinSteps"
     $availableBuiltinSteps = Get-ChildItem -Path $builtinStepsPath -File
     $requiredBuiltinSteps = $Global:DeploymentPlan.StepName | Where-Object { $availableBuiltinSteps.BaseName -icontains $_ } | Select-Object -Unique
     foreach ($requiredBuiltinStep in $requiredBuiltinSteps) {
-        Write-Log -Info "Including builtin step $requiredBuiltinStep"
+        Write-Log -Info "Including builtin step '$requiredBuiltinStep'"
         . (Join-Path -Path $builtinStepsPath -ChildPath $requiredBuiltinStep)
     }
 
     # resolve each step - run Get-Command to validate command exists and run DSC configurations
-    $dscOutputPath = Join-Path -Path $packagesPath -ChildPath "_DscOutput"
-    $Global:DeploymentPlan = Resolve-DeploymentPlanSteps -DeploymentPlan $Global:DeploymentPlan -DscOutputPath $dscOutputPath
+    $Global:DeploymentPlan = Resolve-DeploymentPlanSteps -DeploymentPlan $Global:DeploymentPlan
 
     Write-Log -Info 'Variable $Global:DeploymentPlan has been created.' -Emphasize
     Write-Log -Info "[END] BUILD DEPLOYMENT PLAN" -Emphasize
