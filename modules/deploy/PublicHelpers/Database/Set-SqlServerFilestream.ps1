@@ -41,7 +41,7 @@ function Set-SqlServerFilestream {
     .PARAMETER ConnectionString
     Connection string to database.
 
-    .PARAMATER FilestreamLevel
+    .PARAMETER FilestreamLevel
     Filestream level to set: 
     - 0 - disabled
     - 1 - enabled for T-SQL access
@@ -104,7 +104,7 @@ function Set-SqlServerFilestream {
         $wmiParams.Credential = $ConnectionParams.Credential
     }
 
-    $sqlServerNamespaces = Get-WmiObject @wmiParams -Namespace "ROOT\Microsoft\SqlServer" -class "__Namespace" -ErrorAction SilentlyContinue | `
+    $sqlServerNamespaces = Get-WmiObject @wmiParams -Namespace 'ROOT\Microsoft\SqlServer' -class '__Namespace' -ErrorAction SilentlyContinue | `
         Where-Object { $_.Name.StartsWith('ComputerManagement') } | Select-Object -ExpandProperty Name
     if (!$sqlServerNamespaces) {
         if ($Error.Count -gt 0) { 
@@ -117,7 +117,7 @@ function Set-SqlServerFilestream {
 
     $wmiObjects = @()
     foreach ($namespace in $sqlServerNamespaces) { 
-        $wmiObjects += Get-WmiObject @wmiParams -Namespace "ROOT\Microsoft\SqlServer\$namespace" -Class FilestreamSettings | where { $_.InstanceName -eq $instanceName }
+        $wmiObjects += Get-WmiObject @wmiParams -Namespace "ROOT\Microsoft\SqlServer\$namespace" -Class 'FilestreamSettings' | where { $_.InstanceName -eq $instanceName }
     }
 
     if (!$wmiObjects) {
@@ -125,12 +125,25 @@ function Set-SqlServerFilestream {
     }
 
     $changed = $false
+    $numWmiInstancesCorrect = 0
     foreach ($wmiObject in $wmiObjects) { 
         if ($wmiObject.AccessLevel -ne $FilestreamLevel) {
-            Write-Log -Info "Setting filestream to level $FilestreamLevel - WMI: $($wmiObject.__PATH)"
-            [void]($wmiObject.EnableFilestream($FilestreamLevel, $instanceName))
-            $changed = $true
+            Write-Log -Info "WMI $($wmiObject.__PATH) - setting filestream from $($wmiObject.AccessLevel) to $FilestreamLevel."
+            $result = $wmiObject.EnableFilestream($FilestreamLevel, $instanceName)
+            if ($result.ReturnValue -eq 0) {
+                $changed = $true
+                $numWmiInstancesCorrect++
+            } else {
+                Write-Log -Warn "Failed to set filestream at $($wmiObject.__PATH) - return value from wmi.EnableFilestream: $($result.ReturnValue)"
+            }
+        } else {
+            Write-Log -Info "WMI $($wmiObject.__PATH) - filestream already at level $($wmiObject.AccessLevel)."
+            $numWmiInstancesCorrect++
         }
+    }
+
+    if ($numWmiInstancesCorrect -eq 0) {
+        throw "Failed to set filestream on any WMI objects."
     }
 
     if ($changed) {
@@ -149,8 +162,8 @@ function Set-SqlServerFilestream {
     }
 
     if ($changed) {
-        Write-Log -Info "Filestream successfully changed to level $FilestreamLevel"
+        Write-Log -Info "Filestream successfully changed to level $FilestreamLevel."
     } else {
-        Write-Log -Info "Filestream already at level $FilestreamLevel"
+        Write-Log -Info "Filestream already at level $FilestreamLevel."
     }
 }
