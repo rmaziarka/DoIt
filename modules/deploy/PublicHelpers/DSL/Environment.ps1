@@ -76,7 +76,7 @@ function Environment {
         $Global:Environments['Default'] = @{
             ServerConnections = @{}
             ServerRoles = [ordered]@{}
-            StepSettings = @{}
+            Steps = @{}
             Tokens = @{}
             TokensChildren = @{}
             BasedOn = ''
@@ -94,7 +94,7 @@ function Environment {
             $Global:Environments[$Name] = @{
                 ServerConnections = @{}
                 ServerRoles = [ordered]@{}
-                StepSettings = @{}
+                Steps = @{}
                 Tokens = @{}
                 TokensChildren = @{}
                 BasedOn = 'Default'

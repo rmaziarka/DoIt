@@ -144,7 +144,7 @@ function Resolve-ServerRoles {
 
     $allServerConnections = Resolve-ServerConnectionsConfigElements -AllEnvironments $AllEnvironments -Environment $Environment -ResolvedTokens $resolvedTokens
 
-    $StepsSettings = Resolve-StepsSettings -AllEnvironments $AllEnvironments -Environment $Environment -StepsFilter $StepsFilter
+    $StepsDefinitions = Resolve-StepsDefinitions -AllEnvironments $AllEnvironments -Environment $Environment -StepsFilter $StepsFilter
 
     $serverRolesToRemove = @()
     foreach ($serverRole in $result.Values) {
@@ -153,7 +153,7 @@ function Resolve-ServerRoles {
                                         -Environment $Environment `
                                         -Steps $serverRole.Steps `
                                         -StepsFilter $StepsFilter `
-                                        -StepsSettings $StepsSettings `
+                                        -StepsDefinitions $StepsDefinitions `
                                         -DeployType $DeployType `
                                         -ServerRole $serverRole `
                                         -ResolvedTokens $resolvedTokens 

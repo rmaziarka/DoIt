@@ -446,6 +446,45 @@ Describe -Tag "PSCI.unit" "ServerRole" {
             
         }
 
+        Context "when used with Step" {
+            $Global:Environments = @{}
+
+            Environment Default {
+                ServerConnection WebServer -Nodes 'node1'
+                ServerRole Web -Steps @('TestFunc', 'TestDSC') -ServerConnections WebServer -RunRemotely
+
+                Step TestFunc -RequiredPackages 'package1'
+            }
+
+            Environment Local {
+                ConfigurationSettings TestFunc -RunRemotely:$false
+            }
+
+            It "should properly resolve roles for Default environment" {
+                $resolvedRoles = Resolve-ServerRoles -AllEnvironments $Global:Environments -Environment Default -ResolvedTokens @{}
+                $resolvedRoles.Count | Should Be 1
+                $resolvedRoles.Web | Should Not Be $null
+                $resolvedRoles.Web.Steps.Name | Should Be @('TestFunc', 'TestDSC')
+                $resolvedRoles.Web.Steps[0].RequiredPackages | Should Be 'package1'
+                $resolvedRoles.Web.Steps[1].RequiredPackages | Should Be $null
+                $resolvedRoles.Web.Steps[0].RunRemotely | Should Be $true
+                $resolvedRoles.Web.Steps[1].RunRemotely | Should Be $true
+                
+            }
+
+            It "should properly resolve roles for Local environment" {
+                $resolvedRoles = Resolve-ServerRoles -AllEnvironments $Global:Environments -Environment Local -ResolvedTokens @{}
+                $resolvedRoles.Count | Should Be 1
+                $resolvedRoles.Web | Should Not Be $null
+                $resolvedRoles.Web.Steps.Name | Should Be @('TestFunc', 'TestDSC')
+                $resolvedRoles.Web.Steps[0].RequiredPackages | Should Be @('package1')
+                $resolvedRoles.Web.Steps[1].RequiredPackages | Should Be $null
+                $resolvedRoles.Web.Steps[0].RunRemotely | Should Be $false
+                $resolvedRoles.Web.Steps[1].RunRemotely | Should Be $true
+            }
+            
+        }
+
     }
 }
 

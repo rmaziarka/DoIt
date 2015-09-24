@@ -22,10 +22,10 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 #>
 
-function StepSettings {
+function Step {
     <#
     .SYNOPSIS
-    Element of configuration DSL that defines settings for particular step. It is invoked inside 'Environment' element.
+    Element of configuration DSL that defines settings for particular deployment step. It is invoked inside 'Environment' element.
 
     .DESCRIPTION
     It can be used to override default ServerRole values per step.
@@ -53,7 +53,7 @@ function StepSettings {
     .EXAMPLE
     Environment Default {
         ServerRole Web -Steps 'config1', 'config2' -RequiredPackages 'all'
-        StepSettings config1 -RequiredPackages 'package1' -RunRemotely
+        Step config1 -RequiredPackages 'package1' -RunRemotely
     }
 #>
 
@@ -84,7 +84,7 @@ function StepSettings {
 
     if ((Test-Path variable:Env_Name) -and $Env_Name) {
 
-        $configSettingsDef = $Global:Environments[$Env_Name].StepSettings
+        $configSettingsDef = $Global:Environments[$Env_Name].Steps
 
         if (!$configSettingsDef.Contains($Name)) {
             $configSettingsDef[$Name] = @{ Name = $Name }
@@ -106,8 +106,10 @@ function StepSettings {
         }
 
     } else {
-        throw "'StepSettings' function cannot be invoked outside 'Environment' function (invalid invocation: 'StepSettings $Name')."
+        throw "'Step' function cannot be invoked outside 'Environment' function (invalid invocation: 'Step $Name')."
     }
 }
 
-Set-Alias ConfigurationSettings StepSettings
+# this is for backward compatibility
+Set-Alias ConfigurationSettings Step
+Set-Alias StepSettings Step

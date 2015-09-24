@@ -37,8 +37,8 @@ function Resolve-Steps {
     List of Steps to deploy - can be used if you don't want to deploy all configurations defined in the configuration files.
     If not set, steps will be deployed according to the ServerRoles defined in the configuration files.
 
-    .PARAMETER StepsSettings
-    Hashtable containing all StepsSettings.
+    .PARAMETER StepsDefinitions
+    Hashtable containing all StepsDefinitions.
 
     .PARAMETER DeployType
     Deployment type:
@@ -76,7 +76,7 @@ function Resolve-Steps {
 
         [Parameter(Mandatory=$false)]
         [hashtable]
-        $StepsSettings,
+        $StepsDefinitions,
 
         [Parameter(Mandatory=$false)]
         [ValidateSet('All', 'DSC', 'Functions', 'Adhoc')]
@@ -105,16 +105,14 @@ function Resolve-Steps {
 
     $result = @()
     foreach ($stepName in $Steps) {
-        
-
-        $stepSettings = $StepsSettings[$stepName]
+        $stepDefinition = $StepsDefinitions[$stepName]
 
         $stepObject = [PSCustomObject]@{
             Name = $stepName
-            RequiredPackages = if ($stepSettings -and $stepSettings.ContainsKey('RequiredPackages')) { $stepSettings.RequiredPackages } else { $ServerRole.RequiredPackages }
-            RunRemotely = if ($stepSettings -and $stepSettings.ContainsKey('RunRemotely')) { $stepSettings.RunRemotely } else { $ServerRole.RunRemotely }
-            RunOn = if ($stepSettings -and $stepSettings.ContainsKey('RunOn')) { $stepSettings.RunOn } else { $ServerRole.RunOn }
-            RebootHandlingMode = if ($stepSettings -and $stepSettings.ContainsKey('RebootHandlingMode')) { $stepSettings.RebootHandlingMode } else { $ServerRole.RebootHandlingMode }
+            RequiredPackages = if ($stepDefinition -and $stepDefinition.ContainsKey('RequiredPackages')) { $stepDefinition.RequiredPackages } else { $ServerRole.RequiredPackages }
+            RunRemotely = if ($stepDefinition -and $stepDefinition.ContainsKey('RunRemotely')) { $stepDefinition.RunRemotely } else { $ServerRole.RunRemotely }
+            RunOn = if ($stepDefinition -and $stepDefinition.ContainsKey('RunOn')) { $stepDefinition.RunOn } else { $ServerRole.RunOn }
+            RebootHandlingMode = if ($stepDefinition -and $stepDefinition.ContainsKey('RebootHandlingMode')) { $stepDefinition.RebootHandlingMode } else { $ServerRole.RebootHandlingMode }
         }
 
         $result += $stepObject

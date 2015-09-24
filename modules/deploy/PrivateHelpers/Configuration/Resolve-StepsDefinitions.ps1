@@ -22,10 +22,10 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 #>
 
-function Resolve-StepsSettings {
+function Resolve-StepsDefinitions {
     <#
     .SYNOPSIS
-    Resolves StepsSettings inside Environment.
+    Resolves StepsDefinitions inside Environment.
             
     .PARAMETER AllEnvironments
     Hashtable containing all environment definitions.
@@ -38,7 +38,7 @@ function Resolve-StepsSettings {
     If not set, steps will be deployed according to the ServerRoles defined in the configuration files.
 
     .EXAMPLE
-    $StepsSettings = Resolve-StepsSettings -AllEnvironments $AllEnvironments -Environment $Environment -StepsFilter $StepsFilter
+    $StepsDefinitions = Resolve-StepsDefinitions -AllEnvironments $AllEnvironments -Environment $Environment -StepsFilter $StepsFilter
     
     #>
     [CmdletBinding()]
@@ -61,9 +61,9 @@ function Resolve-StepsSettings {
 
     $result = @{}
 
-    # traverse environments from top to bottom to set / override StepSettings properties
+    # traverse environments from top to bottom to set / override Step properties
     foreach ($env in $envHierarchy) {
-        $configSettings = $AllEnvironments[$env].StepSettings.Values | Where-Object { !$StepsFilter -or $StepsFilter -icontains $_.Name }
+        $configSettings = $AllEnvironments[$env].Steps.Values | Where-Object { !$StepsFilter -or $StepsFilter -icontains $_.Name }
         foreach ($configSetting in $configSettings) {
             if (!$result.Contains($configSetting.Name)) {
                 $result[$configSetting.Name] = @{}
