@@ -30,6 +30,9 @@ function Start-NugetRestore {
     .PARAMETER ProjectPath
     Path to the project file.
 
+    .PARAMETER DisableParallelProcessing
+    Disable parallel nuget package restores (can help for 'The process cannot access the file because it is being used by another process).
+
     .EXAMPLE
     Start-NugetRestore -ProjectPath $projectPath
     #>
@@ -39,7 +42,11 @@ function Start-NugetRestore {
     param(
         [Parameter(Mandatory=$true)]
         [string]
-        $ProjectPath
+        $ProjectPath,
+
+        [Parameter(Mandatory=$true)]
+        [switch]
+        $DisableParallelProcessing
     )
 
     $ProjectPath = Resolve-PathRelativeToProjectRoot -Path $ProjectPath   
@@ -63,6 +70,9 @@ function Start-NugetRestore {
 
     $cmd = Add-QuotesToPaths -Paths $nugetPath
     $cmd += " restore " + (Add-QuotesToPaths -Paths $ProjectPath)
+    if ($DisableParallelProcessing) {
+        $cmd += ' -DisableParallelProcessing'
+    }
 
     [void](Invoke-ExternalCommand -Command $cmd)
     
