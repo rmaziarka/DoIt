@@ -44,7 +44,7 @@ function Start-NugetRestore {
         [string]
         $ProjectPath,
 
-        [Parameter(Mandatory=$true)]
+        [Parameter(Mandatory=$false)]
         [switch]
         $DisableParallelProcessing
     )
