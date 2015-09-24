@@ -56,8 +56,8 @@ function Copy-DeploymentScripts {
     if ($deployScriptsPath) { 
         Write-Log -Info "Copying deployment scripts from '$deployScriptsPath' to '$OutputDeployScriptsPath'"
         [void](New-Item -Path $OutputDeployScriptsPath -ItemType Directory -Force)
-        [void](Copy-Item -Path "${deployScriptsPath}\deploy.ps1" -Destination $OutputDeployScriptsPath -Force)
-        [void](Copy-Item -Path "${deployScriptsPath}\*.bat" -Destination $OutputDeployScriptsPath -Force)
+        [void](Copy-Item -Path "${deployScriptsPath}\*.ps1" -Exclude 'build*' -Destination $OutputDeployScriptsPath -Force)
+        [void](Copy-Item -Path "${deployScriptsPath}\*.bat" -Exclude 'build*' -Destination $OutputDeployScriptsPath -Force)
     }
 
     if ($deployConfigurationPath) {
