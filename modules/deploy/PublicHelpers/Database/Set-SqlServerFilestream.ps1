@@ -29,13 +29,12 @@ function Set-SqlServerFilestream {
 
     .DESCRIPTION
     It does the following:
-    1. Check filestream is at given level globally on SQL Server instance level, and if not set it using WMI. 
+    1. Check filestream is at given level globally on SQL Server instance level, and if not set it using Cim/WMI. 
     2. If level has been changed restart SQL Server service.
     3. Check filestream is at given level at T-SQL level, and if not set it using SQL query.
     
-    Note if SQL Server is not on local machine, you might need to pass $ConnectionParams, as it needs to open 3 kind of connections:
-    - WMI connection (only $ConnectionParams.Credential is used)
-    - WinRM to restart service (whole $ConnectionParams is used)
+    Note if SQL Server is not on local machine, you might need to pass $ConnectionParams, as it needs to open 2 kinds of connections:
+    - WinRM to invoke WMI method and restart service (whole $ConnectionParams is used)
     - SQL query ($ConnectionString is used)
 
     .PARAMETER ConnectionString
@@ -97,14 +96,9 @@ function Set-SqlServerFilestream {
         $ConnectionParams = New-ConnectionParameters -Nodes $computerName
     }
 
-    $wmiParams = @{
-        ComputerName = $ConnectionParams.Nodes
-    }
-    if ($ConnectionParams.Credential) {
-        $wmiParams.Credential = $ConnectionParams.Credential
-    }
+    $cimParams = $ConnectionParams.CimSessionParams
 
-    $sqlServerNamespaces = Get-WmiObject @wmiParams -Namespace 'ROOT\Microsoft\SqlServer' -class '__Namespace' -ErrorAction SilentlyContinue | `
+    $sqlServerNamespaces = Get-CimInstance @cimParams -Namespace 'ROOT\Microsoft\SqlServer' -class '__Namespace' -ErrorAction SilentlyContinue | `
         Where-Object { $_.Name.StartsWith('ComputerManagement') } | Select-Object -ExpandProperty Name
     if (!$sqlServerNamespaces) {
         if ($Error.Count -gt 0) { 
@@ -115,29 +109,33 @@ function Set-SqlServerFilestream {
         throw "Cannot get SQL Server WMI namespace from '$computerName': $errMsg."
     }
 
-    $wmiObjects = @()
+    $cimObjects = @()
     foreach ($namespace in $sqlServerNamespaces) { 
-        $wmiObjects += Get-WmiObject @wmiParams -Namespace "ROOT\Microsoft\SqlServer\$namespace" -Class 'FilestreamSettings' | where { $_.InstanceName -eq $instanceName }
+        $cimObjects += Get-CimInstance @cimParams -Namespace "ROOT\Microsoft\SqlServer\$namespace" -Class 'FilestreamSettings' | where { $_.InstanceName -eq $instanceName }
     }
 
-    if (!$wmiObjects) {
+    if (!$cimObjects) {
         throw "Cannot find any SQL Server WMI object for instance '$instanceName' at '$($wmiParams.ComputerName)' from namespace ROOT\Microsoft\SqlServer - check your instance name is correct: '$instanceName'"
     }
 
     $changed = $false
     $numWmiInstancesCorrect = 0
-    foreach ($wmiObject in $wmiObjects) { 
-        if ($wmiObject.AccessLevel -ne $FilestreamLevel) {
-            Write-Log -Info "WMI $($wmiObject.__PATH) - setting filestream from $($wmiObject.AccessLevel) to $FilestreamLevel."
-            $result = $wmiObject.EnableFilestream($FilestreamLevel, $instanceName)
+    foreach ($cimObject in $cimObjects) { 
+        $cimNamespace = $cimObject.CimClass.CimSystemProperties.Namespace
+        if ($cimObject.AccessLevel -ne $FilestreamLevel) {
+            Write-Log -Info "WMI $cimNamespace - setting filestream from $($cimObject.AccessLevel) to $FilestreamLevel."
+            $result = Invoke-CimMethod -InputObject $cimObject -MethodName EnableFilestream -Arguments @{ 
+                AccessLevel = $FilestreamLevel
+                ShareName = $instanceName
+            }
             if ($result.ReturnValue -eq 0) {
                 $changed = $true
                 $numWmiInstancesCorrect++
             } else {
-                Write-Log -Warn "Failed to set filestream at $($wmiObject.__PATH) - return value from wmi.EnableFilestream: $($result.ReturnValue)"
+                Write-Log -Warn "Failed to set filestream at $cimNamespace - return value from wmi.EnableFilestream: $($result.ReturnValue)"
             }
         } else {
-            Write-Log -Info "WMI $($wmiObject.__PATH) - filestream already at level $($wmiObject.AccessLevel)."
+            Write-Log -Info "WMI $cimNamespace - filestream already at level $($cimObject.AccessLevel)."
             $numWmiInstancesCorrect++
         }
     }
