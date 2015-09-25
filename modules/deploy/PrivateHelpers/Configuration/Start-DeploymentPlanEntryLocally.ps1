@@ -46,32 +46,34 @@ function Start-DeploymentPlanEntryLocally {
     )
 
     foreach ($configInfo in $DeploymentPlanGroupedEntry.GroupedConfigurationInfo) {
-        Write-Log -Info ("[START] RUN LOCAL CONFIGURATION '{0}' / NODE '{1}'" -f $configInfo.Name, $configInfo.ConnectionParams.NodesAsString) -Emphasize
-        Write-ProgressExternal -Message ('Deploying {0} to {1}' -f $configInfo.Name, $configInfo.ConnectionParams.NodesAsString) `
-                               -ErrorMessage ('Deploy error - node {0}, conf {1}' -f $configInfo.ConnectionParams.NodesAsString, $configInfo.Name)
-        if ($configInfo.Type -eq 'Configuration') {
+        Write-Log -Info ("[START] RUN LOCAL CONFIGURATION '{0}' / NODE '{1}'" -f $configInfo.StepName, $configInfo.ConnectionParams.NodesAsString) -Emphasize
+        Write-ProgressExternal -Message ('Deploying {0} to {1}' -f $configInfo.StepName, $configInfo.ConnectionParams.NodesAsString) `
+                               -ErrorMessage ('Deploy error - node {0}, conf {1}' -f $configInfo.ConnectionParams.NodesAsString, $configInfo.StepName)
+        if ($configInfo.StepType -eq 'Configuration') {
             $params = @{
                 ConnectionParams = $configInfo.ConnectionParams
-                MofDir = $configInfo.MofDir
+                MofDir = $configInfo.StepMofDir
                 DscForce = $true
                 RebootHandlingMode = $configInfo.RebootHandlingMode
             }
 
             #TODO: group DSCs that are next to each other and have the same ConnectionParams/RebootHandlingMode
             Start-DscConfigurationWithRetries @params
-        } elseif ($configInfo.Type -eq "Function") {
+        } elseif ($configInfo.StepType -eq "Function") {
             try { 
                 $packagePath = (Get-ConfigurationPaths).PackagesPath
                 Push-Location -Path $packagePath
-                Invoke-DeploymentStep -StepName $configInfo.Name `
-                                               -Node $configInfo.ConnectionParams.Nodes[0] `
-                                               -Environment $configInfo.Environment `
-                                               -ResolvedTokens $configInfo.Tokens `
-                                               -ConnectionParams $configInfo.ConnectionParams
+                [void](Invoke-DeploymentStep -StepName $configInfo.StepName `
+                                      -StepScriptBlockResolved $configInfo.StepScriptBlockResolved `
+                                      -Node $configInfo.ConnectionParams.Nodes[0] `
+                                      -Environment $configInfo.Environment `
+                                      -ServerRole $configInfo.ServerRole `
+                                      -ResolvedTokens $configInfo.Tokens `
+                                      -ConnectionParams $configInfo.ConnectionParams)
            } finally {
                 Pop-Location
            }
         }
-        Write-Log -Info ("[END] RUN LOCAL CONFIGURATION '{0}' / NODE '{1}'" -f $configInfo.Name, $configInfo.ConnectionParams.NodesAsString) -Emphasize
+        Write-Log -Info ("[END] RUN LOCAL CONFIGURATION '{0}' / NODE '{1}'" -f $configInfo.StepName, $configInfo.ConnectionParams.NodesAsString) -Emphasize
     }   
 }

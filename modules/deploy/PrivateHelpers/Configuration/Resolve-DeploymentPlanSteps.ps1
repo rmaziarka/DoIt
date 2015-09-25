@@ -58,29 +58,43 @@ function Resolve-DeploymentPlanSteps {
         $DeployType = 'All'
     )
 
+    $packagesPath = (Get-ConfigurationPaths).PackagesPath
+    $dscOutputPath = Join-Path -Path $packagesPath -ChildPath "_DscOutput"
+
     $filteredDeploymentPlan = New-Object -TypeName System.Collections.ArrayList
 
     # get command for each entry and filter by DeployType
+    $currentServerRole = $null
+    $stepNumber = 1
     foreach ($entry in $DeploymentPlan) {
-        $stepName = $entry.StepName
-        $command = Get-Command -Name $stepName -ErrorAction SilentlyContinue
-        if (!$command) {
-            throw "Invalid Step reference ('$stepName') - Environment '$($entry.Environment)' / ServerRole '$($entry.ServerRole)'. Please ensure there is a DSC configuration or Powershell function named '$stepName'."
+        $resolvedStepScriptBlock = Resolve-StepScriptBlock `
+                                        -StepNumber $stepNumber `
+                                        -StepName $entry.StepName `
+                                        -StepScriptBlock $entry.StepScriptBlock `
+                                        -Node $entry.ConnectionParams.Nodes[0] `
+                                        -Environment $entry.Environment `
+                                        -ServerRole $entry.ServerRole `
+                                        -MofOutputPath $dscOutputPath `
+                                        -DeployType $DeployType
+
+        $entry.StepScriptBlockResolved = $resolvedStepScriptBlock.StepScriptBlockResolved
+        $entry.StepMofDir = $resolvedStepScriptBlock.StepMofDir
+        $entry.StepType = $resolvedStepScriptBlock.StepType
+        if ($currentServerRole -ne $entry.ServerRole) {
+            $currentServerRole = $entry.ServerRole
+            $stepNumber = 1
+        } else {
+            $stepNumber++
         }
-        if ($DeployType -eq 'Functions' -and $command.CommandType -eq 'Configuration') {
-            continue
-        } elseif ($DeployType -eq 'DSC' -and $command.CommandType -ne 'Configuration') {
-            continue
+
+        if ($entry.StepScriptBlockResolved.Trim()) { 
+            [void]($filteredDeploymentPlan.Add($entry))
         }
-        $entry.StepType = $command.CommandType
-        [void]($filteredDeploymentPlan.Add($entry))
     }
 
     # run DSC configurations to create .MOF files
-    $packagesPath = (Get-ConfigurationPaths).PackagesPath
-    $dscOutputPath = Join-Path -Path $packagesPath -ChildPath "_DscOutput"
-    if (Test-Path -LiteralPath $DscOutputPath) {
-        [void](Remove-Item -LiteralPath $DscOutputPath -Force -Recurse)
+    if (Test-Path -LiteralPath $dscOutputPath) {
+        [void](Remove-Item -LiteralPath $dscOutputPath -Force -Recurse)
     }
     $dscEntries = $filteredDeploymentPlan | Where-Object { $_.StepType -eq 'Configuration' }
     foreach ($entry in $dscEntries) {
@@ -94,20 +108,24 @@ function Resolve-DeploymentPlanSteps {
             throw "Cannot deploy DSC configurations from localhost when RemotingMode is not PSRemoting. Please either change it to PSRemoting or add '-RunRemotely' switch to the ServerRole or Step(Environment '$($entry.Environment)' / ServerRole '$($entry.ServerRole)' / Step '$($entry.StepName)')."
         }
 
-        $mofDir = Invoke-DeploymentStep `
+        if (Test-Path -Path $entry.StepMofDir) {
+            Remove-Item -Path $entry.StepMofDir -Force -Recurse
+        }
+
+        [void](Invoke-DeploymentStep `
             -StepName $entry.StepName `
-            -OutputPath $DscOutputPath `
+            -StepScriptBlockResolved $entry.StepScriptBlockResolved `
             -Node $dscNode `
             -Environment $entry.Environment `
+            -ServerRole $entry.ServerRole `
             -ResolvedTokens $entry.Tokens `
-            -ConnectionParams $entry.ConnectionParams
+            -ConnectionParams $entry.ConnectionParams)
 
-        if (!(Get-ChildItem -Path $mofDir -Filter "*.mof")) {
+        if (!(Get-ChildItem -Path $entry.StepMofDir -Filter "*.mof")) {
             Write-Log -Warn "Mof file has not been generated for step named '$($entry.StepName)' (Environment '$($entry.Environment)' / ServerRole '$($entry.ServerRole)'). Please ensure your configuration definition is correct."
-            continue
         }
-        $mofDir = Resolve-Path -LiteralPath $mofDir
-        $entry.ConfigurationMofDir = $mofDir
+        
+        $entry.StepMofDir = Resolve-Path -LiteralPath $entry.StepMofDir
     }
 
     return $filteredDeploymentPlan

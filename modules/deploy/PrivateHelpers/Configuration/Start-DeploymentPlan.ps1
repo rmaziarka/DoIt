@@ -114,9 +114,9 @@ function Start-DeploymentPlan {
             $remotingMode = ' (' + $runOnParams.RemotingMode + ')'
             $runOnNodes = $runOnParams.NodesAsString
         }
-        $configNames = $configInfo.Name -join ', '
+        $stepNames = $configInfo.StepName -join ', '
         $nodes = $configInfo.ConnectionParams.Nodes -join ', '
-        Write-Log -Info ('RunOn = {0}{1}: {2} -> {3}' -f $runOnNodes, $remotingMode, $configNames, $nodes) -Emphasize
+        Write-Log -Info ('RunOn = {0}{1}: {2} -> {3}' -f $runOnNodes, $remotingMode, $stepNames, $nodes) -Emphasize
     }
     Write-Log -Info ' '
 

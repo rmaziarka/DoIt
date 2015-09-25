@@ -34,15 +34,17 @@ function Invoke-DeploymentStep {
     .PARAMETER StepName
     Name of the DSC configuration or function to invoke.
 
-    .PARAMETER OutputPath
-    Base output path for MOF files that will be generated - only relevent if StepName is a DSC configuration.
-    A specific folder structure will be created for the StepName / Node.
+    .PARAMETER StepScriptBlockResolved
+    Resolved step scriptblock (see [[Resolve-StepScriptBlock]]).
 
     .PARAMETER Node
     Name of the node - will be passed as 'NodeName' to the configuration.
 
     .PARAMETER Environment
     Environment name - will be passed as 'Environment' to the configuration.
+
+    .PARAMETER ServerRole
+    Server role name - will be passed as 'ServerRole' to the configuration.
 
     .PARAMETER ResolvedTokens
     Tokens resolved for the node/environment - will be passed as 'Tokens' to the configuration.
@@ -55,15 +57,15 @@ function Invoke-DeploymentStep {
 
     #>
     [CmdletBinding()]
-    [OutputType([string])]
+    [OutputType([object])]
     param(
-        [Parameter(Mandatory=$true)]
+        [Parameter(Mandatory=$false)]
         [string]
         $StepName,
 
         [Parameter(Mandatory=$false)]
         [string]
-        $OutputPath,
+        $StepScriptBlockResolved,
 
         [Parameter(Mandatory=$true)]
         [string]
@@ -74,6 +76,10 @@ function Invoke-DeploymentStep {
         $Environment,
 
         [Parameter(Mandatory=$true)]
+        [string]
+        $ServerRole,
+
+        [Parameter(Mandatory=$true)]
         [hashtable]
         $ResolvedTokens,
 
@@ -82,47 +88,22 @@ function Invoke-DeploymentStep {
         $ConnectionParams
     )  
 
-    $stepCommand = Get-Command -Name $StepName
+    <# 
+      $automaticParameters = @{
+        NodeName = '$Node'
+        Environment = '$Environment'
+        ServerRole = '$ServerRole'
+        Tokens = '$ResolvedTokens'
+        ConnectionParams = '$ConnectionParams'
+        PackagesPath = '$packagesPath'
+      }
+    #>
 
-    $expr = "$StepName"
-    if ($stepCommand.Parameters.ContainsKey("nodeName")) {
-        $expr += " -NodeName `"$Node`""
-    }
+    $packagesPath = (Get-ConfigurationPaths).PackagesPath
+        
+    $scriptBlockToRun = [scriptblock]::Create($StepScriptBlockResolved)
+    Write-Log -Info "Running custom command: $StepScriptBlockResolved"
 
-    if ($stepCommand.Parameters.ContainsKey("environment")) {
-        $expr += " -Environment `"$Environment`""
-    }
+    & $scriptBlockToRun
 
-    if ($stepCommand.Parameters.ContainsKey("tokens")) {
-        $expr += ' -Tokens $ResolvedTokens'
-    }
-
-    if ($stepCommand.Parameters.ContainsKey("connectionParams")) {
-        $expr += ' -ConnectionParams $ConnectionParams'
-    }
-
-    if ($stepCommand.Parameters.ContainsKey("packagesPath")) {
-        $packagesPath = (Get-ConfigurationPaths).PackagesPath
-        $expr += ' -PackagesPath `"$packagesPath`"'
-    }
-
-    if ($stepCommand.CommandType -eq "Configuration") {
-        # Set PSDscAllowPlainTextPassword to $true in order to pass credentials into dsc configuration. It will be stored as plain text in a .mof file.
-        # The better way is to use certificate and its thumbprint to decrypt the credentials on the target node.
-        $configurationData = "@{ AllNodes = @( @{  NodeName = `"$Node`"; PSDscAllowPlainTextPassword = `$true }) }"
-
-        $dir = Join-Path -Path $OutputPath -ChildPath $Node
-        $dir = Join-Path -Path $dir -ChildPath $StepName
-
-        $expr += " -OutputPath `"$dir`" -ConfigurationData $configurationData"
-        Write-Log -Info "Running custom configuration: $expr"
-        [void](Invoke-Expression -Command $expr)
-        return $dir
-    } elseif ($stepCommand.CommandType -eq "Function") {
-        Write-Log -Info "Running custom function: $expr"
-        ([void](Invoke-Expression -Command $expr))
-        return ""
-    } else {
-        throw "Command '$StepName' is of unsupported type: $($stepCommand.commandType)"
-    }  
 }

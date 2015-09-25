@@ -485,6 +485,46 @@ Describe -Tag "PSCI.unit" "ServerRole" {
             
         }
 
+        Context "when used with Step with ScriptBlock" {
+            $Global:Environments = @{}
+
+            Environment Default {
+                ServerConnection WebServer -Nodes 'node1'
+                ServerRole Web -Steps @('TestFunc', 'TestDSC') -ServerConnections WebServer -RunRemotely
+
+                Step TestFunc -ScriptBlock { Run-TestFunc -MyParam 'test' -Tokens $Tokens.Test }
+
+                Tokens Test @{
+                    token1 = 'token1Value'
+                }
+            }
+
+            Environment Local {
+                Step TestFunc -ScriptBlock $null
+            }
+
+            
+
+            It "should properly resolve roles for Default environment" {
+                $resolvedRoles = Resolve-ServerRoles -AllEnvironments $Global:Environments -Environment Default -ResolvedTokens @{}
+                $resolvedRoles.Count | Should Be 1
+                $resolvedRoles.Web | Should Not Be $null
+                $resolvedRoles.Web.Steps.Name | Should Be @('TestFunc', 'TestDSC')
+                $resolvedRoles.Web.Steps[0].ScriptBlock | Should Not Be $null
+                $resolvedRoles.Web.Steps[0].ScriptBlock.GetType().Name | Should Be 'ScriptBlock'
+                $resolvedRoles.Web.Steps[0].ScriptBlock.ToString() | Should Be " Run-TestFunc -MyParam 'test' -Tokens `$Tokens.Test "
+            }
+
+            It "should properly resolve roles for Local environment" {
+                $resolvedRoles = Resolve-ServerRoles -AllEnvironments $Global:Environments -Environment Local -ResolvedTokens @{}
+                $resolvedRoles.Count | Should Be 1
+                $resolvedRoles.Web | Should Not Be $null
+                $resolvedRoles.Web.Steps.Name | Should Be @('TestFunc', 'TestDSC')
+                $resolvedRoles.Web.Steps[0].ScriptBlock | Should Be $null
+            }
+            
+        }
+
     }
 }
 
