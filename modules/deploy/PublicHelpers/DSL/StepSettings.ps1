@@ -34,7 +34,7 @@ function StepSettings {
     Name of the server role.
 
     .PARAMETER RequiredPackages
-    List of packages that will be copied to remote server before running actual configurations.
+    List of packages that will be copied to remote server before running actual steps.
 
     .PARAMETER RunRemotely
     If set then each step is run remotely (on nodes defined in $ServerConnections, or on specified $RunOn node).

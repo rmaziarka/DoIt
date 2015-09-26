@@ -67,7 +67,7 @@ function ServerRole {
     List of packages that will be copied to remote server before running actual steps.
 
     .PARAMETER RunRemotely
-    If set then each configuration is run remotely (on nodes defined in $ServerConnections, or on specified $RunOn node).
+    If set then each step is run remotely (on nodes defined in $ServerConnections, or on specified $RunOn node).
 
     .PARAMETER RunOn
     Defines on which machine run deployment of given server role.

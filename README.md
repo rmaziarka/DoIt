@@ -10,7 +10,7 @@ There are several possibilities to run the deployment code - see [Remoting confi
 - Double-hop deployments - e.g. WebDeploy + DSC.
 
 PSCI provides following features:
-- Simple DSL to describe Environments, Server Roles, Server Connections, Configurations and Tokens (per-environment parameters).
+- Simple DSL to describe Environments, Server Roles, Server Connections and Tokens (per-environment parameters).
 - Written entirely in Powershell (requires Powershell 3.0, or 4.0 for DSC support).
 - Provisioning mechanism that is based on Powershell Desired State Configuration resources or custom Powershell functions.
 - Agentless architecture - deployment to remote environments pushes packages and execute code remotely using Powershell Remoting (WinRM) or Web Deploy.
