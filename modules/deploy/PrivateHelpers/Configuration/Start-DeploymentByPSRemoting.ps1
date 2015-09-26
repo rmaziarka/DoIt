@@ -145,7 +145,15 @@ function Start-DeploymentByPSRemoting {
         $deployScript += " -NodesFilter '{0}'" -f ($NodesFilter -join "','")
     }
     if ($StepsFilter) {
-        $deployScript += " -StepsFilter '{0}'" -f ($StepsFilter -join "','")
+        # needed for backward compatibility - to be removed in future
+        $deployScriptPath = Join-Path -Path ((Get-ConfigurationPaths).DeployScriptsPath) -ChildPath 'deploy.ps1'
+        $scriptContents = Get-Content -LiteralPath $deployScriptPath -ReadCount 0
+        if ($scriptContents -inotmatch '\$StepsFilter' -and $scriptContents -imatch '\$ConfigurationsFilter') {
+            $deployScript += " -ConfigurationsFilter '{0}'" -f ($StepsFilter -join "','")
+        #end
+        } else { 
+            $deployScript += " -StepsFilter '{0}'" -f ($StepsFilter -join "','")
+        }
     }
     if ($TokensOverride) {
        $tokensOverrideString = Convert-HashtableToString -Hashtable $TokensOverride
@@ -176,13 +184,6 @@ function Start-DeploymentByPSRemoting {
             Set-Location -Path $PackageDirectory
             $Global:PSCIRemotingMode = $RemotingMode
             $Global:PSCICIServer = $CIServer
-
-            # needed for backward compatibility - to be removed in future
-            $scriptContents = Get-Content -LiteralPath 'DeployScripts\deploy.ps1' -ReadCount 0
-            if ($scriptContents -inotmatch '\$StepsFilter' -and $scriptContents -imatch '\$ConfigurationsFilter') {
-                $DeployScript = $DeployScript -ireplace '-StepsFilter', '-ConfigurationsFilter'
-            }
-            # end 
 
             Invoke-Expression -Command "& $DeployScript"
         } finally {

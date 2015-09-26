@@ -127,7 +127,15 @@ function Start-DeploymentByMSDeploy {
         $deployScript += " -NodesFilter '{0}'" -f ($NodesFilter -join "','")
     }
     if ($StepsFilter) {
-        $deployScript += " -StepsFilter '{0}'" -f ($StepsFilter -join "','")
+        # needed for backward compatibility - to be removed in future
+        $deployScriptPath = Join-Path -Path ((Get-ConfigurationPaths).DeployScriptsPath) -ChildPath 'deploy.ps1'
+        $scriptContents = Get-Content -LiteralPath $deployScriptPath -ReadCount 0
+        if ($scriptContents -inotmatch '\$StepsFilter' -and $scriptContents -imatch '\$ConfigurationsFilter') {
+            $deployScript += " -ConfigurationsFilter '{0}'" -f ($StepsFilter -join "','")
+        #end
+        } else { 
+            $deployScript += " -StepsFilter '{0}'" -f ($StepsFilter -join "','")
+        }
     }
     if ($TokensOverride) {
        $tokensOverrideString = Convert-HashtableToString -Hashtable $TokensOverride
