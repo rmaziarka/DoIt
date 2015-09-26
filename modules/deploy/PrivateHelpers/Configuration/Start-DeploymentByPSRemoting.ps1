@@ -176,6 +176,14 @@ function Start-DeploymentByPSRemoting {
             Set-Location -Path $PackageDirectory
             $Global:PSCIRemotingMode = $RemotingMode
             $Global:PSCICIServer = $CIServer
+
+            # needed for backward compatibility - to be removed in future
+            $scriptContents = Get-Content -LiteralPath 'DeployScripts\deploy.ps1' -ReadCount 0
+            if ($scriptContents -inotmatch '\$StepsFilter' -and $scriptContents -imatch '\$ConfigurationsFilter') {
+                $DeployScript = $DeployScript -ireplace '-StepsFilter', '-ConfigurationsFilter'
+            }
+            # end 
+
             Invoke-Expression -Command "& $DeployScript"
         } finally {
             if ($PackageDirectoryAutoRemove) {
