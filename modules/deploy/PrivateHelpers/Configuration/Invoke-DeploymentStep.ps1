@@ -106,4 +106,6 @@ function Invoke-DeploymentStep {
 
     & $scriptBlockToRun
 
+    # ScriptCop suppression
+    [void]$packagesPath
 }
