@@ -76,11 +76,11 @@ param(
     
     [Parameter(Mandatory=$false)]
     [string]
-    $PSCILibraryPath = '..', # Modify this path according to your project structure. This is absolute or relative to $ProjectRootPath.
+    $PSCILibraryPath = '..\..', # Modify this path according to your project structure. This is absolute or relative to $ProjectRootPath.
 
     [Parameter(Mandatory=$false)]
     [string]
-    $PackagesPath = '', # Modify this path according to your project structure. This is absolute or relative to $ProjectRootPath. Leave empty for packageless deployment.
+    $PackagesPath = 'packages', # Modify this path according to your project structure. This is absolute or relative to $ProjectRootPath. Leave empty for packageless deployment.
     
     [Parameter(Mandatory=$false)]
     [string]

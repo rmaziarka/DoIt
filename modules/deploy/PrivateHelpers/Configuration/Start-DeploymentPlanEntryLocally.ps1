@@ -68,7 +68,7 @@ function Start-DeploymentPlanEntryLocally {
                                       -Node $configInfo.ConnectionParams.Nodes[0] `
                                       -Environment $configInfo.Environment `
                                       -ServerRole $configInfo.ServerRole `
-                                      -ResolvedTokens $configInfo.Tokens `
+                                      -Tokens $configInfo.Tokens `
                                       -ConnectionParams $configInfo.ConnectionParams)
            } finally {
                 Pop-Location

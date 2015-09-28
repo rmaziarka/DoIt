@@ -53,9 +53,9 @@ configuration PSCIWindowsFeatures {
     Import-DSCResource -Module xDismFeature
 
     Node $AllNodes.NodeName {        
-        $isClientWindows = Get-TokenValue -Context $Node -Name 'IsClientWindows'
-        $windowsFeatures = Get-TokenValue -Context $Node -Name 'WindowsFeatures' -Mandatory
-        Write-Log -Info "Node '$($Node.NodeName)': WindowsFeatures $($windowsFeatures -join ', '); IsClientWindows: $isClientWindows"
+        $isClientWindows = Get-TokenValue -Name 'IsClientWindows'
+        $windowsFeatures = Get-TokenValue -Name 'WindowsFeatures' -Mandatory
+        Write-Log -Info "Preparing PSCIWindowsFeatures, node '$($Node.NodeName)': WindowsFeatures $($windowsFeatures -join ', '); IsClientWindows: $isClientWindows"
 
         foreach ($windowsFeature in $windowsFeatures) {
             if ($isClientWindows) {

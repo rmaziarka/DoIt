@@ -38,33 +38,44 @@ function Get-TokenValue {
     .PARAMETER AllPackagesPath
     Path to the directory that will be traversed.
 
-    .PARAMETER RequiredPackages
-    List of required packages.
+    .PARAMETER Name
+    Name of the token.
 
-    .PARAMETER AddDeployPackages
-    If true, deploy packages (DeployScripts / PSCI) will be added.
+    .PARAMETER Mandatory
+    If $true token entry must be exist (note its value can be null - it's only important there is the key in hashtable).
+
+    .PARAMETER Context
+    Context where the token should be resolved. If not specified, it's $Node.ServerRole / $Node.Tokens for DSC, and $ServerRole / $Tokens
+    for functions (both should be available automatically in parent scope). 
 
     .EXAMPLE
-    $includePackages = Get-IncludePackageList -AllPackagesPath $configPaths.PackagesPath -RequiredPackages $RequiredPackages
+    $directories = Get-TokenValue -Name 'UploadDirectories'
     #>
     [CmdletBinding()]
     [OutputType([void])]
     param(
-        [Parameter(Mandatory=$true)]
-        [hashtable]
-        $Context,
-
         [Parameter(Mandatory=$true)]
         [string]
         $Name,
 
         [Parameter(Mandatory=$false)]
         [switch]
-        $Mandatory
+        $Mandatory,
+
+        [Parameter(Mandatory=$false)]
+        [hashtable]
+        $Context
     )
 
-    $serverRole = $Context.ServerRole
-    $tokens = $Context.Tokens
+    if ($Context) {
+        $serverRole = $Context.ServerRole
+        $tokens = $Context.Tokens
+    } elseif ($Node -and $Node -is [hashtable]) {
+        $serverRole = $Node.ServerRole
+        $tokens = $Node.Tokens
+    } elseif (!$Tokens -or !$ServerRole) {
+        throw "Cannot get token named '$Name' - cannot get Tokens context - there is no `$Node, `$Tokens and `$ServerRole variables available."
+    }
 
     $result = $null
 

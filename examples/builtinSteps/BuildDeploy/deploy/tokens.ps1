@@ -43,6 +43,10 @@ Environment Default {
         IsClientWindows = $true
         WindowsFeatures = 'IIS-WebServerRole', 'IIS-ASPNET45', 'IIS-WindowsAuthentication'
     }
+
+    Tokens UploadDirectoriesTestRole @{
+        UploadDirectories = @{ 'UploadDirectoriesTest' = 'c:\PSCIUploadTest' }
+    }
 }
 
 Environment Test {
