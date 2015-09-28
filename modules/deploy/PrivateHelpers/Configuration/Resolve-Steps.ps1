@@ -109,6 +109,7 @@ function Resolve-Steps {
 
         $stepObject = [PSCustomObject]@{
             Name = $stepName
+            ScriptBlock = if ($stepDefinition -and $stepDefinition.ContainsKey('ScriptBlock')) { $stepDefinition.ScriptBlock } else { $null }
             RequiredPackages = if ($stepDefinition -and $stepDefinition.ContainsKey('RequiredPackages')) { $stepDefinition.RequiredPackages } else { $ServerRole.RequiredPackages }
             RunRemotely = if ($stepDefinition -and $stepDefinition.ContainsKey('RunRemotely')) { $stepDefinition.RunRemotely } else { $ServerRole.RunRemotely }
             RunOn = if ($stepDefinition -and $stepDefinition.ContainsKey('RunOn')) { $stepDefinition.RunOn } else { $ServerRole.RunOn }

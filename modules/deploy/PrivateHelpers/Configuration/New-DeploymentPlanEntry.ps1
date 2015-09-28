@@ -149,15 +149,17 @@ function New-DeploymentPlanEntry {
         EntryNo = $entryNo
         ConnectionParams = $connectionParamsObj
         RunOnConnectionParams = $runOnConnectionParamsObj
-        PackageDirectory = $packageDirectory;
+        PackageDirectory = $packageDirectory
         IsLocalRun = $isLocalRun
-        Environment = $Environment;
-        ServerRole = $ServerRole.Name;
+        Environment = $Environment
+        ServerRole = $ServerRole.Name
         StepName = $Step.Name
+        StepScriptBlock = $Step.ScriptBlock
+        StepScriptBlockResolved = $null # will be updated by Resolve-DeploymentPlanSteps
         StepType = $null # will be updated by Resolve-DeploymentPlanSteps
-        ConfigurationMofDir = $null # will be updated by Resolve-DeploymentPlanSteps
-        Tokens = $ResolvedTokens; 
-        TokensOverride = $TokensOverride; # used only for passing parameters to deploy.ps1 in remote runs
+        StepMofDir = $null # will be updated by Resolve-DeploymentPlanSteps
+        Tokens = $ResolvedTokens;
+        TokensOverride = $TokensOverride # used only for passing parameters to deploy.ps1 in remote runs
         RequiredPackages = $requiredPackages
         RebootHandlingMode = $rebootHandlingMode
     }

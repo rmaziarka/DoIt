@@ -36,8 +36,9 @@ Describe -Tag "PSCI.unit" "Group-DeploymentPlan" {
             Environment = 'env1'
             ServerRole = 'serverRole1'
             StepName = 'remoteCredSSP1'
+            StepScriptBlockResolved = 'remoteCredSSP1'
             StepType = 'Configuration'
-            ConfigurationMofDir = 'c:\mof'
+            StepMofDir = 'c:\mof'
             Tokens = @{'token1' = 'value1'}
             TokensOverride = @{'token1' = 'overridenValue1'}
             RequiredPackages = 'package1'
@@ -53,8 +54,9 @@ Describe -Tag "PSCI.unit" "Group-DeploymentPlan" {
             Environment = 'env2'
             ServerRole = 'serverRole2'
             StepName = 'remoteCredSSP2'
+            StepScriptBlockResolved = 'remoteCredSSP2'
             StepType = 'Function'
-            ConfigurationMofDir = ''
+            StepMofDir = ''
             Tokens = @{'token1' = 'value2'}
             TokensOverride = @{'token1' = 'overridenValue1'}
             RequiredPackages = 'package2'
@@ -70,8 +72,9 @@ Describe -Tag "PSCI.unit" "Group-DeploymentPlan" {
             Environment = 'env1'
             ServerRole = 'serverRole2'
             StepName = 'local'
+            StepScriptBlockResolved = 'local'
             StepType = 'Function'
-            ConfigurationMofDir = ''
+            StepMofDir = ''
             Tokens = @{'token1' = 'value1'}
             TokensOverride = @{'token1' = 'overridenValue1'}
             RequiredPackages = 'package3'
@@ -87,8 +90,9 @@ Describe -Tag "PSCI.unit" "Group-DeploymentPlan" {
             Environment = 'env1'
             ServerRole = 'serverRole1'
             StepName = 'remoteCredSSP3'
+            StepScriptBlockResolved = 'remoteCredSSP3'
             StepType = 'Function'
-            ConfigurationMofDir = 'c:\mof2'
+            StepMofDir = 'c:\mof2'
             Tokens = @{'token1' = 'value1'}
             TokensOverride = @{'token1' = 'overridenValue1'}
             RequiredPackages = 'package2'
@@ -104,8 +108,9 @@ Describe -Tag "PSCI.unit" "Group-DeploymentPlan" {
             Environment = 'env1'
             ServerRole = 'serverRole1'
             StepName = 'remoteCredSSP4'
+            StepScriptBlockResolved = 'remoteCredSSP4'
             StepType = 'Function'
-            ConfigurationMofDir = 'c:\mof2'
+            StepMofDir = 'c:\mof2'
             Tokens = @{'token1' = 'value1'}
             TokensOverride = @{'token1' = 'overridenValue1'}
             RequiredPackages = 'package2'
@@ -121,8 +126,9 @@ Describe -Tag "PSCI.unit" "Group-DeploymentPlan" {
             Environment = 'env1'
             ServerRole = 'serverRole1'
             StepName = 'remoteCredSSP4'
+            StepScriptBlockResolved = 'remoteCredSSP4'
             StepType = 'Function'
-            ConfigurationMofDir = 'c:\mof2'
+            StepMofDir = 'c:\mof2'
             Tokens = @{'token1' = 'value1'}
             TokensOverride = @{'token1' = 'overridenValue1'}
             RequiredPackages = 'package2'
@@ -148,9 +154,9 @@ Describe -Tag "PSCI.unit" "Group-DeploymentPlan" {
                 $configInfo.IsLocalRun | Should Be $originalEntry.IsLocalRun
                 $configInfo.Environment | Should Be $originalEntry.Environment
                 $configInfo.ServerRole | Should Be $originalEntry.ServerRole
-                $configInfo.Name | Should Be $originalEntry.StepName
-                $configInfo.Type | Should Be $originalEntry.StepType
-                $configInfo.MofDir | Should Be $originalEntry.ConfigurationMofDir
+                $configInfo.StepName | Should Be $originalEntry.StepName
+                $configInfo.StepType | Should Be $originalEntry.StepType
+                $configInfo.StepMofDir | Should Be $originalEntry.StepMofDir
                 $configInfo.Tokens.Count | Should Be $originalEntry.Tokens.Count
                 foreach ($tokenKey in $originalEntry.Tokens.Keys) {
                     $configInfo.Tokens[$tokenKey] | Should Be $originalEntry.Tokens[$tokenKey]

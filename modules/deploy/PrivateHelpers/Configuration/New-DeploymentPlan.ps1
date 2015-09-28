@@ -41,7 +41,8 @@ function New-DeploymentPlan {
     ServerRole = <ServerRole name>
     StepName = <Name of DSC configuration or custom function that will be run on the destination server>
     StepType = <'Configuration' for DSC configuration or 'Function' for custom function>
-    ConfigurationMofDir = <Directory where the generated .mof file resides - only used if StepType = 'Configuration'>
+    StepMofDir = <Directory where the generated .mof file resides - only used if StepType = 'Configuration'>
+    StepScriptBlockResolved = <resolved ScriptBlock that will be invoked when running the step>
     Tokens = <Hashtable containing resolved tokens - they can be varying between Environment/Nodes combinations>
     TokensOverride = <Hashtable containing tokens overriden by user - passed directly to deploy.ps1>
     PackageDirectory = <Path to the directory where the files required for the deployment will be copied - only used if deployment steps will not run locally>

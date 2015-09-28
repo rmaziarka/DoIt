@@ -160,13 +160,29 @@ function Start-Deployment {
                                                 -StepsFilter $StepsFilter -NodesFilter $NodesFilter -TokensOverride $TokensOverride `
                                                 -DeployType $DeployType
     
+    if (!$Global:DeploymentPlan) {
+        Write-Log -Warn "No steps to run anywhere. Please ensure your ServerRoles are properly defined (and have -ServerConnection reference), and the ServerRoles / Configurations / Nodes filters are correct."
+        return
+    }
+
     # include required builtin steps
     $builtinStepsPath = "$PSScriptRoot\..\BuiltinSteps"
     $availableBuiltinSteps = Get-ChildItem -Path $builtinStepsPath -File
-    $requiredBuiltinSteps = $Global:DeploymentPlan.StepName | Where-Object { $availableBuiltinSteps.BaseName -icontains $_ } | Select-Object -Unique
+    
+    $requiredBuiltinSteps = @()
+    foreach ($builtinStep in $availableBuiltinSteps) {
+        foreach ($planEntry in $Global:DeploymentPlan) {
+            if ($planEntry.StepName -ieq $builtinStep.BaseName -or ($planEntry.StepScriptBlock -and $planEntry.StepScriptBlock.ToString() -imatch $builtinStep.BaseName)) {
+                if ($requiredBuiltinSteps -notcontains $builtinStep) { 
+                    $requiredBuiltinSteps += $builtinStep
+                }
+            }
+        }
+    }
+    
     foreach ($requiredBuiltinStep in $requiredBuiltinSteps) {
-        Write-Log -Info "Including builtin step '$requiredBuiltinStep'"
-        . (Join-Path -Path $builtinStepsPath -ChildPath $requiredBuiltinStep)
+        Write-Log -Info "Including builtin step '$($requiredBuiltinStep.BaseName)'"
+        . $requiredBuiltinStep.FullName
     }
 
     # resolve each step - run Get-Command to validate command exists and run DSC configurations
@@ -175,7 +191,7 @@ function Start-Deployment {
     Write-Log -Info 'Variable $Global:DeploymentPlan has been created.' -Emphasize
     Write-Log -Info "[END] BUILD DEPLOYMENT PLAN" -Emphasize
     if (!$Global:DeploymentPlan) {
-        Write-Log -Warn "No steps to run anywhere. Please ensure your ServerRoles are properly defined and the ServerRoles / Configurations / Nodes filters are correct."
+        Write-Log -Warn "No steps to run anywhere. Please ensure your ServerRoles are properly defined (and have -ServerConnection reference) and the ServerRoles / Configurations / Nodes filters are correct."
         return
     }
 

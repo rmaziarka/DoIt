@@ -33,6 +33,9 @@ function Step {
     .PARAMETER Name
     Name of the server role.
 
+    .PARAMETER ScriptBlock
+    Script block to use for this step. If not specified, DSC configuration/function named $Name will be invoked with default parameters.
+
     .PARAMETER RequiredPackages
     List of packages that will be copied to remote server before running actual steps.
 
@@ -65,6 +68,10 @@ function Step {
         $Name,
 
         [Parameter(Mandatory=$false)]
+        [scriptblock]
+        $ScriptBlock,
+
+        [Parameter(Mandatory=$false)]
         [object]
         $RequiredPackages,
 
@@ -92,6 +99,9 @@ function Step {
     
         $configSettings = $configSettingsDef[$Name]
 
+        if ($PSBoundParameters.ContainsKey('ScriptBlock')) {
+            $configSettings.ScriptBlock = $ScriptBlock
+        }
         if ($PSBoundParameters.ContainsKey('RequiredPackages')) {
             $configSettings.RequiredPackages = $RequiredPackages
         }
