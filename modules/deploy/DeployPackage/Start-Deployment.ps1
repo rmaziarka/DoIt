@@ -163,10 +163,21 @@ function Start-Deployment {
     # include required builtin steps
     $builtinStepsPath = "$PSScriptRoot\..\BuiltinSteps"
     $availableBuiltinSteps = Get-ChildItem -Path $builtinStepsPath -File
-    $requiredBuiltinSteps = $Global:DeploymentPlan.StepName | Where-Object { $availableBuiltinSteps.BaseName -icontains $_ } | Select-Object -Unique
+    
+    $requiredBuiltinSteps = @()
+    foreach ($builtinStep in $availableBuiltinSteps) {
+        foreach ($planEntry in $Global:DeploymentPlan) {
+            if ($planEntry.StepName -ieq $builtinStep.BaseName -or ($planEntry.StepScriptBlock -and $planEntry.StepScriptBlock.ToString() -imatch $builtinStep.BaseName)) {
+                if ($requiredBuiltinSteps -notcontains $builtinStep) { 
+                    $requiredBuiltinSteps += $builtinStep
+                }
+            }
+        }
+    }
+    
     foreach ($requiredBuiltinStep in $requiredBuiltinSteps) {
-        Write-Log -Info "Including builtin step '$requiredBuiltinStep'"
-        . (Join-Path -Path $builtinStepsPath -ChildPath $requiredBuiltinStep)
+        Write-Log -Info "Including builtin step '$($requiredBuiltinStep.BaseName)'"
+        . $requiredBuiltinStep.FullName
     }
 
     # resolve each step - run Get-Command to validate command exists and run DSC configurations

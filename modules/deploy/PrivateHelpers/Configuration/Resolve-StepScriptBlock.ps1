@@ -25,10 +25,11 @@ SOFTWARE.
 function Resolve-StepScriptBlock {
     <#
     .SYNOPSIS
-    Resolves step scriptblock. <TODO>
+    Resolves step scriptblock.
 
     .DESCRIPTION
-    <TODO>
+    If StepScriptBlock is specified, this function parses it and adds automatic parameters ($Tokens, $Environment etc.) to
+    each function/DSC configuration invocation, and prepares ConfigurationData for DSC configurations.
 
     .PARAMETER StepNumber
     Number of step in current server role (only for logging).
@@ -105,7 +106,7 @@ function Resolve-StepScriptBlock {
         NodeName = '$Node'
         Environment = '$Environment'
         ServerRole = '$ServerRole'
-        Tokens = '$ResolvedTokens'
+        Tokens = '$Tokens'
         ConnectionParams = '$ConnectionParams'
         PackagesPath = '$packagesPath'
     }

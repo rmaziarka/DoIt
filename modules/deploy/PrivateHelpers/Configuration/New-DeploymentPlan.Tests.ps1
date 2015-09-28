@@ -461,6 +461,10 @@ Describe -Tag "PSCI.unit" "New-DeploymentPlan" {
                    StepSettings dsc1 -RequiredPackages { if ($NodeName -eq 'node1') { 'packagen1' } else { 'packagen2' } }
                 }
 
+                Environment Test3 {
+                   Step dsc1 -ScriptBlock { dsc1; func2; }
+                }
+
                 It "should properly plan deployment for Environment Default" {
                     $deploymentPlan = New-DeploymentPlan -AllEnvironments $Global:Environments -Environment Default
                     $deploymentPlan.Count | Should Be 4
@@ -511,7 +515,7 @@ Describe -Tag "PSCI.unit" "New-DeploymentPlan" {
                     $deploymentPlan[3].RequiredPackages | Should Be 'package1'
                 }
 
-                It "should properly plan deployment for Environment Test1" {
+                It "should properly plan deployment for Environment Test2" {
                     $deploymentPlan = New-DeploymentPlan -AllEnvironments $Global:Environments -Environment Test2
                     $deploymentPlan.Count | Should Be 4
 
@@ -524,6 +528,33 @@ Describe -Tag "PSCI.unit" "New-DeploymentPlan" {
                     $deploymentPlan[1].ConnectionParams.Nodes | Should Be 'node2'
                     $deploymentPlan[1].RunOnConnectionParams | Should Be $null
                     $deploymentPlan[1].RequiredPackages | Should Be 'packagen2'
+
+                    $deploymentPlan[2].StepName | Should Be 'config1'
+                    $deploymentPlan[2].ConnectionParams.Nodes | Should Be 'node1'
+                    $deploymentPlan[2].RunOnConnectionParams.Nodes | Should Be 'node1'
+                    $deploymentPlan[2].RequiredPackages | Should Be 'package1'
+
+                    $deploymentPlan[3].StepName | Should Be 'config1'
+                    $deploymentPlan[3].ConnectionParams.Nodes[0] | Should Be 'node2'
+                    $deploymentPlan[3].RunOnConnectionParams.Nodes | Should Be 'node2'
+                    $deploymentPlan[3].RequiredPackages | Should Be 'package1'
+                }
+
+                It "should properly plan deployment for Environment Test3" {
+                    $deploymentPlan = New-DeploymentPlan -AllEnvironments $Global:Environments -Environment Test3
+                    $deploymentPlan.Count | Should Be 4
+
+                    $deploymentPlan[0].StepName | Should Be 'dsc1'
+                    $deploymentPlan[0].StepScriptBlock | Should Be ' dsc1; func2; '
+                    $deploymentPlan[0].ConnectionParams.Nodes | Should Be 'node1'
+                    $deploymentPlan[0].RunOnConnectionParams | Should Be $null
+                    $deploymentPlan[0].RequiredPackages | Should Be 'package1'
+                    
+                    $deploymentPlan[1].StepName | Should Be 'dsc1'
+                    $deploymentPlan[1].StepScriptBlock | Should Be ' dsc1; func2; '
+                    $deploymentPlan[1].ConnectionParams.Nodes | Should Be 'node2'
+                    $deploymentPlan[1].RunOnConnectionParams | Should Be $null
+                    $deploymentPlan[1].RequiredPackages | Should Be 'package1'
 
                     $deploymentPlan[2].StepName | Should Be 'config1'
                     $deploymentPlan[2].ConnectionParams.Nodes | Should Be 'node1'

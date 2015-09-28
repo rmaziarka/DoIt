@@ -46,7 +46,7 @@ function Invoke-DeploymentStep {
     .PARAMETER ServerRole
     Server role name - will be passed as 'ServerRole' to the configuration.
 
-    .PARAMETER ResolvedTokens
+    .PARAMETER Tokens
     Tokens resolved for the node/environment - will be passed as 'Tokens' to the configuration.
 
     .PARAMETER ConnectionParams
@@ -81,7 +81,7 @@ function Invoke-DeploymentStep {
 
         [Parameter(Mandatory=$true)]
         [hashtable]
-        $ResolvedTokens,
+        $Tokens,
 
         [Parameter(Mandatory=$true)]
         [object]
@@ -93,7 +93,7 @@ function Invoke-DeploymentStep {
         NodeName = '$Node'
         Environment = '$Environment'
         ServerRole = '$ServerRole'
-        Tokens = '$ResolvedTokens'
+        Tokens = '$Tokens'
         ConnectionParams = '$ConnectionParams'
         PackagesPath = '$packagesPath'
       }
@@ -102,7 +102,7 @@ function Invoke-DeploymentStep {
     $packagesPath = (Get-ConfigurationPaths).PackagesPath
         
     $scriptBlockToRun = [scriptblock]::Create($StepScriptBlockResolved)
-    Write-Log -Info "Running custom command: $StepScriptBlockResolved"
+    Write-Log -Info "Step '$stepName' - running custom command: $StepScriptBlockResolved"
 
     & $scriptBlockToRun
 

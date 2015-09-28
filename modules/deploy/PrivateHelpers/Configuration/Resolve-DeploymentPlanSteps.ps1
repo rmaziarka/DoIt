@@ -118,11 +118,11 @@ function Resolve-DeploymentPlanSteps {
             -Node $dscNode `
             -Environment $entry.Environment `
             -ServerRole $entry.ServerRole `
-            -ResolvedTokens $entry.Tokens `
+            -Tokens $entry.Tokens `
             -ConnectionParams $entry.ConnectionParams)
 
         if (!(Get-ChildItem -Path $entry.StepMofDir -Filter "*.mof")) {
-            Write-Log -Warn "Mof file has not been generated for step named '$($entry.StepName)' (Environment '$($entry.Environment)' / ServerRole '$($entry.ServerRole)'). Please ensure your configuration definition is correct."
+            throw "Mof file has not been generated for step named '$($entry.StepName)' (Environment '$($entry.Environment)' / ServerRole '$($entry.ServerRole)'). Please ensure your configuration definition is correct and your DSC configuration contains 'Node `$AllNodes.NodeName' or 'Node `$NodeName'."
         }
         
         $entry.StepMofDir = Resolve-Path -LiteralPath $entry.StepMofDir
