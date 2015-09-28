@@ -123,22 +123,23 @@ function Copy-FilesFromRemoteServer {
     $preCopyScriptBlock = Get-PreCopyFromScriptBlock 
     $postCopyScriptBlock = Get-PostCopyFromScriptBlock
 
-    $sessions = New-CopySessions -ConnectionParams $ConnectionParams
+    $copySessions = New-CopySessions -ConnectionParams $ConnectionParams
                                  
-    if (!$sessions) {
+    if (!$copySessions) {
         Write-Progress -Activity "Finished" -Completed -Id 1
         return @()
     }
 
     try { 
-        foreach ($session in $sessions) { 
-           Invoke-Command -Session $session -ScriptBlock (Convert-FunctionToScriptBlock -FunctionName Get-FlatFileList)
-           Invoke-Command -Session $session -ScriptBlock (Convert-FunctionToScriptBlock -FunctionName New-Zip)
+        foreach ($copySession in $copySessions) { 
+           $psSession = $copySession.PSSession
+           Invoke-Command -Session $psSession -ScriptBlock (Convert-FunctionToScriptBlock -FunctionName Get-FlatFileList)
+           Invoke-Command -Session $psSession -ScriptBlock (Convert-FunctionToScriptBlock -FunctionName New-Zip)
 
-           ($srcZipFilePath, $srcZipFileSize) = Invoke-Command -Session $session -ScriptBlock $preCopyScriptBlock -ArgumentList $RemotePath, $Destination, $Include, $IncludeRecurse, $Exclude, $ExcludeRecurse
+           ($srcZipFilePath, $srcZipFileSize) = Invoke-Command -Session $psSession -ScriptBlock $preCopyScriptBlock -ArgumentList $RemotePath, $Destination, $Include, $IncludeRecurse, $Exclude, $ExcludeRecurse
 
            $destZipFilePath = '{0}{1}.zip' -f [System.IO.Path]::GetTempPath(), [System.IO.Path]::GetRandomFileName()
-           Get-RemoteFileUsingStream -Session $session -SourcePath $srcZipFilePath -DestinationPath $destZipFilePath -SourceFileSize $srcZipFileSize
+           Get-RemoteFileUsingStream -Session $psSession -SourcePath $srcZipFilePath -DestinationPath $destZipFilePath -SourceFileSize $srcZipFileSize
 
            Write-Progress -Activity "Uncompressing $destZipFilePath" -Id 1
            $dest = $Destination.Substring(0, 3)
@@ -146,11 +147,15 @@ function Copy-FilesFromRemoteServer {
         }
     } finally {
         if ($srcZipFilePath) {
-            Invoke-Command -Session $session -ScriptBlock $postCopyScriptBlock -ArgumentList $srcZipFilePath
+            Invoke-Command -Session $psSession -ScriptBlock $postCopyScriptBlock -ArgumentList $srcZipFilePath
         }
-        foreach ($session in ($sessions | Where-Object { $_.State -ne 'Closed' })) {
-            Remove-PSSession -Session $session
+
+        foreach ($copySession in $copySessions) {
+            if ($copySession.PSSession -and $copySession.PSSession.State -ne 'Closed') {
+                Remove-PSSession -Session $copySession.PSSession
+            }
         }
+
         if ($destZipFilePath -and (Test-Path -LiteralPath $destZipFilePath)) {
             [void](Remove-Item -LiteralPath $destZipFilePath -Force)
         }

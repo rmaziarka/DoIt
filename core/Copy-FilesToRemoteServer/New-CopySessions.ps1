@@ -132,31 +132,33 @@ function New-CopySessions {
         }
 
         if ($needUpdate) {
-            $destinationDrive = ($Destination[0])[0]
-            $psDriveParams = @{
-                Name = "PSCICopyDrive$serverIndex"
-                PSProvider = 'FileSystem'
-                Root = "\\$server\${destinationDrive}`$"
-                Scope = 'Script'
-            }
-            if ($ConnectionParams.Credential) {
-                $psDriveParams.Credential = $ConnectionParams.Credential
-            }
-            $psDrive = Get-PSDrive -LiteralName $psDriveParams.Name -PSProvider FileSystem -ErrorAction SilentlyContinue 
-            if ($psDrive -and ($psDrive.Root -ne $psDriveParams.Root -or $psDrive.Credential.UserName -ne $psDriveParams.Credential.UserName)) {
-                Remove-PSDrive -LiteralName $psDriveParams.Name
-                $psDrive = $null
-            }
-            if (!$psDrive) { 
-                try { 
-                    $psDrive = New-PSDrive @psDriveParams
-                } catch { 
-                    if ($_) { 
-                        $err = $_.ToString()
-                    } else {
-                        $err = ''
+            if ($Destination) { 
+                $destinationDrive = ($Destination[0])[0]
+                $psDriveParams = @{
+                    Name = "PSCICopyDrive$serverIndex"
+                    PSProvider = 'FileSystem'
+                    Root = "\\$server\${destinationDrive}`$"
+                    Scope = 'Script'
+                }
+                if ($ConnectionParams.Credential) {
+                    $psDriveParams.Credential = $ConnectionParams.Credential
+                }
+                $psDrive = Get-PSDrive -LiteralName $psDriveParams.Name -PSProvider FileSystem -ErrorAction SilentlyContinue 
+                if ($psDrive -and ($psDrive.Root -ne $psDriveParams.Root -or $psDrive.Credential.UserName -ne $psDriveParams.Credential.UserName)) {
+                    Remove-PSDrive -LiteralName $psDriveParams.Name
+                    $psDrive = $null
+                }
+                if (!$psDrive) { 
+                    try { 
+                        $psDrive = New-PSDrive @psDriveParams
+                    } catch { 
+                        if ($_) { 
+                            $err = $_.ToString()
+                        } else {
+                            $err = ''
+                        }
+                        Write-Log -Warn "Failed to create PSDrive $($psDriveParams.Root): $err - falling back to WinRM stream."
                     }
-                    Write-Log -Warn "Failed to create PSDrive $($psDriveParams.Root): $err - falling back to WinRM stream."
                 }
             }
             
