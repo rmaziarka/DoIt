@@ -156,7 +156,7 @@ function Copy-FilesToRemoteServer {
        $hashPath = Get-Hash -Path $Path -Include $Include -IncludeRecurse:$IncludeRecurse -Exclude $Exclude -ExcludeRecurse:$ExcludeRecurse
     }
 
-    $sessions = New-CopySessions -ConnectionParams $ConnectionParams `
+    $copySessions = New-CopySessions -ConnectionParams $ConnectionParams `
                                  -Include $Include `
                                  -IncludeRecurse:$IncludeRecurse `
                                  -Exclude $Exclude `
@@ -164,7 +164,7 @@ function Copy-FilesToRemoteServer {
                                  -Destination $Destination `
                                  -CheckHashMode $CheckHashMode `
                                  -HashPath $hashPath
-    if (!$sessions) {
+    if (!$copySessions) {
         Write-Progress -Activity "Finished" -Completed -Id 1
         return @()
     }
@@ -173,7 +173,7 @@ function Copy-FilesToRemoteServer {
         $hashPath = $null
     }
 
-    $serversToUpdate = $sessions | Select-Object -ExpandProperty ComputerName
+    $serversToUpdate = $copySessions.PSSession | Select-Object -ExpandProperty ComputerName
 
     try { 
         if ($Path.Count -eq 1 -and $Path.ToLower().EndsWith('zip')) {
@@ -209,11 +209,13 @@ function Copy-FilesToRemoteServer {
             }
         }
         $zipItem = Get-Item -Path $zipToCopy
-        foreach ($session in $sessions) { 
-           Invoke-Command -Session $session -ScriptBlock (Convert-FunctionToScriptBlock -FunctionName Expand-ZipShell)
-           Invoke-Command -Session $session -ScriptBlock (Convert-FunctionToScriptBlock -FunctionName Expand-Zip)
-           $destZipFile = Invoke-Command -Session $session -ScriptBlock $preCopyScriptBlock -ArgumentList $zipItem.Name, $Destination, $BlueGreenEnvVariableName, $ClearDestination
-           Send-FileStream -Session $session -ItemToCopy $zipItem -DestinationPath $destZipFile
+        foreach ($copySession in $copySessions) { 
+           $psSession = $copySession.PSSession
+           $psDrive = $copySession.PSDrive
+           Invoke-Command -Session $psSession -ScriptBlock (Convert-FunctionToScriptBlock -FunctionName Expand-ZipShell)
+           Invoke-Command -Session $psSession -ScriptBlock (Convert-FunctionToScriptBlock -FunctionName Expand-Zip)
+           $destZipFile = Invoke-Command -Session $psSession -ScriptBlock $preCopyScriptBlock -ArgumentList $zipItem.Name, $Destination, $BlueGreenEnvVariableName, $ClearDestination
+           Send-FileStream -Session $psSession -PSDrive $psDrive -ItemToCopy $zipItem -DestinationPath $destZipFile
 
            Write-Progress -Activity "Uncompressing $destZipFile" -Id 1
            if ($isStructuredZip) {
@@ -222,14 +224,19 @@ function Copy-FilesToRemoteServer {
            } else {
                $dest = Split-Path -Parent $destZipFile
            }
-           [void](Invoke-Command -Session $session -ScriptBlock $postCopyScriptBlock -ArgumentList $destZipFile, $dest, $BlueGreenEnvVariableName, $hashPath, $ClearDestination)
+           [void](Invoke-Command -Session $psSession -ScriptBlock $postCopyScriptBlock -ArgumentList $destZipFile, $dest, $BlueGreenEnvVariableName, $hashPath, $ClearDestination)
 
-           Remove-PSSession -Session $session
+           Remove-PSSession -Session $psSession
            Write-Progress -Activity "Finished" -Completed -Id 1
         }
     } finally {
-        foreach ($session in ($sessions | Where-Object { $_.State -ne 'Closed' })) {
-            Remove-PSSession -Session $session
+        foreach ($copySession in $copySessions) {
+            if ($copySession.PSSession -and $copySession.PSSession.State -ne 'Closed') {
+                Remove-PSSession -Session $copySession.PSSession
+            }
+            if ($copySession.PSDrive) {
+                Remove-PSDrive -LiteralName $copySession.PSDrive.Name -ErrorAction SilentlyContinue
+            }
         }
         if ($tempZip -and (Test-Path -LiteralPath $tempZip)) {
             [void](Remove-Item -LiteralPath $tempZip -Force)

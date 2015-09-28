@@ -97,8 +97,9 @@ function New-CopySessions {
         $HashPath
     )
 
-    $sessions = @()
+    $result = @()
     # compare it with the hash of items on remote hosts
+    $serverIndex = 1
     foreach ($server in $ConnectionParams.Nodes) { 
         # Initialize session with remote server
         
@@ -131,13 +132,45 @@ function New-CopySessions {
         }
 
         if ($needUpdate) {
+            $destinationDrive = ($Destination[0])[0]
+            $psDriveParams = @{
+                Name = "PSCICopyDrive$serverIndex"
+                PSProvider = 'FileSystem'
+                Root = "\\$server\${destinationDrive}`$"
+                Scope = 'Script'
+            }
+            if ($ConnectionParams.Credential) {
+                $psDriveParams.Credential = $ConnectionParams.Credential
+            }
+            $psDrive = Get-PSDrive -LiteralName $psDriveParams.Name -PSProvider FileSystem -ErrorAction SilentlyContinue 
+            if ($psDrive -and ($psDrive.Root -ne $psDriveParams.Root -or $psDrive.Credential.UserName -ne $psDriveParams.Credential.UserName)) {
+                Remove-PSDrive -LiteralName $psDriveParams.Name
+                $psDrive = $null
+            }
+            if (!$psDrive) { 
+                try { 
+                    $psDrive = New-PSDrive @psDriveParams
+                } catch { 
+                    if ($_) { 
+                        $err = $_.ToString()
+                    } else {
+                        $err = ''
+                    }
+                    Write-Log -Warn "Failed to create PSDrive $($psDriveParams.Root): $err - falling back to WinRM stream."
+                }
+            }
+            
             # SuppressScriptCop - adding small arrays is ok
-            $sessions += @($session)
+            $result += @{ 
+                PSSession = $session
+                PSDrive = $psDrive
+            }
         } else {
             Write-Log -Info "'$server' is up to date - no need to copy."
             Remove-PSSession -Session $session
         }
+        $serverIndex++
     }
 
-    return $sessions
+    return $result
 }

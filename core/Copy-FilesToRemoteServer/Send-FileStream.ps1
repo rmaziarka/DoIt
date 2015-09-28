@@ -30,6 +30,9 @@ function Send-FileStream {
     .PARAMETER Session
         Open session to the remote server.
 
+    .PARAMETER PSDrive
+        Open administrative share to the remote server.
+
     .PARAMETER ItemToCopy
         Item that will be copied (output from Get-Item).
 
@@ -47,6 +50,10 @@ function Send-FileStream {
         [object]
         $Session,
 
+        [Parameter(Mandatory = $false)]
+        [object]
+        $PSDrive,
+
         [Parameter(Mandatory = $true)]
         [object]
         $ItemToCopy,
@@ -58,7 +65,28 @@ function Send-FileStream {
 
     $itemSize = Convert-BytesToSize -Size $ItemToCopy.Length
 
-    Write-Log -Info "Copying '$($ItemToCopy.FullName)' ($itemSize) to remote node '$($session.ComputerName)' / '$DestinationPath'"
+    $msg = "Copying '$($ItemToCopy.FullName)' ($itemSize) to remote node '$($session.ComputerName)' / '$DestinationPath'"
+    if ($PSDrive) {
+        $msg += " using share '$($PSDrive.Root)'"
+    } else {
+        $msg += " using WinRM stream"
+    }
+    Write-Log -Info $msg
+
+    if ($PSDrive) {
+        try { 
+            $DestinationPath = Join-Path -Path "$($PSDrive.Name):" -ChildPath ($DestinationPath.Substring(3))
+            Copy-Item -Path $ItemToCopy.FullName -Destination $DestinationPath -Force
+            return
+        } catch {
+            if ($_) {
+                $err = $_.ToString()
+            } else {
+                $err = ''
+            }
+            Write-Log -Warn "Copy-Item to '$DestinationPath' failed: $err - falling back to WinRM stream"
+        }
+    }
 
     $writeBytesRemoteScript = Get-WriteBytesScriptBlock
     $streamSize = 1MB
