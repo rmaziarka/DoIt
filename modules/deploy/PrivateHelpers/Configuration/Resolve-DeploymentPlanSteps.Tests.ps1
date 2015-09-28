@@ -87,7 +87,7 @@ Describe -Tag "PSCI.unit" "Resolve-DeploymentPlanSteps" {
             Node = $deploymentPlanEntry.ConnectionParams.NodesAsString
             Environment = $deploymentPlanEntry.Environment
             ServerRole = $deploymentPlanEntry.ServerRole
-            ResolvedTokens = $deploymentPlanEntry.Tokens
+            Tokens = $deploymentPlanEntry.Tokens
             ConnectionParams = $deploymentPlanEntry.ConnectionParams
         }
 
