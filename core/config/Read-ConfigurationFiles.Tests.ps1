@@ -35,12 +35,16 @@ Describe -Tag "PSCI.unit" "Read-ConfigurationFiles" {
             }
         }
 
+        Mock Get-PSCIModulePath {
+            return '.'
+        }
+
        
        $testConfigDir = 'testConfiguration'
        $testFileFunc = Join-Path -Path $testConfigDir -ChildPath 'testFileFunc.ps1'
        $testFileDSC = Join-Path -Path $testConfigDir -ChildPath 'testFileDSC.ps1'
 
-        Context "when configuration directory does not have any files" {
+       Context "when configuration directory does not have any files" {
             It "should throw exception" {
                 $fail = $false
                 try {
@@ -110,7 +114,43 @@ Describe -Tag "PSCI.unit" "Read-ConfigurationFiles" {
             }
         }
 
-         Context "when configuration directory has Import-DSCResource statement with $" {
+        Context "when configuration directory has reference to builtin steps" {
+            It "should succeed and return RequiredDSCModules from the step" {
+                try {
+                    [void](New-Item -Path $testConfigDir -ItemType Directory -Force)
+                    [void](New-Item -Path $testFileDSC -ItemType File -Force -Value @'
+    Environment Default {
+        ServerConnection TestNode -Nodes localhost
+        ServerRole TestRole -Steps @('PSCIWindowsFeatures') -ServerConnections TestNode
+
+        Step PSCI-Step
+    }
+'@)
+                    [void](New-Item -Path 'BuiltinSteps' -ItemType Directory -Force)
+                    [void](New-Item -Path 'BuiltinSteps\PSCIWindowsFeatures.ps1' -ItemType File -Force -Value @'
+                         Configuration Test {
+                            Import-DSCResource xDismFeature1
+'@)
+[void](New-Item -Path 'BuiltinSteps\PSCI-Step.ps1' -ItemType File -Force -Value @'
+                         Configuration Test {
+                            Import-DSCResource xDismFeature2
+'@)
+                    $Global:PSCIGlobalConfiguration = @{ ConfigurationPaths = @{ DeployConfigurationPath = $testConfigDir } }
+                    $result = Read-ConfigurationFiles
+                
+                    $result | Should Not Be $null
+                    $result.Files | Should Be (Resolve-Path -LiteralPath $testFileDSC).Path
+                    $result.RequiredDSCModules.Count | Should Be 2
+                    $result.RequiredDSCModules -icontains 'xDismFeature1' | Should Be $true
+                    $result.RequiredDSCModules -icontains 'xDismFeature2' | Should Be $true
+                } finally {
+                    Remove-Item -LiteralPath $testConfigDir -Force -Recurse
+                    Remove-Item -LiteralPath 'BuiltinSteps' -Force -Recurse
+                }
+            }
+        }
+
+        Context "when configuration directory has Import-DSCResource statement with $" {
             It "should throw exception" {
                 try {
                     [void](New-Item -Path $testConfigDir -ItemType Directory -Force)
