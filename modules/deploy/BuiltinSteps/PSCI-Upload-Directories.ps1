@@ -30,8 +30,8 @@ function PSCI-Upload-Directories {
 
     .DESCRIPTION
     It uses following tokens:
-    $Tokens.Directories - hashtable in form @{ '<source_directory relative to packagesPath>' = '<destination_directory>' }
-    $Tokens.CheckHashMode (optional) - type of hash check (optimization) - see [[Copy-FilesToRemoteServer].
+    - **$Tokens.Directories** - hashtable in form @{ '<source_directory relative to packagesPath>' = '<destination_directory>' }
+    - **$Tokens.CheckHashMode** (optional) - type of hash check (optimization) - see [[Copy-FilesToRemoteServer].
 
     .PARAMETER NodeName
     [automatic parameter] Name of node where the directories will be uploaded to.

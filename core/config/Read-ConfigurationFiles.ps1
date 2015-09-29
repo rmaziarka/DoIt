@@ -60,15 +60,23 @@ function Read-ConfigurationFiles {
         throw "There are no configuration files at '$configPath'. Please ensure you have passed valid 'DeployConfigurationPath' parameter."
     }
 
-    
-
     $invalidLineRegex = '(Import-DSCResource.*`[\s\\r\\n$])'
     $dscResourceRegex = 'Import-DSCResource\s+(?:-Module)?(?:Name)?\s*([^-][^\s;]+)|Import-DSCResource.+-Module(?:Name)?\s*([^-][^\s;]+)'
     $sqlpsxSsisRegex = 'Deploy-SSISPackage|Import-SQLPSXSSIS'
+    $builtinStepRegex = '\b(PSCI[\w-]+)\b'
     foreach ($script in $configScripts) {
         $contents = Get-Content -Path $script.FullName -ReadCount 0 | Out-String
         if ($contents -imatch $invalidLineRegex) {
             throw "File '$configPath' contains 'Import-DSCResource' line that ends with backtick, which is not allowed. Please change it to fit into one line. Offending line: $($matches[0])"
+        }
+        $deployModulePath = Get-PSCIModulePath -ModuleName 'PSCI.Deploy'
+        $builtinStepMatches = Select-String -InputObject $contents -Pattern $builtinStepRegex -AllMatches
+        foreach ($builtinStepMatch in $builtinStepMatches.Matches) {
+            $stepName = $builtinStepMatch.Groups[1].Value
+            $builtinStepPath = "$deployModulePath\BuiltinSteps\${stepName}.ps1"
+            if ((Test-Path -Path $builtinStepPath)) {
+                $contents += Get-Content -Path $builtinStepPath -ReadCount 0 | Out-String
+            }
         }
         $result.Files += $script.FullName
         $matchInfo = Select-String -InputObject $contents -Pattern $dscResourceRegex -AllMatches
