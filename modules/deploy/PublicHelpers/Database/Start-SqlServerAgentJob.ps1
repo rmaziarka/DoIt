@@ -119,11 +119,6 @@ function Start-SqlServerAgentJob {
         throw "Cannot find job named '$JobName' in msdb.dbo.sysjobs table."
     }
 
-    $beforeRunMaxInstanceId = Invoke-Sql @sqlParams -Query "select max(isnull(instance_id, 0)) from msdb.dbo.sysjobhistory where job_id = '$jobId'"
-    if (!$beforeRunMaxInstanceId -or $beforeRunMaxInstanceId -is [System.DBNull]) {
-        $beforeRunMaxInstanceId = 0
-    }
-
     $sql = "DECLARE @output int; EXEC @output = msdb.dbo.sp_start_job @job_name=N'$JobName'"
     if ($StepName) {
         $sql += ", @step_name=N'$StepName'"
@@ -143,9 +138,10 @@ function Start-SqlServerAgentJob {
 
     $runningSeconds = 0
     do {
-
-        $maxInstanceId = Invoke-Sql @sqlParams -Query "select max(isnull(instance_id, 0)) from msdb.dbo.sysjobhistory where job_id = '$jobId'"
-        if ($maxInstanceId -isnot [System.DBNull] -and $maxInstanceId -gt $beforeRunMaxInstanceId) {
+        $sessionId = Invoke-Sql @sqlParams -Query `
+        ("select top(1) session_id from msdb.dbo.sysjobactivity where job_id = '$jobId' and start_execution_date is not null and stop_execution_date is null " + `
+        "order by start_execution_date desc")
+        if ($sessionId -is [System.DBNull]) {
             break
         }
         Write-Log -Info "Job '$JobName' is still running."
@@ -178,7 +174,9 @@ function Start-SqlServerAgentJob {
 
     if ($runOutcome -ne 1) {
         Write-Log -Info "History $jobId / $runDate / $runTime"
-        $historyInfo = Invoke-Sql @sqlParams -Query "select step_id, step_name, message from msdb.dbo.sysjobhistory where job_id = '$jobId' and run_date = $runDate and run_time = $runTime order by step_id"
+        $historyInfo = Invoke-Sql @sqlParams -Query `
+        ("select step_id, step_name, message from msdb.dbo.sysjobhistory where job_id = '$jobId' and " + `
+         "msdb.dbo.agent_datetime(run_date,run_time) >= msdb.dbo.agent_datetime($runDate, $runTime) order by step_id")
 
         $log = "Job '$JobName' has failed (outcome $runOutcome = '$runOutcomeName'). Run history:`r`n"
         foreach ($historyEntry in $historyInfo.Tables[0]) {
