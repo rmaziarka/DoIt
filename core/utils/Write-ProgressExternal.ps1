@@ -52,7 +52,7 @@ Function Write-ProgressExternal {
         $ErrorMessage,
 
         [Parameter(Mandatory=$false)]
-        [ValidateSet($null, 'Progress', 'Status', 'Problem')]
+        [ValidateSet($null, 'Progress', 'Status', 'Problem', 'BlockOpened', 'BlockClosed')]
         [string]
         $MessageType
     )
@@ -78,6 +78,10 @@ Function Write-ProgressExternal {
         Write-Host "##teamcity[buildStatus text='{build.status.text} $Message']"
     } elseif ($MessageType -eq 'Problem') {
         Write-Host "##teamcity[buildProblem description='$Message']"
+    } elseif ($MessageType -eq 'BlockOpened') {
+        Write-Host "##teamcity[blockOpened name='$Message']"
+    } elseif ($MessageType -eq 'BlockClosed') {
+        Write-Host "##teamcity[blockClosed name='$Message']"
     } else {
         throw "Unrecognized MessageType: $MessageType."
     }

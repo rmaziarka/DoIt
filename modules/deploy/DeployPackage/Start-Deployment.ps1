@@ -135,6 +135,7 @@ function Start-Deployment {
     }
     
     if (!$NoConfigFiles) { 
+        Write-ProgressExternal -MessageType BlockOpened -Message 'Parse config files'
         Write-Log -Info "[START] PARSE CONFIG FILES - environment(s) '$($Environment -join ',')'" -Emphasize
         $configInfo = Read-ConfigurationFiles
 
@@ -153,8 +154,10 @@ function Start-Deployment {
         }
         # here $Global:Environments should be populated
         Write-Log -Info "[END] PARSE CONFIG FILES" -Emphasize
+        Write-ProgressExternal -MessageType BlockClosed -Message 'Parse config files'
     }
     
+    Write-ProgressExternal -MessageType BlockOpened -Message 'Build deployment plan'
     Write-Log -Info "[START] BUILD DEPLOYMENT PLAN" -Emphasize
     $Global:DeploymentPlan = New-DeploymentPlan -AllEnvironments $Global:Environments -Environment $Environment -ServerRolesFilter $ServerRolesFilter `
                                                 -StepsFilter $StepsFilter -NodesFilter $NodesFilter -TokensOverride $TokensOverride `
@@ -190,6 +193,8 @@ function Start-Deployment {
 
     Write-Log -Info 'Variable $Global:DeploymentPlan has been created.' -Emphasize
     Write-Log -Info "[END] BUILD DEPLOYMENT PLAN" -Emphasize
+    Write-ProgressExternal -MessageType BlockClosed -Message 'Build deployment plan'
+
     if (!$Global:DeploymentPlan) {
         Write-Log -Warn "No steps to run anywhere. Please ensure your ServerRoles are properly defined (and have -ServerConnection reference) and the ServerRoles / Configurations / Nodes filters are correct."
         return

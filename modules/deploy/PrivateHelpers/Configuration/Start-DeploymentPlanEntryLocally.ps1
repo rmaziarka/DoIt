@@ -45,10 +45,12 @@ function Start-DeploymentPlanEntryLocally {
         $DeploymentPlanGroupedEntry
     )
 
+    $stepNumber = 0
     foreach ($configInfo in $DeploymentPlanGroupedEntry.GroupedConfigurationInfo) {
-        Write-Log -Info ("[START] RUN LOCAL CONFIGURATION '{0}' / NODE '{1}'" -f $configInfo.StepName, $configInfo.ConnectionParams.NodesAsString) -Emphasize
+        Write-ProgressExternal -MessageType BlockOpened -Message ('Step {0}/{1}: {2}' -f ++$stepNumber, $DeploymentPlanGroupedEntry.GroupedConfigurationInfo.count, $configInfo.StepName)
+        Write-Log -Info ("[START] RUN LOCAL STEP '{0}' / NODE '{1}'" -f $configInfo.StepName, $configInfo.ConnectionParams.NodesAsString) -Emphasize
         Write-ProgressExternal -Message ('Deploying {0} to {1}' -f $configInfo.StepName, $configInfo.ConnectionParams.NodesAsString) `
-                               -ErrorMessage ('Deploy error - node {0}, conf {1}' -f $configInfo.ConnectionParams.NodesAsString, $configInfo.StepName)
+                               -ErrorMessage ('Deploy error - node {0}, step {1}' -f $configInfo.ConnectionParams.NodesAsString, $configInfo.StepName)
         if ($configInfo.StepType -eq 'Configuration') {
             $params = @{
                 ConnectionParams = $configInfo.ConnectionParams
@@ -74,6 +76,7 @@ function Start-DeploymentPlanEntryLocally {
                 Pop-Location
            }
         }
-        Write-Log -Info ("[END] RUN LOCAL CONFIGURATION '{0}' / NODE '{1}'" -f $configInfo.StepName, $configInfo.ConnectionParams.NodesAsString) -Emphasize
+        Write-Log -Info ("[END] RUN LOCAL STEP '{0}' / NODE '{1}'" -f $configInfo.StepName, $configInfo.ConnectionParams.NodesAsString) -Emphasize
+        Write-ProgressExternal -MessageType BlockClosed -Message ('Step {0}/{1}: {2}' -f $stepNumber, $DeploymentPlanGroupedEntry.GroupedConfigurationInfo.count, $configInfo.StepName)
     }   
 }

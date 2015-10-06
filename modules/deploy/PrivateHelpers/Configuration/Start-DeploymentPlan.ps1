@@ -74,6 +74,7 @@ function Start-DeploymentPlan {
     )
 
     if (!$PSCIGlobalConfiguration.RemotingMode) {
+        Write-ProgressExternal -MessageType BlockOpened -Message 'Deploy'
         Write-Log -Info '[START] ACTUAL DEPLOYMENT' -Emphasize
     }
 
@@ -125,6 +126,7 @@ function Start-DeploymentPlan {
         $entriesToInstallDSC = $DeploymentPlan | Where-Object { $_.StepType -eq 'Configuration' -and !$_.IsLocalRun }
         if ($entriesToInstallDSC) {
             $dscInstalledNodes = @()
+            Write-ProgressExternal -MessageType BlockOpened -Message 'Install DSC resources'
             Write-ProgressExternal -Message 'Installing DSC resources' -ErrorMessage 'DSC resources install error'
             Write-Log -Info '[START] INSTALL DSC RESOURCES' -Emphasize
             foreach ($entry in $entriesToInstallDSC) {
@@ -135,17 +137,26 @@ function Start-DeploymentPlan {
                 }
             }
             Write-Log -Info '[END] INSTALL DSC RESOURCES' -Emphasize
+            Write-ProgressExternal -MessageType BlockClosed -Message 'Install DSC resources'
         }
     }
 
+    $i = 0
     foreach ($entry in $planByRunOn) {
-        if ($entry.GroupedConfigurationInfo[0].RunOnConnectionParams -and !$PSCIGlobalConfiguration.RemotingMode) {   
+        if ($entry.GroupedConfigurationInfo[0].RunOnConnectionParams -and !$PSCIGlobalConfiguration.RemotingMode) {
+            $blockName = 'Step {0}/{1}: Deploy remotely from {2}' -f ++$i, $planByRunOn.count, $entry.GroupedConfigurationInfo[0].RunOnConnectionParams.NodesAsString
+            Write-ProgressExternal -MessageType BlockOpened -Message $blockName 
             Start-DeploymentPlanEntryRemotely -DeploymentPlanGroupedEntry $entry -DeployType $DeployType           
         } else {
+            $blockName = 'Step {0}/{1}: Deploy from localhost' -f ++$i, $planByRunOn.count
+            Write-ProgressExternal -MessageType BlockOpened -Message $blockName 
             Start-DeploymentPlanEntryLocally -DeploymentPlanGroupedEntry $entry
         }
+
+        Write-ProgressExternal -MessageType BlockClosed -Message $blockName
     }
     if (!$PSCIGlobalConfiguration.RemotingMode) {
         Write-Log -Info "[END] ACTUAL DEPLOYMENT" -Emphasize
+        Write-ProgressExternal -MessageType BlockClosed -Message 'Deploy'
     }
 }

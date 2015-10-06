@@ -53,7 +53,7 @@ function Start-DeploymentPlanEntryRemotely {
         [string]
         $DeployType = 'All'
     )    
- 
+
     $configInfo = $DeploymentPlanGroupedEntry.GroupedConfigurationInfo
     $runOnConnectionParams = $configInfo[0].RunOnConnectionParams
     $packageDirectory = $configInfo[0].PackageDirectory
@@ -88,15 +88,16 @@ function Start-DeploymentPlanEntryRemotely {
         $userName = ''
     }
     
-    Write-Log -Info ("[START] RUN REMOTE CONFIGURATION(s) '{0}' / RUNON '{1}' / REMOTING '{2}' / AUTH '{3}' / CRED '{4}' / PROTOCOL '{5}'" -f `
-        ($configInfo.StepName -join "','"),
+    $stepNames = $configInfo.StepName -join "','"
+    Write-Log -Info ("[START] RUN REMOTE STEP(s) '{0}' / RUNON '{1}' / REMOTING '{2}' / AUTH '{3}' / CRED '{4}' / PROTOCOL '{5}'" -f `
+        $stepNames,
         $runOnNode, `
         $runOnConnectionParams.RemotingMode, `
         $runOnConnectionParams.Authentication, `
         $userName, `
         $runOnConnectionParams.Protocol) -Emphasize
-    Write-ProgressExternal -Message ("Deploying remotely {0} to {1}" -f ($configInfo.StepName -join ","), $runOnNode) `
-        -ErrorMessage ('Deploy error - node {0}, conf {1}' -f $runOnNode, ($configInfo.StepName -join ","))
+    Write-ProgressExternal -Message ("Deploying remotely {0} to {1}" -f $stepNames, $runOnNode) `
+        -ErrorMessage ('Deploy error - node {0}, conf {1}' -f $runOnNode, $stepNames)
 
     if ($remotingMode -eq 'WebDeployHandler' -or $remotingMode -eq 'WebDeployAgentService') {
         Start-DeploymentByMSDeploy @params
@@ -105,6 +106,5 @@ function Start-DeploymentPlanEntryRemotely {
     } else {
         throw "Remoting Mode '$remotingMode' is not supported."
     }
-    Write-Log -Info ("[END] RUN REMOTE CONFIGURATION '{0}' / RUNON '{1}'" -f ($configInfo.StepName -join ","), $runOnNode) -Emphasize
-    
+    Write-Log -Info ("[END] RUN REMOTE STEP '{0}' / RUNON '{1}'" -f $stepNames, $runOnNode) -Emphasize
 }
