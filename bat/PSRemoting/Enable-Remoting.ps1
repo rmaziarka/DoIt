@@ -120,13 +120,6 @@ function Enable-Remoting {
         Write-Error "PowerShell/Windows Management Framework needs to be updated to 3 or higher. Stopping script"
     }
 
-    # < Windows Server 2012 -> need legacy way to create self-signed certificate
-    if ([Environment]::OSVersion.Version.Major -lt 6 -or ([Environment]::OSVersion.Version.Major -eq 6 -and [Environment]::OSVersion.Version.Minor -lt 2)) {
-        $legacyOS = $true
-    } else {
-        $legacyOS = $false
-    }
-
     if (!(Get-PSSessionConfiguration -verbose:$false) -or (!(Get-ChildItem -Path WSMan:\localhost\Listener))){
         Write-Output "Enabling PSRemoting"
         Enable-PSRemoting -Force -ErrorAction SilentlyContinue
@@ -148,7 +141,7 @@ function Enable-Remoting {
 
     $httpsListener = $listeners | where { $_.Keys -like "TRANSPORT=HTTPS" }
     if ($Protocols -icontains "HTTPS" -and !$httpsListener) {
-       Enable-HTTPSRemoting -CertSelfSigned:$CertSelfSigned -LegacyOS:$legacyOS -CertThumbprint $CertThumbprint -CertSubjectName $CertSubjectName
+       Enable-HTTPSRemoting -CertSelfSigned:$CertSelfSigned -CertThumbprint $CertThumbprint -CertSubjectName $CertSubjectName
        $httpsListener = $listeners | where { $_.Keys -like "TRANSPORT=HTTPS" }
     } elseif ($Protocols -icontains "HTTPS") {
         $httpsListenerEnabled = if ($httpsListener) { "enabled" } else { "disabled" }
@@ -195,6 +188,52 @@ function Enable-Remoting {
 
     Test-PSRemoting -AuthTypes $AuthTypes -Protocols $Protocols -ComputerName $CertSubjectName
 
+}
+
+function Set-RenewedSelfSignedCertificate {
+    
+    <#
+    .SYNOPSIS
+    Renews self-signed certificate on HTTPS.
+
+    .PARAMETER CertSubjectName
+    Subject name for the certificate (if AuthTypes contains HTTPS). It must be the same string as the one used to connect to this server.
+    For example if you're going to run Invoke-Command -ComputerName 192.168.1.50, subject name must be 192.168.1.50.
+
+    .EXAMPLE
+    Set-RenewedSelfSignedCertificate -CertSubjectName $CertSubjectName
+
+    #>
+
+    [CmdletBinding()]
+    [OutputType([void])]
+    param(
+        [Parameter(Mandatory=$false)]
+        [string]
+        $CertSubjectName = $env:COMPUTERNAME
+    )
+
+    $ErrorActionPreference = "Stop"
+
+    $selectorset = @{}
+    $selectorset.add('Transport','HTTPS')
+    $selectorset.add('Address','*')
+
+    try { 
+        $wsManInstance = Get-WSManInstance -ResourceUri 'winrm/config/Listener' -SelectorSet $selectorset -ErrorAction SilentlyContinue
+    } catch { }
+    if (!$wsManInstance) {
+        throw "HTTPS has not been enabled yet. Please enable it before renewing self-seigned certificate."
+    }
+    $oldCertThumbprint = $wsManInstance.CertificateThumbprint
+    $newCertThumbprint = Get-NewSelfSignedCertificate -CertSubjectName $CertSubjectName
+
+    $valueset = @{}
+    $valueset.add('Hostname', $CertSubjectName)
+    $valueset.add('CertificateThumbprint', $newCertThumbprint)
+    Write-Output "Configuring HTTPS listener."
+    [void](Set-WsManInstance -ResourceURI 'winrm/config/Listener' -SelectorSet $selectorset -ValueSet $valueset)
+    Write-Output "Certificate successfully updated from $oldCertThumbprint to $newCertThumbprint."
 }
 
 
@@ -250,9 +289,6 @@ function Enable-HTTPSRemoting {
     .PARAMETER CertSelfSigned
     If true and HTTPS is configured, a self-signed certificate will be created. Note it's validity is 365 days.
 
-    .PARAMETER LegacyOS
-    If true, legacy method will be used to create self-signed certificate.
-
     .PARAMETER CertThumbprint
     Thumbprint of certificate to import (if AuthTypes contains HTTPS and CertSelfSigned is false).
 
@@ -260,8 +296,11 @@ function Enable-HTTPSRemoting {
     Subject name for the certificate (if AuthTypes contains HTTPS). It must be the same string as the one used to connect to this server.
     For example if you're going to run Invoke-Command -ComputerName 192.168.1.50, subject name must be 192.168.1.50.
 
+    .PARAMETER RefreshSelfSignedCert
+    If true and HTTPS is configured and self-signed certificate already exists, it will be renewed.
+
     .EXAMPLE
-    Enable-HTTPSRemoting -CertSelfSigned:$CertSelfSigned -LegacyOS:$legacyOS -CertThumbprint $CertThumbprint -CertSubjectName $CertSubjectName
+    Enable-HTTPSRemoting -CertSelfSigned:$CertSelfSigned -CertThumbprint $CertThumbprint -CertSubjectName $CertSubjectName
     #>
 
     [CmdletBinding()]
@@ -272,26 +311,17 @@ function Enable-HTTPSRemoting {
         $CertSelfSigned,
 
         [Parameter(Mandatory=$false)]
-        [switch] 
-        $LegacyOS,
-
-        [Parameter(Mandatory=$false)]
         [string] 
         $CertThumbprint,
 
         [Parameter(Mandatory=$true)]
         [string]
-        $CertSubjectName     
+        $CertSubjectName
     )
- 
-    if ($CertSelfSigned -and $LegacyOS) {
-        Write-Output "Creating new self-signed certificate in legacy mode (< Windows Server 2012)"
-        $CertThumbprint = New-LegacySelfSignedCert -SubjectName $CertSubjectName
-    } elseif ($CertSelfSigned) {
-        Write-Output "Creating new self-signed certificate"
-        $cert = New-SelfSignedCertificate -DnsName $CertSubjectName -CertStoreLocation "Cert:\LocalMachine\My"
-        $CertThumbprint = $cert.Thumbprint
-    } 
+
+    if ($CertSelfSigned) {
+        $CertThumbprint = Get-NewSelfSignedCertificate -CertSubjectName $CertSubjectName
+    }
     
     # Create the hashtables of settings to be used.
     $valueset = @{}
@@ -304,6 +334,46 @@ function Enable-HTTPSRemoting {
     
     Write-Output "Creating HTTPS listener for hostname '$CertSubjectName'"
     [void](New-WSManInstance -ResourceURI 'winrm/config/Listener' -SelectorSet $selectorset -ValueSet $valueset)
+}
+
+function Get-NewSelfSignedCertificate {
+
+    <#
+    .SYNOPSIS
+    Creates a new self-signed certificate.
+
+    .PARAMETER CertSubjectName
+    Subject name for the certificate (if AuthTypes contains HTTPS). It must be the same string as the one used to connect to this server.
+    For example if you're going to run Invoke-Command -ComputerName 192.168.1.50, subject name must be 192.168.1.50.
+
+    .EXAMPLE
+    $CertThumbprint = Get-NewSelfSignedCertificate -CertSubjectName $CertSubjectName
+    #>
+    [CmdletBinding()]
+    [OutputType([string])]
+    param(
+        [Parameter(Mandatory=$true)]
+        [string]
+        $CertSubjectName
+    )
+
+    # < Windows Server 2012 -> need legacy way to create self-signed certificate
+    if ([Environment]::OSVersion.Version.Major -lt 6 -or ([Environment]::OSVersion.Version.Major -eq 6 -and [Environment]::OSVersion.Version.Minor -lt 2)) {
+        $legacyOS = $true
+    } else {
+        $legacyOS = $false
+    }
+
+    if ($legacyOS) {
+        Write-Host "Creating new self-signed certificate in legacy mode (< Windows Server 2012)"
+        $CertThumbprint = New-LegacySelfSignedCert -SubjectName $CertSubjectName
+    } else {
+        Write-Host "Creating new self-signed certificate"
+        $cert = New-SelfSignedCertificate -DnsName $CertSubjectName -CertStoreLocation "Cert:\LocalMachine\My"
+        $CertThumbprint = $cert.Thumbprint
+    } 
+
+    return $CertThumbprint
 }
 
 
