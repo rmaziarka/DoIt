@@ -109,9 +109,11 @@ function Start-Build {
             $invokeArgs += $buildParamsHash[$param]
             $logInvocation += "-$param $($buildParamsHash[$param]) "
         }
+        Write-ProgressExternal -MessageType BlockOpened -Message "$($cmd.Name)"
         Write-Log -Info "Running task: $logInvocation" -Emphasize
         Write-ProgressExternal -Message "Running task $($cmd.Name)" -ErrorMessage "Task $($cmd.Name) failed"
         Invoke-Command -ScriptBlock ($cmd.ScriptBlock) -ArgumentList $invokeArgs
+        Write-ProgressExternal -MessageType BlockClosed -Message "$($cmd.Name)"
      }
 
      $packagePath = (Get-ConfigurationPaths).PackagesPath
