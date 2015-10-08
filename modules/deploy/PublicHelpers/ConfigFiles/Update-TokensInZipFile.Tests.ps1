@@ -41,7 +41,9 @@ Describe -Tag "PSCI.unit" "Update-TokensInZipFile" {
                                         @{'Name' = 'x.config'; 'FullName' = 'dir1/x.config'}, 
                                         @{'Name' = 'x.config'; 'FullName' = 'dir2/x.config'}, 
                                         @{'Name' = 'x.DEV.config'; 'FullName' = 'dir2/x.DEV.config'}, 
-                                        @{'Name' = 'x.TEST.config'; 'FullName' = 'dir2/x.TEST.config'} ) }
+                                        @{'Name' = 'x.TEST.config'; 'FullName' = 'dir2/x.TEST.config'},
+                                        @{'Name' = 'y.DEV.config'; 'FullName' = 'dir1/y.DEV.config'}
+                                    ) }
             $zipArchive | Add-Member -MemberType ScriptMethod -Name 'Dispose' -Value { }
             $zipArchive.Entries | Add-Member -MemberType ScriptMethod -Name 'Open' -Value { New-Object -TypeName System.IO.MemoryStream }
             $zipArchive.Entries | Add-Member -MemberType ScriptMethod -Name 'Delete' -Value { $global:deletedFiles += $_.Name }
@@ -65,13 +67,13 @@ Describe -Tag "PSCI.unit" "Update-TokensInZipFile" {
             }
         }
 
-        Context "when invoked with no Environment for .zip with 4 .config files inside" {
+        Context "when invoked with no Environment for .zip with 5 .config files inside" {
             
             $global:deletedFiles = @()
             Update-TokensInZipFile -ZipFile 'test.zip' -OutputFile 'test_out.zip' -Tokens @{ }
 
-            It "Update-TokensInStream should be invoked 4 times" {
-                Assert-MockCalled Update-TokensInStream -Exactly 4
+            It "Update-TokensInStream should be invoked 5 times" {
+                Assert-MockCalled Update-TokensInStream -Exactly 5
             }
 
             It "It should not run Convert-XmlUsingXdtInArchive" {
@@ -84,13 +86,13 @@ Describe -Tag "PSCI.unit" "Update-TokensInZipFile" {
             }
         }
 
-        Context "when invoked with no Environment and -PreserveTransformFiles for .zip with 4 .config files inside" {
+        Context "when invoked with no Environment and -PreserveTransformFiles for .zip with 5 .config files inside" {
             
             $global:deletedFiles = @()
             Update-TokensInZipFile -ZipFile 'test.zip' -OutputFile 'test_out.zip' -Tokens @{ } -PreserveTransformFiles
 
-            It "Update-TokensInStream should be invoked 4 times" {
-                Assert-MockCalled Update-TokensInStream -Exactly 4
+            It "Update-TokensInStream should be invoked 5 times" {
+                Assert-MockCalled Update-TokensInStream -Exactly 5
             }
 
             It "It should not run Convert-XmlUsingXdtInArchive" {
@@ -102,13 +104,13 @@ Describe -Tag "PSCI.unit" "Update-TokensInZipFile" {
             }
         }
 
-        Context "when invoked for .zip with 4 .config files inside and Environment = Dev" {
+        Context "when invoked for .zip with 5 .config files inside and Environment = Dev" {
             
             $global:deletedFiles = @()
             Update-TokensInZipFile -ZipFile 'test.zip' -OutputFile 'test_out.zip' -Tokens @{ } -Environment Dev
 
-            It "Update-TokensInStream should be invoked 4 times" {
-                Assert-MockCalled Update-TokensInStream -Exactly 4
+            It "Update-TokensInStream should be invoked 5 times" {
+                Assert-MockCalled Update-TokensInStream -Exactly 5
             }
 
             It "It should run Convert-XmlUsingXdtInArchive once" {

@@ -95,7 +95,7 @@ function Update-TokensInZipFile {
 
         [Parameter(Mandatory=$false)]
         [string] 
-        $TokenEnvironmentRegex = '.*\.(\w+)\.config',
+        $TokenEnvironmentRegex = '(.*\.)(\w+)\.(config)',
 
         [Parameter(Mandatory=$false)]
         [string] 
@@ -139,14 +139,27 @@ function Update-TokensInZipFile {
         }
 
         # Run XDT transform where applicable
-        $xdtTransformConfigs = $configFileEntries | Where-Object { $_.Name -imatch $TokenEnvironmentRegex } | Sort-Object -Property { $_.Name -imatch '\.Default\.' }, { $_.Name }
+        $potentialXdtFiles = $configFileEntries | Where-Object { $_.Name -imatch $TokenEnvironmentRegex } | Sort-Object -Property { $_.Name -imatch '\.Default\.' }, { $_.Name }
+        $xdtTransformConfigs = @()
+
+        foreach ($configFileEntry in $configFileEntries) {
+            if ($configFileEntry.Name -imatch $TokenEnvironmentRegex) {
+                $baseFileName = $Matches[1] + $Matches[3]
+                $baseFullFileName = Join-Path -Path (Split-Path -Path $configFileEntry.FullName -Parent) -ChildPath $baseFileName
+                $baseFullFileName = $baseFullFileName -replace '\\', '/'
+                if ($configFileEntries.Where({ $_.FullName -ieq $baseFullFileName})) {
+                    $xdtTransformConfigs += $configFileEntry
+                }
+            }
+        }
+
         Write-Log -Info "Found $($xdtTransformConfigs.Count) XDT transform files."
             
         foreach ($xdtTransformConfig in $xdtTransformConfigs) {
             $xdtTransformConfig.Name -imatch $TokenEnvironmentRegex
             $fileName = $Matches[0]
-            $envName = $Matches[1]
-
+            $envName = $Matches[2]
+            
             if ($envName -ieq 'Default' -or $envName -ieq $Environment) {
                 $fileToTransformName = $fileName -ireplace "$envName\.", ''
                 $fileToTransformFullName = Join-Path -Path (Split-Path -Parent $xdtTransformConfig.FullName) -ChildPath $fileToTransformName
