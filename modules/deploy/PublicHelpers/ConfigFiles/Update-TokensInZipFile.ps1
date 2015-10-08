@@ -139,7 +139,6 @@ function Update-TokensInZipFile {
         }
 
         # Run XDT transform where applicable
-        $potentialXdtFiles = $configFileEntries | Where-Object { $_.Name -imatch $TokenEnvironmentRegex } | Sort-Object -Property { $_.Name -imatch '\.Default\.' }, { $_.Name }
         $xdtTransformConfigs = @()
 
         foreach ($configFileEntry in $configFileEntries) {
