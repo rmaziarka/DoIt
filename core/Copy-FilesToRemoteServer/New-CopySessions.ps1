@@ -149,15 +149,20 @@ function New-CopySessions {
                     $psDrive = $null
                 }
                 if (!$psDrive) { 
-                    try { 
-                        $psDrive = New-PSDrive @psDriveParams
-                    } catch { 
-                        if ($_) { 
-                            $err = $_.ToString()
-                        } else {
-                            $err = ''
+                    # smb share is port 445
+                    if (!(Test-Port -Hostname $server -Port 445)) {
+                        Write-Log -Warn "Port 445 is not open on $server - falling back to WinRM stream."
+                    } else { 
+                        try { 
+                            $psDrive = New-PSDrive @psDriveParams
+                        } catch { 
+                            if ($_) { 
+                                $err = $_.ToString()
+                            } else {
+                                $err = ''
+                            }
+                            Write-Log -Warn "Failed to create PSDrive $($psDriveParams.Root): $err - falling back to WinRM stream."
                         }
-                        Write-Log -Warn "Failed to create PSDrive $($psDriveParams.Root): $err - falling back to WinRM stream."
                     }
                 }
             }
