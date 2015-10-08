@@ -83,19 +83,78 @@ function Set-TargetResource {
     )
 
     if (!$Path7zip) {
-        $Path7zip = Join-Path -Path $env:ProgramFiles -ChildPath '7-Zip'
+        $Path7zip = Get-PathTo7Zip -FailIfNotFound
+    } else { 
+        $Path7zip = Join-Path -Path $Path7zip -ChildPath '7z.exe'
     }
-    $Path7zip = Join-Path -Path $Path7zip -ChildPath '7z.exe'
     if (!(Test-Path -LiteralPath $Path7zip)) {
         throw "7zip does not exist at '$Path7zip'"
     }
 
-    $args = " x `"$SourcePath`" -o`"$DestinationPath`" -y"
+    $args = "x `"$SourcePath`" -o`"$DestinationPath`" -y"
     Write-Verbose -Message "Running $Path7zip $args"
     & "$Path7zip" x "`"$SourcePath`"" "-o`"$DestinationPath`"" "-y"
     if ($lastexitcode) {
         throw "7-Zip failed with exit code $lastexitcode"
     }
 }
+
+function Get-PathTo7Zip {
+    <#
+    .SYNOPSIS
+    Returns path to 7-zip. Returns $null or throws an error if it has not been installed.
+
+    .PARAMETER FailIfNotFound
+    If on and 7-zip is not installed, an exception will be thrown.
+    Otherwise $null will be returned.
+
+    .EXAMPLE
+    Get-PathTo7Zip
+    #>
+
+    [CmdletBinding()]
+    [OutputType([string])]
+    param(       
+        [Parameter(Mandatory=$false)]
+        [switch]
+        $FailIfNotFound
+    )
+
+    $regEntry = "Registry::HKLM\SOFTWARE\7-Zip"
+    # note - registry check will fail if running Powershell x86 on x64 machine
+    if (Test-Path -LiteralPath $regEntry) {
+        $7zipPath = (Get-ItemProperty -Path $regEntry).Path
+        if (!(Test-Path -LiteralPath $7zipPath)) {
+            if ($FailIfNotFound) { 
+                throw "7zip directory not found at '$7zipPath'."
+            } else {
+                return $null
+            }
+        }
+    } else { 
+        # note - 'Program Files' is hardcoded here as $env:ProgramFiles on Powershell x86 is 'Program Files (x86)'
+        $7zipPath = "C:\Program Files\7-Zip"
+        if (!(Test-Path -LiteralPath $7zipPath)) {
+            $7zipPath = Join-Path -Path $env:ProgramFiles -ChildPath '7-Zip'
+        }
+        if (!(Test-Path -LiteralPath $7zipPath)) {
+            if ($FailIfNotFound) { 
+                throw "Cannot find neither 7-zip registry entry at '$regEntry' nor 7-zip directory at '$7zipPath'. Please ensure 7-zip has been installed."
+            } else {
+                return $null
+            }
+        }       
+    }
+    $7zipPath = Join-Path -Path $7zipPath -ChildPath "7z.exe"
+    if (!(Test-Path -LiteralPath $7zipPath)) {
+        if ($FailIfNotFound) { 
+            throw "7z.exe not found at '$7zipPath'"
+        } else {
+            return $null
+        }
+    }
+    return $7zipPath
+}
+
 
 Export-ModuleMember -Function *-TargetResource

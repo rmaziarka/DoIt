@@ -63,6 +63,7 @@ function Read-ConfigurationFiles {
     $invalidLineRegex = '(Import-DSCResource.*`[\s\\r\\n$])'
     $dscResourceRegex = 'Import-DSCResource\s+(?:-Module)?(?:Name)?\s*([^-][^\s;]+)|Import-DSCResource.+-Module(?:Name)?\s*([^-][^\s;]+)'
     $sqlpsxSsisRegex = 'Deploy-SSISPackage|Import-SQLPSXSSIS'
+    $nssmRegex = 'Set-NssmService'
     $builtinStepRegex = '\b(PSCI[\w-]+)\b'
     foreach ($script in $configScripts) {
         $contents = Get-Content -Path $script.FullName -ReadCount 0 | Out-String
@@ -100,6 +101,11 @@ function Read-ConfigurationFiles {
         if ($contents -imatch $sqlpsxSsisRegex) {
             if ($result.RequiredExternalLibs -inotcontains 'SQLPSX\SSIS') {
                 $result.RequiredExternalLibs += 'SQLPSX\SSIS'
+            }
+        }
+        if ($contents -imatch $nssmRegex) {
+            if ($result.RequiredExternalLibs -inotcontains 'nssm') {
+                $result.RequiredExternalLibs += 'nssm'
             }
         }
     }
