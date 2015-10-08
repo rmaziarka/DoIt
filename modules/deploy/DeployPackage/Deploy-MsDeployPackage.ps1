@@ -60,7 +60,10 @@ function Deploy-MsDeployPackage {
     If true and a placeholder that not exists in $TokensForConfigFiles table is found, an exception will be thrown.
 
     .PARAMETER SkipDir
-    List of directories to skip. Passed in '-skip' msdeploy parameter.
+    List of directories to skip. Passed in '-skip:Directory' msdeploy parameter.
+
+    .PARAMETER SkipFile
+    List of files to skip. Passed in '-skip:File' msdeploy parameter.
 
     .PARAMETER UseChecksum
     Whether to use checksum for directory sync. Note checksum sometimes causes issues in msdeploy - see http://stackoverflow.com/questions/20240261/notimplementedexception-in-msdeploy-when-using-usechecksum.
@@ -139,8 +142,12 @@ function Deploy-MsDeployPackage {
         $ValidateTokensExistence = $true,
 
         [Parameter(Mandatory=$false)]
-        [string] 
+        [string[]] 
         $SkipDir,
+
+        [Parameter(Mandatory=$false)]
+        [string[]] 
+        $SkipFile,
 
         [Parameter(Mandatory=$false)]
         [switch] 
@@ -202,8 +209,16 @@ function Deploy-MsDeployPackage {
                     -ErrorMsg "Cannot find file '{0}' required for deployment of package '$PackageName'. Please ensure you have run the build and the package exists."
    
     if ($SkipDir) {
-        $MsDeployAddParameters += "-skip:Directory=`"$SkipDir`" "
-    }   
+        foreach ($dir in $SkipDir) { 
+            $MsDeployAddParameters += "-skip:Directory=`"$dir`" "
+        }
+    }
+
+    if ($SkipFile) {
+        foreach ($file in $SkipFile) { 
+            $MsDeployAddParameters += "-skip:File=`"$file`" "
+        }
+    }
    
     $packageCopyPath = $PackagePath
     $removeCopy = $false
