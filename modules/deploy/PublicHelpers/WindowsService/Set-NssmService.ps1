@@ -41,10 +41,13 @@ function Set-NssmService {
     Additional arguments for the executable specified in $Path.
 
     .PARAMETER ServiceDisplayName
-    Service display name. If not specified, it will be the same as $ServiceName.
+    Service display name. If not specified and service does not exist, it will be the same as $ServiceName.
 
     .PARAMETER StartupType
     Service startup type.
+
+    .PARAMETER Credential
+    Credential to use for starting the service. If not specified and service does not exist, LOCAL SYSTEM will be used.
 
     .PARAMETER Status
     Final status of the service to set.
@@ -85,6 +88,10 @@ function Set-NssmService {
         [string]
         [ValidateSet($null, 'Automatic', 'Delayed', 'Manual', 'Disabled')]
         $StartupType = 'Automatic',
+
+        [parameter(Mandatory=$false)]
+        [PSCredential]
+        $Credential,
 
         [parameter(Mandatory=$false)]
         [string]
@@ -138,21 +145,29 @@ function Set-NssmService {
         }
     }
 
-    $serviceStopped = $false
+    $serviceStopped = !$currentService
     if (!$currentService) {
-        Write-Log -Info "Creating service '$ServiceName' with command line '$CommandLine'"
-        [void](Start-ExternalProcess -Command $NssmExePath -ArgumentList @('install', "`"$ServiceName`"") -Quiet)
+        Write-Log -Info "Creating service '$ServiceName' with command line '$Path'"
+        [void](Start-ExternalProcess -Command $NssmExePath -ArgumentList @('install', "`"$ServiceName`"", "`"$Path`"") -Quiet)
         $serviceStopped = $true
     }
 
-    $serviceStopped = $false
-    $appParams = @{
-        Application = $Path
-        AppParameters = $Arguments -join ' '
+    $appParams = @{}
+
+    if ($Path) { 
+        $appParams.Application = $Path
     }
 
     if ($ServiceDisplayName) {
         $appParams.DisplayName = $ServiceDisplayName
+    }
+
+    if ($Credential) {
+        $appParams.ObjectName = $Credential.UserName
+    }
+
+    if ($Arguments) { 
+        $appParams.AppParameters = $Arguments -join ' '
     }
 
     switch ($StartupType) {
@@ -169,14 +184,32 @@ function Set-NssmService {
     foreach ($appParam in $appParams.GetEnumerator()) {
         $nssmOutput = ''
         [void](Start-ExternalProcess -Command $NssmExePath -ArgumentList @('get', "`"$ServiceName`"", $appParam.Key) -Quiet -Output ([ref]$nssmOutput))
+        $value = $appParam.Value
         if ($nssmOutput -ne $appParam.Value) {
             if (!$serviceStopped) {
                 Write-Log -Info "Stopping service '$ServiceName'"
                 Stop-Service -Name $ServiceName
                 $serviceStopped = $true
             }
-            Write-Log -Info "Setting service '$ServiceName' parameter '$($appParam.Key)' to '$($appParam.Value)'"
-            [void](Start-ExternalProcess -Command $NssmExePath -ArgumentList @('set', "`"$ServiceName`"", $appParam.Key, "`"$($appParam.Value)`"") -Quiet)
+            if ($appParam.Key -eq 'ObjectName') {
+                
+                $value = "`"{0}`" {1}" -f $Credential.UserName, $Credential.GetNetworkCredential().Password
+                Write-Log -Info "Setting service '$ServiceName' parameter '$($appParam.Key)' to '$($Credential.UserName) <password>'"
+            } else {
+                $value ="`"$value`""
+                Write-Log -Info "Setting service '$ServiceName' parameter '$($appParam.Key)' to '$value)'"
+            }
+            
+            $nssmOutput = ''
+            $nssmStdErr = ''
+            $argumentList = @('set', "`"$ServiceName`"", $appParam.Key, $value)
+            $exitCode = Start-ExternalProcess -Command $NssmExePath -ArgumentList $argumentList -Quiet -Output ([ref]$nssmOutput) -OutputStdErr ([ref]$nssmStdErr) -CheckLastExitCode:$false -CheckStdErr:$false
+            if ($exitCode -or $nssmStdErr) {
+                # this is poor man's conversion UTF16 -> UTF8 (nssm always outputs in UTF16)
+                $nssmOutput = $nssmOutput -replace '(.)\x00', '$1'
+                $nssmStdErr = $nssmStdErr -replace '(.)\x00', '$1'
+                throw "Nssm failed with exit code ${exitCode} - command line: `"$NssmExePath`" $($argumentList -join ' ')`r`nSTDOUT: $nssmOutput`r`nSTDERR: $nssmStdErr"
+            }
         } else {
             Write-Log -_Debug "Service '$ServiceName' parameter '$($appParam.Key)' is already '$($appParam.Value)'"
         }
