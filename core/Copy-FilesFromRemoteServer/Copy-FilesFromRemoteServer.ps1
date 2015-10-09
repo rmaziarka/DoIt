@@ -102,6 +102,17 @@ function Copy-FilesFromRemoteServer {
         throw "ConnectionParams.Nodes has more than 1 node. Only one node must be specified.."
     }
 
+    for ($i = 0; $i -lt $RemotePath.Count; $i++) {
+        $src = $RemotePath[$i]
+        $srcNext = $RemotePath[$i+1]
+        if (![System.IO.Path]::IsPathRooted($src)) {
+            throw "'RemotePath' must be an absolute path - invalid value '$src'."
+        }
+        if ($srcNext -and $src[0] -ne $srcNext[0]) {
+            throw "'RemotePath' paths must be on the same disk."
+        }
+    } 
+
     Write-Log -Info "Copying '$RemotePath' from '$($ConnectionParams.NodesAsString)' to local path '$Destination'" -Emphasize
     
     if (Test-Path -LiteralPath $Destination -PathType Leaf) {
@@ -123,7 +134,7 @@ function Copy-FilesFromRemoteServer {
     $preCopyScriptBlock = Get-PreCopyFromScriptBlock 
     $postCopyScriptBlock = Get-PostCopyFromScriptBlock
 
-    $copySessions = New-CopySessions -ConnectionParams $ConnectionParams
+    $copySessions = New-CopySessions -ConnectionParams $ConnectionParams -Destination $RemotePath
                                  
     if (!$copySessions) {
         Write-Progress -Activity "Finished" -Completed -Id 1
@@ -133,13 +144,14 @@ function Copy-FilesFromRemoteServer {
     try { 
         foreach ($copySession in $copySessions) { 
            $psSession = $copySession.PSSession
+           $psDrive = $copySession.PSDrive
            Invoke-Command -Session $psSession -ScriptBlock (Convert-FunctionToScriptBlock -FunctionName Get-FlatFileList)
            Invoke-Command -Session $psSession -ScriptBlock (Convert-FunctionToScriptBlock -FunctionName New-Zip)
 
            ($srcZipFilePath, $srcZipFileSize) = Invoke-Command -Session $psSession -ScriptBlock $preCopyScriptBlock -ArgumentList $RemotePath, $Destination, $Include, $IncludeRecurse, $Exclude, $ExcludeRecurse
 
            $destZipFilePath = '{0}{1}.zip' -f [System.IO.Path]::GetTempPath(), [System.IO.Path]::GetRandomFileName()
-           Get-RemoteFileUsingStream -Session $psSession -SourcePath $srcZipFilePath -DestinationPath $destZipFilePath -SourceFileSize $srcZipFileSize
+           Get-RemoteFileUsingStream -Session $psSession -PSDrive $psDrive -SourcePath $srcZipFilePath -DestinationPath $destZipFilePath -SourceFileSize $srcZipFileSize
 
            Write-Progress -Activity "Uncompressing $destZipFilePath" -Id 1
            $dest = $Destination.Substring(0, 3)

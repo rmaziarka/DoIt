@@ -29,9 +29,9 @@ function Expand-Zip {
 
     .DESCRIPTION
     It uses following methods to decompress the file (when first fails it tries the second etc.):
-    1) .NET ZipFile      - fails if destination exists
-    2) 7zip              - must be installed to succeed
-    3) Shell.Application - should always work, but can be slow.
+    1) 7zip - must be installed to succeed.
+    2) .NET ZipFile
+    3) Shell.Application - can be slow.
     
     .PARAMETER ArchiveFile
     File to uncompress.

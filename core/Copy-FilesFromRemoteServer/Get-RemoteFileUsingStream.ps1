@@ -39,6 +39,9 @@ function Get-RemoteFileUsingStream {
     .PARAMETER SourceFileSize
         Size of source file.
 
+    .PARAMETER PSDrive
+        Open administrative share to the remote server.
+
     .EXAMPLE            
         Get-RemoteFileUsingStream -Session $session -SourcePath $srcZipFilePath -DestinationPath $destZipFilePath -SourceFileSize $srcZipFileSize
     #>
@@ -59,11 +62,37 @@ function Get-RemoteFileUsingStream {
 
         [Parameter(Mandatory = $true)]
         [string]
-        $SourceFileSize
+        $SourceFileSize,
+
+        [Parameter(Mandatory = $false)]
+        [object]
+        $PSDrive
     )
 
     $fileSize = Convert-BytesToSize -Size $SourceFileSize
-    Write-Log -Info "Copying '$($SourcePath)' ($fileSize) from remote node '$($session.ComputerName)' to local path '$DestinationPath'"
+    $msg = "Copying '$($SourcePath)' ($fileSize) from remote node '$($session.ComputerName)' to local path '$DestinationPath'"
+
+    if ($PSDrive) {
+        $msg += " using share '$($PSDrive.Root)'"
+    } else {
+        $msg += " using WinRM stream"
+    }
+    Write-Log -Info $msg
+
+    if ($PSDrive) {
+        try { 
+            $SourcePath = Join-Path -Path "$($PSDrive.Name):" -ChildPath ($SourcePath.Substring(3))
+            Copy-Item -Path $SourcePath -Destination $DestinationPath -Force
+            return
+        } catch {
+            if ($_) {
+                $err = $_.ToString()
+            } else {
+                $err = ''
+            }
+            Write-Log -Warn "Copy-Item from '$SourcePath' failed: $err - falling back to WinRM stream"
+        }
+    }
 
     $readBytesRemoteScript = Get-ReadBytesScriptBlock
     $offset = 0
