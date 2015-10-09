@@ -57,33 +57,12 @@ function Expand-Zip {
     
     # this function can be run remotely without PSCI available
 
-
-    # try decompressing with .NET first (only if destination does not exist - otherwise it fails)
-    if (!(Test-Path -Path $OutputDirectory)) { 
-        try { 
-            $msg = "Decompressing file '$ArchiveFile' to '$OutputDirectory' using .NET"
-            if (Get-Command -Name Write-Log -ErrorAction SilentlyContinue) {
-               Write-Log -Info $msg 
-            } else {
-               Write-Verbose -Message $msg
-            }
-            Add-Type -AssemblyName System.IO.Compression.FileSystem
-            [System.IO.Compression.ZipFile]::ExtractToDirectory($ArchiveFile, $OutputDirectory) 
-            return
-        } catch {
-            Write-Host -Object ".Net decompression failed: $_ - falling back to 7-zip / shell."
-        }
+    if (!(Test-Path -LiteralPath $ArchiveFile)) {
+        throw "Archive file does not exist at '$ArchiveFile'."
     }
-    
-    # then 7-zip
-    try { 
-        $msg = "Decompressing file '$ArchiveFile' to '$OutputDirectory' using 7-zip"
-        if (Get-Command -Name Write-Log -ErrorAction SilentlyContinue) {
-            Write-Log -Info $msg 
-        } else {
-            Write-Verbose -Message $msg
-        }
 
+    # try decompression with 7-zip first
+    try { 
         $regEntry = 'Registry::HKLM\SOFTWARE\7-Zip'
         # note - registry check will fail if running Powershell x86 on x64 machine
         if (Test-Path -LiteralPath $regEntry) {
@@ -95,6 +74,12 @@ function Expand-Zip {
             }
         }
         if (Test-Path -LiteralPath $7zipPath) {
+            $msg = "Decompressing file '$ArchiveFile' to '$OutputDirectory' using 7-zip"
+            if (Get-Command -Name Write-Log -ErrorAction SilentlyContinue) {
+                Write-Log -Info $msg 
+            } else {
+                Write-Verbose -Message $msg
+            }
             $7zipPath = '"{0}"' -f $7zipPath
             $cmdLine =  " x `"$ArchiveFile`" -o`"$OutputDirectory`" -y"
             . $env:ComSpec /C """$7zipPath $cmdLine"""
@@ -103,12 +88,63 @@ function Expand-Zip {
             } else {
                 Write-Host -Object "7zip decompression failed with exitcode $LASTEXITCODE - falling back to shell."
             }
-                
         }
     } catch {
-        Write-Host -Object "7zip decompression failed: $_ - falling back to shell."
+        Write-Host -Object "7zip decompression failed: $_ - falling back to .NET / Shell."
     }
 
+    # then .NET
+    try { 
+        $msg = "Decompressing file '$ArchiveFile' to '$OutputDirectory' using .NET"
+        if (Get-Command -Name Write-Log -ErrorAction SilentlyContinue) {
+            Write-Log -Info $msg 
+        } else {
+            Write-Verbose -Message $msg
+        }
+        Add-Type -AssemblyName System.IO.Compression.FileSystem
+        if (!(Test-Path -Path $OutputDirectory)) {
+            [System.IO.Compression.ZipFile]::ExtractToDirectory($ArchiveFile, $OutputDirectory) 
+        } else {
+            try {
+                $zipArchive = [System.IO.Compression.ZipFile]::OpenRead($ArchiveFile);
+                foreach ($entry in $zipArchive.Entries) {
+                    $dst = Join-Path -Path $OutputDirectory -ChildPath $entry.FullName
+                    if (!$entry.Name) {
+                        # if directory, create it if it doesn't exist
+                        if ((Test-Path -LiteralPath $dst -PathType Leaf)) {
+                            Remove-Item -LiteralPath $dst -Force
+                        }
+                        if (!(Test-Path -LiteralPath $dst)) {
+                            [void](New-Item -Path $dst -Type Directory)    
+                        }
+                        continue
+                    } else {
+                        # if file, delete it if it exists (ExtractToFile has issues with files with hidden or possibly read-only attributes)
+                        if (Test-Path -LiteralPath $dst) {
+                            Remove-Item -LiteralPath $dst -Force
+                        } else {
+                            # and create parent folder if it doesn't exist
+                            $parent = Split-Path -Path $dst -Parent
+                            if (!(Test-Path -LiteralPath $parent)) {
+                                [void](New-Item -Path $parent -Type Directory)
+                            }
+                        }
+                    }
+                    
+                    [System.IO.Compression.ZipFileExtensions]::ExtractToFile($entry, $dst, $true);
+                }
+            } finally {
+                if ($zipArchive) {
+                    $zipArchive.Dispose();
+                }
+            }
+        }
+        return
+    } catch {
+        Write-Host -Object ".NET decompression failed: $_ - falling back to shell."
+    }
+    
+    # then fall back to Shell.Application
     $msg = "Decompressing file '$ArchiveFile' to '$OutputDirectory' using Shell.Application"
     if (Get-Command -Name Write-Log -ErrorAction SilentlyContinue) {
         Write-Log -Info $msg 

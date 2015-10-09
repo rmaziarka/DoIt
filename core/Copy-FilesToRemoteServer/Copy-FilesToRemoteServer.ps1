@@ -197,11 +197,11 @@ function Copy-FilesToRemoteServer {
                 ExcludeRecurse = $ExcludeRecurse
             }
 
-            if (!$BlueGreenEnvVariableName) { 
+            if (!$BlueGreenEnvVariableName -and $Path.Count -gt 1) { 
                 New-Zip @zipParams -DestinationZipPath $Destination
                 $isStructuredZip = $true
             } else {
-                New-Zip @zipParams
+                New-Zip @zipParams -Try7Zip
                 $isStructuredZip = $false
             }
             if (!(Test-Path -LiteralPath $tempZip)) {

@@ -122,6 +122,28 @@ Describe -Tag "PSCI.unit" "Copy-FilesToRemoteServer" {
             }
         } 
 
+        
+        Context "when copying one directory" {
+            try {
+                New-Item -Path 'testFolder1\testFolder11' -ItemType Directory -Force 
+                New-Item -Path 'testFolder1\testFile2' -ItemType File -Force -Value 'test2'
+                New-Item -Path 'testFolder1\testFolder11\testFile3' -ItemType File -Force -Value 'test33'
+
+                Copy-FilesToRemoteServer -Path 'testFolder1' -Destination $dstDir -ConnectionParams $connectionParams
+
+                It "should copy the files with structure intact" {
+                    Test-Path -LiteralPath $dstDir -PathType Container | Should Be $true
+                    Test-Path -LiteralPath "$dstDir\testFile2" -PathType Leaf | Should Be $true
+                    (Get-Item -Path "$dstDir\testFile2").Length | Should Be (Get-Item -Path 'testFolder1\testFile2').Length
+                    Test-Path -LiteralPath "$dstDir\testFolder11\testFile3" -PathType Leaf | Should Be $true
+                    (Get-Item -Path "$dstDir\testFolder11\testFile3").Length | Should Be (Get-Item -Path 'testFolder1\testfolder11\testFile3').Length
+                }
+
+            } finally {
+                Remove-Item -LiteralPath 'testFolder1' -Force -Recurse -ErrorAction SilentlyContinue
+            }
+        } 
+
         Context "when copying several directories and files to one Destination" {
             try {
                 New-Item -Path 'testFile1' -ItemType File -Force -Value 'test'

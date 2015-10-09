@@ -57,6 +57,9 @@ function Compress-With7Zip {
     .PARAMETER Password
     PSCredential object that stores the password used to encrypt the archive.
 
+    .PARAMETER Quiet
+    If true, no output from the command will be passed to the console.
+
     .EXAMPLE
     Compress-With7Zip -PathsToCompress "C:\directory\to\compress" -OutputFile "C:\archive.zip"
     #>
@@ -103,7 +106,11 @@ function Compress-With7Zip {
 
         [Parameter(Mandatory=$false)]
         [System.Management.Automation.PSCredential]
-        $Password
+        $Password,
+
+        [Parameter(Mandatory=$false)]
+        [switch]
+        $Quiet
     )
 
     $cmdLine = New-Object System.Text.StringBuilder
@@ -174,7 +181,7 @@ function Compress-With7Zip {
     try { 
         Push-Location -Path $WorkingDirectory
         Write-Log -_Debug "Invoking 7zip at directory '$WorkingDirectory' ($($PathsToCompress.Count) path(s))."
-        [void](Start-ExternalProcess -Command $7zipPath -ArgumentList ($cmdLine.ToString()) -WorkingDirectory $WorkingDirectory)
+        [void](Start-ExternalProcess -Command $7zipPath -ArgumentList ($cmdLine.ToString()) -WorkingDirectory $WorkingDirectory -Quiet:$Quiet)
     } finally {
         if ($fileList -and (Test-Path -LiteralPath $fileList)) {
             Remove-Item -LiteralPath $fileList -Force

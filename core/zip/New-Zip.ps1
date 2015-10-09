@@ -107,6 +107,14 @@ function New-Zip {
         $Try7Zip
     )
 
+    $msg = "Creating archive '$OutputFile' from '$($Path -join `"', '`")', include '$($Include -join `"', '`")'."
+    # this function can be run remotely without PSCI available
+    if (Get-Command -Name Write-Log -ErrorAction SilentlyContinue) {
+        Write-Log -Info $msg 
+    } else {
+        Write-Verbose -Message $msg
+    }
+
     if ($Try7Zip -and $Path.Count -eq 1) {
         $pathTo7Zip = Get-PathTo7Zip
         if ($pathTo7Zip) {
@@ -119,8 +127,10 @@ function New-Zip {
             }
             if (Test-Path -Path $Path[0] -PathType Leaf) {
                 $7zipPath = $Path[0]
+                $workingDir = Split-Path -Path $Path[0] -Parent
             } else {
                 $7zipPath = '*'
+                $workingDir = $Path[0]
             }
             Compress-With7Zip -PathsToCompress $7zipPath `
                               -OutputFile $OutputFile `
@@ -128,11 +138,12 @@ function New-Zip {
                               -IncludeRecurse:$IncludeRecurse `
                               -Exclude $Exclude `
                               -ExcludeRecurse:$ExcludeRecurse `
-                              -WorkingDirectory $Path[0] `
-                              -CompressionLevel $7zipCompressionLevel
+                              -WorkingDirectory $workingDir `
+                              -CompressionLevel $7zipCompressionLevel `
+                              -Quiet
             return
         } else {
-            Write-Log -_Debug '7-Zip not installed - falling back to .NET. Note msdeploy sync will be slower.'
+            Write-Log -_Debug '7-Zip not installed - falling back to .NET. Note if this zip is meant for msdeploy, it will not be able to synchronize it incrementally.'
         }
     }
 
@@ -159,13 +170,6 @@ function New-Zip {
         $zipArchive = New-Object -TypeName System.IO.Compression.ZipArchive -ArgumentList $fileStream, $zipArchiveMode
         $outputFileResolved = (Resolve-Path -LiteralPath $OutputFile).ProviderPath
 
-        $msg = "Creating archive '$OutputFile' from '$($Path -join `"', '`")', include '$($Include -join `"', '`")'."
-        # this function can be run remotely without PSCI available
-        if (Get-Command -Name Write-Log -ErrorAction SilentlyContinue) {
-            Write-Log -Info $msg 
-        } else {
-            Write-Verbose -Message $msg
-        }
         $i = 0
         foreach ($p in $Path) { 
             if ($DestinationZipPath) {
