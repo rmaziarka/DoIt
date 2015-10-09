@@ -145,8 +145,7 @@ function Copy-FilesFromRemoteServer {
         foreach ($copySession in $copySessions) { 
            $psSession = $copySession.PSSession
            $psDrive = $copySession.PSDrive
-           Invoke-Command -Session $psSession -ScriptBlock (Convert-FunctionToScriptBlock -FunctionName Get-FlatFileList)
-           Invoke-Command -Session $psSession -ScriptBlock (Convert-FunctionToScriptBlock -FunctionName New-Zip)
+           Invoke-Command -Session $psSession -ScriptBlock (Convert-FunctionToScriptBlock -FunctionName @('Get-FlatFileList', 'New-Zip'))
 
            ($srcZipFilePath, $srcZipFileSize) = Invoke-Command -Session $psSession -ScriptBlock $preCopyScriptBlock -ArgumentList $RemotePath, $Destination, $Include, $IncludeRecurse, $Exclude, $ExcludeRecurse
 

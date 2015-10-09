@@ -58,6 +58,9 @@ function Get-PathTo7Zip {
         # note - 'Program Files' is hardcoded here as $env:ProgramFiles on Powershell x86 is 'Program Files (x86)'
         $7zipPath = "C:\Program Files\7-Zip"
         if (!(Test-Path -LiteralPath $7zipPath)) {
+            $7zipPath = Join-Path -Path $env:ProgramFiles -ChildPath '7-Zip'
+        }
+        if (!(Test-Path -LiteralPath $7zipPath)) {
             if ($FailIfNotFound) { 
                 throw "Cannot find neither 7-zip registry entry at '$regEntry' nor 7-zip directory at '$7zipPath'. Please ensure 7-zip has been installed."
             } else {

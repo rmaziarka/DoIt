@@ -38,11 +38,18 @@ function Convert-FunctionToScriptBlock {
     [OutputType([scriptblock])]
     param(
         [Parameter(Mandatory=$true)]
-        [string] 
+        [string[]] 
         $FunctionName
     )
 
-    $def = ((Get-Command -Name $FunctionName).Definition)
+    $scriptBlock = ''
+    foreach ($funcName in $FunctionName) {
+        $def = ((Get-Command -Name $funcName).Definition)
+        if ($scriptBlock) {
+            $scriptBlock += '; '
+        }
+        $scriptBlock += "function $funcName { $def }"
+    }
 
-    return [scriptblock]::Create("function $FunctionName { $def }")
+    return [scriptblock]::Create($scriptBlock)
 }

@@ -63,17 +63,8 @@ function Expand-Zip {
 
     # try decompression with 7-zip first
     try { 
-        $regEntry = 'Registry::HKLM\SOFTWARE\7-Zip'
-        # note - registry check will fail if running Powershell x86 on x64 machine
-        if (Test-Path -LiteralPath $regEntry) {
-            $7zipPath = (Get-ItemProperty -Path $regEntry).Path + '7z.exe'
-        } else {
-            $7zipPath = 'C:\Program Files\7-Zip\7z.exe'
-            if (!(Test-Path -LiteralPath $7zipPath)) {
-                $7zipPath = 'C:\Program Files (x86)\7-Zip\7z.exe'
-            }
-        }
-        if (Test-Path -LiteralPath $7zipPath) {
+        $7zipPath = Get-PathTo7Zip
+        if ($7zipPath) {
             $msg = "Decompressing file '$ArchiveFile' to '$OutputDirectory' using 7-zip"
             if (Get-Command -Name Write-Log -ErrorAction SilentlyContinue) {
                 Write-Log -Info $msg 

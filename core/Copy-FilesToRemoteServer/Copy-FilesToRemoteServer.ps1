@@ -212,8 +212,7 @@ function Copy-FilesToRemoteServer {
         foreach ($copySession in $copySessions) { 
            $psSession = $copySession.PSSession
            $psDrive = $copySession.PSDrive
-           Invoke-Command -Session $psSession -ScriptBlock (Convert-FunctionToScriptBlock -FunctionName Expand-ZipShell)
-           Invoke-Command -Session $psSession -ScriptBlock (Convert-FunctionToScriptBlock -FunctionName Expand-Zip)
+           Invoke-Command -Session $psSession -ScriptBlock (Convert-FunctionToScriptBlock -FunctionName @('Get-PathTo7Zip', 'Expand-ZipShell', 'Expand-Zip'))
            $destZipFile = Invoke-Command -Session $psSession -ScriptBlock $preCopyScriptBlock -ArgumentList $zipItem.Name, $Destination, $BlueGreenEnvVariableName, $ClearDestination
            Send-FileStream -Session $psSession -PSDrive $psDrive -ItemToCopy $zipItem -DestinationPath $destZipFile
 

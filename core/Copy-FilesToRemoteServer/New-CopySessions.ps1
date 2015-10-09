@@ -111,8 +111,7 @@ function New-CopySessions {
 
         $needUpdate = $true
         if ($CheckHashMode -eq 'AlwaysCalculateHash') {
-            Invoke-Command -Session $session -ScriptBlock (Convert-FunctionToScriptBlock -FunctionName Get-FlatFileList)
-            Invoke-Command -Session $session -ScriptBlock (Convert-FunctionToScriptBlock -FunctionName Get-Hash)
+            Invoke-Command -Session $session -ScriptBlock (Convert-FunctionToScriptBlock -FunctionName @('Get-FlatFileList', 'Get-Hash'))
             $remoteHash = Invoke-Command -Session $session -ScriptBlock {
                 $destinations = $using:Destination
                 foreach ($dest in $destinations) {
