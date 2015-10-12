@@ -38,6 +38,26 @@ configuration PSCIWindowsFeatures {
 
     .EXAMPLE
     ```
+    Import-Module "$PSScriptRoot\..\PSCI\PSCI.psd1" -Force
+
+    Environment Local { 
+        ServerConnection WebServer -Nodes localhost
+        ServerRole Web -Steps 'PSCIWindowsFeatures' -ServerConnection WebServer
+
+        Tokens Web @{
+            IsClientWindows = $true
+            WindowsFeatures = 'IIS-WebServerRole', 'IIS-ASPNET45', 'IIS-WindowsAuthentication'
+        }
+    }
+
+    Install-DscResources -ModuleNames xDismFeature
+
+    Start-Deployment -Environment Local -NoConfigFiles
+    ```
+    Install specified roles using PSCI configuration DSL.
+
+    .EXAMPLE
+    ```
     PSCIWindowsFeatures -OutputPath 'test' -ConfigurationData @{ AllNodes = @( @{ 
         NodeName = 'localhost'; 
         Tokens = @{ 
@@ -48,6 +68,7 @@ configuration PSCIWindowsFeatures {
 
     Start-DscConfiguration -Path 'test' -ComputerName localhost -Wait -Force -Verbose
     ```
+    Install specified roles manually running DSC configuration.
     #>
 
     Import-DSCResource -Module xDismFeature

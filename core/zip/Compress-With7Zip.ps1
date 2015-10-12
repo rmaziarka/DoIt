@@ -124,6 +124,11 @@ function Compress-With7Zip {
         $WorkingDirectory = Get-Location | Select-Object -ExpandProperty Path
     }
 
+    if (!(Test-Path -Path $WorkingDirectory)) {
+        throw "Working directory '$WorkingDirectory' does not exist."
+    }
+    $WorkingDirectory = (Resolve-Path -LiteralPath $WorkingDirectory).ProviderPath
+
     # wrap in quotes if needed
     $OutputFile = Add-QuotesToPaths $OutputFile
 
@@ -179,14 +184,12 @@ function Compress-With7Zip {
     }
 
     try { 
-        Push-Location -Path $WorkingDirectory
         Write-Log -_Debug "Invoking 7zip at directory '$WorkingDirectory' ($($PathsToCompress.Count) path(s))."
         [void](Start-ExternalProcess -Command $7zipPath -ArgumentList ($cmdLine.ToString()) -WorkingDirectory $WorkingDirectory -Quiet:$Quiet)
     } finally {
         if ($fileList -and (Test-Path -LiteralPath $fileList)) {
             Remove-Item -LiteralPath $fileList -Force
         }
-        Pop-Location
     }
     
 }

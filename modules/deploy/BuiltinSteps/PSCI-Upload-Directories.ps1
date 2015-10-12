@@ -26,37 +26,50 @@ function PSCI-Upload-Directories {
 
     <#
     .SYNOPSIS
-    Uploads specific directories to remote host using WinRM.
+    Uploads specific directories to remote host using administrative shares or WinRM (if share is not accessible).
 
     .DESCRIPTION
+    This function should be invoked locally (without -RunRemotely). 
     It uses following tokens:
-    - **$Tokens.Directories** - hashtable in form @{ '<source_directory relative to packagesPath>' = '<destination_directory>' }
-    - **$Tokens.CheckHashMode** (optional) - type of hash check (optimization) - see [[Copy-FilesToRemoteServer].
+    - **$Tokens.UploadDirectories** - hashtable in form @{ '<source_directory relative to packagesPath>' = '<destination_directory>' }
+    - **$Tokens.UploadDirectoriesCheckHashMode** (optional) - type of hash check (optimization) - default 'DontCheckHash'. Available values:
+        - DontCheckHash - files are always uploaded to the servers
+        - AlwaysCalculateHash - files are uploaded to the servers if their hashes calculated in local path and in remote path are different
+        - UseHashFile - files are uploaded to the servers if there doesn't exist a syncHash_<hash> file, where hash is hash calculated in local path. The file is created/replaced automatically.
+    For details, see [[Copy-FilesToRemoteServer]].
 
     .PARAMETER NodeName
-    [automatic parameter] Name of node where the directories will be uploaded to.
+    (automatic parameter) Name of node where the directories will be uploaded to.
 
     .PARAMETER ServerRole
-    [automatic parameter] Name of current server role.
+    (automatic parameter) Name of current server role.
 
     .PARAMETER Tokens
-    [automatic parameter] Tokens hashtable - see description for details.
+    (automatic parameter) Tokens hashtable - see description for details.
 
     .PARAMETER ConnectionParams
-    [automatic parameter] Connection parameters taken from current ServerConnection (see [[New-ConnectionParameters]]).
+    (automatic parameter) Connection parameters taken from current ServerConnection (see [[New-ConnectionParameters]]).
 
     .EXAMPLE
     ```
-    PSCIWindowsFeatures -OutputPath 'test' -ConfigurationData @{ AllNodes = @( @{ 
-        NodeName = 'localhost'; 
-        Tokens = @{ 
-            IsClientWindows = $true
-            WindowsFeatures = 'IIS-WebServerRole', 'IIS-ASPNET45', 'IIS-WindowsAuthentication'
-        }
-    } ) }
+    Import-Module "$PSScriptRoot\..\PSCI\PSCI.psd1" -Force
 
-    Start-DscConfiguration -Path 'test' -ComputerName localhost -Wait -Force -Verbose
+    Environment Local { 
+        ServerConnection WebServer -Nodes localhost
+        ServerRole Web -Steps 'PSCI-Upload-Directories' -ServerConnection WebServer
+
+        Tokens Web @{
+            UploadDirectories = @{
+                'c:\PSCITestSource1' = 'c:\PSCITestDestination1'
+                'c:\PSCITestSource2' = 'c:\PSCITestDestination2'
+            }
+            UploadDirectoriesCheckHashMode = 'UseHashFile'
+        }
+    }
+
+    Start-Deployment -Environment Local -NoConfigFiles
     ```
+    Uploads specified directories to remote server (localhost in this example).
     #>
 
     [CmdletBinding()]
@@ -90,22 +103,13 @@ function PSCI-Upload-Directories {
         throw "UploadDirectories token must be a hashtable (e.g. @{ '<source_directory relative to packagesPath>' = '<destination_directory>' })."
     }
 
-    if (!$checkHashMode) {
-        $checkHashMode = 'UseHashFile'
-    }
-
     Write-Log -Info ("Starting PSCI-Upload-Directories, node ${NodeName}: {0}" -f (Convert-HashtableToString -Hashtable $directories))
 
     $srcList = @()
     $dstList = @()
-    $packagesPath = (Get-ConfigurationPaths).PackagesPath
 
     foreach ($dirInfo in $directories.GetEnumerator()) {
-        if ([System.IO.Path]::IsPathRooted($dirInfo.Key)) { 
-            $srcList += $dirInfo.Key
-        } else {
-            $srcList += (Join-Path -Path $packagesPath -ChildPath $dirInfo.Key)
-        }
+        $srcList += $dirInfo.Key
         $dstList += $dirInfo.Value
     }
     
@@ -114,7 +118,10 @@ function PSCI-Upload-Directories {
         ConnectionParams = $ConnectionParams
         Destination = $dstList
         ClearDestination = $true
-        CheckHashMode = $checkHashMode
+    }
+
+    if ($checkHashMode) {
+        $params.CheckHashMode = $checkHashMode
     }
 
     Copy-FilesToRemoteServer @params
