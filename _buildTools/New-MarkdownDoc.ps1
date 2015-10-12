@@ -409,9 +409,6 @@ function Generate-MarkdownForFunction {
                     }
                 }
             }
-            if ($item.Code.StartsWith('```')) {
-                    [void]($outputString.Append("```````r`n"))
-            }
         }
     }
 
