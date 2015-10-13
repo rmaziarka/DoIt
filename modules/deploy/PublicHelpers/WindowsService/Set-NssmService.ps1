@@ -217,8 +217,6 @@ function Set-NssmService {
                 Write-Log -Info "Setting service '$ServiceName' parameter '$($appParam.Key)' to '$value)'"
             }
             
-            $nssmOutput = ''
-            $nssmStdErr = ''
             $argumentList = @('set', "`"$ServiceName`"", $appParam.Key, $value)
             [void](Start-ExternalProcess -Command $NssmExePath -ArgumentList $argumentList -Quiet)
             $serviceChanged = $true
