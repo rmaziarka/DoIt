@@ -43,6 +43,9 @@ function Set-NssmService {
     .PARAMETER ServiceDisplayName
     Service display name. If not specified and service does not exist, it will be the same as $ServiceName.
 
+    .PARAMETER ServiceDescription
+    Service description. If not specified and service does not exist, it will be empty.
+
     .PARAMETER StartupType
     Service startup type.
 
@@ -61,12 +64,15 @@ function Set-NssmService {
     .PARAMETER AdditionalParameters
     Additional parameters that will be passed to nssm.exe (nssm set <key> <value>) - see [usage](https://nssm.cc/usage).
 
+    .OUTPUTS
+    $true if any change was made, $false otherwise.
+
     .EXAMPLE
     Set-NssmService -ServiceName 'MyService' -Path 'c:\MyService\MyService.bat' -Arguments '80' -Status Running
 
     #>
     [CmdletBinding()]
-    [OutputType([void])]
+    [OutputType([bool])]
     param (
         [parameter(Mandatory=$true)]
         [string]
@@ -83,6 +89,10 @@ function Set-NssmService {
         [parameter(Mandatory=$false)]
         [string]
         $ServiceDisplayName,
+
+        [parameter(Mandatory=$false)]
+        [string]
+        $ServiceDescription,
 
         [parameter(Mandatory=$false)]
         [string]
@@ -120,6 +130,7 @@ function Set-NssmService {
 
     $NssmExePath = Join-Path -Path $NssmPath -ChildPath 'win64\nssm.exe' 
 
+    $serviceChanged = $false
     if (!(Test-Path -Path $NssmExePath)) {
         if (!(Test-Path -Path $NssmSrcPath)) {
             throw "Cannot find nssm at '$NssmSrcPath'."
@@ -135,13 +146,14 @@ function Set-NssmService {
     $currentService = Get-Service -Name $ServiceName -ErrorAction SilentlyContinue
     if ($Remove) {
         if ($currentService) {
-            Write-Log -Info "Removing service '$ServiceName'"
+            Write-Log -Info "Stopping service '$ServiceName'"
             Stop-Service -Name $ServiceName
+            Write-Log -Info "Removing service '$ServiceName'"
             [void](Start-ExternalProcess -Command $NssmExePath -ArgumentList @('remove', "`"$ServiceName`"", 'confirm') -Quiet)
-            return
+            return $true
         } else {
             Write-Log -Info "Service '$ServiceName' already does not exist."
-            return
+            return $false
         }
     }
 
@@ -150,6 +162,7 @@ function Set-NssmService {
         Write-Log -Info "Creating service '$ServiceName' with command line '$Path'"
         [void](Start-ExternalProcess -Command $NssmExePath -ArgumentList @('install', "`"$ServiceName`"", "`"$Path`"") -Quiet)
         $serviceStopped = $true
+        $serviceChanged = $true
     }
 
     $appParams = @{}
@@ -160,6 +173,10 @@ function Set-NssmService {
 
     if ($ServiceDisplayName) {
         $appParams.DisplayName = $ServiceDisplayName
+    }
+
+    if ($ServiceDescription) {
+        $appParams.Description = $ServiceDescription
     }
 
     if ($Credential) {
@@ -203,13 +220,8 @@ function Set-NssmService {
             $nssmOutput = ''
             $nssmStdErr = ''
             $argumentList = @('set', "`"$ServiceName`"", $appParam.Key, $value)
-            $exitCode = Start-ExternalProcess -Command $NssmExePath -ArgumentList $argumentList -Quiet -Output ([ref]$nssmOutput) -OutputStdErr ([ref]$nssmStdErr) -CheckLastExitCode:$false -CheckStdErr:$false
-            if ($exitCode -or $nssmStdErr) {
-                # this is poor man's conversion UTF16 -> UTF8 (nssm always outputs in UTF16)
-                $nssmOutput = $nssmOutput -replace '(.)\x00', '$1'
-                $nssmStdErr = $nssmStdErr -replace '(.)\x00', '$1'
-                throw "Nssm failed with exit code ${exitCode} - command line: `"$NssmExePath`" $($argumentList -join ' ')`r`nSTDOUT: $nssmOutput`r`nSTDERR: $nssmStdErr"
-            }
+            [void](Start-ExternalProcess -Command $NssmExePath -ArgumentList $argumentList -Quiet)
+            $serviceChanged = $true
         } else {
             Write-Log -_Debug "Service '$ServiceName' parameter '$($appParam.Key)' is already '$($appParam.Value)'"
         }
@@ -217,7 +229,10 @@ function Set-NssmService {
     
     $currentService = Get-Service -Name $ServiceName -ErrorAction SilentlyContinue
     if ($currentService.Status -ne $Status) {
-        Write-Log -Info "Setting service status to '$Status'"
+        Write-Log -Info "Setting service status from $($currentService.Status) to '$Status'"
         Set-Service -Name $ServiceName -Status $Status
+        $serviceChanged = $true
     }
+
+    return $serviceChanged
 }
