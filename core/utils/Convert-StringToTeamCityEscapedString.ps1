@@ -40,7 +40,7 @@ function Convert-StringToTeamCityEscapedString {
     [CmdletBinding()]
     [OutputType([string])]
     param(
-        [Parameter(Mandatory=$true)]
+        [Parameter(Mandatory=$false)]
         [string] 
         $String
     )
