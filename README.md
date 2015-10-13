@@ -24,5 +24,5 @@ Additionally, [PSCI.teamcityExtensions](https://github.com/ObjectivityBSS/PSCI.t
 #### Where to start?
 -------------
 - See [Getting started](https://github.com/ObjectivityBSS/PSCI/wiki/Getting-started).
-- Checkout the code or get it from [nuget](https://www.nuget.org/packages/PSCI/) and use [PsISEProjectExplorer](https://github.com/mgr32/PsISEProjectExplorer) to explore.
+- Checkout the code or get it from [nuget](https://www.nuget.org/packages/PSCI/) and use [Powershell Tools for Visual Studio 2015](https://visualstudiogallery.msdn.microsoft.com/c9eb3ba8-0c59-4944-9a62-6eee37294597) or [PsISEProjectExplorer](https://github.com/mgr32/PsISEProjectExplorer) to explore.
 

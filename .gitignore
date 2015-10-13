@@ -10,3 +10,5 @@ examples/**/obj
 examples/**/packages
 StyleCop.cache
 *.nupkg
+.vs/
+/PSCI.pssproj.user
