@@ -69,8 +69,7 @@ Function Write-ProgressExternal {
         return
     }
 
-    # need to escape some characters - see https://confluence.jetbrains.com/display/TCD8/Build+Script+Interaction+with+TeamCity
-    $Message = $Message -replace "\|","||" -replace "'","|'" -replace "`n","|n" -replace "`r","|r" -replace "\[","|[" -replace "\]","|]"
+    $Message = Convert-StringToTeamCityEscapedString -String $Message
 
     if (!$MessageType -or $MessageType -eq 'Progress') {
         Write-Host "##teamcity[progressMessage '$Message']"
