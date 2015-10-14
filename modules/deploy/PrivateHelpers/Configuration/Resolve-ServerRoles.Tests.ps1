@@ -28,7 +28,8 @@ Describe -Tag "PSCI.unit" "ServerRole" {
     InModuleScope PSCI.deploy {
 
         Mock Write-Log { 
-            Write-Host "$Message"
+            Write-Host $Message
+            $Global:LogMessage += $Message
             if ($Critical) {
                 throw ("Exception: " + $Message)
             }
@@ -525,6 +526,27 @@ Describe -Tag "PSCI.unit" "ServerRole" {
             
         }
 
+        Context "when used with invalid Tokens reference" {
+            $Global:Environments = @{}
+            $Global:LogMessage = @()
+            $Global:MissingScriptBlockTokens = @{}
+
+            Environment Default {
+                ServerConnection WebServer -Nodes 'node1'
+                ServerRole Web -Steps @('TestFunc') -ServerConnections { $Tokens.Test.Invalid } -RunRemotely
+
+                Step TestFunc -ScriptBlock $null
+            }           
+
+            $resolvedRoles = Resolve-ServerRoles -AllEnvironments $Global:Environments -Environment Default -ResolvedTokens @{}
+
+            It "should log warning message" {
+                $Global:LogMessage.Count | Should Be 2
+                $Global:LogMessage[0] | Should Be "Cannot resolve '`$Tokens.Test.Invalid' in token '[ServerRole 'Web' / -ServerConnections]' = '{ `$Tokens.Test.Invalid }' / Environment 'Default'."
+                $Global:LogMessage[1] | Should Be "Environment 'Default' / ServerRole 'Web' has no ServerConnections or Nodes and will not be deployed."
+
+            }
+        }
     }
 }
 

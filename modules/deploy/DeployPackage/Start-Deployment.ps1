@@ -159,6 +159,8 @@ function Start-Deployment {
     
     Write-ProgressExternal -MessageType BlockOpened -Message 'Build deployment plan'
     Write-Log -Info "[START] BUILD DEPLOYMENT PLAN" -Emphasize
+    # This is used in Resolve-ScriptedToken
+    $Global:MissingScriptBlockTokens = @{}
     $Global:DeploymentPlan = New-DeploymentPlan -AllEnvironments $Global:Environments -Environment $Environment -ServerRolesFilter $ServerRolesFilter `
                                                 -StepsFilter $StepsFilter -NodesFilter $NodesFilter -TokensOverride $TokensOverride `
                                                 -DeployType $DeployType

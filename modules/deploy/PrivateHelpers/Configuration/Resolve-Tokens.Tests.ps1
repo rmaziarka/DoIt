@@ -30,6 +30,7 @@ Describe -Tag "PSCI.unit" "Resolve-Tokens" {
 
         Mock Write-Log { 
             Write-Host $Message
+            $Global:LogMessage += $Message
             if ($Critical) {
                 throw $Message
             }
@@ -320,12 +321,16 @@ Describe -Tag "PSCI.unit" "Resolve-Tokens" {
                     Credentials = { ConvertTo-PSCredential -User "$($Tokens.Common.Domain)\$($Tokens.Common.User)" -Password $Tokens.Common.Password }
                     NodeTest = { $Node }
                     EnvironmentTest = { $Environment }
+                    InvalidReferenceTest = { $Tokens.Common.InvalidToken }
+                    InvalidReferenceCatTest = { $Tokens.CommonInvalid.InvalidToken }
                 }
             }
 
-            It "Resolve-Tokens: should properly evaluate scriptblock" {
-                $resolvedTokens = Resolve-Tokens -AllEnvironments $Global:Environments -Environment Default -Node 's01'
+            $Global:LogMessage = @()
+            $Global:MissingScriptBlockTokens = @{}
+            $resolvedTokens = Resolve-Tokens -AllEnvironments $Global:Environments -Environment Default -Node 's01'
 
+            It "Resolve-Tokens: should properly evaluate scriptblock" {
                 $resolvedTokens.Common | Should Not Be $null
                 $resolvedTokens.Common.Credentials | Should Not Be $null
                 $resolvedTokens.Common.Credentials.GetType().FullName | Should Be 'System.Management.Automation.PSCredential'
@@ -344,6 +349,14 @@ Describe -Tag "PSCI.unit" "Resolve-Tokens" {
                 $resolvedTokens.All.NodeTest | Should Be 's01'
                 $resolvedTokens.All.EnvironmentTest | Should Be 'Default'
             }
+
+            It "Resolve-Tokens: should log warning message" {
+                $Global:LogMessage.Count | Should Be 2
+                $logMessage = $Global:LogMessage | Sort
+                $logMessage[0] | Should Be "Cannot resolve '`$Tokens.Common.InvalidToken' in token 'Common.InvalidReferenceTest' = '{ `$Tokens.Common.InvalidToken }' / Environment 'Default'."
+                $logMessage[1] | Should Be "Cannot resolve '`$Tokens.CommonInvalid.InvalidToken' in token 'Common.InvalidReferenceCatTest' = '{ `$Tokens.CommonInvalid.InvalidToken }' / Environment 'Default'."
+            }
+
         }
 
         <# TODO: this is not implemented yet

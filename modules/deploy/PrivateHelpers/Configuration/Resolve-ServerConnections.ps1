@@ -92,7 +92,7 @@ function Resolve-ServerConnections {
         $ResolvedTokens
     )    
     
-    $SelectedServerConnections = Resolve-ScriptedToken -ScriptedToken $SelectedServerConnections -ResolvedTokens $ResolvedTokens -Environment $Environment
+    $SelectedServerConnections = Resolve-ScriptedToken -ScriptedToken $SelectedServerConnections -ResolvedTokens $ResolvedTokens -Environment $Environment -TokenName "[ServerRole '$($ServerRole.Name)' / -ServerConnections]"
 
     $result = @()
     foreach ($serverConnectionName in $SelectedServerConnections) {

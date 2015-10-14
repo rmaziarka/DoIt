@@ -177,7 +177,7 @@ function Resolve-Tokens {
                 $newHashTable = @{}
                 foreach ($tokenValueEnumerator in $tokenValue.GetEnumerator()) {
                     if ($tokenValueEnumerator.Value -and $tokenValueEnumerator.Value -is [ScriptBlock]) {
-                        $newValue = Resolve-ScriptedToken -ScriptedToken $tokenValueEnumerator.Value -ResolvedTokens $resolvedTokens -Node $Node -Environment $Environment    
+                        $newValue = Resolve-ScriptedToken -ScriptedToken $tokenValueEnumerator.Value -ResolvedTokens $resolvedTokens -Node $Node -Environment $Environment -TokenName "${tokenKey}.$($tokenValueEnumerator.Key)" -TokenCategory $category
                         $newHashTable[$tokenValueEnumerator.Key] = $newValue
                     } else {
                         $newHashTable[$tokenValueEnumerator.Key] = $tokenValueEnumerator.Value
@@ -186,7 +186,7 @@ function Resolve-Tokens {
                 $resolvedTokens[$category][$tokenKey] = $newHashTable
             } elseif ($tokenValue -is [ScriptBlock]) {
                 try { 
-                    $newValue = Resolve-ScriptedToken -ScriptedToken $tokenValue -ResolvedTokens $resolvedTokens -Node $Node -Environment $Environment
+                    $newValue = Resolve-ScriptedToken -ScriptedToken $tokenValue -ResolvedTokens $resolvedTokens -Node $Node -Environment $Environment -TokenName $tokenKey -TokenCategory $category
                 } catch {
                     throw ("Cannot evaluate token '$Environment / $category / $tokenKey'. Error message: {0} / token value: {{ {1} }}" -f $_.Exception.Message, $tokenValue)
                 }

@@ -33,6 +33,12 @@ function Resolve-ScriptedToken {
     .PARAMETER ResolvedTokens
     Hashtable containing resolved tokens - will be available as $Tokens variable inside the scriptblock.
 
+    .PARAMETER TokenName
+    Token name (only for logging purposes).
+
+    .PARAMETER TokenCategory
+    Name of category the parsed token belongs to (only for logging purposes).
+
     .PARAMETER Node
     Value of $Node variable that will be available inside the scriptblock.
 
@@ -57,6 +63,14 @@ function Resolve-ScriptedToken {
 
         [Parameter(Mandatory=$false)]
         [string]
+        $TokenName,
+
+        [Parameter(Mandatory=$false)]
+        [string] 
+        $TokenCategory,
+
+        [Parameter(Mandatory=$false)]
+        [string]
         $Node,
 
         [Parameter(Mandatory=$true)]
@@ -74,7 +88,27 @@ function Resolve-ScriptedToken {
     )
 
     $i = 0
+
+    $tokensRegexMatch = '\$Tokens\.(\w+)\.(\w+)'
     while ($ScriptedToken -is [ScriptBlock] -and $i -lt 20) {
+        if ($ScriptedToken.ToString() -imatch $tokensRegexMatch) {
+            $refTokenCategory = $Matches[1]
+            $refTokenName = $Matches[2]
+            if (!$ResolvedTokens.ContainsKey($refTokenCategory) -or !$ResolvedTokens[$refTokenCategory].ContainsKey($refTokenName)) {
+                if ($TokenCategory) {
+                    $tokenLog = "$TokenCategory.$TokenName"
+                } else {
+                    $tokenLog = $TokenName
+                }
+                $missingTokenName = "$refTokenCategory.$refTokenName"
+                if ($Global:MissingScriptBlockTokens -and !$Global:MissingScriptBlockTokens.ContainsKey($missingTokenName)) { 
+                    # This is to prevent logging the same warning multiple times (tokens are resolved for each deployment plan step)
+                    $Global:MissingScriptBlockTokens[$missingTokenName] = $true
+                    Write-Log -Warn "Cannot resolve '`$Tokens.$missingTokenName' in token '$tokenLog' = '{$($ScriptedToken.ToString())}' / Environment '$Environment'."
+                }
+            }
+        }        
+
         $ScriptedToken = $ScriptedToken.InvokeWithContext($null, $contextVariables, $null)
         # InvokeWithContext always returns a collection, but there are following cases:
         # - if scriptblock returns another scriptblock, we need to get it from first element of the array

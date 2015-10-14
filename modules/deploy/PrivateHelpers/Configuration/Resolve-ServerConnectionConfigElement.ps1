@@ -75,7 +75,7 @@ function Resolve-ServerConnectionConfigElement {
         }
     }
 
-    $result.Nodes = Resolve-ScriptedToken -ScriptedToken $result.Nodes -ResolvedTokens $resolvedTokens -Environment $Environment
+    $result.Nodes = Resolve-ScriptedToken -ScriptedToken $result.Nodes -ResolvedTokens $resolvedTokens -Environment $Environment -TokenName "[ServerConnection '$($ServerConnection.Name)' / -Nodes]"
     # Other properties will be resolved later as they require tokens with $NodeName
 
     if (!$result.RemotingMode) {

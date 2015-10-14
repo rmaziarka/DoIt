@@ -96,7 +96,7 @@ function Resolve-Steps {
         # in adhoc deployment steps are overriden directly from filters
         $Steps = $StepsFilter
     } else {
-        $Steps = Resolve-ScriptedToken -ScriptedToken $Steps -ResolvedTokens $ResolvedTokens -Environment $Environment
+        $Steps = Resolve-ScriptedToken -ScriptedToken $Steps -ResolvedTokens $ResolvedTokens -Environment $Environment -TokenName "[ServerRole '$($ServerRole.Name) / -Steps]"
         # remove steps not matching StepsFilter
         if ($StepsFilter) {
             $Steps = $Steps | Where-Object { $StepsFilter -icontains $_ }

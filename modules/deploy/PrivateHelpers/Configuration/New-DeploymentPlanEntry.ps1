@@ -105,9 +105,9 @@ function New-DeploymentPlanEntry {
     $connectionParams = @{
                     Nodes = $Node
                     RemotingMode = $ServerConnection.RemotingMode
-                    Credential = Resolve-ScriptedToken -ScriptedToken $ServerConnection.RemotingCredential -ResolvedTokens $ResolvedTokens -Environment $Environment -Node $Node
+                    Credential = Resolve-ScriptedToken -ScriptedToken $ServerConnection.RemotingCredential -ResolvedTokens $ResolvedTokens -Environment $Environment -Node $Node -TokenName "[ServerConnection '$($ServerConnection.Name)' / -Credential]"
                     Authentication = $ServerConnection.Authentication
-                    Port = Resolve-ScriptedToken -ScriptedToken $ServerConnection.Port -ResolvedTokens $ResolvedTokens -Environment $Environment -Node $Node
+                    Port = Resolve-ScriptedToken -ScriptedToken $ServerConnection.Port -ResolvedTokens $ResolvedTokens -Environment $Environment -Node $Node -TokenName "[ServerConnection '$($ServerConnection.Name)' / -Port]"
                     Protocol = $ServerConnection.Protocol
                     CrossDomain = $ServerConnection.CrossDomain
                 }
@@ -127,12 +127,12 @@ function New-DeploymentPlanEntry {
 
     $isLocalRun = $runOnNode -ieq $Node
 
-    $packageDirectory = (Resolve-ScriptedToken -ScriptedToken $ServerConnection.PackageDirectory -ResolvedTokens $ResolvedTokens -Environment $Environment -Node $Node)
+    $packageDirectory = (Resolve-ScriptedToken -ScriptedToken $ServerConnection.PackageDirectory -ResolvedTokens $ResolvedTokens -Environment $Environment -Node $Node -TokenName "[ServerConnection '$($ServerConnection.Name)' / -PackageDirectory]")
     if (!$packageDirectory) {
         $packageDirectory = 'auto'
     }
 
-    $requiredPackages = @((Resolve-ScriptedToken -ScriptedToken $Step.RequiredPackages -ResolvedTokens $ResolvedTokens -Environment $Environment -Node $Node))
+    $requiredPackages = @((Resolve-ScriptedToken -ScriptedToken $Step.RequiredPackages -ResolvedTokens $ResolvedTokens -Environment $Environment -Node $Node -TokenName "[ServerRole '$($ServerRole.Name)' / Step '$($Step.Name)' / -RequiredPackages]"))
     if ($requiredPackages) {
         $packagePath = (Get-ConfigurationPaths).PackagesPath
         foreach ($package in $requiredPackages) {
@@ -143,7 +143,7 @@ function New-DeploymentPlanEntry {
         }
     }
 
-    $rebootHandlingMode = Resolve-ScriptedToken -ScriptedToken $Step.RebootHandlingMode -ResolvedTokens $ResolvedTokens -Environment $Environment -Node $Node
+    $rebootHandlingMode = Resolve-ScriptedToken -ScriptedToken $Step.RebootHandlingMode -ResolvedTokens $ResolvedTokens -Environment $Environment -Node $Node -TokenName "[ServerRole '$($ServerRole.Name)' / Step '$($Step.Name)' / -RebootHandlingMode]"
 
     return [PSCustomObject]@{ 
         EntryNo = $entryNo
