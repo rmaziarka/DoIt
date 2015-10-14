@@ -160,7 +160,7 @@ function Resolve-ServerRoles {
 
         
         if (!$serverRole.Steps) {
-            Write-Log -Info "Environment '$Environment' / ServerRole '$($serverRole.Name)' has no configurations and will not be deployed."
+            Write-Log -Info "Environment '$Environment' / ServerRole '$($serverRole.Name)' has no steps and will not be deployed."
             $serverRolesToRemove += $serverRole.Name
             continue
         }
