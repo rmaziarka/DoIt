@@ -25,10 +25,10 @@ SOFTWARE.
 function Resolve-Token {
      <#
     .SYNOPSIS
-    Substitutes occurences of '${tokenName}' in given token (defined by Name and Value).
+    Substitutes occurences of '${tokenCategory.tokenName}' or '${tokenName}' in given token (defined by Name and Value).
 
     .DESCRIPTION
-    It searches $Value for occurrences of '${tokenName}' and replaces them with a value from $ResolvedTokens.
+    It searches $Value for occurrences of '${tokenCategory.tokenName}' or '${tokenName}' and replaces them with a value from $ResolvedTokens.
     It is done in a loop in case '${tokenName}' resolves to '${anotherTokenName}' (which again needs resolving). No more than 20 such nestings are allowed.
 
     .PARAMETER Name
@@ -79,7 +79,7 @@ function Resolve-Token {
 
         [Parameter(Mandatory=$false)]
         [string] 
-        $TokenRegex = '\$\{(\w+)\}'
+        $TokenRegex = '\$\{((\w+)\.?(\w+)?)\}'
     )
     if (!$Value -or $Value.GetType().FullName -ne "System.String") {
         return $Value
@@ -88,30 +88,47 @@ function Resolve-Token {
     do {
         $substituted = $false    
         if ($Value -match $TokenRegex) {
-            $strToReplace = $matches[0] -replace '\$', '\$'
-            $key = $matches[1]
-            # search in all categories, but first in '$Category'
+            $strToReplace = $Matches[0] -replace '\$', '\$'
+            $token = $Matches[1]
+            $keyFirstPart = $Matches[2]
+            $keySecondPart = $Matches[3]
 
-            $allCategories = @()
-            if ($Category) {
-                $allCategories += $Category
-            }
-            # SuppressScriptCop - adding small arrays is ok
-            $ResolvedTokens.Keys | Where-Object { $_ -ne $Category } | Foreach-Object { $allCategories += $_ }
-            foreach ($cat in $allCategories) {               
-                if ($ResolvedTokens[$cat].ContainsKey($key)) {
-                    $newValue = $ResolvedTokens[$cat][$Key]
-                    # if newValue is scriptblock, it means this is first pass of Resolve-tokens - we need to ignore it (will be resolved in 3rd pass)
-                    if ($newValue -is [scriptblock]) {
+            $tokenFound = $false
+            if ($keyFirstPart -and $keySecondPart) {
+                if ($ResolvedTokens.ContainsKey($keyFirstPart) -and $ResolvedTokens[$keyFirstPart].ContainsKey($keySecondPart)) { 
+                    $newTokenValue = $ResolvedTokens[$keyFirstPart][$keySecondPart]
+                    $tokenFound = $true
+                } elseif ($ValidateExistence) {
+                    throw "Cannot resolve variable '$token' in token '$Name' = '$Value'. Please ensure there exists a category '$keyFirstPart' with token named '$keySecondPart' is available in your configuration."
+                }
+            } elseif ($keyFirstPart) {
+                # only one part of key provided - search in all categories, but first in $Category
+                $allCategories = @()
+                if ($Category) {
+                    $allCategories += $Category
+                }
+                # SuppressScriptCop - adding small arrays is ok
+                $ResolvedTokens.Keys | Where-Object { $_ -ne $Category } | Foreach-Object { $allCategories += $_ }
+                foreach ($cat in $allCategories) {               
+                    if ($ResolvedTokens[$cat].ContainsKey($keyFirstPart)) {
+                        $newTokenValue = $ResolvedTokens[$cat][$keyFirstPart]
+                        $tokenFound = $true
                         break
                     }
-                    $Value = $Value -replace $strToReplace, $newValue
-                    $substituted = $true
+                }
+            } elseif ($ValidateExistence) {
+                throw "Cannot resolve variable '$token' in token '$Name' = '$Value'. '$token' is invalid - please specify `${tokenCategory.tokenName} or `${tokenName}"
+            }
+            
+            if ($tokenFound) { 
+                # if newValue is scriptblock, it means this is first pass of Resolve-tokens - we need to ignore it (will be resolved in 3rd pass)
+                if ($newTokenValue -is [scriptblock]) {
                     break
                 }
+                $Value = $Value -replace $strToReplace, $newTokenValue                
             }
-            if (!$substituted -and $ValidateExistence) {
-                throw "Cannot resolve variable '$key' in token '$Name' = '$Value'. Please ensure token named '$key' is available in your configuration."
+            if (!$tokenFound -and $ValidateExistence) {
+                throw "Cannot resolve variable '$token' in token '$Name' = '$Value'. Please ensure token named '$keyFirstPart' is available in your configuration (in any category)."
             }
         }
         $i++

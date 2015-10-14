@@ -260,11 +260,12 @@ Describe -Tag "PSCI.unit" "Resolve-Tokens" {
             Environment Default {
 
                 Tokens Common @{
-                    ConnectionString='Server=${Node};Database=Hub;Integrated Security=True;MultipleActiveResultSets=True'
+                    ConnectionString = 'Server=${Node};Database=Hub;Integrated Security=True;MultipleActiveResultSets=True'
                 }
 
                 Tokens WebDeployConfig @{
-                    'Some-Web.config Connection String'='${ConnectionString}'
+                    'Some-Web.config Connection String' = '${ConnectionString}'
+                    'Second-ConnectionString' = '${Common.ConnectionString}'
                 }
             }
 
@@ -278,7 +279,30 @@ Describe -Tag "PSCI.unit" "Resolve-Tokens" {
                 $resolvedTokens.WebDeployConfig | Should Not Be $null
                 $resolvedTokens.WebDeployConfig['Some-Web.config Connection String'] | Should Not Be $null
                 $resolvedTokens.WebDeployConfig['Some-Web.config Connection String'] | Should Be $resolvedTokens.Common.ConnectionString
+                $resolvedTokens.WebDeployConfig['Second-ConnectionString'] | Should Not Be $null
+                $resolvedTokens.WebDeployConfig['Second-ConnectionString'] | Should Be $resolvedTokens.Common.ConnectionString
             }
+
+            Environment Default {
+                Tokens WebDeployConfig @{
+                    'Second-ConnectionString' = '${Common.ConnectionStringInvalid}'
+                }
+            }
+
+            It "Resolve-Tokens: should fail if token (category.name) is invalid" {
+                { Resolve-Tokens -AllEnvironments $Global:Environments -Environment Default -Node 's01' } | Should Throw
+            }
+
+            Environment Default {
+                Tokens WebDeployConfig @{
+                    'Second-ConnectionString' = '${ConnectionStringInvalid}'
+                }
+            }
+
+            It "Resolve-Tokens: should fail if token (name) is invalid" {
+                { Resolve-Tokens -AllEnvironments $Global:Environments -Environment Default -Node 's01' } | Should Throw
+            }
+
         }
 
         Context "with scriptblock as tokens value" {
@@ -366,8 +390,22 @@ Describe -Tag "PSCI.unit" "Resolve-Tokens" {
                 }
             }
 
-            It "Resolve-Tokens: should properly resolve tokens" {
+            It "Resolve-Tokens: should properly resolve flat tokens" {
                 $tokensOverride = @{ 'Credentials' = ConvertTo-PSCredential -User "Test" -Password "Test" }
+                $resolvedTokens = Resolve-Tokens -AllEnvironments $Global:Environments -Environment Default -Node 's01' -TokensOverride $tokensOverride
+
+                $resolvedTokens.Count | Should Be 3
+                $resolvedTokens.WebConfig | Should Not Be $null
+                $resolvedTokens.WebConfig.Count | Should Be 2
+
+                $resolvedTokens.WebConfig.Credentials | Should Not Be $null
+                $resolvedTokens.WebConfig.Credentials.GetType() | Should Be PSCredential
+                $resolvedTokens.WebConfig.Timeout | Should Be 60
+                $resolvedTokens.WebConfig.Timeout.GetType() | Should Be int
+            }
+
+            It "Resolve-Tokens: should properly resolve hierarchical tokens" {
+                $tokensOverride = @{ 'WebConfig.Credentials' = ConvertTo-PSCredential -User "Test" -Password "Test" }
                 $resolvedTokens = Resolve-Tokens -AllEnvironments $Global:Environments -Environment Default -Node 's01' -TokensOverride $tokensOverride
 
                 $resolvedTokens.Count | Should Be 3

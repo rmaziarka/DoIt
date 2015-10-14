@@ -30,7 +30,7 @@ function Get-TokenValue {
     .DESCRIPTION
     It tries to gets token named $Name from the following objects:
     1) $Context.Tokens.$Name - available -Tokens is passed explicitly to Step
-    2) $Context.Tokens.<current ServerRole name> - available if Tokens are structure according to ServerRole convention
+    2) $Context.Tokens.<current ServerRole name> - available if Tokens are structured according to ServerRole convention
     3) $Context.Tokens.All.$Name
 
     This function is used in builtin DSC configurations (for instance [[PSCIWindowsFeatures]]).

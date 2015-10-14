@@ -75,7 +75,7 @@ function Resolve-Tokens {
     Apart from resolving Tokens based on Environment/Node, it additionally does the following:
     1) Adds 'All' category containing all tokens from every category (a flat hashtable of tokens)
     2) Adds 'Common' category containing Node name and Environment.
-    3) Resolves all occurrences of '${tokenName}' in token values which are strings (see '${LDAPServer}' in the example above).
+    3) Resolves all occurrences of '${tokenCat.tokenName}' or '${tokenName}' in token values which are strings (see '${LDAPServer}' in the example above).
        Note categories cannot be used in the string (e.g. '${Category1.LDAPServer}' will not work).
        Note that additional tokens named 'Node' and 'Environment' are available for substitution (see point 2 and example above).
     4) Evaluates all script blocks in token values, making resolved $Tokens variable available (Credentials in the example above).
@@ -265,14 +265,23 @@ function Resolve-TokensForEnvironment {
             $ResolvedTokens[$category] = @{}
         }
         foreach ($token in $tokens[$category].GetEnumerator()) {
-            if ($TokensOverride -and $TokensOverride.ContainsKey($token.Key)) {
-                $val = $TokensOverride[$token.Key]
+            $overridden = $false
+            if ($TokensOverride) {
+                $compositeKey = "$category.$($token.Key)"
+                if ($TokensOverride.ContainsKey($compositeKey)) {
+                    $val = $TokensOverride[$compositeKey]
+                    $overridden = $true
+                } elseif ($TokensOverride.ContainsKey($token.Key)) {
+                    $val = $TokensOverride[$token.Key]
+                    $overridden = $true
+                }
                 if ($val -ieq '$true') {
                     $val = $true
                 } elseif ($val -ieq '$false') {
                     $val = $false
                 }
-            } else {
+            }
+            if (!$overridden) {
                 $val = $token.Value
             }
             $ResolvedTokens[$category][$token.Key] = $val
