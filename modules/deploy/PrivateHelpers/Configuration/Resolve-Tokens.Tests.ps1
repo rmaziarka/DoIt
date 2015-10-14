@@ -327,7 +327,6 @@ Describe -Tag "PSCI.unit" "Resolve-Tokens" {
             }
 
             $Global:LogMessage = @()
-            $Global:MissingScriptBlockTokens = @{}
             $resolvedTokens = Resolve-Tokens -AllEnvironments $Global:Environments -Environment Default -Node 's01'
 
             It "Resolve-Tokens: should properly evaluate scriptblock" {
@@ -349,6 +348,23 @@ Describe -Tag "PSCI.unit" "Resolve-Tokens" {
                 $resolvedTokens.All.NodeTest | Should Be 's01'
                 $resolvedTokens.All.EnvironmentTest | Should Be 'Default'
             }
+
+        }
+
+        Context "with scriptblock as tokens value referencing invalid tokens" {
+            $Global:Environments = @{}
+
+            Environment Default {
+
+                Tokens Common @{
+                    InvalidReferenceTest = { $Tokens.Common.InvalidToken }
+                    InvalidReferenceCatTest = { $Tokens.CommonInvalid.InvalidToken }
+                }
+            }
+
+            $Global:LogMessage = @()
+            $Global:MissingScriptBlockTokens = @{}
+            $resolvedTokens = Resolve-Tokens -AllEnvironments $Global:Environments -Environment Default -Node 's01'
 
             It "Resolve-Tokens: should log warning message" {
                 $Global:LogMessage.Count | Should Be 2
@@ -524,7 +540,7 @@ Describe -Tag "PSCI.unit" "Resolve-Tokens" {
                         'localhost'  = @{ 
                             InternalNode = { return 'localhost:i' }
                             ExternalNode = '${ExternalNodeValue}'
-                            #Nested = @{ NestedNode = { return 'nested' } } 
+                            Nested = @{ NestedNode = { return 'nested' } } 
                         }
                         ExternalNodeScriptBlock = { $Tokens.DestinationNodes.ExternalNodeValue }
                         ExternalNodeStringRef = '${ExternalNodeValue}'

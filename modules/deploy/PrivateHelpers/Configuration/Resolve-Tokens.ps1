@@ -137,89 +137,130 @@ function Resolve-Tokens {
     $resolvedTokens.Common.Node = $Node
     $resolvedTokens.Common.Environment = $Environment
 
-    # 1st pass resolve each string token (apart from ones with [scriptblock] value).
-    # TODO: this is ugly copy-paste (minus -ValidateExistence)!
-    foreach ($category in $resolvedTokens.Keys) {
-        $tokensCatKeys = @()
-        $resolvedTokens[$category].Keys | Foreach-Object { $tokensCatKeys += $_ }
-
-        foreach ($tokenKey in $tokensCatKeys) {
-            $tokenValue = $resolvedTokens[$category][$tokenKey]
-
-            if ($tokenValue -is [hashtable]) {
-                $newHashTable = @{}
-                foreach ($tokenValueEnumerator in $tokenValue.GetEnumerator()) {
-                    $newValue = Resolve-Token -Name "${tokenKey}.$($tokenValueEnumerator.Key)" -Value $tokenValueEnumerator.Value -ResolvedTokens $resolvedTokens -Category $category -ValidateExistence:$false
-                    $newHashTable[$tokenValueEnumerator.Key] = $newValue
-                }
-                $resolvedTokens[$category][$tokenKey] = $newHashTable
-            } else {
-                $newValue = Resolve-Token -Name $tokenKey -Value $tokenValue -ResolvedTokens $resolvedTokens -Category $category -ValidateExistence:$false
-                $resolvedTokens[$category][$tokenKey] = $newValue
-            }
-        }
+    $resolveTokenFunction = { 
+        param($TokenName, $TokenCategory, $TokenValue, $ResolvedTokens, $Node, $Environment, $ValidateExistence)    
+        Resolve-Token -Name $TokenName -Value $TokenValue -Category $TokenCategory -ResolvedTokens $ResolvedTokens -ValidateExistence:$ValidateExistence
     }
+
+    $resolveScriptedTokenFunction = { 
+        param($TokenName, $TokenCategory, $TokenValue, $ResolvedTokens, $Node, $Environment, $ValidateExistence)
+        Resolve-ScriptedToken -TokenName $TokenName -ScriptedToken $TokenValue -TokenCategory $TokenCategory -ResolvedTokens $ResolvedTokens -Node $Node -Environment $Environment
+    }
+
+    $params = @{
+        ResolvedTokens = $resolvedTokens
+        Environment = $Environment
+        Node = $Node
+    }
+
+    # 1st pass resolve each string token (apart from ones with [scriptblock] value).
+    Resolve-TokensPass @params -ResolveFunction $resolveTokenFunction -ValidateExistence:$false
 
     # 2st pass - resolve each scriptblock token
-    foreach ($category in $resolvedTokens.Keys) {
-        $tokensCatKeys = @()
-        # SuppressScriptCop - adding small arrays is ok
-        $resolvedTokens[$category].Keys | Foreach-Object { $tokensCatKeys += $_ }
-
-        foreach ($tokenKey in $tokensCatKeys) {
-            $tokenValue = $resolvedTokens[$category][$tokenKey]
-
-            if (!$tokenValue) {
-                continue
-            }
-
-            if ($tokenValue -is [hashtable]) {
-                $newHashTable = @{}
-                foreach ($tokenValueEnumerator in $tokenValue.GetEnumerator()) {
-                    if ($tokenValueEnumerator.Value -and $tokenValueEnumerator.Value -is [ScriptBlock]) {
-                        $newValue = Resolve-ScriptedToken -ScriptedToken $tokenValueEnumerator.Value -ResolvedTokens $resolvedTokens -Node $Node -Environment $Environment -TokenName "${tokenKey}.$($tokenValueEnumerator.Key)" -TokenCategory $category
-                        $newHashTable[$tokenValueEnumerator.Key] = $newValue
-                    } else {
-                        $newHashTable[$tokenValueEnumerator.Key] = $tokenValueEnumerator.Value
-                    }
-                }
-                $resolvedTokens[$category][$tokenKey] = $newHashTable
-            } elseif ($tokenValue -is [ScriptBlock]) {
-                try { 
-                    $newValue = Resolve-ScriptedToken -ScriptedToken $tokenValue -ResolvedTokens $resolvedTokens -Node $Node -Environment $Environment -TokenName $tokenKey -TokenCategory $category
-                } catch {
-                    throw ("Cannot evaluate token '$Environment / $category / $tokenKey'. Error message: {0} / token value: {{ {1} }}" -f $_.Exception.Message, $tokenValue)
-                }
-                $resolvedTokens[$category][$tokenKey] = $newValue
-            }
-        }
-    }
+    Resolve-TokensPass @params -ResolveFunction $resolveScriptedTokenFunction -ValidateExistence:$false
 
     # 3st pass - resolve each string token again
-    foreach ($category in $resolvedTokens.Keys) {
-        $tokensCatKeys = @()
-        $resolvedTokens[$category].Keys | Foreach-Object { $tokensCatKeys += $_ }
-
-        foreach ($tokenKey in $tokensCatKeys) {
-            $tokenValue = $resolvedTokens[$category][$tokenKey]
-            if ($tokenValue -is [hashtable]) {
-                $newHashTable = @{}
-                foreach ($tokenValueEnumerator in $tokenValue.GetEnumerator()) {
-                    $newValue = Resolve-Token -Name "${tokenKey}.$($tokenValueEnumerator.Key)" -Value $tokenValueEnumerator.Value -ResolvedTokens $resolvedTokens -Category $category -ValidateExistence:$false
-                    $newHashTable[$tokenValueEnumerator.Key] = $newValue
-                }
-                $resolvedTokens[$category][$tokenKey] = $newHashTable
-            } else {
-                $newValue = Resolve-Token -Name $tokenKey -Value $tokenValue -ResolvedTokens $resolvedTokens -Category $category
-                $resolvedTokens[$category][$tokenKey] = $newValue
-            }
-        }
-    }
+    Resolve-TokensPass @params -ResolveFunction $resolveTokenFunction -ValidateExistence:$true
 
     # add 'All' category that contains flat hashtable of all tokens
     Add-AllTokensCategory -Tokens $resolvedTokens
 
     return $resolvedTokens
+}
+
+function Resolve-TokensPass {
+
+    <#
+    .SYNOPSIS
+    Helper function to run one pass of tokens resolve.
+
+    .PARAMETER ResolvedTokens
+    Resolved tokens (result hashtable)
+
+    .PARAMETER ResolveFunction
+    Scriptblock that will be invoked to resolve specific token value.
+
+    .PARAMETER Environment
+    Environment name - will be used for selecting proper sub-hashtable from $AllEnvironments.
+
+    .PARAMETER Node
+    Node name - will be used for selecting proper sub-hashtable from $AllEnvironments and to resolve '${Node}' tokens.
+
+    .PARAMETER ValidateExistence
+    Whether to validate existence of the referenced token.
+
+    .EXAMPLE
+    Resolve-TokensPass -ResolvedTokens $resolvedTokens -Environment $Environment -Node $Node -ResolveFunction $resolveTokenFunction -ValidateExistence:$false
+    #>
+
+    [CmdletBinding()]
+    [OutputType([void])]
+    param(
+        [Parameter(Mandatory=$true)]
+        [hashtable]
+        $ResolvedTokens,
+
+        [Parameter(Mandatory=$true)]
+        [scriptblock]
+        $ResolveFunction,
+
+        [Parameter(Mandatory=$true)]
+        [string]
+        $Environment,
+
+        [Parameter(Mandatory=$false)]
+        [string]
+        $Node,
+
+        [Parameter(Mandatory=$false)]
+        [switch]
+        $ValidateExistence
+    )
+
+    foreach ($category in $resolvedTokens.Keys) {
+        $tokensCatKeys = @()
+        $resolvedTokens[$category].Keys | Foreach-Object { $tokensCatKeys += $_ }
+
+        foreach ($tokenKey in $tokensCatKeys) {
+            $tokenValue = $resolvedTokens[$category][$tokenKey]
+            if (!$tokenValue) {
+                continue
+            }
+            try { 
+                if ($tokenValue -is [hashtable]) {
+                    $newHashTable = @{}
+                    foreach ($tokenValueEnumerator in $tokenValue.GetEnumerator()) {
+                        $params = @{
+                            TokenName = "${tokenKey}.$($tokenValueEnumerator.Key)"
+                            TokenCategory = $category
+                            TokenValue = $tokenValueEnumerator.Value
+                            ResolvedTokens = $ResolvedTokens
+                            Environment = $Environment
+                            Node = $Node
+                            ValidateExistence = $ValidateExistence
+                        }
+                        $newValue = & $ResolveFunction @params                   
+                        $newHashTable[$tokenValueEnumerator.Key] = $newValue
+                    }
+                    $resolvedTokens[$category][$tokenKey] = $newHashTable
+                } else {
+                    $params = @{
+                        TokenName = $tokenKey
+                        TokenCategory = $category
+                        TokenValue = $tokenValue
+                        ResolvedTokens = $ResolvedTokens
+                        Environment = $Environment
+                        Node = $Node
+                        ValidateExistence = $ValidateExistence
+                    }
+                    $newValue = & $ResolveFunction @params 
+                    $resolvedTokens[$category][$tokenKey] = $newValue
+                }
+            } catch {
+                throw ("Cannot evaluate token '$Environment / $category / $tokenKey'. Error message: {0} / token value: {{ {1} }}" -f $_.Exception.Message, $tokenValue)
+            }
+        }
+    }
 }
 
 

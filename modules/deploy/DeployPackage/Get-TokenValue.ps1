@@ -44,6 +44,9 @@ function Get-TokenValue {
     .PARAMETER Mandatory
     If $true token entry must be exist (note its value can be null - it's only important there is the key in hashtable).
 
+    .PARAMETER DefaultValue
+    Default value to use if token not found (and Mandatory is $false).
+
     .PARAMETER Context
     Context where the token should be resolved. If not specified, it's $Node.ServerRole / $Node.Tokens for DSC, and $ServerRole / $Tokens
     for functions (both should be available automatically in parent scope). 
@@ -63,6 +66,10 @@ function Get-TokenValue {
         $Mandatory,
 
         [Parameter(Mandatory=$false)]
+        [string]
+        $DefaultValue,
+
+        [Parameter(Mandatory=$false)]
         [hashtable]
         $Context
     )
@@ -79,16 +86,26 @@ function Get-TokenValue {
 
     $result = $null
 
-    if ($tokens -and $tokens.ContainsKey($Name)) {
-        $result = $tokens.$Name
-    } elseif ($tokens -and $serverRole -and $tokens.ContainsKey($serverRole) -and $tokens.$serverRole -is [hashtable]) {
-        $result = $tokens.$serverRole.$Name
-    } else {
-        $result = $tokens.All.$Name
+    $tokenFound = $false
+    if ($tokens -and $tokens -is [hashtable]) {
+        if ($tokens.ContainsKey($Name)) {
+            $result = $tokens.$Name
+            $tokenFound = $true
+        } elseif ($serverRole -and $tokens.ContainsKey($serverRole) -and $tokens.$serverRole -is [hashtable] -and $tokens.$serverRole.ContainsKey($Name)) {
+            $result = $tokens.$serverRole.$Name
+            $tokenFound = $true
+        } elseif ($tokens.ContainsKey('All') -and $tokens.All.ContainsKey($Name)) { 
+            $result = $tokens.All.$Name
+            $tokenFound = $true
+        
+        }
     }
 
     if (!$result -and $Mandatory) {
         throw "Mandatory token named '$Name' has not been specified. Please ensure there is `$Tokens.$Name or `$Tokens.$ServerRole.$Name available."
+    }
+    if (!$tokenFound -and $DefaultValue) {
+        return $DefaultValue
     }
     return $result
 }
