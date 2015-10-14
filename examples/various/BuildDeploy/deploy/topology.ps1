@@ -43,7 +43,7 @@ Environment Default {
     ServerRole Web -Steps @('ConfigureIISProvision', 'ConfigureIISWebApp') -ServerConnections TestNodePSRemoting
     ServerRole Database -Steps @('Deploy-Database') -ServerConnections TestNodeDefault
 
-    ServerRole RemotingTestPSRemoting -Steps @('Prepare-RemotingTest', 'Validate-RemotingTest') -RunRemotely -ServerConnections TestNodePSRemoting
+    ServerRole RemotingTestPSRemoting -Steps @('Prepare-RemotingTest', 'Validate-RemotingTest', 'Validate-Website') -RunRemotely -ServerConnections TestNodePSRemoting
     ServerRole RemotingTestPSRemotingCredSSP -Steps @('Prepare-RemotingTest', 'Validate-RemotingTest') -RunRemotely -ServerConnections TestNodePSRemotingCredSSP
     ServerRole RemotingTestMSDeploy -Steps @('Prepare-RemotingTest', 'Validate-RemotingTest') -RunRemotely -ServerConnections TestNodeMSDeploy
 

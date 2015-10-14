@@ -39,11 +39,19 @@ Environment Default {
         DatabaseDeploymentConnectionString = 'Server=${Node}\SQLEXPRESS;Integrated Security=SSPI;'
     }
 
+    Tokens WebsitePortCategory @{
+        WebsitePort = '82'
+    }
+
+    Tokens WebsitePortTokensTest @{
+        WebsitePort = '81'
+    }
+
     Tokens WebServerProvision @{
         AppPoolName = 'PSCITest'
         WebsitePhysicalPath = 'c:\inetpub\wwwroot\PSCITest'
         WebsiteName = 'PSCITest'
-        WebsitePort = '81'
+        WebsitePort = '${WebsitePortCategory.WebsitePort}'
     }
 }
 
