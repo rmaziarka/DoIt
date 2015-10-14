@@ -180,7 +180,7 @@ Describe -Tag "PSCI.unit" "Resolve-Tokens" {
                 $resolvedTokens.WebConfig.LogDir | Should Be 'C:\Logs'
             }
 
-            It "Resolve-Tokens: should properly resolve tokens for granchildren environment" {
+            It "Resolve-Tokens: should properly resolve tokens for grandchildren environment" {
                 $resolvedTokens = Resolve-Tokens -AllEnvironments $Global:Environments -Environment Live_Perf2 -Node 's01'
 
                 $resolvedTokens.Count | Should Be 3
@@ -562,9 +562,9 @@ Describe -Tag "PSCI.unit" "Resolve-Tokens" {
                 $resolvedTokens.Node.ExternalNode | should Be 'localhost:e'
                 $resolvedTokens.DestinationNodes.NodesMap.ExternalNodeScriptBlock | should Be 'localhost:e'
                 $resolvedTokens.DestinationNodes.NodesMap.ExternalNodeStringRef | should Be 'localhost:e'
-                #$resolvedTokens.DestinationNodes.NodesMap.localhost.InternalNode | should Be 'localhost:i'
-                #$resolvedTokens.DestinationNodes.NodesMap.localhost.ExternalNode | should Be 'localhost:e'
-                #$resolvedTokens.DestinationNodes.NodesMap.localhost.Nested.NestedNode | should Be 'nested'
+                $resolvedTokens.DestinationNodes.NodesMap.localhost.InternalNode | should Be 'localhost:i'
+                $resolvedTokens.DestinationNodes.NodesMap.localhost.ExternalNode | should Be 'localhost:e'
+                $resolvedTokens.DestinationNodes.NodesMap.localhost.Nested.NestedNode | should Be 'nested'
             }
         }
     }

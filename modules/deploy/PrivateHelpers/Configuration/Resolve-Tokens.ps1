@@ -154,180 +154,18 @@ function Resolve-Tokens {
     }
 
     # 1st pass resolve each string token (apart from ones with [scriptblock] value).
-    Resolve-TokensPass @params -ResolveFunction $resolveTokenFunction -ValidateExistence:$false
+    Resolve-TokensSinglePass @params -ResolveFunction $resolveTokenFunction -ValidateExistence:$false
 
     # 2st pass - resolve each scriptblock token
-    Resolve-TokensPass @params -ResolveFunction $resolveScriptedTokenFunction -ValidateExistence:$false
+    Resolve-TokensSinglePass @params -ResolveFunction $resolveScriptedTokenFunction -ValidateExistence:$false
 
     # 3st pass - resolve each string token again
-    Resolve-TokensPass @params -ResolveFunction $resolveTokenFunction -ValidateExistence:$true
+    Resolve-TokensSinglePass @params -ResolveFunction $resolveTokenFunction -ValidateExistence:$true
 
     # add 'All' category that contains flat hashtable of all tokens
     Add-AllTokensCategory -Tokens $resolvedTokens
 
     return $resolvedTokens
-}
-
-function Resolve-TokensPass {
-
-    <#
-    .SYNOPSIS
-    Helper function to run one pass of tokens resolve.
-
-    .PARAMETER ResolvedTokens
-    Resolved tokens (result hashtable)
-
-    .PARAMETER ResolveFunction
-    Scriptblock that will be invoked to resolve specific token value.
-
-    .PARAMETER Environment
-    Environment name - will be used for selecting proper sub-hashtable from $AllEnvironments.
-
-    .PARAMETER Node
-    Node name - will be used for selecting proper sub-hashtable from $AllEnvironments and to resolve '${Node}' tokens.
-
-    .PARAMETER ValidateExistence
-    Whether to validate existence of the referenced token.
-
-    .EXAMPLE
-    Resolve-TokensPass -ResolvedTokens $resolvedTokens -Environment $Environment -Node $Node -ResolveFunction $resolveTokenFunction -ValidateExistence:$false
-    #>
-
-    [CmdletBinding()]
-    [OutputType([void])]
-    param(
-        [Parameter(Mandatory=$true)]
-        [hashtable]
-        $ResolvedTokens,
-
-        [Parameter(Mandatory=$true)]
-        [scriptblock]
-        $ResolveFunction,
-
-        [Parameter(Mandatory=$true)]
-        [string]
-        $Environment,
-
-        [Parameter(Mandatory=$false)]
-        [string]
-        $Node,
-
-        [Parameter(Mandatory=$false)]
-        [switch]
-        $ValidateExistence
-    )
-
-    foreach ($category in $resolvedTokens.Keys) {
-        $tokensCatKeys = @()
-        $resolvedTokens[$category].Keys | Foreach-Object { $tokensCatKeys += $_ }
-
-        foreach ($tokenKey in $tokensCatKeys) {
-            $tokenValue = $resolvedTokens[$category][$tokenKey]
-            if (!$tokenValue) {
-                continue
-            }
-            try { 
-                if ($tokenValue -is [hashtable]) {
-                    $newHashTable = @{}
-                    foreach ($tokenValueEnumerator in $tokenValue.GetEnumerator()) {
-                        $params = @{
-                            TokenName = "${tokenKey}.$($tokenValueEnumerator.Key)"
-                            TokenCategory = $category
-                            TokenValue = $tokenValueEnumerator.Value
-                            ResolvedTokens = $ResolvedTokens
-                            Environment = $Environment
-                            Node = $Node
-                            ValidateExistence = $ValidateExistence
-                        }
-                        $newValue = & $ResolveFunction @params                   
-                        $newHashTable[$tokenValueEnumerator.Key] = $newValue
-                    }
-                    $resolvedTokens[$category][$tokenKey] = $newHashTable
-                } else {
-                    $params = @{
-                        TokenName = $tokenKey
-                        TokenCategory = $category
-                        TokenValue = $tokenValue
-                        ResolvedTokens = $ResolvedTokens
-                        Environment = $Environment
-                        Node = $Node
-                        ValidateExistence = $ValidateExistence
-                    }
-                    $newValue = & $ResolveFunction @params 
-                    $resolvedTokens[$category][$tokenKey] = $newValue
-                }
-            } catch {
-                throw ("Cannot evaluate token '$Environment / $category / $tokenKey'. Error message: {0} / token value: {{ {1} }}" -f $_.Exception.Message, $tokenValue)
-            }
-        }
-    }
-}
-
-
-function Resolve-TokensForEnvironment {
-    
-    <#
-    .SYNOPSIS
-    Helper function to resolve given tokens hashtable.
-
-    .PARAMETER Tokens
-    Tokens hashtable.
-
-    .PARAMETER ResolvedTokens
-    Resolved tokens (result hashtable)
-
-    .PARAMETER TokensOverride
-    A list of tokens to override. Token defined in the configuration files will be overrided with values specified in this array 
-    (tokens will be matched by name, ignoring categories).
-
-    .EXAMPLE
-    Resolve-TokensForEnvironment -Tokens $AllEnvironments[$env].Tokens -ResolvedTokens $resolvedTokens -TokensOverride $TokensOverride
-    #>
-
-    [CmdletBinding()]
-    [OutputType([void])]
-    param(
-        [Parameter(Mandatory=$true)]
-        [hashtable]
-        $Tokens,
-
-        [Parameter(Mandatory=$true)]
-        [hashtable]
-        $ResolvedTokens,
-
-        [Parameter(Mandatory=$false)]
-        [hashtable]
-        $TokensOverride
-    )
-
-
-    foreach ($category in $tokens.Keys) {
-        if (!$resolvedTokens.ContainsKey($category)) {
-            $ResolvedTokens[$category] = @{}
-        }
-        foreach ($token in $tokens[$category].GetEnumerator()) {
-            $overridden = $false
-            if ($TokensOverride) {
-                $compositeKey = "$category.$($token.Key)"
-                if ($TokensOverride.ContainsKey($compositeKey)) {
-                    $val = $TokensOverride[$compositeKey]
-                    $overridden = $true
-                } elseif ($TokensOverride.ContainsKey($token.Key)) {
-                    $val = $TokensOverride[$token.Key]
-                    $overridden = $true
-                }
-                if ($val -ieq '$true') {
-                    $val = $true
-                } elseif ($val -ieq '$false') {
-                    $val = $false
-                }
-            }
-            if (!$overridden) {
-                $val = $token.Value
-            }
-            $ResolvedTokens[$category][$token.Key] = $val
-        }      
-    }
 }
 
 function Add-AllTokensCategory {
