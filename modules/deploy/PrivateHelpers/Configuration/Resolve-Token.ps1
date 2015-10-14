@@ -126,6 +126,7 @@ function Resolve-Token {
                     break
                 }
                 $Value = $Value -replace $strToReplace, $newTokenValue                
+                $substituted = $true
             }
             if (!$tokenFound -and $ValidateExistence) {
                 throw "Cannot resolve variable '$token' in token '$Name' = '$Value'. Please ensure token named '$keyFirstPart' is available in your configuration (in any category)."
