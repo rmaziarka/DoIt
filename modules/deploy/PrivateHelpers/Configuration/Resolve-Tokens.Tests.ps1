@@ -266,6 +266,7 @@ Describe -Tag "PSCI.unit" "Resolve-Tokens" {
                 Tokens WebDeployConfig @{
                     'Some-Web.config Connection String' = '${ConnectionString}'
                     'Second-ConnectionString' = '${Common.ConnectionString}'
+                    'TwoStrings' = '${ConnectionString},${Common.ConnectionString}'
                 }
             }
 
@@ -281,6 +282,8 @@ Describe -Tag "PSCI.unit" "Resolve-Tokens" {
                 $resolvedTokens.WebDeployConfig['Some-Web.config Connection String'] | Should Be $resolvedTokens.Common.ConnectionString
                 $resolvedTokens.WebDeployConfig['Second-ConnectionString'] | Should Not Be $null
                 $resolvedTokens.WebDeployConfig['Second-ConnectionString'] | Should Be $resolvedTokens.Common.ConnectionString
+                $resolvedTokens.WebDeployConfig['TwoStrings'] | Should Not Be $null
+                $resolvedTokens.WebDeployConfig['TwoStrings'] | Should Be ('{0},{1}' -f $resolvedTokens.Common.ConnectionString, $resolvedTokens.Common.ConnectionString)
             }
 
             Environment Default {

@@ -75,8 +75,8 @@ function Send-FileStream {
 
     if ($PSDrive) {
         try { 
-            $DestinationPath = Join-Path -Path "$($PSDrive.Name):" -ChildPath ($DestinationPath.Substring(3))
-            Copy-Item -Path $ItemToCopy.FullName -Destination $DestinationPath -Force
+            $psDriveDestinationPath = Join-Path -Path "$($PSDrive.Name):" -ChildPath ($DestinationPath.Substring(3))
+            Copy-Item -Path $ItemToCopy.FullName -Destination $psDriveDestinationPath -Force
             return
         } catch {
             if ($_) {
@@ -84,7 +84,7 @@ function Send-FileStream {
             } else {
                 $err = ''
             }
-            Write-Log -Warn "Copy-Item to '$DestinationPath' failed: $err - falling back to WinRM stream"
+            Write-Log -Warn "Copy-Item to '$psDriveDestinationPath' failed: $err - falling back to WinRM stream"
         }
     }
 

@@ -81,8 +81,8 @@ function Get-RemoteFileUsingStream {
 
     if ($PSDrive) {
         try { 
-            $SourcePath = Join-Path -Path "$($PSDrive.Name):" -ChildPath ($SourcePath.Substring(3))
-            Copy-Item -Path $SourcePath -Destination $DestinationPath -Force
+            $psDriveSourcePath = Join-Path -Path "$($PSDrive.Name):" -ChildPath ($SourcePath.Substring(3))
+            Copy-Item -Path $psDriveSourcePath -Destination $DestinationPath -Force
             return
         } catch {
             if ($_) {
@@ -90,7 +90,7 @@ function Get-RemoteFileUsingStream {
             } else {
                 $err = ''
             }
-            Write-Log -Warn "Copy-Item from '$SourcePath' failed: $err - falling back to WinRM stream"
+            Write-Log -Warn "Copy-Item from '$psDriveSourcePath' failed: $err - falling back to WinRM stream"
         }
     }
 
