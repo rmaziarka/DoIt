@@ -129,6 +129,11 @@ function Resolve-Token {
             }
             
             if ($tokenFound) { 
+                # if newValue is scriptblock, it means this is first pass of Resolve-tokens - we need to ignore it (will be resolved in 3rd pass)
+                if ($newTokenValue -is [scriptblock]) {
+                    break
+                }
+
                 # suffix will be not empty if we have ${Key.userHashtableKey} or ${Category.Key.userHashtableKey}
                 if ($suffix) {
                     try {

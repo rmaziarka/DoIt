@@ -715,6 +715,7 @@ Describe -Tag "PSCI.unit" "Resolve-Tokens" {
                 Tokens Node @{
                     SelectedNode = 'localhost:i', 'localhost:i2'
                     ExternalNode = { $Tokens.DestinationNodes.ExternalNodeValue }
+                    Array = @( @{'a' = { $Tokens.DestinationNodes.ExternalNodeValue[0] } }, '${DestinationNodes.ExternalNodeValue[1]}', '${Node.ExternalNode[1]}' )
                 }
             }
 
@@ -722,10 +723,14 @@ Describe -Tag "PSCI.unit" "Resolve-Tokens" {
 
             It "Should properly resolve tokens" {
                 $resolvedTokens.Count | Should Be 4
-                $resolvedTokens.Node.SelectedNode.Count | should Be 2
-                $resolvedTokens.Node.SelectedNode | should Be @('localhost:i', 'localhost:i2')
-                $resolvedTokens.Node.ExternalNode.Count | should Be 2
-                $resolvedTokens.Node.ExternalNode | should Be @('localhost:e', 'localhost:e2')
+                $resolvedTokens.Node.SelectedNode.Count | Should Be 2
+                $resolvedTokens.Node.SelectedNode | Should Be @('localhost:i', 'localhost:i2')
+                $resolvedTokens.Node.ExternalNode.Count | Should Be 2
+                $resolvedTokens.Node.ExternalNode | Should Be @('localhost:e', 'localhost:e2')
+                $resolvedTokens.Node.Array.Count | Should Be 3
+                $resolvedTokens.Node.Array[0].a | Should Be 'localhost:e'
+                $resolvedTokens.Node.Array[1]| Should Be 'localhost:e2'
+                $resolvedTokens.Node.Array[2]| Should Be 'localhost:e2'
             }
         }
 

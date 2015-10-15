@@ -100,7 +100,7 @@ function Resolve-SingleTokenRecursively {
 
     <#
     .SYNOPSIS
-    Helper function to resolve single token recursively (if it's a hashtable).
+    Helper function to resolve single token recursively (if it's a hashtable or array).
 
     .PARAMETER TokenName
     Token name.
@@ -141,7 +141,7 @@ function Resolve-SingleTokenRecursively {
         [object]
         $TokenCategory,
 
-        [Parameter(Mandatory=$true)]
+        [Parameter(Mandatory=$false)]
         [object]
         $TokenValue,
 
@@ -165,33 +165,38 @@ function Resolve-SingleTokenRecursively {
         [switch]
         $ValidateExistence
     )
+
+    $params = @{
+        TokenCategory = $TokenCategory
+        ResolvedTokens = $ResolvedTokens
+        Environment = $Environment
+        Node = $Node
+        ValidateExistence = $ValidateExistence
+    }
     
     if ($TokenValue -is [hashtable]) {
         $newHashTable = @{}
-        $recursionParams = @{
-            TokenCategory = $TokenCategory
-            ResolvedTokens = $ResolvedTokens
-            ResolveFunction = $ResolveFunction
-            Environment = $Environment
-            Node = $Node
-            ValidateExistence = $ValidateExistence
-        }
+        $params.ResolveFunction = $ResolveFunction
         foreach ($tokenValueEnumerator in $tokenValue.GetEnumerator()) {
-            $recursionParams.TokenName = "$TokenName.$($tokenValueEnumerator.Key)"
-            $recursionParams.TokenValue = $tokenValueEnumerator.Value
-            $newHashTable[$tokenValueEnumerator.Key] = Resolve-SingleTokenRecursively @recursionParams
+            $params.TokenName = "$TokenName.$($tokenValueEnumerator.Key)"
+            $params.TokenValue = $tokenValueEnumerator.Value
+            $newHashTable[$tokenValueEnumerator.Key] = Resolve-SingleTokenRecursively @params
         }
         return $newHashTable
-    } else {
-        $params = @{
-            TokenName = $TokenName
-            TokenCategory = $TokenCategory
-            TokenValue = $TokenValue
-            ResolvedTokens = $ResolvedTokens
-            Environment = $Environment
-            Node = $Node
-            ValidateExistence = $ValidateExistence
+    } elseif ($TokenValue -is [array]) {
+        $newArray = @()
+        $i = 0
+        $params.ResolveFunction = $ResolveFunction
+        foreach ($entry in $TokenValue) {
+            $params.TokenName = "${TokenName}[$i]"
+            $params.TokenValue = $entry
+            $newArray += Resolve-SingleTokenRecursively @params
+            $i++
         }
+        return $newArray
+    } else {
+        $params.TokenName = $TokenName
+        $params.TokenValue = $TokenValue
         try { 
             $newValue = & $ResolveFunction @params 
         } catch {
