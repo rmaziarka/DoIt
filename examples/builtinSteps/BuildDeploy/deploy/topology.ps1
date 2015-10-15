@@ -43,6 +43,8 @@ Environment Default {
 
     ServerRole UploadDirectoriesTestRole -Steps @('PSCI-Upload-Directories') -ServerConnection TestNode
 
+    ServerRole IISConfigTestRole -Steps 'PSCIWebServerConfig' -ServerConnections TestNode
+
     Step Custom-WindowsFeaturesStep -ScriptBlock { PSCIWindowsFeatures -Tokens $Tokens.CustomWindowsFeatures }
 }
 
