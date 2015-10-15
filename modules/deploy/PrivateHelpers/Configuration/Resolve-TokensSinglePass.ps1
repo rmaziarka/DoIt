@@ -44,7 +44,7 @@ function Resolve-TokensSinglePass {
     Whether to validate existence of the referenced token.
 
     .EXAMPLE
-    Resolve-TokensPass -ResolvedTokens $resolvedTokens -Environment $Environment -Node $Node -ResolveFunction $resolveTokenFunction -ValidateExistence:$false
+    Resolve-TokensSinglePass -ResolvedTokens $resolvedTokens -Environment $Environment -Node $Node -ResolveFunction $resolveTokenFunction -ValidateExistence:$false
     #>
 
     [CmdletBinding()]
