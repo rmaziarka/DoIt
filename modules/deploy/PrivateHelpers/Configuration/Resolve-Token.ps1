@@ -79,7 +79,7 @@ function Resolve-Token {
 
         [Parameter(Mandatory=$false)]
         [string] 
-        $TokenRegex = '\$\{((\w+)\.?(\w+)?)\}'
+        $TokenRegex = '\$\{(([\w-]+)\.?([\w-]+)?([^\}]*))\}'
     )
     if (!$Value -or $Value.GetType().FullName -ne "System.String") {
         return $Value
@@ -88,44 +88,66 @@ function Resolve-Token {
     do {
         $substituted = $false    
         if ($Value -match $TokenRegex) {
-            $strToReplace = $Matches[0] -replace '\$', '\$'
+            $origStrToReplace = $Matches[0]
+            $strToReplace = $origStrToReplace -replace '\$', '\$'
             $token = $Matches[1]
             $keyFirstPart = $Matches[2]
             $keySecondPart = $Matches[3]
+            $suffix = $Matches[4]
 
             $tokenFound = $false
+            # if we have ${Category.Key}, we just get token 'Key' from 'Category'
             if ($keyFirstPart -and $keySecondPart) {
                 if ($ResolvedTokens.ContainsKey($keyFirstPart) -and $ResolvedTokens[$keyFirstPart].ContainsKey($keySecondPart)) { 
                     $newTokenValue = $ResolvedTokens[$keyFirstPart][$keySecondPart]
                     $tokenFound = $true
-                } elseif ($ValidateExistence) {
-                    throw "Cannot resolve variable '$token' in token '$Name' = '$Value'. Please ensure there exists a category '$keyFirstPart' with token named '$keySecondPart' is available in your configuration."
                 }
-            } elseif ($keyFirstPart) {
-                # only one part of key provided - search in all categories, but first in $Category
-                $allCategories = @()
-                if ($Category) {
-                    $allCategories += $Category
-                }
-                # SuppressScriptCop - adding small arrays is ok
-                $ResolvedTokens.Keys | Where-Object { $_ -ne $Category } | Foreach-Object { $allCategories += $_ }
-                foreach ($cat in $allCategories) {               
-                    if ($ResolvedTokens[$cat].ContainsKey($keyFirstPart)) {
-                        $newTokenValue = $ResolvedTokens[$cat][$keyFirstPart]
-                        $tokenFound = $true
-                        break
+            } 
+            if (!$tokenFound) {
+                # if we have ${Key}, we search 'Key' in all categories, but first in $Category
+                if ($keyFirstPart) {
+                    $allCategories = @()
+                    if ($Category) {
+                        $allCategories += $Category
                     }
+                    # SuppressScriptCop - adding small arrays is ok
+                    $ResolvedTokens.Keys | Where-Object { $_ -ne $Category } | Foreach-Object { $allCategories += $_ }
+                    foreach ($cat in $allCategories) {               
+                        if ($ResolvedTokens[$cat].ContainsKey($keyFirstPart)) {
+                            $newTokenValue = $ResolvedTokens[$cat][$keyFirstPart]
+                            $tokenFound = $true
+                            break
+                        }
+                    }
+                } elseif ($ValidateExistence) {
+                    throw "Cannot resolve variable '$token' in token '$Name' = '$Value'. '$token' is invalid - please specify `${tokenCategory.tokenName} or `${tokenName}"
                 }
-            } elseif ($ValidateExistence) {
-                throw "Cannot resolve variable '$token' in token '$Name' = '$Value'. '$token' is invalid - please specify `${tokenCategory.tokenName} or `${tokenName}"
+                # if we have ${Key.userHashtableKey}, it would be matched here so we need to fix the suffix
+                if ($keySecondPart) {
+                    $suffix = ".$keySecondPart$suffix"
+                }
             }
             
             if ($tokenFound) { 
+                # suffix will be not empty if we have ${Key.userHashtableKey} or ${Category.Key.userHashtableKey}
+                if ($suffix) {
+                    try {
+                        $newTokenValue = Invoke-Expression -Command "`$newTokenValue$suffix"
+                    } catch {
+                        throw "Cannot resolve variable '$token' in token '$Name' = '$Value'. Error message: $($_.Exception.Message)."
+                    }
+                }
+
                 # if newValue is scriptblock, it means this is first pass of Resolve-tokens - we need to ignore it (will be resolved in 3rd pass)
                 if ($newTokenValue -is [scriptblock]) {
                     break
                 }
-                $Value = $Value -replace $strToReplace, $newTokenValue                
+                # if we would replace whole string, we just set value to newTokenValue to preserve type
+                if ($origStrToReplace.Length -eq $Value.Length) {
+                    $Value = $newTokenValue
+                } else { 
+                    $Value = $Value -replace $strToReplace, $newTokenValue                
+                }
                 $substituted = $true
             }
             if (!$tokenFound -and $ValidateExistence) {

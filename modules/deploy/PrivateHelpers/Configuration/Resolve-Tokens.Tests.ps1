@@ -262,18 +262,23 @@ Describe -Tag "PSCI.unit" "Resolve-Tokens" {
 
                 Tokens Common @{
                     ConnectionString = 'Server=${Node};Database=Hub;Integrated Security=True;MultipleActiveResultSets=True'
+                    Timeout = 60
+                    Hashtable = @{ 'key' = 'value' }
                 }
 
                 Tokens WebDeployConfig @{
                     'Some-Web.config Connection String' = '${ConnectionString}'
                     'Second-ConnectionString' = '${Common.ConnectionString}'
                     'TwoStrings' = '${ConnectionString},${Common.ConnectionString}'
+                    TimeoutRef = '${Common.Timeout}'
+                    TimeoutRefStr = 'timeout: ${Common.Timeout}'
+                    HashtableRef = '${Hashtable}'
                 }
             }
 
-            It "Resolve-Tokens: should properly substitute tokens" {
-                $resolvedTokens = Resolve-Tokens -AllEnvironments $Global:Environments -Environment Default -Node 's01'
+            $resolvedTokens = Resolve-Tokens -AllEnvironments $Global:Environments -Environment Default -Node 's01'
 
+            It "Resolve-Tokens: should properly substitute tokens" {
                 $resolvedTokens.Common | Should Not Be $null
                 $resolvedTokens.Common.ConnectionString | Should Not Be $null
                 $resolvedTokens.Common.ConnectionString.StartsWith('Server=s01;') | Should Be $true
@@ -285,6 +290,16 @@ Describe -Tag "PSCI.unit" "Resolve-Tokens" {
                 $resolvedTokens.WebDeployConfig['Second-ConnectionString'] | Should Be $resolvedTokens.Common.ConnectionString
                 $resolvedTokens.WebDeployConfig['TwoStrings'] | Should Not Be $null
                 $resolvedTokens.WebDeployConfig['TwoStrings'] | Should Be ('{0},{1}' -f $resolvedTokens.Common.ConnectionString, $resolvedTokens.Common.ConnectionString)
+            }
+
+            It "Resolve-Tokens: should retain types when possible" {
+                $resolvedTokens.WebDeployConfig.TimeoutRef.GetType() | Should Be int
+                $resolvedTokens.WebDeployConfig.TimeoutRef | Should Be 60
+                $resolvedTokens.WebDeployConfig.TimeoutRefStr.GetType() | Should Be string
+                $resolvedTokens.WebDeployConfig.TimeoutRefStr | Should Be 'timeout: 60'
+                $resolvedTokens.WebDeployConfig.HashtableRef.GetType() | Should Be hashtable
+                $resolvedTokens.WebDeployConfig.HashtableRef.key | Should Be 'value'
+
             }
 
             Environment Default {
@@ -307,6 +322,29 @@ Describe -Tag "PSCI.unit" "Resolve-Tokens" {
                 { Resolve-Tokens -AllEnvironments $Global:Environments -Environment Default -Node 's01' } | Should Throw
             }
 
+        }
+
+        Context "with tokens substitution with suffix" {
+            $Global:Environments = @{}
+
+            Environment Default {
+                Tokens Common @{
+                    Hash = @{ 'key' = @{ 'key2' = 'value' } }
+                    HashRef1 = '${Common.Hash.key.key2}'
+                    HashRef2 = '${Hash.key.key2}'
+                }
+            }
+
+            $resolvedTokens = Resolve-Tokens -AllEnvironments $Global:Environments -Environment Default -Node 's01'
+
+            It "Resolve-Tokens: should properly substitute tokens" {
+                $resolvedTokens.Common | Should Not Be $null
+                $resolvedTokens.Common.Hash.Keys | Should Be 'key'
+
+                $resolvedTokens.Common.HashRef1 | Should Be 'value'
+                $resolvedTokens.Common.HashRef2 | Should Be 'value'
+
+            }
         }
 
         Context "with scriptblock as tokens value" {
@@ -476,6 +514,167 @@ Describe -Tag "PSCI.unit" "Resolve-Tokens" {
                 $resolvedTokens.WebConfig.Credentials.GetType() | Should Be string
                 $resolvedTokens.WebConfig.Timeout | Should Be 'false'
                 $resolvedTokens.WebConfig.Timeout.GetType() | Should Be string
+            }
+
+            It "Resolve-Tokens: should resolve referenced tokens (with category)" {
+                $tokensOverride = @{ 'Credentials' = '${WebConfig.Timeout}' }
+                $resolvedTokens = Resolve-Tokens -AllEnvironments $Global:Environments -Environment Default -Node 's01' -TokensOverride $tokensOverride
+
+                $resolvedTokens.Count | Should Be 3
+                $resolvedTokens.WebConfig | Should Not Be $null
+                $resolvedTokens.WebConfig.Count | Should Be 2
+
+                $resolvedTokens.WebConfig.Credentials | Should Be 60
+                $resolvedTokens.WebConfig.Credentials.GetType() | Should Be int
+                $resolvedTokens.WebConfig.Timeout | Should Be 60
+                $resolvedTokens.WebConfig.Timeout.GetType() | Should Be int
+            }
+
+            It "Resolve-Tokens: should resolve referenced tokens (without category)" {
+                $tokensOverride = @{ 'Credentials' = '${Timeout}' }
+                $resolvedTokens = Resolve-Tokens -AllEnvironments $Global:Environments -Environment Default -Node 's01' -TokensOverride $tokensOverride
+
+                $resolvedTokens.Count | Should Be 3
+                $resolvedTokens.WebConfig | Should Not Be $null
+                $resolvedTokens.WebConfig.Count | Should Be 2
+
+                $resolvedTokens.WebConfig.Credentials | Should Be 60
+                $resolvedTokens.WebConfig.Credentials.GetType() | Should Be int
+                $resolvedTokens.WebConfig.Timeout | Should Be 60
+                $resolvedTokens.WebConfig.Timeout.GetType() | Should Be int
+            }
+
+            It "Resolve-Tokens: should throw on invalid reference" {
+                $tokensOverride = @{ 'Credentials' = '${TimeoutInvalid}' }
+
+                { Resolve-Tokens -AllEnvironments $Global:Environments -Environment Default -Node 's01' -TokensOverride $tokensOverride } | Should Throw
+            }
+        }
+        
+        Context "when used with TokensOverride and non-unique tokens" {
+            $Global:Environments = @{}
+
+            Environment Default {
+                Tokens WebConfig @{
+                    Credentials = 'WebConfig'
+                    Timeout = 60
+                }
+
+                Tokens DbConfig @{
+                    Credentials = 'DbConfig'
+                }
+            }
+
+            $tokensOverride = @{ 'Credentials' = 'NewValue' }
+            $resolvedTokens = Resolve-Tokens -AllEnvironments $Global:Environments -Environment Default -Node 's01' -TokensOverride $tokensOverride
+
+             It "Resolve-Tokens: should replace all matching tokens" {
+
+                $resolvedTokens.Count | Should Be 4
+                $resolvedTokens.WebConfig | Should Not Be $null
+                $resolvedTokens.WebConfig.Count | Should Be 2
+                $resolvedTokens.DbConfig | Should Not Be $null
+                $resolvedTokens.DbConfig.Count | Should Be 1
+
+                $resolvedTokens.WebConfig.Credentials | Should Be 'NewValue'
+                $resolvedTokens.WebConfig.Timeout | Should Be 60
+                $resolvedTokens.DbConfig.Credentials | Should Be 'NewValue'
+            }
+        }
+
+
+        Context "when used with TokensOverride with suffix" {
+            $Global:Environments = @{}
+
+            Environment Default {
+                Tokens WebConfig @{
+                    Hash = @{ 'Key' = @{ 'keyIn' = 'value' }
+                              'Key2' = 'value2' 
+                              'Key3' = 'value3' 
+                            }
+                }
+            }
+
+            $tokensOverride = @{ 'Hash.key.keyIn' = 'valueNew'
+                                 'Hash.key2' = 'valueNew2'
+                               }
+            $resolvedTokens = Resolve-Tokens -AllEnvironments $Global:Environments -Environment Default -Node 's01' -TokensOverride $tokensOverride
+
+            It "Resolve-Tokens: should properly resolve hash tokens" {
+                $resolvedTokens.Count | Should Be 3
+
+                $resolvedTokens.WebConfig.Hash.Key.keyIn | Should Be 'valueNew'
+                $resolvedTokens.WebConfig.Hash.Key2 | Should Be 'valueNew2'
+                $resolvedTokens.WebConfig.Hash.Key3 | Should Be 'value3'
+            }
+        }
+
+        Context "when used with TokensOverride with category and suffix" {
+            $Global:Environments = @{}
+
+            Environment Default {
+                Tokens WebConfig @{
+                    Hash = @{ 'Key' = @{ 'keyIn' = 'value' }
+                              'Key2' = 'value2' 
+                              'Key3' = 'value3'
+                            }
+                }
+            }
+
+            $tokensOverride = @{ 'WebConfig.Hash.key.keyIn' = 'valueNew'
+                                 'WebConfig.Hash.key2' = 'valueNew2'
+                               }
+            $resolvedTokens = Resolve-Tokens -AllEnvironments $Global:Environments -Environment Default -Node 's01' -TokensOverride $tokensOverride
+
+            It "Resolve-Tokens: should properly resolve hash tokens" {
+                $resolvedTokens.Count | Should Be 3
+
+                $resolvedTokens.WebConfig.Hash.Key.keyIn | Should Be 'valueNew'
+                $resolvedTokens.WebConfig.Hash.Key2 | Should Be 'valueNew2'
+                $resolvedTokens.WebConfig.Hash.Key3 | Should Be 'value3'
+            }
+        }
+
+        Context "when used with TokensOverride with scriptblock" {
+            $Global:Environments = @{}
+
+            Environment Default {
+                Tokens WebConfig @{
+                    ScriptBlockToken = ''
+                    ScriptBlockToken2 = ''
+                    ScriptBlockToken3 = ''
+                }
+            }
+
+            $tokensOverride = @{ 'ScriptBlockToken' = '{ return "value" + "New" }'
+                                 'ScriptBlockToken2' = '{value}' 
+                                 'ScriptBlockToken3' = { return $Tokens.WebConfig.ScriptBlockToken2 }
+                                 }
+            $resolvedTokens = Resolve-Tokens -AllEnvironments $Global:Environments -Environment Default -Node 's01' -TokensOverride $tokensOverride
+
+            It "Resolve-Tokens: should properly resolve tokens" {
+                $resolvedTokens.Count | Should Be 3
+
+                $resolvedTokens.WebConfig.ScriptBlockToken | Should Be 'valueNew'
+                $resolvedTokens.WebConfig.ScriptBlockToken2 | Should Be '{value}'
+                $resolvedTokens.WebConfig.ScriptBlockToken3 | Should Be '{value}'
+            }
+        }
+
+         Context "when used with TokensOverride with invalid scriptblock" {
+            $Global:Environments = @{}
+
+            Environment Default {
+                Tokens WebConfig @{
+                    ScriptBlockToken = ''
+                }
+            }
+
+            $tokensOverride = @{ 'ScriptBlockToken' = '{ syntaxError }' }
+
+            It "Resolve-Tokens: should throw exception" {
+                { Resolve-Tokens -AllEnvironments $Global:Environments -Environment Default -Node 's01' -TokensOverride $tokensOverride } | Should Throw
+
             }
         }
 

@@ -26,7 +26,7 @@ function Resolve-TokensForEnvironment {
     
     <#
     .SYNOPSIS
-    Helper function to resolve given tokens hashtable.
+    Helper function to resolve given tokens hashtable (using TokensOverride).
 
     .PARAMETER Tokens
     Tokens hashtable.
@@ -62,27 +62,71 @@ function Resolve-TokensForEnvironment {
         if (!$resolvedTokens.ContainsKey($category)) {
             $ResolvedTokens[$category] = @{}
         }
-        foreach ($token in $tokens[$category].GetEnumerator()) {
-            $overridden = $false
-            if ($TokensOverride) {
-                $compositeKey = "$category.$($token.Key)"
-                if ($TokensOverride.ContainsKey($compositeKey)) {
-                    $val = $TokensOverride[$compositeKey]
-                    $overridden = $true
-                } elseif ($TokensOverride.ContainsKey($token.Key)) {
-                    $val = $TokensOverride[$token.Key]
-                    $overridden = $true
+        foreach ($token in $Tokens[$category].GetEnumerator()) {
+            $ResolvedTokens[$category][$token.Key] = $token.Value
+        }
+    }
+
+    if (!$TokensOverride) {
+        return
+    }
+
+    foreach ($tokenOverride in $TokensOverride.GetEnumerator()) {
+        $tokenName = $tokenOverride.Key
+        $tokenNewValue = $tokenOverride.Value
+        try { 
+            $tokenNewValue = Resolve-OverrideTokenValue -Value $tokenNewValue
+        } catch {
+            throw "Failed to override token '$tokenName = $tokenNewValue'. Error message: $($_.Exception.Message)"
+        }
+        $foundToken = @()
+        if ($tokenName -match '([\w-]+)\.?([\w-]+)?(.*)') {
+            $keyFirstPart = $Matches[1]
+            $keySecondPart = $Matches[2]
+            $suffix = $Matches[3]
+            if ($keySecondPart) {
+                if ($ResolvedTokens.ContainsKey($keyFirstPart) -and $ResolvedTokens[$keyFirstPart].ContainsKey($keySecondPart)) {
+                    $foundToken += @{ 
+                        Category = $keyFirstPart
+                        Name = $keySecondPart
+                    }
+                 }
+            }
+            if (!$foundToken) {
+                foreach ($cat in $ResolvedTokens.Keys) {
+                    if ($ResolvedTokens[$cat].ContainsKey($keyFirstPart)) {
+                        $foundToken += @{ 
+                            Category = $cat
+                            Name = $keyFirstPart
+                        }
+                    }
                 }
-                if ($val -ieq '$true') {
-                    $val = $true
-                } elseif ($val -ieq '$false') {
-                    $val = $false
+                if ($keySecondPart) {
+                    $suffix = ".$keySecondPart$suffix"
                 }
             }
-            if (!$overridden) {
-                $val = $token.Value
+            if (!$foundToken) {
+                Write-Warning "Token '$tokenName', defined in TokenOverride '$tokenName = $tokenNewValue' has not been found."
+                continue
             }
-            $ResolvedTokens[$category][$token.Key] = $val
-        }      
+            foreach ($tokenEntry in $foundToken.GetEnumerator()) {
+                $category = $tokenEntry.Category
+                $name = $tokenEntry.Name
+                if ($suffix) {
+                    $valueToChange = $ResolvedTokens[$category][$name]
+                    try { 
+                        Invoke-Expression -Command "`$valueToChange$suffix = `$tokenNewValue"
+                    } catch {
+                        throw "Failed to override token '$tokenName = $tokenNewValue'. Error message: $($_.Exception.Message)"
+                    }
+                } else {
+                    $ResolvedTokens[$category][$name] = $tokenNewValue
+                }
+                
+            }
+
+        } else {
+            Write-Warning "Unrecognized TokenOverride syntax: $tokenName = $tokenNewValue"
+        }
     }
 }
