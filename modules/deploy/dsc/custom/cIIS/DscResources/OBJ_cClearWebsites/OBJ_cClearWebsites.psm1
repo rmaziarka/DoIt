@@ -64,16 +64,15 @@ function Get-TargetResource
     }
     $iisEntitiesToDelete = @()
     foreach ($site in $sites) {
-        $apps = Get-Item -Path "IIS:\sites\$WebsiteName\$ApplicationName" -ErrorAction SilentlyContinue | Where { $_.Schema.Name -eq 'Application' }
-        if ($apps) {
-            foreach ($app in $apps) { 
-                $iisEntitiesToDelete += [PSCustomObject]@{
-                    WebsiteName = $site.Name
-                    ApplicationName = $app.Name
-                    PhysicalPath = $app.PhysicalPath
-                }
+        $apps = Get-ChildItem -Path "IIS:\sites\$($site.name)" -ErrorAction SilentlyContinue | Where { $_.Schema.Name -eq 'application' }
+        foreach ($app in $apps) { 
+            $iisEntitiesToDelete += [PSCustomObject]@{
+                WebsiteName = $site.Name
+                ApplicationName = $app.Name
+                PhysicalPath = $app.PhysicalPath
             }
         }
+        
         if ($RemoveWebsites) {
             $iisEntitiesToDelete += [PSCustomObject]@{
                 WebsiteName = $site.Name
@@ -127,7 +126,7 @@ function Set-TargetResource
                 Write-Verbose "Removing website '$($entity.WebsiteName)'"
                 Remove-Website -Name $entity.WebsiteName
             }
-            if ($ClearDirectories) {
+            if ($RemoveDirectories) {
                 Write-Verbose "Removing directory '$($entity.PhysicalPath)'"
                 Remove-Item -LiteralPath $entity.PhysicalPath -Recurse -Force
             }
