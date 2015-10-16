@@ -87,7 +87,7 @@ function Build-SqlServerAgentPackage {
                             -DefaultPath (Join-Path -Path $configPaths.PackagesPath -ChildPath $PackageName) `
                             -CheckExistence:$false
     
-    [void](New-Item -Path $OutputPath -ItemType Directory)
+    [void](New-Item -Path $OutputPath -ItemType Directory -Force)
 
     Write-Log -Info "Copying SQL Server Agent scripts from $ScriptsPath."
     $sqlPaths = Get-ChildItem -Path $ScriptsPath -Filter *.sql | Select-Object -ExpandProperty FullName | Sort-Object
