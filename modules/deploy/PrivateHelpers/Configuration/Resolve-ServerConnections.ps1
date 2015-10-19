@@ -42,10 +42,11 @@ function Resolve-ServerConnections {
 
     .PARAMETER DeployType
     Deployment type:
-    All       - deploy everything according to configuration files (= Provision + Deploy)
-    DSC       - deploy only DSC configurations
-    Functions - deploy only Powershell functions
-    Adhoc     - override steps and nodes with $StepsFilter and $NodesFilter (they don't have to be defined in ServerRoles - useful for adhoc deployments)
+    - **All**       - deploy everything according to configuration files (= Provision + Deploy)
+    - **DSC**       - deploy only DSC configurations
+    - **Functions** - deploy only Powershell functions
+    - **Adhoc**     - deploy steps defined in $StepsFilter to server roles defined in $ServerRolesFilter and/or nodes defined in $NodesFilter
+                      (note the steps do not need to be defined in server roles)
 
     .PARAMETER ServerRole
     ServerRole containing the steps to resolve.
@@ -107,7 +108,9 @@ function Resolve-ServerConnections {
         }
         if ($DeployType -eq 'Adhoc') {
             # in adhoc deployment Nodes are overriden directly from filters
-            $serverConn.Nodes = $NodesFilter
+            if ($NodesFilter) { 
+                $serverConn.Nodes = $NodesFilter
+            }
         } else {
             # remove Nodes not matching NodesFilter
             if ($NodesFilter) {

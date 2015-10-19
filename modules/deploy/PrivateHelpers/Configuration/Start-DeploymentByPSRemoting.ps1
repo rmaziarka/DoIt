@@ -50,10 +50,11 @@ function Start-DeploymentByPSRemoting {
 
     .PARAMETER DeployType
     Deployment type:
-    All       - deploy everything according to configuration files (= Provision + Deploy)
-    DSC       - deploy only DSC configurations
-    Functions - deploy only Powershell functions
-    Adhoc     - override steps and nodes with $StepsFilter and $NodesFilter (they don't have to be defined in ServerRoles - useful for adhoc deployments)
+    - **All**       - deploy everything according to configuration files (= Provision + Deploy)
+    - **DSC**       - deploy only DSC configurations
+    - **Functions** - deploy only Powershell functions
+    - **Adhoc**     - deploy steps defined in $StepsFilter to server roles defined in $ServerRolesFilter and/or nodes defined in $NodesFilter
+                      (note the steps do not need to be defined in server roles)
 
     .PARAMETER NodesFilter
     List of Nodes where steps have to be deployed - can be used if you don't want to deploy to all nodes defined in the configuration files.

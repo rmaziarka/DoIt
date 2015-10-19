@@ -38,7 +38,8 @@ function Start-DeploymentPlan {
     - **All**       - deploy everything according to configuration files (= Provision + Deploy)
     - **DSC**       - deploy only DSC configurations
     - **Functions** - deploy only Powershell functions
-    - **Adhoc**     - override steps and nodes with $StepsFilter and $NodesFilter (they don't have to be defined in ServerRoles - useful for adhoc deployments)
+    - **Adhoc**     - deploy steps defined in $StepsFilter to server roles defined in $ServerRolesFilter and/or nodes defined in $NodesFilter
+                      (note the steps do not need to be defined in server roles)
 
     .PARAMETER AutoInstallDscResources
     If true, custom DSC resources included in PSCI will be automatically copied to localhost (required for parsing DSC configurations)

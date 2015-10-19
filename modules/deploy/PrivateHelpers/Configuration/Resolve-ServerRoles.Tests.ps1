@@ -547,6 +547,88 @@ Describe -Tag "PSCI.unit" "ServerRole" {
 
             }
         }
+
+        Context "when used with DeployType adhoc" {
+            $Global:Environments = @{}
+
+            Environment Default {
+                ServerConnection WebServer -Nodes @('node1', 'node2')
+                ServerRole Web -Steps @('TestFunc') -ServerConnections WebServer
+                ServerRole Database -Steps @('TestFunc') -ServerConnections WebServer
+                ServerRole Database2 -Steps @('TestFunc2') -ServerConnections WebServer
+            }
+
+            
+            It "should properly resolve roles with -NodesFilter" {
+                $resolvedRoles = Resolve-ServerRoles -AllEnvironments $Global:Environments -Environment Default -ResolvedTokens @{} `
+                             -StepsFilter @('TestFuncA', 'TestFuncB') -NodesFilter 'node1' -DeployType 'Adhoc'
+
+                $resolvedRoles.Count | Should Be 3
+            
+                $resolvedRoles.Web | Should Not Be $null
+                $resolvedRoles.Web.Steps.Name | Should Be @('TestFuncA', 'TestFuncB')
+                $resolvedRoles.Web.ServerConnections.Count | Should Be 1
+                $resolvedRoles.Web.ServerConnections.Name | Should Be 'WebServer'
+                $resolvedRoles.Web.ServerConnections.Nodes | Should Be 'node1'
+                $resolvedRoles.Database | Should Not Be $null
+                $resolvedRoles.Database.Steps.Name | Should Be @('TestFuncA', 'TestFuncB')
+                $resolvedRoles.Database.ServerConnections.Count | Should Be 1
+                $resolvedRoles.Database.ServerConnections.Name | Should Be 'WebServer'
+                $resolvedRoles.Database.ServerConnections.Nodes | Should Be 'node1'
+                $resolvedRoles.Database2 | Should Not Be $null
+                $resolvedRoles.Database2.Steps.Name | Should Be @('TestFuncA', 'TestFuncB')
+                $resolvedRoles.Database2.ServerConnections.Count | Should Be 1
+                $resolvedRoles.Database2.ServerConnections.Name | Should Be 'WebServer'
+                $resolvedRoles.Database2.ServerConnections.Nodes | Should Be 'node1'
+            }
+
+            It "should properly resolve roles with -ServerRolesFilter and -NodesFilter" {
+                $resolvedRoles = Resolve-ServerRoles -AllEnvironments $Global:Environments -Environment Default -ResolvedTokens @{} `
+                             -StepsFilter 'TestFuncA', 'TestFuncB' -ServerRolesFilter 'Web' -NodesFilter 'node1' -DeployType 'Adhoc'
+
+                $resolvedRoles.Count | Should Be 1
+            
+                $resolvedRoles.Web | Should Not Be $null
+                $resolvedRoles.Web.Steps.Name | Should Be @('TestFuncA', 'TestFuncB')
+                $resolvedRoles.Web.ServerConnections.Count | Should Be 1
+                $resolvedRoles.Web.ServerConnections.Name | Should Be 'WebServer'
+                $resolvedRoles.Web.ServerConnections.Nodes | Should Be 'node1'
+            }
+
+            It "should properly resolve roles with -ServerRolesFilter" {
+                $resolvedRoles = Resolve-ServerRoles -AllEnvironments $Global:Environments -Environment Default -ResolvedTokens @{} `
+                             -StepsFilter 'TestFuncA', 'TestFuncB' -ServerRolesFilter 'Web' -DeployType 'Adhoc'
+
+                $resolvedRoles.Count | Should Be 1
+            
+                $resolvedRoles.Web | Should Not Be $null
+                $resolvedRoles.Web.Steps.Name | Should Be @('TestFuncA', 'TestFuncB')
+                $resolvedRoles.Web.ServerConnections.Count | Should Be 1
+                $resolvedRoles.Web.ServerConnections.Name | Should Be 'WebServer'
+                $resolvedRoles.Web.ServerConnections.Nodes | Should Be @('node1','node2')
+            }
+
+            It "should properly resolve roles with existing step and -ServerRolesFilter" {
+                $resolvedRoles = Resolve-ServerRoles -AllEnvironments $Global:Environments -Environment Default -ResolvedTokens @{} `
+                             -StepsFilter 'TestFunc' -ServerRolesFilter 'Web' -DeployType 'Adhoc'
+
+                $resolvedRoles.Count | Should Be 1
+            
+                $resolvedRoles.Web | Should Not Be $null
+                $resolvedRoles.Web.Steps.Name | Should Be @('TestFunc')
+                $resolvedRoles.Web.ServerConnections.Count | Should Be 1
+                $resolvedRoles.Web.ServerConnections.Name | Should Be 'WebServer'
+                $resolvedRoles.Web.ServerConnections.Nodes | Should Be @('node1','node2')
+            }
+
+            It "should fail when neither -ServerRolesFilter nor -NodesFilter is specified" {
+                { Resolve-ServerRoles -AllEnvironments $Global:Environments -Environment Default -ResolvedTokens @{} `
+                             -StepsFilter 'TestFunc' -DeployType 'Adhoc'} | Should Throw
+
+            }
+
+        }
     }
+
 }
 

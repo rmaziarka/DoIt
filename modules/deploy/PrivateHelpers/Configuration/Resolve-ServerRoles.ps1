@@ -82,10 +82,11 @@ function Resolve-ServerRoles {
 
     .PARAMETER DeployType
     Deployment type:
-    All       - deploy everything according to configuration files (= Provision + Deploy)
-    DSC       - deploy only DSC configurations
-    Functions - deploy only Powershell functions
-    Adhoc     - override steps and nodes with $StepsFilter and $NodesFilter (they don't have to be defined in ServerRoles - useful for adhoc deployments)
+    - **All**       - deploy everything according to configuration files (= Provision + Deploy)
+    - **DSC**       - deploy only DSC configurations
+    - **Functions** - deploy only Powershell functions
+    - **Adhoc**     - deploy steps defined in $StepsFilter to server roles defined in $ServerRolesFilter and/or nodes defined in $NodesFilter
+                      (note the steps do not need to be defined in server roles)
 
     .EXAMPLE
     $serverRoles = Resolve-ServerRoles -AllEnvironments $AllEnvironments -Environment $env -ServerConnections $serverConnections `
@@ -124,6 +125,13 @@ function Resolve-ServerRoles {
         [string]
         $DeployType = 'All'
     )
+
+    if ($DeployType -eq 'Adhoc' -and !$StepsFilter) {
+        throw "When DeployType = 'Adhoc' StepsFilter must be provided."
+    }
+    if ($DeployType -eq 'Adhoc' -and !$ServerRolesFilter -and !$NodesFilter) {
+        throw "When DeployType = 'Adhoc' either ServerRolesFilter or NodesFilter must be provided."
+    }
 
     $envHierarchy = @(Resolve-BasedOnHierarchy -AllElements $AllEnvironments -SelectedElement $Environment -ConfigElementName 'Environment')
 
