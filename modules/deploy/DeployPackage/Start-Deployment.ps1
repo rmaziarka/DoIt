@@ -65,8 +65,8 @@ function Start-Deployment {
     .PARAMETER DeployType
     Deployment type:
     - **All**       - deploy everything according to configuration files (= Provision + Deploy)
-    - **DSC**       - deploy only DSC configurations
-    - **Functions** - deploy only Powershell functions
+    - **Provision** - deploy only provisioning steps (-StepsProvision)
+    - **Deploy**    - deploy only deploy steps (-StepsDeploy / -Steps) 
     - **Adhoc**     - override steps and nodes with $StepsFilter and $NodesFilter (they don't have to be defined in ServerRoles - useful for adhoc deployments)
 
     .PARAMETER DeployConfigurationPath
@@ -113,7 +113,7 @@ function Start-Deployment {
         $TokensOverride,
 
         [Parameter(Mandatory=$false)]
-        [ValidateSet('All', 'DSC', 'Functions', 'Adhoc')]
+        [ValidateSet('All', 'Provision', 'Deploy', 'Adhoc')]
         [string]
         $DeployType = 'All',
 

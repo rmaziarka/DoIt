@@ -628,6 +628,80 @@ Describe -Tag "PSCI.unit" "ServerRole" {
             }
 
         }
+
+        Context "when used with StepsProvision and StepsDeploy" {
+            $Global:Environments = @{}
+
+            Environment Default {
+                ServerConnection WebServer -Nodes 'node1', 'node2'
+                ServerRole Web -StepsProvision @('Prov1', 'Prov2') -StepsDeploy 'Deploy1' -ServerConnections WebServer
+
+                Step TestFunc -ScriptBlock $null
+            }           
+
+            It "should return all steps by default" {
+                $resolvedRoles = Resolve-ServerRoles -AllEnvironments $Global:Environments -Environment Default -ResolvedTokens @{}
+
+                $resolvedRoles.Count | Should Be 1
+            
+                $resolvedRoles.Web | Should Not Be $null
+                $resolvedRoles.Web.Steps.Name | Should Be @('Prov1', 'Prov2', 'Deploy1')
+                $resolvedRoles.Web.ServerConnections.Count | Should Be 1
+                $resolvedRoles.Web.ServerConnections.Name | Should Be 'WebServer'
+                $resolvedRoles.Web.ServerConnections.Nodes | Should Be @('node1','node2')
+            }
+
+            It "should return only provision steps when DeployType = Provision" {
+                $resolvedRoles = Resolve-ServerRoles -AllEnvironments $Global:Environments -Environment Default -ResolvedTokens @{} `
+                    -Deploytype Provision
+
+                $resolvedRoles.Count | Should Be 1
+            
+                $resolvedRoles.Web | Should Not Be $null
+                $resolvedRoles.Web.Steps.Name | Should Be @('Prov1', 'Prov2')
+                $resolvedRoles.Web.ServerConnections.Count | Should Be 1
+                $resolvedRoles.Web.ServerConnections.Name | Should Be 'WebServer'
+                $resolvedRoles.Web.ServerConnections.Nodes | Should Be @('node1','node2')
+            }
+
+            It "should return only deploy steps when DeployType = Deploy" {
+                $resolvedRoles = Resolve-ServerRoles -AllEnvironments $Global:Environments -Environment Default -ResolvedTokens @{} `
+                    -Deploytype Deploy
+
+                $resolvedRoles.Count | Should Be 1
+            
+                $resolvedRoles.Web | Should Not Be $null
+                $resolvedRoles.Web.Steps.Name | Should Be @('Deploy1')
+                $resolvedRoles.Web.ServerConnections.Count | Should Be 1
+                $resolvedRoles.Web.ServerConnections.Name | Should Be 'WebServer'
+                $resolvedRoles.Web.ServerConnections.Nodes | Should Be @('node1','node2')
+            }
+        }
+
+        Context "when used with Enabled" {
+            $Global:Environments = @{}
+
+            Environment Default {
+                ServerConnection WebServer -Nodes 'node1', 'node2'
+                ServerRole Web -StepsProvision @('Prov1', 'Prov2', 'Prov3') -StepsDeploy 'Deploy1' -ServerConnections WebServer
+                ServerRole Database -Steps 'Deploy1' -ServerConnections WebServer -Enabled { $false }
+
+                Step Prov1 -Enabled $false
+                Step Prov3 -Enabled { $true }
+            }           
+
+            It "should return only enabled steps" {
+                $resolvedRoles = Resolve-ServerRoles -AllEnvironments $Global:Environments -Environment Default -ResolvedTokens @{}
+
+                $resolvedRoles.Count | Should Be 1
+            
+                $resolvedRoles.Web | Should Not Be $null
+                $resolvedRoles.Web.Steps.Name | Should Be @('Prov2', 'Prov3', 'Deploy1')
+                $resolvedRoles.Web.ServerConnections.Count | Should Be 1
+                $resolvedRoles.Web.ServerConnections.Name | Should Be 'WebServer'
+                $resolvedRoles.Web.ServerConnections.Nodes | Should Be @('node1','node2')
+            }
+        }
     }
 
 }

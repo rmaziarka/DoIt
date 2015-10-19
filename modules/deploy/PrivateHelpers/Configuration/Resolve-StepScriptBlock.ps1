@@ -53,14 +53,6 @@ function Resolve-StepScriptBlock {
     Base output path for MOF files that will be generated - only relevent if StepName is a DSC configuration.
     A specific folder structure will be created for the StepName / Node.
 
-    .PARAMETER DeployType
-    Deployment type:
-    - **All**       - deploy everything according to configuration files (= Provision + Deploy)
-    - **DSC**       - deploy only DSC configurations
-    - **Functions** - deploy only Powershell functions
-    - **Adhoc**     - deploy steps defined in $StepsFilter to server roles defined in $ServerRolesFilter and/or nodes defined in $NodesFilter
-                      (note the steps do not need to be defined in server roles)
-
     .EXAMPLE
     $resolvedStepScriptBlock = Resolve-StepScriptBlock @params
 
@@ -94,12 +86,7 @@ function Resolve-StepScriptBlock {
 
         [Parameter(Mandatory=$false)]
         [string]
-        $MofOutputPath,
-
-        [Parameter(Mandatory=$false)]
-        [ValidateSet('All', 'DSC', 'Functions', 'Adhoc')]
-        [string]
-        $DeployType = 'All'
+        $MofOutputPath
     )
 
     # note: these must be synchronized with Invoke-DeploymentStep
@@ -127,12 +114,6 @@ function Resolve-StepScriptBlock {
         $stepCommand = Get-Command -Name $commandName -ErrorAction SilentlyContinue
         if (!$stepCommand) {
             throw "Invalid command reference ('$commandName') - Step $StepNumber '$StepName' / Environment '$Environment' / ServerRole '$ServerRole'. Please ensure there is a DSC configuration or Powershell function named '$commandName'."
-        }
-
-        if (($DeployType -eq 'Functions' -and $stepCommand.CommandType -eq 'Configuration') -or `
-            ($DeployType -eq 'DSC' -and $stepCommand.CommandType -ne 'Configuration')) {
-            $resolvedScriptBlock = $resolvedScriptBlock.Replace($commandNode.Extent, '')
-            continue
         }
 
         if ($stepCommand.CommandType -eq 'Configuration') {

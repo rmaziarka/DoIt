@@ -62,8 +62,11 @@ function ServerRole {
     .PARAMETER ServerConnections
     List of ServerConnections where current ServerRole will be deployed. Can be array of strings or scriptblock.
 
-    .PARAMETER Steps
-    List of steps (Powershell functions / DSC configurations) which will be deployed to the $Nodes.
+    .PARAMETER StepsProvision
+    List of Provision steps (Powershell functions / DSC configurations) which will be deployed to the $Nodes.
+
+    .PARAMETER StepsDeploy
+    List of Deploy steps (Powershell functions / DSC configurations) which will be deployed to the $Nodes.
 
     .PARAMETER RequiredPackages
     List of packages that will be copied to remote server before running actual steps.
@@ -82,6 +85,9 @@ function ServerRole {
     - **AutoReboot**         - reboot the machine and continue deployment
 
     Note that any setting apart from 'None' will cause output messages not to log in real-time.
+
+    .PARAMETER Enabled
+    Defines whether the server role is enabled (if $false, the server role will be excluded).
 
     .EXAMPLE
     ServerRole Web -Steps 'ConfigureIISProvision' -ServerConnections 'WebServer1'
@@ -133,10 +139,14 @@ function ServerRole {
         [object]
         $ServerConnections,
 
-        [Alias('Configurations')]
         [Parameter(Mandatory=$false)]
         [object]
-        $Steps,
+        $StepsProvision,
+
+        [Alias('Steps', 'Configurations')]
+        [Parameter(Mandatory=$false)]
+        [object]
+        $StepsDeploy,
 
         [Parameter(Mandatory=$false)]
         [object]
@@ -153,7 +163,11 @@ function ServerRole {
         [Parameter(Mandatory=$false)]
         #[ValidateSet($null, 'None', 'Stop', 'RetryWithoutReboot', 'AutoReboot')]
         [object]
-        $RebootHandlingMode
+        $RebootHandlingMode,
+
+        [Parameter(Mandatory=$false)]
+        [object]
+        $Enabled
     )
 
     if ((Test-Path variable:Env_Name) -and $Env_Name) {
@@ -169,8 +183,11 @@ function ServerRole {
         if ($PSBoundParameters.ContainsKey('ServerConnections')) {
             $serverRole.ServerConnections = $ServerConnections
         }
-        if ($PSBoundParameters.ContainsKey('Steps')) {
-            $serverRole.Steps = $Steps
+        if ($PSBoundParameters.ContainsKey('StepsProvision')) {
+            $serverRole.StepsProvision = $StepsProvision
+        }
+        if ($PSBoundParameters.ContainsKey('StepsDeploy')) {
+            $serverRole.StepsDeploy = $StepsDeploy
         }
         if ($PSBoundParameters.ContainsKey('RequiredPackages')) {
             $serverRole.RequiredPackages = $RequiredPackages
@@ -183,6 +200,9 @@ function ServerRole {
         }
         if ($PSBoundParameters.ContainsKey('RebootHandlingMode')) {
             $serverRole.RebootHandlingMode = $RebootHandlingMode
+        }
+        if ($PSBoundParameters.ContainsKey('Enabled')) {
+            $serverRole.Enabled = $Enabled
         }
 
     } else {

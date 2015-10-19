@@ -30,8 +30,11 @@ function Resolve-Steps {
     .PARAMETER Environment
     Name of the environment where the packages will be deployed.
 
-    .PARAMETER Steps
-    List of steps to resolve.
+    .PARAMETER StepsProvision
+    List of Provision Steps to resolve.
+
+    .PARAMETER StepsDeploy
+    List of Deploy Steps to resolve.
 
     .PARAMETER StepsFilter
     List of Steps to deploy - can be used if you don't want to deploy all configurations defined in the configuration files.
@@ -43,8 +46,8 @@ function Resolve-Steps {
     .PARAMETER DeployType
     Deployment type:
     - **All**       - deploy everything according to configuration files (= Provision + Deploy)
-    - **DSC**       - deploy only DSC configurations
-    - **Functions** - deploy only Powershell functions
+    - **Provision** - deploy only provisioning steps (-StepsProvision)
+    - **Deploy**    - deploy only deploy steps (-StepsDeploy / -Steps) 
     - **Adhoc**     - deploy steps defined in $StepsFilter to server roles defined in $ServerRolesFilter and/or nodes defined in $NodesFilter
                       (note the steps do not need to be defined in server roles)
 
@@ -62,14 +65,17 @@ function Resolve-Steps {
     [CmdletBinding()]
     [OutputType([object[]])]
     param(
-
         [Parameter(Mandatory=$true)]
         [string]
         $Environment,
 
         [Parameter(Mandatory=$false)]
         [object]
-        $Steps,
+        $StepsProvision,
+
+        [Parameter(Mandatory=$false)]
+        [object]
+        $StepsDeploy,
 
         [Parameter(Mandatory=$false)]
         [string[]]
@@ -80,7 +86,7 @@ function Resolve-Steps {
         $StepsDefinitions,
 
         [Parameter(Mandatory=$false)]
-        [ValidateSet('All', 'DSC', 'Functions', 'Adhoc')]
+        [ValidateSet('All', 'Provision', 'Deploy', 'Adhoc')]
         [string]
         $DeployType = 'All',
 
@@ -97,7 +103,15 @@ function Resolve-Steps {
         # in adhoc deployment steps are overriden directly from filters
         $Steps = $StepsFilter
     } else {
-        $Steps = Resolve-ScriptedToken -ScriptedToken $Steps -ResolvedTokens $ResolvedTokens -Environment $Environment -TokenName "[ServerRole '$($ServerRole.Name) / -Steps]"
+        $StepsProvision = Resolve-ScriptedToken -ScriptedToken $StepsProvision -ResolvedTokens $ResolvedTokens -Environment $Environment -TokenName "[ServerRole '$($ServerRole.Name)' / -StepsProvision]"
+        $StepsDeploy = Resolve-ScriptedToken -ScriptedToken $StepsDeploy -ResolvedTokens $ResolvedTokens -Environment $Environment -TokenName "[ServerRole '$($ServerRole.Name)' / -StepsDeploy]"
+        if ($DeployType -eq 'Provision') {
+            $Steps = $StepsProvision
+        } elseif ($DeployType -eq 'Deploy') {
+            $Steps = $StepsDeploy
+        } else {
+            $Steps = $StepsProvision + $StepsDeploy
+        }
         # remove steps not matching StepsFilter
         if ($StepsFilter) {
             $Steps = $Steps | Where-Object { $StepsFilter -icontains $_ }
@@ -107,6 +121,13 @@ function Resolve-Steps {
     $result = @()
     foreach ($stepName in $Steps) {
         $stepDefinition = $StepsDefinitions[$stepName]
+
+        if ($stepDefinition -and $stepDefinition.ContainsKey('Enabled')) {
+            $enabled = Resolve-ScriptedToken -ScriptedToken $stepDefinition.Enabled -ResolvedTokens $ResolvedTokens -Environment $Environment -TokenName "[ServerRole '$($ServerRole.Name) / -Step '$stepName' / -Enabled]"
+            if ($enabled -eq $false) {
+                continue
+            }
+        }
 
         $stepObject = [PSCustomObject]@{
             Name = $stepName
@@ -118,7 +139,6 @@ function Resolve-Steps {
         }
 
         $result += $stepObject
-
     }
 
     return ,($result)

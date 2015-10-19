@@ -83,8 +83,8 @@ function Resolve-ServerRoles {
     .PARAMETER DeployType
     Deployment type:
     - **All**       - deploy everything according to configuration files (= Provision + Deploy)
-    - **DSC**       - deploy only DSC configurations
-    - **Functions** - deploy only Powershell functions
+    - **Provision** - deploy only provisioning steps (-StepsProvision)
+    - **Deploy**    - deploy only deploy steps (-StepsDeploy / -Steps) 
     - **Adhoc**     - deploy steps defined in $StepsFilter to server roles defined in $ServerRolesFilter and/or nodes defined in $NodesFilter
                       (note the steps do not need to be defined in server roles)
 
@@ -121,7 +121,7 @@ function Resolve-ServerRoles {
         $NodesFilter,
 
         [Parameter(Mandatory=$false)]
-        [ValidateSet('All', 'DSC', 'Functions', 'Adhoc')]
+        [ValidateSet('All', 'Provision', 'Deploy', 'Adhoc')]
         [string]
         $DeployType = 'All'
     )
@@ -141,6 +141,12 @@ function Resolve-ServerRoles {
     foreach ($env in $envHierarchy) {
         $serverRoles = $AllEnvironments[$env].ServerRoles.Values | Where-Object { !$ServerRolesFilter -or $ServerRolesFilter -icontains $_.Name }
         foreach ($serverRole in $serverRoles) {
+            if ($serverRole.ContainsKey('Enabled')) { 
+                $serverRoleEnabled = Resolve-ScriptedToken -ScriptedToken $serverRole.Enabled -ResolvedTokens $ResolvedTokens -Environment $Environment -TokenName "[ServerRole '$($serverRole.Name)' / -Enabled]"
+                if ($serverRoleEnabled -eq $false) {
+                    continue
+                }
+            }
             if (!$result.Contains($serverRole.Name)) {
                 $result[$serverRole.Name] = @{}
             }
@@ -159,7 +165,8 @@ function Resolve-ServerRoles {
         
         $serverRole.Steps = Resolve-Steps `
                                         -Environment $Environment `
-                                        -Steps $serverRole.Steps `
+                                        -StepsProvision $serverRole.StepsProvision `
+                                        -StepsDeploy $serverRole.StepsDeploy `
                                         -StepsFilter $StepsFilter `
                                         -StepsDefinitions $StepsDefinitions `
                                         -DeployType $DeployType `

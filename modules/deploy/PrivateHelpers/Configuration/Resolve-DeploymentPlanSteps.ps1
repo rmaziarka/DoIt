@@ -37,8 +37,8 @@ function Resolve-DeploymentPlanSteps {
     .PARAMETER DeployType
     Deployment type:
     - **All**       - deploy everything according to configuration files (= Provision + Deploy)
-    - **DSC**       - deploy only DSC configurations
-    - **Functions** - deploy only Powershell functions
+    - **Provision** - deploy only provisioning steps (-StepsProvision)
+    - **Deploy**    - deploy only deploy steps (-StepsDeploy / -Steps) 
     - **Adhoc**     - deploy steps defined in $StepsFilter to server roles defined in $ServerRolesFilter and/or nodes defined in $NodesFilter
                       (note the steps do not need to be defined in server roles)
 
@@ -54,7 +54,7 @@ function Resolve-DeploymentPlanSteps {
         $DeploymentPlan,
 
         [Parameter(Mandatory=$false)]
-        [ValidateSet('All', 'DSC', 'Functions', 'Adhoc')]
+        [ValidateSet('All', 'Provision', 'Deploy', 'Adhoc')]
         [string]
         $DeployType = 'All'
     )
@@ -75,8 +75,7 @@ function Resolve-DeploymentPlanSteps {
                                         -Node $entry.ConnectionParams.Nodes[0] `
                                         -Environment $entry.Environment `
                                         -ServerRole $entry.ServerRole `
-                                        -MofOutputPath $dscOutputPath `
-                                        -DeployType $DeployType
+                                        -MofOutputPath $dscOutputPath
 
         $entry.StepScriptBlockResolved = $resolvedStepScriptBlock.StepScriptBlockResolved
         $entry.StepMofDir = $resolvedStepScriptBlock.StepMofDir

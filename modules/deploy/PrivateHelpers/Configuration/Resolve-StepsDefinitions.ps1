@@ -63,13 +63,13 @@ function Resolve-StepsDefinitions {
 
     # traverse environments from top to bottom to set / override Step properties
     foreach ($env in $envHierarchy) {
-        $configSettings = $AllEnvironments[$env].Steps.Values | Where-Object { !$StepsFilter -or $StepsFilter -icontains $_.Name }
-        foreach ($configSetting in $configSettings) {
-            if (!$result.Contains($configSetting.Name)) {
-                $result[$configSetting.Name] = @{}
+        $stepSettings = $AllEnvironments[$env].Steps.Values | Where-Object { !$StepsFilter -or $StepsFilter -icontains $_.Name }
+        foreach ($stepSetting in $stepSettings) {
+            if (!$result.Contains($stepSetting.Name)) {
+                $result[$stepSetting.Name] = @{}
             }
-            foreach ($entry in $configSetting.GetEnumerator()) {
-                $result[$configSetting.Name][$entry.Key] = $entry.Value
+            foreach ($entry in $stepSetting.GetEnumerator()) {
+                $result[$stepSetting.Name][$entry.Key] = $entry.Value
             }
         }
     }

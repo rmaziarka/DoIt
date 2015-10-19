@@ -43,7 +43,7 @@ function Step {
     If set then each step is run remotely (on nodes defined in $ServerConnections, or on specified $RunOn node).
 
     .PARAMETER RunOn
-    Defines on which machine run deployment of given server role.
+    Defines on which machine the step will run.
 
     .PARAMETER RebootHandlingMode
     Specifies what to do when a reboot is required by DSC resource:
@@ -52,6 +52,9 @@ function Step {
     - **RetryWithoutReboot** - retry several times without reboot
     - **AutoReboot**         - reboot the machine and continue deployment
     Note that any setting apart from 'None' will cause output messages not to log in real-time.
+
+    .PARAMETER Enabled
+    Defines whether the step is enabled (if $false, the step will not run).
 
     .EXAMPLE
     Environment Default {
@@ -86,33 +89,40 @@ function Step {
         [Parameter(Mandatory=$false)]
         #[ValidateSet($null, 'None', 'Stop', 'RetryWithoutReboot', 'AutoReboot')]
         [object]
-        $RebootHandlingMode
+        $RebootHandlingMode,
+
+        [Parameter(Mandatory=$false)]
+        [object]
+        $Enabled
     )
 
     if ((Test-Path variable:Env_Name) -and $Env_Name) {
 
-        $configSettingsDef = $Global:Environments[$Env_Name].Steps
+        $stepsDef = $Global:Environments[$Env_Name].Steps
 
-        if (!$configSettingsDef.Contains($Name)) {
-            $configSettingsDef[$Name] = @{ Name = $Name }
+        if (!$stepsDef.Contains($Name)) {
+            $stepsDef[$Name] = @{ Name = $Name }
         }
     
-        $configSettings = $configSettingsDef[$Name]
+        $stepSettings = $stepsDef[$Name]
 
         if ($PSBoundParameters.ContainsKey('ScriptBlock')) {
-            $configSettings.ScriptBlock = $ScriptBlock
+            $stepSettings.ScriptBlock = $ScriptBlock
         }
         if ($PSBoundParameters.ContainsKey('RequiredPackages')) {
-            $configSettings.RequiredPackages = $RequiredPackages
+            $stepSettings.RequiredPackages = $RequiredPackages
         }
         if ($PSBoundParameters.ContainsKey('RunOn')) {
-            $configSettings.RunOn = $RunOn
+            $stepSettings.RunOn = $RunOn
         }
         if ($PSBoundParameters.ContainsKey('RunRemotely')) {
-            $configSettings.RunRemotely = $RunRemotely
+            $stepSettings.RunRemotely = $RunRemotely
         }
         if ($PSBoundParameters.ContainsKey('RebootHandlingMode')) {
-            $configSettings.RebootHandlingMode = $RebootHandlingMode
+            $stepSettings.RebootHandlingMode = $RebootHandlingMode
+        }
+        if ($PSBoundParameters.ContainsKey('Enabled')) {
+            $stepSettings.Enabled = $Enabled
         }
 
     } else {
