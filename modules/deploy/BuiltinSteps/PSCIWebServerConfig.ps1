@@ -183,7 +183,7 @@ Configuration PSCIWebServerConfig {
                 Name   = $site.Name
                 Ensure = 'Present'
                 State  = 'Started'
-                BindingInfo = MSFT_xWebBindingInformation { 
+                BindingInfo = OBJ_cWebBindingInformation { 
                     Port = $site.Port
                 }
                 PhysicalPath = $site.PhysicalPath
