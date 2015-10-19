@@ -31,8 +31,8 @@ configuration PSCIWindowsFeatures {
 
     .DESCRIPTION
     It uses following tokens:
-    - **$Tokens.IsClientWindows** - if true, features will be installed using dism, otherwise Add-WindowsFeature (the latter is available only on Windows Server)
-    - **$Tokens.WindowsFeatures** - array of windows features to add. 
+    - **$IsClientWindows** - if true, features will be installed using dism, otherwise Add-WindowsFeature (the latter is available only on Windows Server)
+    - **$WindowsFeatures** - array of windows features to add. 
     
     To list available feature names on client you can use `dism /online /Get-Features`. On server `Get-WindowsFeature`.
 

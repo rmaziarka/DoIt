@@ -30,23 +30,23 @@ Configuration PSCIWebServerConfig {
 
     .DESCRIPTION
     It uses following tokens (every entry is optional):
-    - **$Tokens.ApplicationPool** - hashtable (or array of hashtables) describing configuration of Application Pools, each entry should contain following keys:
+    - **$ApplicationPool** - hashtable (or array of hashtables) describing configuration of Application Pools, each entry should contain following keys:
       - **Name** (mandatory)
       - **Identity** - one of ApplicationPoolIdentity, LocalSystem, LocalService, NetworkService, SpecificUser (default: ApplicationPoolIdentity)
       - **Credential** - PSCredential, used only if Identity = SpecificUser
 
-    - **$Tokens.Website** - hashtable (or array of hashtables) describing configuration of Websites, each entry should contain following keys:
+    - **$Website** - hashtable (or array of hashtables) describing configuration of Websites, each entry should contain following keys:
       - **Name** (mandatory)
       - **Port** (mandatory)
       - **PhysicalPath** (mandatory)
       - **ApplicationPool** (default: DefaultAppPool) - note if application pool is configured in the same step, also proper ACLs to PhysicalPath will be added.
     
-    - **$Tokens.VirtualDirectories** - hashtable (or array of hashtables) describing configuration of Virtual Directories created under websites, each entry should contain following keys:
+    - **$VirtualDirectories** - hashtable (or array of hashtables) describing configuration of Virtual Directories created under websites, each entry should contain following keys:
       - **Name** (mandatory)
       - **PhysicalPath** (mandatory)
       - **Website** (mandatory)
 
-    - **$Tokens.WebApplications** - hashtable (or array of hashtables) describing configuration of Web Applications, each entry should contain following keys:
+    - **$WebApplications** - hashtable (or array of hashtables) describing configuration of Web Applications, each entry should contain following keys:
       - **Name** (mandatory)
       - **PhysicalPath** (mandatory)
       - **Website** (mandatory)
@@ -71,17 +71,17 @@ Configuration PSCIWebServerConfig {
             #VirtualDirectory = @{ Name = 'MyVirtualDir'; PhysicalPath = 'c:\inetpub\wwwroot\MyWebSite\VirtualDir'; Website = 'MyWebsite' }
             WebApplication = @{ Name = 'MyApp'; PhysicalPath = 'c:\inetpub\wwwroot\MyApp'; Website = 'MyWebsite'; ApplicationPool = 'MyWebAppPool' }
         }
+
     }
 
     Install-DscResources -ModuleNames 'xWebAdministration', 'cIIS', 'cACL'
 
     Start-Deployment -Environment Local -NoConfigFiles
     ```
-    Configure IIS according to the settings specified in 'Web' tokens section.
+    Configures IIS according to the settings specified in 'Web' tokens section.
 
     #>
 
-    Import-DSCResource -Module xWebAdministration
     Import-DSCResource -Module cIIS
     Import-DSCResource -Module cACL
 
@@ -164,7 +164,7 @@ Configuration PSCIWebServerConfig {
 
             Write-Log -Info "Preparing website '$($site.Name)', Port '$($site.Port), PhysicalPath '$($site.PhysicalPath)', ApplicationPool '$($site.ApplicationPool)'"
 
-            $dependsOn = @()
+            $depends = @()
             if (!$directoriesToCreate.ContainsKey($site.PhysicalPath)) { 
                 File "WebsiteDir_$($site.Name)" {
                     DestinationPath = $site.PhysicalPath
@@ -172,14 +172,14 @@ Configuration PSCIWebServerConfig {
                     Type = 'Directory'
                 }
                 $directoriesToCreate[$site.PhysicalPath] = $true
-                $dependsOn += "[File]WebsiteDir_$($site.Name)"
+                $depends += "[File]WebsiteDir_$($site.Name)"
             }
 
             if ($matchingWebAppPool) {
-                $dependsOn += "[cAppPool]AppPool_$($matchingWebAppPool.Name)"
+                $depends += "[cAppPool]AppPool_$($matchingWebAppPool.Name)"
             }
 
-            xWebsite "Website_$($site.Name)" { 
+            cWebsite "Website_$($site.Name)" { 
                 Name   = $site.Name
                 Ensure = 'Present'
                 State  = 'Started'
@@ -188,7 +188,7 @@ Configuration PSCIWebServerConfig {
                 }
                 PhysicalPath = $site.PhysicalPath
                 ApplicationPool = $site.ApplicationPool
-                DependsOn = $dependsOn
+                DependsOn = $depends
             }
 
             if (!$matchingWebAppPool) { 
@@ -228,7 +228,7 @@ Configuration PSCIWebServerConfig {
                 throw "Missing virtual directory website - token 'VirtualDirectory' (name '$($virtualDir.Name)'), key 'Website'"
             }
 
-            $dependsOn = @()
+            $depends = @()
             if (!$directoriesToCreate.ContainsKey($virtualDir.PhysicalPath)) { 
                 File "VirtualDirectoryDir_$($virtualDir.Name)" {
                     DestinationPath = $virtualDir.PhysicalPath
@@ -236,7 +236,7 @@ Configuration PSCIWebServerConfig {
                     Type = 'Directory'
                 }
                 $directoriesToCreate[$virtualDir.PhysicalPath] = $true
-                $dependsOn += "[File]VirtualDirectoryDir_$($virtualDir.Name)"
+                $depends += "[File]VirtualDirectoryDir_$($virtualDir.Name)"
             }
 
             cWebVirtualDirectory "VirtualDirectory_$($virtualDir.Name)" {
@@ -245,7 +245,7 @@ Configuration PSCIWebServerConfig {
                 WebApplication = ''
                 PhysicalPath = $virtualDir.PhysicalPath
                 Ensure = 'Present'
-                DependsOn = $dependsOn
+                DependsOn = $depends
             }
 
         }
@@ -266,7 +266,7 @@ Configuration PSCIWebServerConfig {
 
             Write-Log -Info "Preparing web application '$($webApp.Name)', PhysicalPath '$($webApp.PhysicalPath)', Website '$($webApp.Website)', ApplicationPool '$($webApp.ApplicationPool)'"
 
-            $dependsOn = @()
+            $depends = @()
             if (!$directoriesToCreate.ContainsKey($webApp.PhysicalPath)) { 
                 File "WebApplicationDir_$($webApp.Name)" {
                     DestinationPath = $webApp.PhysicalPath
@@ -274,20 +274,20 @@ Configuration PSCIWebServerConfig {
                     Type = 'Directory'
                 }
                 $directoriesToCreate[$webApp.PhysicalPath] = $true
-                $dependsOn += "[File]WebApplicationDir_$($webApp.Name)"
+                $depends += "[File]WebApplicationDir_$($webApp.Name)"
             }
 
             if ($matchingWebsite) {
-                $dependsOn += "[xWebsite]Website_$($site.Name)"
+                $depends += "[xWebsite]Website_$($site.Name)"
             }
 
-            xWebApplication "WebApplication_$($webApp.Name)" {
+            cWebApplication "WebApplication_$($webApp.Name)" {
                 Name = $webApp.Name
                 Ensure = 'Present'
                 Website = $webApp.Website
                 WebAppPool = $webApp.ApplicationPool
                 PhysicalPath = $webApp.PhysicalPath
-                DependsOn = $dependsOn
+                DependsOn = $depends
             }
 
             if (!$matchingWebAppPool) { 

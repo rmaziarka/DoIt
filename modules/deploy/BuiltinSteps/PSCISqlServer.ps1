@@ -23,60 +23,188 @@ SOFTWARE.
 #>
 
 Configuration PSCISqlServer {
-    param ($NodeName, $Environment, $Tokens)
 
+    <#
+    .SYNOPSIS
+    Ensures SQL Server is installed with specific options.
+
+    .DESCRIPTION
+    It uses following tokens:
+    - **SqlServerSourcePath** - (Required) UNC path to the root of the source files for installation. Note if you want to install from ISO, you need to first mount it.
+    - **SetupCredential** - (Required) Credential to be used to perform the installation.
+    - **Features** - (Required) SQL features to be installed. Following features are available in SQL Server 2016 (most of them also in previous versions):
+      - SQL - SQL Server Database Engine (SQLEngine), Replication (Replication), Fulltext (FullText) and Data Quality Server (DQ)
+      - AS - all Analysis Services components
+      - RS - all Reporting Services components
+      - IS - all Integration Services components
+      - DQC - Data Quality Client
+      - MDS - Master Data Services
+      - SSMS - SQL Server Management Tools - Basic
+      - ADV_SSMS - SQL Server Management Tools - Complete
+      - BIDS - SQL Server Data Tools (SSDT)
+      - BC - Backward compatibility components
+      - BOL - SQL Server Books Online
+      - Conn - Connectivity components
+      - DREPLAY_CTLR - Distributed Replay Controller
+      - DREPLAC_CLT - Distributed Replay Client
+      - SNAC_SDK - SDK for Microsoft SQL Server Native Client
+      - SDK - Software Development Kit
+      - LocalDB - LocalDB
+    - **SQLCollation** - (Required) Collation for SQL Server (e.g. Latin1_General_CI_AS).
+    - **InstanceName** - SQL instance to be installed. If not specified, default instance (MSSQLSERVER) will be used.
+    - **ConfigureFirewall** - if true, firewall will be opened for installed features.
+    - **InstanceDir** - Installation path for SQL instance files.
+    - **SQLSysAdminAccounts** - Array of accounts to be made SQL administrators.
+    - **SecurityMode** - SQL security mode - can be 'SQL' or 'Windows' (default). 
+    - **SAPwd** - SA password, if SecurityMode=SQL.
+    - **InstallSQLDataDir** - Root path for SQL database files.
+    - **SQLUserDBDir** - Path for SQL database files.
+    - **SQLUserDBLogDir** - Path for SQL log files.
+    - **SQLTempDBDir** - Path for SQL TempDB files.
+    - **SQLTempDBLogDir** - Path for SQL TempDB log files.
+    - **SQLBackupDir** - Path for SQL backup files.
+    - **ASCollation** - Collation for Analysis Services.
+    - **ASSysAdminAccounts** - Array of accounts to be made Analysis Services admins.
+    - **ASDataDir** - Path for Analysis Services data files.
+    - **ASLogDir** - Path for Analysis Services log files.
+    - **ASBackupDir** - Path for Analysis Services backup files.
+    - **ASTempDir** - Path for Analysis Services temp files.
+    - **ASConfigDir** - Path for Analysis Services config.
+    
+    Note it can also install missing features.
+    Note currently non-default service accounts are not supported. If you need to use non-default ones please create your own configuration basing on this one.
+
+    .EXAMPLE
+    ```
+    Import-Module "$PSScriptRoot\..\PSCI\PSCI.psd1" -Force
+
+    Environment Local { 
+        ServerConnection WebServer -Nodes localhost
+        ServerRole Database -Steps 'PSCISqlServer' -ServerConnection WebServer
+
+        Tokens Database @{
+            SqlServerSourcePath = 'e:\'
+            WindowsSourcePath = '\\localhost\InstallPackages\WindowsServer'
+            IsClientWindows = $false
+            SetupCredential = { $Tokens.Credential.Credential }
+            Features = 'SQLENGINE', 'SSMS', 'ADV_SSMS'
+            InstanceName = 'MSSQLSERVER'
+            SQLCollation = 'Latin1_General_CI_AS'
+            InstallSQLDataDir = 'C:\SQLServerData\Data'
+            SQLUserDBLogDir = 'C:\SQLServerData\Log'
+            SQLBackupDir = 'C:\SQLServerData\Backup'
+            ConfigureFirewall = $true
+        }
+    }
+
+    Install-DscResources -ModuleNames 'xSQLServer', 'xDismFeature'
+
+    Start-Deployment -Environment Local -NoConfigFiles
+    ```
+    Configures SQL Server according to the settings specified in 'Database' tokens section.
+    #>
+    
     Import-DSCResource -ModuleName xSQLServer
-    Import-DSCResource -ModuleName xStorage
-    Import-DSCResource -ModuleName xDatabase
+    Import-DSCResource -ModuleName xDismFeature
 
-    Node $NodeName {
-        WindowsFeature Net35 {
-            Name = 'NET-Framework-Core'
-            Source = $Tokens.InstallPaths.WindowsServer2012Iso
+    Node $AllNodes.NodeName {
+
+        $options = @{
+            SqlServerSourcePath = Get-TokenValue -Name 'SqlServerSourcePath' -Mandatory
+            WindowsSourcePath = Get-TokenValue -Name 'WindowsSourcePath'
+            IsClientWindows = Get-TokenValue -Name 'IsClientWindows'
+            SetupCredential = Get-TokenValue -Name 'SetupCredential' -Mandatory
+            Features = (Get-TokenValue -Name 'Features' -Mandatory) -join ','
+            SQLCollation = Get-TokenValue -Name 'SQLCollation' -Mandatory
+            ConfigureFirewall = Get-TokenValue -Name 'ConfigureFirewall'
+
+            InstanceName = Get-TokenValue -Name 'InstanceName'
+            InstanceDir = Get-TokenValue -Name 'InstanceDir'
+            SQLSysAdminAccounts = Get-TokenValue -Name 'SQLSysAdminAccounts'
+            SecurityMode = Get-TokenValue -Name 'SecurityMode'
+            SAPwd = Get-TokenValue -Name 'SAPWd'
+            InstallSQLDataDir = Get-TokenValue -Name 'InstallSQLDataDir'
+            SQLUserDBDir = Get-TokenValue -Name 'SQLUserDBDir'
+            SQLUserDBLogDir = Get-TokenValue -Name 'SQLUserDBLogDir'
+            SQLTempDBDir = Get-TokenValue -Name 'SQLTempDBDir'
+            SQLBackupDir = Get-TokenValue -Name 'SQLBackupDir'
+            ASCollation = Get-TokenValue -Name 'ASCollation'
+            ASSysAdminAccounts = Get-TokenValue -Name 'ASSysAdminAccounts'
+            ASDataDir = Get-TokenValue -Name 'ASDataDir'
+            ASLogDir = Get-TokenValue -Name 'ASLogDir'
+            ASBackupDir = Get-TokenValue -Name 'ASBackupDir'
+            ASTempDir = Get-TokenValue -Name 'ASTempDir'
+            ASConfigDir = Get-TokenValue -Name 'ASConfigDir'
         }
 
-        xMountImage MountSqlIso {
-            Name = 'MountSqlIso'
-            ImagePath = $Tokens.SqlServer.IsoPath
-            DriveLetter = $Tokens.SqlServer.IsoMountDrive
-            Ensure = 'Present'
+        if ($options.SecurityMode -eq 'SQL' -and !$options.SAPwd) {
+            throw 'SAPwd must be specified when SecurityMode is SQL.'
         }
 
-        # Note: this works in a non-deterministic way (due to xMountImage / clear-cache issues)
+        if ($options.SecurityMode -and $options.SecurityMode -ne 'SQL' -and $options.SecurityMode -ne 'Windows') {
+            throw "SecurityMode value is incorrect: '$($options.SecurityMode)' - can be 'SQL' or 'Windows'"
+        }
+
+        if (!$options.instanceName) {
+            $options.instanceName = 'MSSQLSERVER'
+        }
+
+        Write-Log -Info "Preparing .NET 3.5 - source '$($options.WindowsSourcePath)', IsClientWindows: '$($options.IsClientWindows)"
+
+        
+        $depends = ''
+        if ($options.IsClientWindows -or $options.IsClientWindows -eq $null) {
+            xDismFeature Net35 {
+                Name = 'NetFx3'
+            }
+            $depends = '[xDismFeature]Net35'
+        } else {
+            WindowsFeature Net35 {
+                Name = 'NET-Framework-Core'
+                Source = $options.windowsSourcePath
+            }
+            $depends = '[WindowsFeature]Net35'
+        }
+        
+        Write-Log -Info ('Preparing SQL Server instance - parameters: {0}' -f (Convert-HashtableToString -Hashtable $options))
 
         xSQLServerSetup DatabaseSetup {
-            SourcePath              = "$($Tokens.SqlServer.IsoMountDrive)\" # needs to be uncompressed iso
+            SourcePath              = $options.SqlServerSourcePath
             SourceFolder            = ''
-            SetupCredential         = $Tokens.Credentials.SetupCredential # this is unfortunately required
-            UpdateEnabled           = 'False' # it doesn't seem to work when it's true
+            SetupCredential         = $options.SetupCredential
+            UpdateEnabled           = 'False' 
             UpdateSource            = ''
-            Features                = 'SQLENGINE,SSMS,ADV_SSMS' # TODO: this only installed SQLENGINE!
-            InstanceName            = 'MSSQLSERVER'
-            SQLCollation            = 'Latin1_General_CI_AS'
-            #SecurityMode            = 'Windows'
-            
-            InstallSQLDataDir       = 'C:\SQLServerData\Data'
-            SQLUserDBLogDir         = 'C:\SQLServerData\Log'
-            SQLBackupDir            = 'C:\SQLServerData\Backup'
-            DependsOn               = @('[WindowsFeature]Net35', '[xMountImage]MountSqlIso')
+            Features                = $options.Features
+            InstanceName            = $options.InstanceName
+            InstanceDir             = $options.InstanceDir
+            SQLCollation            = $options.SQLCollation
+            SQLSysAdminAccounts = $options.SQLSysAdminAccounts
+            SecurityMode = $options.SecurityMode
+            SAPwd = $options.SAPWd
+            InstallSQLDataDir = $options.InstallSQLDataDir
+            SQLUserDBDir = $options.SQLUserDBDir
+            SQLUserDBLogDir = $options.SQLUserDBLogDir
+            SQLTempDBDir = $options.SQLTempDBDir
+            SQLBackupDir = $options.SQLBackupDir
+            ASCollation = $options.ASCollation
+            ASSysAdminAccounts = $options.ASSysAdminAccounts
+            ASDataDir = $options.ASDataDir
+            ASLogDir = $options.ASLogDir
+            ASBackupDir = $options.ASBackupDir
+            ASTempDir = $options.ASTempDir
+            ASConfigDir = $options.ASConfigDir
+            DependsOn  = $dependsOn
         }
 
-        xSQLServerFirewall DatabaseFirewall {
-            Ensure                  = "Present"
-            SourcePath              = $Tokens.SqlServer.IsoMountDrive
-            SourceFolder            = ''
-            Features                = 'SQLENGINE'
-            InstanceName            = 'MSSQLSERVER'
-            DependsOn               = '[xSQLServerSetup]DatabaseSetup'
+        if ($options.ConfigureFirewall) { 
+            xSQLServerFirewall DatabaseFirewall {
+                Ensure                  = 'Present'
+                SourcePath              = $options.SqlServerSourcePath
+                SourceFolder            = ''
+                Features                = $options.Features
+                InstanceName            = $options.InstanceName
+                DependsOn               = '[xSQLServerSetup]DatabaseSetup'
+            }
         }
-
-        xMountImage DismountSqlIso {
-            Name = 'DismountSqlIso'
-            ImagePath = $Tokens.SqlServer.IsoPath
-            DriveLetter = $Tokens.SqlServer.IsoMountDrive
-            Ensure = 'Absent'
-            DependsOn = '[xSQLServerFirewall]DatabaseFirewall'
-        }
-
     }
 }
