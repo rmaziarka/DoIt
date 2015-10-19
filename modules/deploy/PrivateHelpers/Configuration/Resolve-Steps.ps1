@@ -112,6 +112,7 @@ function Resolve-Steps {
         } else {
             $Steps = $StepsProvision + $StepsDeploy
         }
+        $Steps = $Steps | Where-Object { $_ }
         # remove steps not matching StepsFilter
         if ($StepsFilter) {
             $Steps = $Steps | Where-Object { $StepsFilter -icontains $_ }

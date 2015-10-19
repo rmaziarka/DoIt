@@ -169,15 +169,15 @@ Configuration PSCISqlServer {
         Write-Log -Info ('Preparing SQL Server instance - parameters: {0}' -f (Convert-HashtableToString -Hashtable $options))
 
         xSQLServerSetup DatabaseSetup {
-            SourcePath              = $options.SqlServerSourcePath
-            SourceFolder            = ''
-            SetupCredential         = $options.SetupCredential
-            UpdateEnabled           = 'False' 
-            UpdateSource            = ''
-            Features                = $options.Features
-            InstanceName            = $options.InstanceName
-            InstanceDir             = $options.InstanceDir
-            SQLCollation            = $options.SQLCollation
+            SourcePath = $options.SqlServerSourcePath
+            SourceFolder = ''
+            SetupCredential = $options.SetupCredential
+            UpdateEnabled = 'False' 
+            UpdateSource = ''
+            Features = $options.Features
+            InstanceName = $options.InstanceName
+            InstanceDir = $options.InstanceDir
+            SQLCollation = $options.SQLCollation
             SQLSysAdminAccounts = $options.SQLSysAdminAccounts
             SecurityMode = $options.SecurityMode
             SAPwd = $options.SAPWd
@@ -198,12 +198,12 @@ Configuration PSCISqlServer {
 
         if ($options.ConfigureFirewall) { 
             xSQLServerFirewall DatabaseFirewall {
-                Ensure                  = 'Present'
-                SourcePath              = $options.SqlServerSourcePath
-                SourceFolder            = ''
-                Features                = $options.Features
-                InstanceName            = $options.InstanceName
-                DependsOn               = '[xSQLServerSetup]DatabaseSetup'
+                Ensure  = 'Present'
+                SourcePath = $options.SqlServerSourcePath
+                SourceFolder  = ''
+                Features = $options.Features
+                InstanceName = $options.InstanceName
+                DependsOn = '[xSQLServerSetup]DatabaseSetup'
             }
         }
     }

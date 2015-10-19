@@ -52,7 +52,7 @@ function Resolve-ScriptedToken {
     [CmdletBinding()]
     [OutputType([object])]
     param(
-        [Parameter(Mandatory=$true)]
+        [Parameter(Mandatory=$false)]
         [AllowNull()]
         [object]
         $ScriptedToken,

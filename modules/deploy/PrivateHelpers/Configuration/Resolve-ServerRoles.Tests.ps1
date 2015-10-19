@@ -678,6 +678,53 @@ Describe -Tag "PSCI.unit" "ServerRole" {
             }
         }
 
+        Context "when used only with StepsProvision" {
+            $Global:Environments = @{}
+
+            Environment Default {
+                ServerConnection WebServer -Nodes 'node1', 'node2'
+                ServerRole Web -StepsProvision @('Prov1', 'Prov2') -ServerConnections WebServer
+
+                Step TestFunc -ScriptBlock $null
+            }           
+
+            It "should return all steps" {
+                $resolvedRoles = Resolve-ServerRoles -AllEnvironments $Global:Environments -Environment Default -ResolvedTokens @{}
+
+                $resolvedRoles.Count | Should Be 1
+            
+                $resolvedRoles.Web | Should Not Be $null
+                $resolvedRoles.Web.Steps.Name | Should Be @('Prov1', 'Prov2')
+                $resolvedRoles.Web.ServerConnections.Count | Should Be 1
+                $resolvedRoles.Web.ServerConnections.Name | Should Be 'WebServer'
+                $resolvedRoles.Web.ServerConnections.Nodes | Should Be @('node1','node2')
+            }
+        }
+
+         Context "when used with no Steps" {
+            $Global:Environments = @{}
+
+            Environment Default {
+                ServerConnection WebServer -Nodes 'node1', 'node2'
+                ServerRole Web -ServerConnections WebServer
+                ServerRole Database -Steps 'test' -ServerConnections WebServer
+
+                Step TestFunc -ScriptBlock $null
+            }           
+
+            It "should not return whole server role" {
+                $resolvedRoles = Resolve-ServerRoles -AllEnvironments $Global:Environments -Environment Default -ResolvedTokens @{}
+
+                $resolvedRoles.Count | Should Be 1
+            
+                $resolvedRoles.Database | Should Not Be $null
+                $resolvedRoles.Database.Steps.Name | Should Be @('test')
+                $resolvedRoles.Database.ServerConnections.Count | Should Be 1
+                $resolvedRoles.Database.ServerConnections.Name | Should Be 'WebServer'
+                $resolvedRoles.Database.ServerConnections.Nodes | Should Be @('node1','node2')
+            }
+        }
+
         Context "when used with Enabled" {
             $Global:Environments = @{}
 
