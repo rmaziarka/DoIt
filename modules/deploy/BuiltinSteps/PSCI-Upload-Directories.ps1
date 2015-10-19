@@ -31,8 +31,8 @@ function PSCI-Upload-Directories {
     .DESCRIPTION
     This function should be invoked locally (without -RunRemotely). 
     It uses following tokens:
-    - **$Tokens.UploadDirectories** - hashtable in form @{ '<source_directory relative to packagesPath>' = '<destination_directory>' }
-    - **$Tokens.UploadDirectoriesCheckHashMode** (optional) - type of hash check (optimization) - default 'DontCheckHash'. Available values:
+    - **$UploadDirectories** - hashtable in form @{ '<source_directory relative to packagesPath>' = '<destination_directory>' }
+    - **$UploadDirectoriesCheckHashMode** (optional) - type of hash check (optimization) - default 'DontCheckHash'. Available values:
         - DontCheckHash - files are always uploaded to the servers
         - AlwaysCalculateHash - files are uploaded to the servers if their hashes calculated in local path and in remote path are different
         - UseHashFile - files are uploaded to the servers if there doesn't exist a syncHash_<hash> file, where hash is hash calculated in local path. The file is created/replaced automatically.

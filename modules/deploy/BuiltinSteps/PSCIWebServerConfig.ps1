@@ -211,7 +211,7 @@ Configuration PSCIWebServerConfig {
                         Permission = 'Read'
                         Type = 'Allow'
                         Inherit = $true
-                        DependsOn = "[xWebsite]Website_$($site.Name)"
+                        DependsOn = "[cWebsite]Website_$($site.Name)"
                     }
                 }
             }
@@ -278,7 +278,7 @@ Configuration PSCIWebServerConfig {
             }
 
             if ($matchingWebsite) {
-                $depends += "[xWebsite]Website_$($site.Name)"
+                $depends += "[cWebsite]Website_$($site.Name)"
             }
 
             cWebApplication "WebApplication_$($webApp.Name)" {
@@ -310,7 +310,7 @@ Configuration PSCIWebServerConfig {
                         Permission = 'Read'
                         Type = 'Allow'
                         Inherit = $true
-                        DependsOn = "[xWebapplication]WebApplication_$($webApp.Name)"
+                        DependsOn = "[cWebApplication]WebApplication_$($webApp.Name)"
                     }
                 }
             }
