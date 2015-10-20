@@ -178,6 +178,7 @@ function Start-Deployment {
     foreach ($builtinStep in $availableBuiltinSteps) {
         foreach ($planEntry in $Global:DeploymentPlan) {
             if ($planEntry.StepName -ieq $builtinStep.BaseName -or ($planEntry.StepScriptBlock -and $planEntry.StepScriptBlock.ToString() -imatch $builtinStep.BaseName)) {
+                $planEntry.StepIsBuiltin = $true
                 if ($requiredBuiltinSteps -notcontains $builtinStep) { 
                     $requiredBuiltinSteps += $builtinStep
                 }

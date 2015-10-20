@@ -109,8 +109,15 @@ Configuration PSCISqlServer {
 
     Node $AllNodes.NodeName {
 
+        $sqlServerSourcePath = Get-TokenValue -Name 'SqlServerSourcePath' 
+
+        if (!$sqlServerSourcePath) {
+            Write-Log -Warn 'No SqlServerSourcePath defined in tokens - SQL Server will not be installed.'
+            return
+        }
+        
         $options = @{
-            SqlServerSourcePath = Get-TokenValue -Name 'SqlServerSourcePath' -Mandatory
+            SqlServerSourcePath = $sqlServerSourcePath
             WindowsSourcePath = Get-TokenValue -Name 'WindowsSourcePath'
             IsClientWindows = Get-TokenValue -Name 'IsClientWindows'
             SetupCredential = Get-TokenValue -Name 'SetupCredential' -Mandatory
@@ -150,7 +157,6 @@ Configuration PSCISqlServer {
         }
 
         Write-Log -Info "Preparing .NET 3.5 - source '$($options.WindowsSourcePath)', IsClientWindows: '$($options.IsClientWindows)"
-
         
         $depends = ''
         if ($options.IsClientWindows -or $options.IsClientWindows -eq $null) {

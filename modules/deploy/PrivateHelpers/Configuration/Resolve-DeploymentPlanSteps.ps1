@@ -96,37 +96,44 @@ function Resolve-DeploymentPlanSteps {
     if (Test-Path -LiteralPath $dscOutputPath) {
         [void](Remove-Item -LiteralPath $dscOutputPath -Force -Recurse)
     }
-    $dscEntries = $filteredDeploymentPlan | Where-Object { $_.StepType -eq 'Configuration' }
-    foreach ($entry in $dscEntries) {
-        if ($entry.IsLocalRun -or !$entry.ConnectionParams -or $entry.ConnectionParams.Count -eq 0) {
-            $dscNode = 'localhost'
-        } else {
-            $dscNode = $entry.ConnectionParams.Nodes[0]
-        }
+    $result = New-Object -TypeName System.Collections.ArrayList
+    foreach ($entry in $filteredDeploymentPlan) {
+        if ($entry.StepType -eq 'Configuration') { 
+            if ($entry.IsLocalRun -or !$entry.ConnectionParams -or $entry.ConnectionParams.Count -eq 0) {
+                $dscNode = 'localhost'
+            } else {
+                $dscNode = $entry.ConnectionParams.Nodes[0]
+            }
 
-        if (!$entry.RunOnConnectionParams -and $entry.ConnectionParams.RemotingMode -and $entry.ConnectionParams.RemotingMode -ne 'PSRemoting') {
-            throw "Cannot deploy DSC configurations from localhost when RemotingMode is not PSRemoting. Please either change it to PSRemoting or add '-RunRemotely' switch to the ServerRole or Step(Environment '$($entry.Environment)' / ServerRole '$($entry.ServerRole)' / Step '$($entry.StepName)')."
-        }
+            if (!$entry.RunOnConnectionParams -and $entry.ConnectionParams.RemotingMode -and $entry.ConnectionParams.RemotingMode -ne 'PSRemoting') {
+                throw "Cannot deploy DSC configurations from localhost when RemotingMode is not PSRemoting. Please either change it to PSRemoting or add '-RunRemotely' switch to the ServerRole or Step(Environment '$($entry.Environment)' / ServerRole '$($entry.ServerRole)' / Step '$($entry.StepName)')."
+            }
 
-        if (Test-Path -Path $entry.StepMofDir) {
-            Remove-Item -Path $entry.StepMofDir -Force -Recurse
-        }
+            if (Test-Path -Path $entry.StepMofDir) {
+                Remove-Item -Path $entry.StepMofDir -Force -Recurse
+            }
 
-        [void](Invoke-DeploymentStep `
-            -StepName $entry.StepName `
-            -StepScriptBlockResolved $entry.StepScriptBlockResolved `
-            -Node $dscNode `
-            -Environment $entry.Environment `
-            -ServerRole $entry.ServerRole `
-            -Tokens $entry.Tokens `
-            -ConnectionParams $entry.ConnectionParams)
+            [void](Invoke-DeploymentStep `
+                -StepName $entry.StepName `
+                -StepScriptBlockResolved $entry.StepScriptBlockResolved `
+                -Node $dscNode `
+                -Environment $entry.Environment `
+                -ServerRole $entry.ServerRole `
+                -Tokens $entry.Tokens `
+                -ConnectionParams $entry.ConnectionParams)
 
-        if (!(Get-ChildItem -Path $entry.StepMofDir -Filter "*.mof")) {
-            throw "Mof file has not been generated for step named '$($entry.StepName)' (Environment '$($entry.Environment)' / ServerRole '$($entry.ServerRole)'). Please ensure your configuration definition is correct and your DSC configuration contains 'Node `$AllNodes.NodeName' or 'Node `$NodeName'."
-        }
+            if (!(Get-ChildItem -Path $entry.StepMofDir -Filter "*.mof")) {
+                if (!$entry.StepIsBuiltin) { 
+                    # Builtin steps have their own logging
+                    Write-Log -Warn "Mof file has not been generated for step named '$($entry.StepName)' (Environment '$($entry.Environment)' / ServerRole '$($entry.ServerRole)'). Please ensure your configuration definition is correct and your DSC configuration contains 'Node `$AllNodes.NodeName' or 'Node `$NodeName'. This step will not be deployed."
+                }
+                continue
+            }
         
-        $entry.StepMofDir = Resolve-Path -LiteralPath $entry.StepMofDir
+            $entry.StepMofDir = Resolve-Path -LiteralPath $entry.StepMofDir
+        }
+        [void]($result.Add($entry))
     }
 
-    return $filteredDeploymentPlan
+    return $result
 }

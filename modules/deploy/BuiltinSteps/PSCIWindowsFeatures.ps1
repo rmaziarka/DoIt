@@ -75,7 +75,12 @@ configuration PSCIWindowsFeatures {
 
     Node $AllNodes.NodeName {        
         $isClientWindows = Get-TokenValue -Name 'IsClientWindows'
-        $windowsFeatures = Get-TokenValue -Name 'WindowsFeatures' -Mandatory
+        $windowsFeatures = Get-TokenValue -Name 'WindowsFeatures'
+
+        if (!$windowsFeatures) {
+            Write-Log -Warn 'No WindowsFeatures defined in tokens.'
+            return
+        }
         Write-Log -Info "Preparing PSCIWindowsFeatures, node '$($Node.NodeName)': WindowsFeatures $($windowsFeatures -join ', '); IsClientWindows: $isClientWindows"
 
         foreach ($windowsFeature in $windowsFeatures) {
@@ -91,4 +96,3 @@ configuration PSCIWindowsFeatures {
         }
     }
 }
-

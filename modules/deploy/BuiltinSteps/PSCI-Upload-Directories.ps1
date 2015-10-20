@@ -96,6 +96,7 @@ function PSCI-Upload-Directories {
     $checkHashMode = Get-TokenValue -Name 'UploadDirectoriesCheckHashMode'
 
     if (!$directories) {
+        Write-Log -Warn 'No UploadDirectories defined in tokens.'
         return
     }
 

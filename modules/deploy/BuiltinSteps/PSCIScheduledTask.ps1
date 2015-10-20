@@ -92,7 +92,7 @@ configuration PSCIScheduledTask {
         $scheduledTasks = Get-TokenValue -Name 'ScheduledTasks'
 
         if (!$scheduledTasks) {
-            Write-Log -Info "No scheduled tasks to deploy"
+            Write-Log -Warn 'No ScheduledTasks defined in tokens.'
             return
         }
 

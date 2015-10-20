@@ -93,7 +93,7 @@ Configuration PSCIWebServerConfig {
         $webApplication = Get-TokenValue -Name 'WebApplication'
 
         if (!$applicationPool -and !$website -and !$virtualDirectory -and $webApplication) {
-            Write-Warning "No configuration specified for PSCIWebServerConfig. Please ensure there is at least one token entry with name 'ApplicationPool', 'Website', 'VirtualDirectory' or 'WebApplication'."
+            Write-Log -Warn "No configuration specified for PSCIWebServerConfig. Please ensure there is at least one token entry with name 'ApplicationPool', 'Website', 'VirtualDirectory' or 'WebApplication'."
             return
         }
 

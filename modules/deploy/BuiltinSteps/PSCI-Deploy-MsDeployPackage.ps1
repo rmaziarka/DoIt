@@ -29,7 +29,7 @@ function PSCI-Deploy-MsDeployPackage {
     Uploads specific directories to remote host using administrative shares or WinRM (if share is not accessible).
 
     .DESCRIPTION
-    This function should be invoked locally (without -RunRemotely). 
+    This function can be invoked both locally (preferred) and remotely (-RunRemotely).
     It uses following tokens:
     - **MsDeployPackages** - hashtable (or array of hashtables) with following keys:
       - **PackageName** - (required) name of msdeploy package to deploy (the same as in Build-MsDeployPackage)

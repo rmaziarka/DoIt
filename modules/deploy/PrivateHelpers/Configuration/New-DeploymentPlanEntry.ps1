@@ -158,6 +158,7 @@ function New-DeploymentPlanEntry {
         StepScriptBlockResolved = $null # will be updated by Resolve-DeploymentPlanSteps
         StepType = $null # will be updated by Resolve-DeploymentPlanSteps
         StepMofDir = $null # will be updated by Resolve-DeploymentPlanSteps
+        StepIsBuiltin = $false # will be updated by Start-Deployment
         Tokens = $ResolvedTokens;
         TokensOverride = $TokensOverride # used only for passing parameters to deploy.ps1 in remote runs
         RequiredPackages = $requiredPackages
