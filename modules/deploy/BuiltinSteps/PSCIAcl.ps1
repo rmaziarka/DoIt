@@ -31,10 +31,15 @@ configuration PSCIAcl {
 
     .DESCRIPTION
     It uses following tokens:
-    - **IsClientWindows** - if true, features will be installed using dism, otherwise Add-WindowsFeature (the latter is available only on Windows Server)
-    - **WindowsFeatures** - array of windows features to add. 
+    - **DirectoryAcls** - hashtable (or array of hashtables) with following keys:
+      - **Path** - (required) path to directory
+      - **Account** - (required) account name that will be allowed/denied to the directory
+      - **Access** - Allow (default) or Deny
+      - **Rights** - FullControl, Modify or ReadAndExecute (default)
+      - **Inherit** - ACL inheritance (default true)
+      - **Strict** - whether to use strict account name checking (default false)
     
-    To list available feature names on client you can use `dism /online /Get-Features`. On server `Get-WindowsFeature`.
+    See also [Grani_ACL](https://github.com/guitarrapc/DSCResources/tree/master/Custom/GraniResource/DSCResources/Grani_ACL).
 
     .EXAMPLE
     ```
@@ -98,8 +103,7 @@ configuration PSCIAcl {
                 Access = if ($directoryAcl.ContainsKey('Allow')) { $directoryAcl.Access } else { 'Allow' }
                 Rights = if ($directoryAcl.ContainsKey('Rights')) { $directoryAcl.Rights } else { 'ReadAndExecute' }
                 Inherit = if ($directoryAcl.ContainsKey('Inherit')) { $directoryAcl.Inherit } else { $true }
-                Recurse = if ($directoryAcl.ContainsKey('Recurse')) { $directoryAcl.Recurse } else { $false }
-                Strict = if ($directoryAcl.ContainsKey('Strict')) { $directoryAcl.Recurse } else { $false }
+                Strict = if ($directoryAcl.ContainsKey('Strict')) { $directoryAcl.Strict } else { $false }
             }
         }
     }

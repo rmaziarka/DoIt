@@ -29,27 +29,28 @@ configuration PSCIScheduledTask {
     Ensures specific Scheduled Tasks are configured in Task Scheduler.
 
     .DESCRIPTION
-    It uses following common tokens:
-    - **TaskName** - (Mandatory) Scheduled Task name
-    - **PowershellCommandToRun** - powershell command to run (puts powershell.exe to Execute and command to Argument)
-    - **Execute** - path to executable to run
-    - **Argument** - argument for executable to run
-    - **WorkingDirectory** - working directory
-    - **Credential** - credential under which the Scheduled Task will run (if not specified, SYSTEM will be used)
-    - **RunLevel** - Highest (administrator - default) or Limited
-    - **Compatibility** - At, V1, Vista, Win7 or Win8 (default)
-    - **Description** - description of the Scheduled Task
-    - **TaskPath** - path where the task will be created in Scheduled Task tree. 
+    It uses following tokens:
+    - **ScheduledTasks** - hashtable (or array of hashtables) with following common keys:
+      - **TaskName** - (Mandatory) Scheduled Task name
+      - **PowershellCommandToRun** - powershell command to run (puts powershell.exe to Execute and command to Argument)
+      - **Execute** - path to executable to run
+      - **Argument** - argument for executable to run
+      - **WorkingDirectory** - working directory
+      - **Credential** - credential under which the Scheduled Task will run (if not specified, SYSTEM will be used)
+      - **RunLevel** - Highest (administrator - default) or Limited
+      - **Compatibility** - At, V1, Vista, Win7 or Win8 (default)
+      - **Description** - description of the Scheduled Task
+      - **TaskPath** - path where the task will be created in Scheduled Task tree. 
 
-    And following tokens for settings the schedule:
-    - **ScheduledAt** - first time when the task should run (datetime)
-    - **Daily** - whether to run it daily (true/false)
+    And following keys for settings the schedule:
+      - **ScheduledAt** - first time when the task should run (datetime)
+      - **Daily** - whether to run it daily (true/false)
 
     Or:
-    - **ScheduledAt** - first time when the task should run (datetime)
-    - **ScheduledTimeSpanDay** - run it every n days
-    - **ScheduledTimeSpanHour** - run it every n hours
-    - **ScheduledTimeSpanMin** - run it every n minutes
+      - **ScheduledAt** - first time when the task should run (datetime)
+      - **ScheduledTimeSpanDay** - run it every n days
+      - **ScheduledTimeSpanHour** - run it every n hours
+      - **ScheduledTimeSpanMin** - run it every n minutes
     
     See [https://github.com/guitarrapc/DSCResources/tree/master/Custom/GraniResource/DSCResources/Grani_ScheduleTask] for description of DSC resource used in this step.
 
