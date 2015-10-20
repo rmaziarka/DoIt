@@ -86,8 +86,8 @@ function PSCI-Deploy-MsDeployPackage {
             UserName = '<username>'
             Password = '<password>'
             MSDeployDestination = { New-MsDeployDestinationString `
-		    					    -Url ('http://{0}/MsDeployAgentService' -f $Node) `
-							        -UserName $Tokens.Remoting.UserName `
+                                    -Url ('http://{0}/MsDeployAgentService' -f $Node) `
+                                    -UserName $Tokens.Remoting.UserName `
                                     -Password $Tokens.Remoting.Password }
         }
 
