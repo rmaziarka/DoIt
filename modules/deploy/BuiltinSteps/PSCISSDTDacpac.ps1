@@ -22,7 +22,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 #>
 
-function PSCI-Deploy-SSDTDacpac {
+function PSCISSDTDacpac {
 
     <#
     .SYNOPSIS
@@ -61,7 +61,7 @@ function PSCI-Deploy-SSDTDacpac {
 
     Environment Local { 
         ServerConnection DatabaseServer -Nodes localhost
-        ServerRole Database -Steps 'PSCI-Deploy-SSDTDacpac' -ServerConnection DatabaseServer
+        ServerRole Database -Steps 'PSCISSDTDacpac' -ServerConnection DatabaseServer
 
         Tokens Database @{
             SSDTPackages = @{
@@ -103,7 +103,7 @@ function PSCI-Deploy-SSDTDacpac {
     }
 
     foreach ($ssdtPackage in $ssdtPackages) {
-        Write-Log -Info ("Starting PSCI-Deploy-SSDTDacpac, node ${NodeName}: {0}" -f (Convert-HashtableToString -Hashtable $ssdtPackage))
+        Write-Log -Info ("Starting PSCISSDTDacpac, node ${NodeName}: {0}" -f (Convert-HashtableToString -Hashtable $ssdtPackage))
         Deploy-SSDTDacpac @ssdtPackage
     }
     

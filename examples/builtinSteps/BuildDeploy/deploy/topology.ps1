@@ -41,7 +41,7 @@ Environment Default {
     # 'Custom-WindowsFeaturesStep' which invokes custom scriptblock that invokes PSCIWindowsFeatures with $Tokens.CustomWindowsFeatures
     ServerRole WindowsFeaturesTestRole -Steps @('PSCIWindowsFeatures', 'Custom-WindowsFeaturesStep') -ServerConnections TestNode
 
-    ServerRole UploadDirectoriesTestRole -Steps @('PSCI-Upload-Directories') -ServerConnection TestNode
+    ServerRole UploadDirectoriesTestRole -Steps @('PSCIDirectory') -ServerConnection TestNode
 
     ServerRole IISConfigTestRole -Steps 'PSCIWebServerConfig' -ServerConnections TestNode
 

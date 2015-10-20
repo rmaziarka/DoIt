@@ -22,7 +22,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 #>
 
-function PSCI-Deploy-MsDeployPackage {
+function PSCIMsDeployPackage {
 
     <#
     .SYNOPSIS
@@ -71,7 +71,7 @@ function PSCI-Deploy-MsDeployPackage {
 
     Environment Local { 
         ServerConnection WebServer -Nodes localhost
-        ServerRole Web -Steps 'PSCI-Deploy-MsDeployPackage' -ServerConnection WebServer
+        ServerRole Web -Steps 'PSCIMsDeployPackage' -ServerConnection WebServer
 
         Tokens Web @{
             MsDeployPackages = @{
@@ -136,7 +136,7 @@ function PSCI-Deploy-MsDeployPackage {
     foreach ($msDeployPackage in $msDeployPackages) {
         $msDeployPackage.Node = $NodeName
         $msDeployPackage.Environment = $Environment
-        Write-Log -Info ("Starting PSCI-Deploy-MsDeployPackage, node ${NodeName}: {0}" -f (Convert-HashtableToString -Hashtable $msdeployPackage))
+        Write-Log -Info ("Starting PSCIMsDeployPackage, node ${NodeName}: {0}" -f (Convert-HashtableToString -Hashtable $msdeployPackage))
         Deploy-MsDeployPackage @msDeployPackage
     }
     

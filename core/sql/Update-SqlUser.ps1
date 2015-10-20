@@ -52,17 +52,26 @@ function Update-SqlUser {
     
         [Parameter(Mandatory=$true)]
         [string]
-        $DatabaseName,
-    
-        [Parameter(Mandatory=$true)]
-        [string]
         $Username,
+
+        [Parameter(Mandatory=$false)]
+        [string]
+        $DatabaseName,
     
         [Parameter(Mandatory=$false)]
         [string[]]
         $DbRoles
     )
     $sqlScript = Join-Path -Path $PSScriptRoot -ChildPath "Update-SqlUser.sql"
+
+    if (!$DatabaseName) { 
+        $csb = New-Object -TypeName System.Data.SqlClient.SqlConnectionStringBuilder -ArgumentList $ConnectionString
+        $DatabaseName = $csb.InitialCatalog
+    }
+    if (!$DatabaseName) {
+        throw "No database name - please specify -DatabaseName or add Initial Catalog to ConnectionString."
+    }
+
     $parameters =  @{ 
         Username = $Username 
         DatabaseName = $DatabaseName

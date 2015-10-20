@@ -22,7 +22,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 #>
 
-function PSCI-Upload-Directories {
+function PSCIDirectory {
 
     <#
     .SYNOPSIS
@@ -59,7 +59,7 @@ function PSCI-Upload-Directories {
 
     Environment Local { 
         ServerConnection WebServer -Nodes localhost
-        ServerRole Web -Steps 'PSCI-Upload-Directories' -ServerConnection WebServer
+        ServerRole Web -Steps 'PSCIDirectory' -ServerConnection WebServer
 
         Tokens Web @{
             UploadDirectories = @{
@@ -111,7 +111,7 @@ function PSCI-Upload-Directories {
         throw "UploadDirectories token must be a hashtable (e.g. @{ '<source_directory relative to packagesPath>' = '<destination_directory>' })."
     }
 
-    Write-Log -Info ("Starting PSCI-Upload-Directories, node ${NodeName}: {0}" -f (Convert-HashtableToString -Hashtable $directories))
+    Write-Log -Info ("Starting PSCIDirectory, node ${NodeName}: {0}" -f (Convert-HashtableToString -Hashtable $directories))
 
     $srcList = @()
     $dstList = @()
