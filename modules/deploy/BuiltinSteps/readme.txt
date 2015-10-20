@@ -1,5 +1,6 @@
 Builtin steps allow to use predefined DSC configurations and functions in order to do common tasks. 
 You just need to reference builtin step name in your server role and prepare tokens required by the builtin step.
+You can also use them as a reference for your own deployment steps - just copy them to your deploy/configuration directory and modify according to your needs.
 See any of the builtin step listed below for a complete example.
 
 Note tokens for each builtin step can be passed by convention or explicitly. 
