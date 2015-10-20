@@ -54,17 +54,20 @@ function Update-SSASXmlaProcessType {
     $xmla.PreserveWhitespace = $true
     $xmla.Load($GeneratedXmlaFilePath)
     
-    if ($ProcessType -eq 'DoNotProcess' -and ($xmla.Batch.Process)) {
-        $xmla.Batch.RemoveChild($xmla.Batch.Process)
+    if ($ProcessType -eq 'DoNotProcess') {
+        if ($xmla.Batch.Process) {
+            $xmla.Batch.RemoveChild($xmla.Batch.Process)
+        }
     } 
     elseif ($xmla.Batch.Process) {
         $xmla.Batch.Process.Type = $ProcessType
     } 
     else {
         $databaseId = $xmla.Batch.Alter.Object.DatabaseID
-        $newProcessNode = $xmla.CreateElement('Process')
-        $newProcessNode.InnerXML = "<Type>$ProcessType</Type><Object><DatabaseID>$databaseId</DatabaseID></Object>"
+        $namespace = $xmla.DocumentElement.NamespaceURI
+        $newProcessNode = $xmla.CreateElement('Process', $namespace)
         $xmla.Batch.AppendChild($newProcessNode)
+        $newProcessNode.InnerXML = "<Type>$ProcessType</Type><Object><DatabaseID>$databaseId</DatabaseID></Object>"
     }
 
     $xmla.Save($GeneratedXmlaFilePath)
