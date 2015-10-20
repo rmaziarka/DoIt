@@ -97,51 +97,58 @@ function Set-SqlServerFilestream {
     }
 
     $cimParams = $ConnectionParams.CimSessionParams
+    try { 
+        $cimSession = New-CimSession @cimParams
 
-    $sqlServerNamespaces = Get-CimInstance @cimParams -Namespace 'ROOT\Microsoft\SqlServer' -class '__Namespace' -ErrorAction SilentlyContinue | `
-        Where-Object { $_.Name.StartsWith('ComputerManagement') } | Select-Object -ExpandProperty Name
-    if (!$sqlServerNamespaces) {
-        if ($Error.Count -gt 0) { 
-            $errMsg = $Error[0].ToString()
-        } else {
-            $errMsg = ''
-        }
-        throw "Cannot get SQL Server WMI namespace from '$computerName': $errMsg."
-    }
-
-    $cimObjects = @()
-    foreach ($namespace in $sqlServerNamespaces) { 
-        $cimObjects += Get-CimInstance @cimParams -Namespace "ROOT\Microsoft\SqlServer\$namespace" -Class 'FilestreamSettings' | where { $_.InstanceName -eq $instanceName }
-    }
-
-    if (!$cimObjects) {
-        throw "Cannot find any SQL Server WMI object for instance '$instanceName' at '$($wmiParams.ComputerName)' from namespace ROOT\Microsoft\SqlServer - check your instance name is correct: '$instanceName'"
-    }
-
-    $changed = $false
-    $numWmiInstancesCorrect = 0
-    foreach ($cimObject in $cimObjects) { 
-        $cimNamespace = $cimObject.CimClass.CimSystemProperties.Namespace
-        if ($cimObject.AccessLevel -ne $FilestreamLevel) {
-            Write-Log -Info "WMI $cimNamespace - setting filestream from $($cimObject.AccessLevel) to $FilestreamLevel."
-            $result = Invoke-CimMethod -InputObject $cimObject -MethodName EnableFilestream -Arguments @{ 
-                AccessLevel = $FilestreamLevel
-                ShareName = $instanceName
-            }
-            if ($result.ReturnValue -eq 0) {
-                $changed = $true
-                $numWmiInstancesCorrect++
+        $sqlServerNamespaces = Get-CimInstance -CimSession $cimSession -Namespace 'ROOT\Microsoft\SqlServer' -class '__Namespace' -ErrorAction Continue | `
+            Where-Object { $_.Name.StartsWith('ComputerManagement') } | Select-Object -ExpandProperty Name
+        if (!$sqlServerNamespaces) {
+            if ($Error.Count -gt 0) { 
+                $errMsg = $Error[0].ToString()
             } else {
-                Write-Log -Warn "Failed to set filestream at $cimNamespace - return value from wmi.EnableFilestream: $($result.ReturnValue)"
+                $errMsg = ''
             }
-        } else {
-            Write-Log -Info "WMI $cimNamespace - filestream already at level $($cimObject.AccessLevel)."
-            $numWmiInstancesCorrect++
+            throw "Cannot get SQL Server WMI namespace from '$computerName': $errMsg."
         }
-    }
 
-    if ($numWmiInstancesCorrect -eq 0) {
-        throw "Failed to set filestream on any WMI objects."
+        $cimObjects = @()
+        foreach ($namespace in $sqlServerNamespaces) { 
+            $cimObjects += Get-CimInstance -CimSession $cimSession -Namespace "ROOT\Microsoft\SqlServer\$namespace" -Class 'FilestreamSettings' | where { $_.InstanceName -eq $instanceName }
+        }
+
+        if (!$cimObjects) {
+            throw "Cannot find any SQL Server WMI object for instance '$instanceName' at '$($wmiParams.ComputerName)' from namespace ROOT\Microsoft\SqlServer - check your instance name is correct: '$instanceName'"
+        }
+
+        $changed = $false
+        $numWmiInstancesCorrect = 0
+        foreach ($cimObject in $cimObjects) { 
+            $cimNamespace = $cimObject.CimClass.CimSystemProperties.Namespace
+            if ($cimObject.AccessLevel -ne $FilestreamLevel) {
+                Write-Log -Info "WMI $cimNamespace - setting filestream from $($cimObject.AccessLevel) to $FilestreamLevel."
+                $result = Invoke-CimMethod -InputObject $cimObject -MethodName EnableFilestream -Arguments @{ 
+                    AccessLevel = $FilestreamLevel
+                    ShareName = $instanceName
+                }
+                if ($result.ReturnValue -eq 0) {
+                    $changed = $true
+                    $numWmiInstancesCorrect++
+                } else {
+                    Write-Log -Warn "Failed to set filestream at $cimNamespace - return value from wmi.EnableFilestream: $($result.ReturnValue)"
+                }
+            } else {
+                Write-Log -Info "WMI $cimNamespace - filestream already at level $($cimObject.AccessLevel)."
+                $numWmiInstancesCorrect++
+            }
+        }
+
+        if ($numWmiInstancesCorrect -eq 0) {
+            throw "Failed to set filestream on any WMI objects."
+        }
+    } finally {
+        if ($cimSession) {
+            [void](Remove-CimSession -CimSession $cimSession)
+        }
     }
 
     if ($changed) {
