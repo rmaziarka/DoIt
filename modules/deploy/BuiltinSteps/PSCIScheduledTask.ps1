@@ -57,6 +57,9 @@ configuration PSCIScheduledTask {
     ```
     Import-Module "$PSScriptRoot\..\PSCI\PSCI.psd1" -Force
 
+    # clear any old Environment definitions - required only for -NoConfigFiles deployments
+    $Global:Environments = @{}
+
     Environment Local { 
         ServerConnection WebServer -Nodes localhost
         ServerRole Web -Steps 'PSCIScheduledTask' -ServerConnection WebServer
@@ -79,7 +82,11 @@ configuration PSCIScheduledTask {
 
     Install-DscResources -ModuleNames GraniResource
 
-    Start-Deployment -Environment Local -NoConfigFiles
+    try { 
+        Start-Deployment -Environment Local -NoConfigFiles
+    } catch {
+        Write-ErrorRecord
+    }
     ```
     Installs specified scheduled task.
 

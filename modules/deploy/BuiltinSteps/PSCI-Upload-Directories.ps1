@@ -54,6 +54,9 @@ function PSCI-Upload-Directories {
     ```
     Import-Module "$PSScriptRoot\..\PSCI\PSCI.psd1" -Force
 
+    # clear any old Environment definitions - required only for -NoConfigFiles deployments
+    $Global:Environments = @{}
+
     Environment Local { 
         ServerConnection WebServer -Nodes localhost
         ServerRole Web -Steps 'PSCI-Upload-Directories' -ServerConnection WebServer
@@ -67,7 +70,11 @@ function PSCI-Upload-Directories {
         }
     }
 
-    Start-Deployment -Environment Local -NoConfigFiles
+    try { 
+        Start-Deployment -Environment Local -NoConfigFiles
+    } catch {
+        Write-ErrorRecord
+    }
     ```
     Uploads specified directories to remote server (localhost in this example).
     #>

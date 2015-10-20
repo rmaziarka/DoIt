@@ -78,6 +78,9 @@ Configuration PSCISqlServer {
     ```
     Import-Module "$PSScriptRoot\..\PSCI\PSCI.psd1" -Force
 
+    # clear any old Environment definitions - required only for -NoConfigFiles deployments
+    $Global:Environments = @{}
+
     Environment Local { 
         ServerConnection WebServer -Nodes localhost
         ServerRole Database -Steps 'PSCISqlServer' -ServerConnection WebServer
@@ -99,7 +102,11 @@ Configuration PSCISqlServer {
 
     Install-DscResources -ModuleNames 'xSQLServer', 'xDismFeature'
 
-    Start-Deployment -Environment Local -NoConfigFiles
+    try { 
+        Start-Deployment -Environment Local -NoConfigFiles
+    } catch {
+        Write-ErrorRecord
+    }
     ```
     Configures SQL Server according to the settings specified in 'Database' tokens section.
     #>

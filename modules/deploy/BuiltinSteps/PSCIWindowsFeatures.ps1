@@ -40,6 +40,9 @@ configuration PSCIWindowsFeatures {
     ```
     Import-Module "$PSScriptRoot\..\PSCI\PSCI.psd1" -Force
 
+    # clear any old Environment definitions - required only for -NoConfigFiles deployments
+    $Global:Environments = @{}
+
     Environment Local { 
         ServerConnection WebServer -Nodes localhost
         ServerRole Web -Steps 'PSCIWindowsFeatures' -ServerConnection WebServer
@@ -52,7 +55,11 @@ configuration PSCIWindowsFeatures {
 
     Install-DscResources -ModuleNames xDismFeature
 
-    Start-Deployment -Environment Local -NoConfigFiles
+    try { 
+        Start-Deployment -Environment Local -NoConfigFiles
+    } catch {
+        Write-ErrorRecord
+    }
     ```
     Install specified roles using PSCI configuration DSL.
 

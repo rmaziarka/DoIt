@@ -26,13 +26,13 @@ function PSCI-Deploy-MsDeployPackage {
 
     <#
     .SYNOPSIS
-    Uploads specific directories to remote host using administrative shares or WinRM (if share is not accessible).
+    Deploys one or more MsDeploy packages.
 
     .DESCRIPTION
     This function can be invoked both locally (preferred) and remotely (-RunRemotely).
     It uses following tokens:
     - **MsDeployPackages** - hashtable (or array of hashtables) with following keys:
-      - **PackageName** - (required) name of msdeploy package to deploy (the same as in Build-MsDeployPackage)
+      - **PackageName** - (required) name of msdeploy package to deploy (the same as in [[Build-WebPackage]])
       - **MsDeployDestinationString** - (required) MSDeploy destination string (see [[New-MsDeployDestinationString]])
       - **Website** - name of the IIS website 
       - **WebApplication** - name of the IIS application
@@ -66,19 +66,22 @@ function PSCI-Deploy-MsDeployPackage {
         -ProjectPath "$PSScriptRoot\..\PSCI\examples\webAndDatabase\SampleWebApplication\SampleWebApplication.sln" `
         -RestoreNuGet
 
+    # clear any old Environment definitions - required only for -NoConfigFiles deployments
+    $Global:Environments = @{}
+
     Environment Local { 
         ServerConnection WebServer -Nodes localhost
         ServerRole Web -Steps 'PSCI-Deploy-MsDeployPackage' -ServerConnection WebServer
 
         Tokens Web @{
             MsDeployPackages = @{
-                    PackageName = 'MyWebApplication';
-                    PackageType = 'Web';
-                    MsDeployDestinationString = { $Tokens.Remoting.MsDeployDestination }
-                    TokensForConfigFiles = { $Tokens.WebTokens }
-                    FilesToIgnoreTokensExistence = @( 'NLog.config' );
-                    Website = 'PSCI_TestWebsite'
-                    SkipDir = 'App_Data';
+                PackageName = 'MyWebApplication';
+                PackageType = 'Web';
+                MsDeployDestinationString = { $Tokens.Remoting.MsDeployDestination }
+                TokensForConfigFiles = { $Tokens.WebTokens }
+                FilesToIgnoreTokensExistence = @( 'NLog.config' );
+                Website = 'PSCI_TestWebsite'
+                SkipDir = 'App_Data';
             }
         }
 
@@ -97,7 +100,11 @@ function PSCI-Deploy-MsDeployPackage {
         }
     }
 
-    Start-Deployment -Environment Local -NoConfigFiles
+    try { 
+        Start-Deployment -Environment Local -NoConfigFiles
+    } catch {
+        Write-ErrorRecord
+    }
 
     ```
     Builds msdeploy package and deploys it to localhost.

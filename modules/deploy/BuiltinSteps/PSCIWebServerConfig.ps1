@@ -56,6 +56,9 @@ Configuration PSCIWebServerConfig {
     ```
     Import-Module "$PSScriptRoot\..\PSCI\PSCI.psd1" -Force
 
+    # clear any old Environment definitions - required only for -NoConfigFiles deployments
+    $Global:Environments = @{}
+
     Environment Local { 
         ServerConnection WebServer -Nodes localhost
         ServerRole Web -Steps 'PSCIWebServerConfig' -ServerConnection WebServer
@@ -76,7 +79,11 @@ Configuration PSCIWebServerConfig {
 
     Install-DscResources -ModuleNames 'xWebAdministration', 'cIIS', 'cACL'
 
-    Start-Deployment -Environment Local -NoConfigFiles
+    try { 
+        Start-Deployment -Environment Local -NoConfigFiles
+    } catch {
+        Write-ErrorRecord
+    }
     ```
     Configures IIS according to the settings specified in 'Web' tokens section.
 

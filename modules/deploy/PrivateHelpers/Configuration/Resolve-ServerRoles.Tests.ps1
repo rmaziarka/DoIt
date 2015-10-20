@@ -269,17 +269,20 @@ Describe -Tag "PSCI.unit" "ServerRole" {
                 ServerConnection WebServer -Nodes machine1 -RemotingMode WebDeployHandler
                 ServerConnection DbServer -Nodes machine2 -BasedOn WebServer
                 ServerConnection DbServer2 -Nodes $null -BasedOn WebServer
-                ServerConnection SsrsServer -BasedOn WebServer
+                ServerConnection SsrsServer1 -Nodes machinessrs
+                ServerConnection SsrsServer2 -BasedOn SsrsServer1
                 ServerRole Web -Steps @('TestFunc') -ServerConnections WebServer
                 ServerRole Database -Steps @('TestDSC') -ServerConnections DbServer
                 ServerRole Database2 -Steps @('TestDSC') -ServerConnections DbServer2 # this should be ignored because DbServer2 will have no Nodes
-                ServerRole Ssrs -Steps @('TestSsrs') -ServerConnections SsrsServer
+                ServerRole Ssrs -Steps @('TestSsrs') -ServerConnections SsrsServer2
             }
 
             Environment Local {
                 ServerConnection DbServer -Nodes machine3 -BasedOn $null
+                ServerConnection SsrsServer1 -Nodes machinessrs2
                 ServerRole Database2 -Steps @('TestDSC') -ServerConnections (ServerConnection DbServer4 -BasedOn DbServer)
                 ServerRole Database3 -Steps @('TestDSC') -ServerConnections (ServerConnection DbServer5 -BasedOn DbServer2 -Nodes machine4)
+                
             }
 
             It "should properly resolve Default environment" {
@@ -304,9 +307,9 @@ Describe -Tag "PSCI.unit" "ServerRole" {
                 $resolvedRoles.Ssrs | Should Not Be $null
                 $resolvedRoles.Ssrs.Steps.Name | Should Be @('TestSsrs')
                 $resolvedRoles.Ssrs.ServerConnections.Count | Should Be 1
-                $resolvedRoles.Ssrs.ServerConnections.Name | Should Be 'SsrsServer'
-                $resolvedRoles.Ssrs.ServerConnections.Nodes | Should Be 'machine1'
-                $resolvedRoles.Ssrs.ServerConnections.RemotingMode | Should Be 'WebDeployHandler'
+                $resolvedRoles.Ssrs.ServerConnections.Name | Should Be 'SsrsServer2'
+                $resolvedRoles.Ssrs.ServerConnections.Nodes | Should Be 'machinessrs'
+                $resolvedRoles.Ssrs.ServerConnections.RemotingMode | Should Be 'PSRemoting'
             }
 
             It "should properly resolve Local environment" {
@@ -345,9 +348,9 @@ Describe -Tag "PSCI.unit" "ServerRole" {
                 $resolvedRoles.Ssrs | Should Not Be $null
                 $resolvedRoles.Ssrs.Steps.Name | Should Be @('TestSsrs')
                 $resolvedRoles.Ssrs.ServerConnections.Count | Should Be 1
-                $resolvedRoles.Ssrs.ServerConnections.Name | Should Be 'SsrsServer'
-                $resolvedRoles.Ssrs.ServerConnections.Nodes | Should Be 'machine1'
-                $resolvedRoles.Ssrs.ServerConnections.RemotingMode | Should Be 'WebDeployHandler'
+                $resolvedRoles.Ssrs.ServerConnections.Name | Should Be 'SsrsServer2'
+                $resolvedRoles.Ssrs.ServerConnections.Nodes | Should Be 'machinessrs2'
+                $resolvedRoles.Ssrs.ServerConnections.RemotingMode | Should Be 'PSRemoting'
             }
         }
 
