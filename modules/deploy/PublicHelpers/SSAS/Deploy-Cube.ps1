@@ -137,7 +137,7 @@ function Deploy-Cube {
         $result = Receive-Job -Job $Job
         Remove-Job -Job $Job
 
-        if ($result.Count -gt 0) {
+        if ($result) {
             $stringBuilder = New-Object System.Text.StringBuilder
             foreach ($msg in $result) {
                 [void]($stringBuilder.Append(("[ErrorCode]={0}, [Description]={1}" -f $msg.ErrorCode, $msg.Description)))

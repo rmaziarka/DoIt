@@ -49,6 +49,7 @@ function Update-SSASXmlaRoleMembers {
         $RolesMapping
     )
     
+    Write-Log -Info "Updating role members in '$GeneratedXmlaFilePath'"
     $xmla = New-Object System.Xml.XmlDocument
     $xmla.PreserveWhitespace = $true
     $xmla.Load($GeneratedXmlaFilePath)
@@ -59,7 +60,14 @@ function Update-SSASXmlaRoleMembers {
             foreach ($member in $RolesMapping[$role.Name]) {
                 $members += "<Member><Name>$member</Name></Member>"
             }
-            $role.Members.InnerXml = $members
+            if (!$role.Members) {
+                $namespace = $xmla.DocumentElement.NamespaceURI
+                $membersElement = $xmla.CreateElement('Members', $namespace)
+                $role.AppendChild($membersElement)
+                $membersElement.InnerXml = $members
+            } else { 
+                $role.Members.InnerXml = $members
+            }
         }
     }
     $xmla.Save($GeneratedXmlaFilePath)

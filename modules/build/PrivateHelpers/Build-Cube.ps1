@@ -63,7 +63,7 @@ function Build-Cube
 
     $CubeProject = Join-Path -Path $ProjectDirPath -ChildPath "$ProjectName.dwproj"
     $BuildCommand = '"' + $DevEnvPath + '" "' + $CubeProject +  '" /rebuild Development /project ' + $ProjectName
-    Invoke-ExternalCommand -Command $BuildCommand
+    [void](Invoke-ExternalCommand -Command $BuildCommand)
 
     Write-Log -Info "Cube project was build successfully." 
 }
