@@ -134,7 +134,7 @@ function Update-TokensInZipFile {
             $desc = ("zip '{0}', file '{1}'" -f $fileToUpdate, $configFileEntry.FullName)
             $numChanged = Update-TokensInStream -InputStream $configFileStream -InputStreamDescription $desc -OutputStream $configFileStream -Tokens $tokens -ValidateTokensExistence:$ValidateTokensExistence -TokenRegex $TokenRegex
             if ($numChanged -gt 0) {
-                Write-Log -Info "Updated $numChanged tokens in file '$($configFileEntry.FullName)'"
+                Write-Log -Info "Updated $numChanged token(s) in file '$($configFileEntry.FullName)'"
             }
         }
 

@@ -63,7 +63,7 @@ function Sync-MsDeployDirectory {
 
         [Parameter(Mandatory=$false)]
         [switch] 
-        $UseChecksum = $true, 
+        $UseChecksum, 
 
         [Parameter(Mandatory=$false)]
         [string[]] 
@@ -74,7 +74,7 @@ function Sync-MsDeployDirectory {
         "-verb:sync"
     )
 
-    if ($useCheksum) {
+    if ($useChecksum) {
         $params += "-useCheckSum"
     }
 

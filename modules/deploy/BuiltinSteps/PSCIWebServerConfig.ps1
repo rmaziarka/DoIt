@@ -30,23 +30,23 @@ Configuration PSCIWebServerConfig {
 
     .DESCRIPTION
     It uses following tokens (every entry is optional):
-    - **$ApplicationPool** - hashtable (or array of hashtables) describing configuration of Application Pools, each entry should contain following keys:
+    - **ApplicationPool** - hashtable (or array of hashtables) describing configuration of Application Pools, each entry should contain following keys:
       - **Name** (mandatory)
       - **Identity** - one of ApplicationPoolIdentity, LocalSystem, LocalService, NetworkService, SpecificUser (default: ApplicationPoolIdentity)
       - **Credential** - PSCredential, used only if Identity = SpecificUser
 
-    - **$Website** - hashtable (or array of hashtables) describing configuration of Websites, each entry should contain following keys:
+    - **Website** - hashtable (or array of hashtables) describing configuration of Websites, each entry should contain following keys:
       - **Name** (mandatory)
       - **Port** (mandatory)
       - **PhysicalPath** (mandatory)
       - **ApplicationPool** (default: DefaultAppPool) - note if application pool is configured in the same step, also proper ACLs to PhysicalPath will be added.
     
-    - **$VirtualDirectories** - hashtable (or array of hashtables) describing configuration of Virtual Directories created under websites, each entry should contain following keys:
+    - **VirtualDirectories** - hashtable (or array of hashtables) describing configuration of Virtual Directories created under websites, each entry should contain following keys:
       - **Name** (mandatory)
       - **PhysicalPath** (mandatory)
       - **Website** (mandatory)
 
-    - **$WebApplications** - hashtable (or array of hashtables) describing configuration of Web Applications, each entry should contain following keys:
+    - **WebApplications** - hashtable (or array of hashtables) describing configuration of Web Applications, each entry should contain following keys:
       - **Name** (mandatory)
       - **PhysicalPath** (mandatory)
       - **Website** (mandatory)

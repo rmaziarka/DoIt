@@ -151,7 +151,7 @@ function Deploy-MsDeployPackage {
 
         [Parameter(Mandatory=$false)]
         [switch] 
-        $UseChecksum = $true,
+        $UseChecksum,
 
         [Parameter(Mandatory=$false)]
         [string] 
