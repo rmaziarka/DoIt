@@ -96,7 +96,7 @@ Configuration PSCIIISConfig {
 
     }
 
-    Install-DscResources -ModuleNames 'xWebAdministration', 'cIIS', 'cACL'
+    Install-DscResources -ModuleNames 'cIIS', 'cACL'
 
     try { 
         Start-Deployment -Environment Local -NoConfigFiles

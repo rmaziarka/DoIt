@@ -298,6 +298,7 @@ function Set-TargetResource
                 $errorId = "AppPoolCreationFailure"; 
                 $errorCategory = [System.Management.Automation.ErrorCategory]::InvalidOperation;
                 $errorMessage = $($LocalizedData.FeatureCreationFailureError) -f ${Name} ;
+                $errorMessage += $_.Exception.Message
                 $exception = New-Object System.InvalidOperationException $errorMessage ;
                 $errorRecord = New-Object System.Management.Automation.ErrorRecord $exception, $errorId, $errorCategory, $null
 
@@ -626,6 +627,7 @@ function Set-TargetResource
             $errorId = "AppPoolRemovalFailure"; 
             $errorCategory = [System.Management.Automation.ErrorCategory]::InvalidOperation;
             $errorMessage = $($LocalizedData.WebsiteRemovalFailureError) -f ${Name} ;
+            $errorMessage += $_.Exception.Message
             $exception = New-Object System.InvalidOperationException $errorMessage ;
             $errorRecord = New-Object System.Management.Automation.ErrorRecord $exception, $errorId, $errorCategory, $null
 
