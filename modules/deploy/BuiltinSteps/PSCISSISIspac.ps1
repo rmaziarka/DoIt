@@ -41,21 +41,22 @@ function PSCISSISIspac {
       - **EnvironmentsDefinition** - SSIS environments to create, in following format:
 ```
         @{ 'Local' = @{
-            ServerName = '${DatabaseNode}'
-            DatabaseName = '${DatabaseName}'
+                ServerName = '${DatabaseNode}'
+                DatabaseName = '${DatabaseName}'
+           }
+           'Dev' = @{
+                ServerName = 'dev.local'
+                DatabaseName = 'db.local'
+           }
         }
-       'Dev' = @{
-            ServerName = 'dev.local'
-            DatabaseName = 'db.local'
-        }
-    }
 ```
       - **PackagesParameters** - SSIS parameters to override in specific packages in following format (only parameters referencing environment variables are currently supported):
 ```
     @{ 'mypackage.dtsx' = @{
             'mypackage.ServerName' = 'ServerName'
             'mypackage.DatabaseName' = 'DatabaseName'
-    }}
+       }
+    }
 ```
       - **PackagePath** - path to the package containing sql files. If not provided it will be set to $PackagesPath\$PackageName
       

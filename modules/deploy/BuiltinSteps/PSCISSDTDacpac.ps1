@@ -32,7 +32,7 @@ function PSCISSDTDacpac {
     This function can be invoked both locally (preferred - but SQL Server port will need to be open) and remotely (-RunRemotely - without restrictions).
     It uses following tokens:
     - **SsdtPackages** - hashtable (or array of hashtables) with following keys:
-      - **PackageName** - (required) name of SSDT package to deploy (the same as in [[Build-SSDTPackage]])
+      - **PackageName** - (required) name of SSDT package to deploy (the same as in [[Build-SSDTDacpac]])
       - **DacPacFilePath** - paths to .dacpac files to be deployed (relative to PackagePath) - if not specified, it is assumed $PackageName.dacpac by convention
       - **UpgradeExisting** - true to allow modification of existing database schema in order to match schema contained in source package; false to block modification of existing database (if the database does not exist this flag has no effect)
       - **ConnectionString** - connection string that will be used to connect to the destination database (note it will override connection string specified in PublishProfile)
@@ -43,7 +43,7 @@ function PSCISSDTDacpac {
       - **PackagePath** - path to the package containing dacpac file(s) (If not provided, $PackagePath = $PackagesPath\$PackageName, where $PackagesPath is taken from global variable)
       - **SqlServerVersion** - destination SQL Server version (2012 or 2014). It determines DAC dlls that will be loaded. If not specified, the newest version will be used.
       
-    See also [[Build-SSDTDacpac] and [[Deploy-SSDTDacpac]].
+    See also [[Build-SSDTDacpac]] and [[Deploy-SSDTDacpac]].
 
     .PARAMETER Tokens
     (automatic parameter) Tokens hashtable - see description for details.

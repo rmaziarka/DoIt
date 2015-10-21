@@ -39,7 +39,7 @@ function PSCISqlServerDatabase {
       - **DropDatabase** - if true, the database will be dropped first before creating/restoring it
       - **QueryTimeoutInSeconds** - can be used to override default timeout (1 hour)
       
-    See also [[Remove-SqlDatabase], [[New-SqlDatabase]] and [[Restore-SqlDatabase]].
+    See also [[Remove-SqlDatabase]], [[New-SqlDatabase]] and [[Restore-SqlDatabase]].
 
     Note if database exists and:
     - DropDatabase = $false and RestorePath is empty - no action will be done

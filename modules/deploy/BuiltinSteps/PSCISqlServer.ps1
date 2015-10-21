@@ -74,6 +74,7 @@ Configuration PSCISqlServer {
     
     Note it can also install missing features.
     Note currently non-default service accounts are not supported. If you need to use non-default ones please create your own configuration basing on this one.
+
     See also [xSQLServer](https://github.com/PowerShell/xSQLServer).
 
     .EXAMPLE
