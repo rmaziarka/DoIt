@@ -67,8 +67,8 @@ function PSCISSRSReportsPackage {
                 PackageName = 'MyReports'
                 TargetServerURL = { $Tokens.SSRSConfig.TargetServerUrl }
                 TargetFolder = { $Tokens.SSRSConfig.TargetFolder }
-		        TargetDataSourceFolder = { $Tokens.SSRSConfig.TargetDataSourceFolder }
-		        TargetDataSetFolder = { $Tokens.SSRSConfig.TargetDataSetFolder }
+                TargetDataSourceFolder = { $Tokens.SSRSConfig.TargetDataSourceFolder }
+                TargetDataSetFolder = { $Tokens.SSRSConfig.TargetDataSetFolder }
                 #Credential = { $Tokens.Remoting.Credential }
                 DataSources = @{ 'MyDataSource.rds' = { New-SSRSDataSourceDefinition `
                                                         -ConnectString $Tokens.SSRSConfig.MyDataSourceConnectionString `

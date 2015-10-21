@@ -32,25 +32,27 @@ Configuration PSCIWebServerConfig {
     This is DSC configuration, so it should be invoked locally (but can also be invoked with -RunRemotely).
     It uses following tokens (every entry is optional):
     - **ApplicationPool** - hashtable (or array of hashtables) describing configuration of Application Pools, each entry should contain following keys:
-      - **Name** (mandatory)
+      - **Name** (required)
       - **Identity** - one of ApplicationPoolIdentity, LocalSystem, LocalService, NetworkService, SpecificUser (default: ApplicationPoolIdentity)
       - **Credential** - PSCredential, used only if Identity = SpecificUser
 
     - **Website** - hashtable (or array of hashtables) describing configuration of Websites, each entry should contain following keys:
-      - **Name** (mandatory)
-      - **Port** (mandatory)
-      - **PhysicalPath** (mandatory)
+      - **Name** (required)
+      - **Port** (required)
+      - **PhysicalPath** (required)
       - **ApplicationPool** (default: DefaultAppPool) - note if application pool is configured in the same step, also proper ACLs to PhysicalPath will be added.
+      - **AuthenticationMethodsToEnable** - list of authentication methods to enable (e.g. Windows) - note it should not be normally used (you should put it into Web.config of your web application)
+      - **AuthenticationMethodsToDisable** - list of authentication methods to disable (e.g. Anonymous) - note it should not be normally used (you should put it into Web.config of your web application)
     
     - **VirtualDirectories** - hashtable (or array of hashtables) describing configuration of Virtual Directories created under websites, each entry should contain following keys:
-      - **Name** (mandatory)
-      - **PhysicalPath** (mandatory)
-      - **Website** (mandatory)
+      - **Name** (required)
+      - **PhysicalPath** (required)
+      - **Website** (required)
 
     - **WebApplications** - hashtable (or array of hashtables) describing configuration of Web Applications, each entry should contain following keys:
-      - **Name** (mandatory)
-      - **PhysicalPath** (mandatory)
-      - **Website** (mandatory)
+      - **Name** (required)
+      - **PhysicalPath** (required)
+      - **Website** (required)
       - **ApplicationPool** (default: <inherited from site>) - note if application pool is configured in the same step, also proper ACLs to PhysicalPath will be added.
 
     See also [xWebAdministration](https://github.com/PowerShell/xWebAdministration).
@@ -225,6 +227,27 @@ Configuration PSCIWebServerConfig {
                     }
                 }
             }
+
+            if ($site.AuthenticationMethodsToEnable) {
+                Write-Log -Info "Enabling following authentication methods: $($site.AuthenticationMethodsToEnable -join ', ') on site '$($site.Name)'"
+                foreach ($authMethodToEnable in $site.AuthenticationMethodsToEnable) {
+                    cIISWebsiteAuthentication "$($site.Name)_Auth$authMethodToEnable" {
+                        WebsiteName = $site.Name
+                        Ensure = 'Present'
+                        AuthenticationMethod = $authMethodToEnable
+                }
+            }
+
+            if ($site.AuthenticationMethodsToDisable) {
+                Write-Log -Info "Enabling following authentication methods: $($site.AuthenticationMethodsToDisable -join ', ') on site '$($site.Name)'"
+                foreach ($authMethodToDisable in $site.AuthenticationMethodsToDisable) {
+                    cIISWebsiteAuthentication "$($site.Name)_Auth$authMethodToDisable" {
+                        WebsiteName = $site.Name
+                        Ensure = 'Absent'
+                        AuthenticationMethod = $authMethodToDisable
+                }
+            }
+            
         }
 
         foreach ($virtualDir in $virtualDirectory) {

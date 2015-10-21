@@ -32,7 +32,7 @@ configuration PSCIScheduledTask {
     This is DSC configuration, so it should be invoked locally (but can also be invoked with -RunRemotely).
     It uses following tokens:
     - **ScheduledTasks** - hashtable (or array of hashtables) with following common keys:
-      - **TaskName** - (Mandatory) Scheduled Task name
+      - **TaskName** - (required) Scheduled Task name
       - **PowershellCommandToRun** - powershell command to run (puts powershell.exe to Execute and command to Argument)
       - **Execute** - path to executable to run
       - **Argument** - argument for executable to run
