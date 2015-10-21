@@ -30,6 +30,7 @@ function Deploy-SqlServerAgentPackage {
     .DESCRIPTION
     It reads all .sql files from $PackagePath and assumes in each file there is one SQL Server Agent job scripted using 'CREATE TO' SSMS command.
     Each job is deleted if it exists (preserving history in a backup table beforehand) and created by running the scripts (history being restored afterwards).
+    Each job definition can also be tokenized using standard sqlcmd syntax (variables can be set by passing -SqlCmdVariables parameter).
 
     .PARAMETER PackageName
     Name of the package. It determines PackagePath if it's not provided.
