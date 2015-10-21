@@ -235,6 +235,7 @@ Configuration PSCIWebServerConfig {
                         WebsiteName = $site.Name
                         Ensure = 'Present'
                         AuthenticationMethod = $authMethodToEnable
+                    }
                 }
             }
 
@@ -245,6 +246,7 @@ Configuration PSCIWebServerConfig {
                         WebsiteName = $site.Name
                         Ensure = 'Absent'
                         AuthenticationMethod = $authMethodToDisable
+                    }
                 }
             }
             
