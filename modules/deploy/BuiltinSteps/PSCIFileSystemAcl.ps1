@@ -23,11 +23,11 @@ SOFTWARE.
 #>
 
 
-configuration PSCIAcl {
+configuration PSCIFileSystemAcl {
 
     <#
     .SYNOPSIS
-    Ensures specific directories has specific Access Control Lists.
+    Ensures specific directories or files has specific Access Control Lists.
 
     .DESCRIPTION
     This is DSC configuration, so it should be invoked locally (but can also be invoked with -RunRemotely).
@@ -51,7 +51,7 @@ configuration PSCIAcl {
 
     Environment Local { 
         ServerConnection WebServer -Nodes localhost
-        ServerRole Web -Steps 'PSCIAcl' -ServerConnection WebServer
+        ServerRole Web -Steps 'PSCIFileSystemAcl' -ServerConnection WebServer
 
         Tokens Web @{
             DirectoryAcls = @(
@@ -93,7 +93,7 @@ configuration PSCIAcl {
         }
 
         foreach ($directoryAcl in $directoryAcls) {
-            Write-Log -Info ("Preparing PSCIAcl, node ${NodeName}: {0}" -f (Convert-HashtableToString -Hashtable $directoryAcl))
+            Write-Log -Info ("Preparing PSCIFileSystemAcl, node ${NodeName}: {0}" -f (Convert-HashtableToString -Hashtable $directoryAcl))
 
             $path = $directoryAcl.Path
             $pathDscName = $path -replace '\\', '_'
