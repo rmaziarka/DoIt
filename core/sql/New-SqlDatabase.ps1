@@ -33,7 +33,7 @@ function New-SqlDatabase {
     .PARAMETER ConnectionString
     Connection string
 
-    PARAMETER DatabaseName
+    .PARAMETER DatabaseName
     Database name - if not specified, Initial Catalog from ConnectionString will be used.
 
     .PARAMETER Credential
