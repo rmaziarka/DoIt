@@ -29,7 +29,7 @@ function PSCIMsDeployPackage {
     Deploys one or more MsDeploy packages.
 
     .DESCRIPTION
-    This function can be invoked both locally (preferred) and remotely (-RunRemotely).
+    This function can be invoked both locally (preferred - but msdeploy port will need to be open) and remotely (-RunRemotely - without restrictions).
     It uses following tokens:
     - **MsDeployPackages** - hashtable (or array of hashtables) with following keys:
       - **PackageName** - (required) name of msdeploy package to deploy (the same as in [[Build-WebPackage]])
@@ -46,7 +46,7 @@ function PSCIMsDeployPackage {
       - **UseChecksum** - if true, checksum will be used during synchronization (otherwise timestamp)
       - **MsDeployAddParameters** - additional msdeploy command line parameters
 
-    See also [[Deploy-MsDeployPackage]].
+    See also [[Build-WebPackage]], [[Build-MsBuildPackage]] and [[Deploy-MsDeployPackage]].
 
     .PARAMETER NodeName
     (automatic parameter) Name of node where the directories will be uploaded to.

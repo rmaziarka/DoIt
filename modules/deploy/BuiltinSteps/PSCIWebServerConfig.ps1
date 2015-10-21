@@ -29,6 +29,7 @@ Configuration PSCIWebServerConfig {
     Configures IIS - creates application pools / websites / virtual directories / web applications.
 
     .DESCRIPTION
+    This is DSC configuration, so it should be invoked locally (but can also be invoked with -RunRemotely).
     It uses following tokens (every entry is optional):
     - **ApplicationPool** - hashtable (or array of hashtables) describing configuration of Application Pools, each entry should contain following keys:
       - **Name** (mandatory)
@@ -51,6 +52,8 @@ Configuration PSCIWebServerConfig {
       - **PhysicalPath** (mandatory)
       - **Website** (mandatory)
       - **ApplicationPool** (default: <inherited from site>) - note if application pool is configured in the same step, also proper ACLs to PhysicalPath will be added.
+
+    See also [xWebAdministration](https://github.com/PowerShell/xWebAdministration).
 
     .EXAMPLE
     ```

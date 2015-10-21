@@ -29,6 +29,7 @@ Configuration PSCISqlServer {
     Ensures SQL Server is installed with specific options.
 
     .DESCRIPTION
+    This is DSC configuration, so it should be invoked locally (but can also be invoked with -RunRemotely).
     It uses following tokens:
     - **SqlServerSourcePath** - (Required) UNC path to the root of the source files for installation. Note if you want to install from ISO, you need to first mount it.
     - **SetupCredential** - (Required) Credential to be used to perform the installation.
@@ -73,6 +74,7 @@ Configuration PSCISqlServer {
     
     Note it can also install missing features.
     Note currently non-default service accounts are not supported. If you need to use non-default ones please create your own configuration basing on this one.
+    See also [xSQLServer](https://github.com/PowerShell/xSQLServer).
 
     .EXAMPLE
     ```

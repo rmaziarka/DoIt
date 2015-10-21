@@ -29,7 +29,7 @@ function PSCISqlServerUser {
     Ensures specified SQL Server Logins and Users exist.
 
     .DESCRIPTION
-    This function can be invoked both locally (preferred) and remotely (-RunRemotely).
+    This function can be invoked both locally (preferred - but SQL Server port will need to be open) and remotely (-RunRemotely - without restrictions).
     It uses following tokens:
     - **SqlServerUsers** - hashtable (or array of hashtables) with following keys:
       - **ConnectionString** - (required) connection string to the database

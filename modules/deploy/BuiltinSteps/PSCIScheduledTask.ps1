@@ -29,6 +29,7 @@ configuration PSCIScheduledTask {
     Ensures specific Scheduled Tasks are configured in Task Scheduler.
 
     .DESCRIPTION
+    This is DSC configuration, so it should be invoked locally (but can also be invoked with -RunRemotely).
     It uses following tokens:
     - **ScheduledTasks** - hashtable (or array of hashtables) with following common keys:
       - **TaskName** - (Mandatory) Scheduled Task name
@@ -52,7 +53,7 @@ configuration PSCIScheduledTask {
       - **ScheduledTimeSpanHour** - run it every n hours
       - **ScheduledTimeSpanMin** - run it every n minutes
     
-    See [https://github.com/guitarrapc/DSCResources/tree/master/Custom/GraniResource/DSCResources/Grani_ScheduleTask] for description of DSC resource used in this step.
+    See [Grani_ScheduleTask](https://github.com/guitarrapc/DSCResources/tree/master/Custom/GraniResource/DSCResources/Grani_ScheduleTask) for description of DSC resource used in this step.
 
     .EXAMPLE
     ```

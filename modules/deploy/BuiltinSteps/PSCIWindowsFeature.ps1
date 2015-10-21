@@ -23,18 +23,21 @@ SOFTWARE.
 #>
 
 
-configuration PSCIWindowsFeatures {
+configuration PSCIWindowsFeature {
 
     <#
     .SYNOPSIS
     Ensures specific Windows Features are installed.
 
     .DESCRIPTION
+    This is DSC configuration, so it should be invoked locally (but can also be invoked with -RunRemotely).
     It uses following tokens:
     - **IsClientWindows** - if true, features will be installed using dism, otherwise Add-WindowsFeature (the latter is available only on Windows Server)
     - **WindowsFeatures** - array of windows features to add. 
     
     To list available feature names on client you can use `dism /online /Get-Features`. On server `Get-WindowsFeature`.
+
+    See also [WindowsFeature](https://technet.microsoft.com/en-us/library/dn282127.aspx) and [xDismFeature](https://github.com/PowerShell/xDismFeature).
 
     .EXAMPLE
     ```
@@ -45,7 +48,7 @@ configuration PSCIWindowsFeatures {
 
     Environment Local { 
         ServerConnection WebServer -Nodes localhost
-        ServerRole Web -Steps 'PSCIWindowsFeatures' -ServerConnection WebServer
+        ServerRole Web -Steps 'PSCIWindowsFeature' -ServerConnection WebServer
 
         Tokens Web @{
             IsClientWindows = $true
@@ -65,7 +68,7 @@ configuration PSCIWindowsFeatures {
 
     .EXAMPLE
     ```
-    PSCIWindowsFeatures -OutputPath 'test' -ConfigurationData @{ AllNodes = @( @{ 
+    PSCIWindowsFeature -OutputPath 'test' -ConfigurationData @{ AllNodes = @( @{ 
         NodeName = 'localhost'; 
         Tokens = @{ 
             IsClientWindows = $true
@@ -88,7 +91,7 @@ configuration PSCIWindowsFeatures {
             Write-Log -Warn 'No WindowsFeatures defined in tokens.'
             return
         }
-        Write-Log -Info "Preparing PSCIWindowsFeatures, node '$($Node.NodeName)': WindowsFeatures $($windowsFeatures -join ', '); IsClientWindows: $isClientWindows"
+        Write-Log -Info "Preparing PSCIWindowsFeature, node '$($Node.NodeName)': WindowsFeatures $($windowsFeatures -join ', '); IsClientWindows: $isClientWindows"
 
         foreach ($windowsFeature in $windowsFeatures) {
             if ($isClientWindows) {

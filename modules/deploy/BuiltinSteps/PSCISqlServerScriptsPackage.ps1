@@ -29,7 +29,7 @@ function PSCISqlServerScriptsPackage {
     Runs SQL Server scripts from specified SQL Server package.
 
     .DESCRIPTION
-    This function can be invoked both locally (preferred) and remotely (-RunRemotely).
+    This function can be invoked both locally (preferred - but SQL Server port will need to be open) and remotely (-RunRemotely - without restrictions).
     It uses following tokens:
     - **SqlServerScripts** - hashtable (or array of hashtables) with following keys:
       - **ConnectionString** - (required) connection string to the database
@@ -44,7 +44,7 @@ function PSCISqlServerScriptsPackage {
       - **Credential** - credentials to impersonate (only when mode = sqlcmd and using Windows Authentication)
       - **CustomSortOrder** - if array is passed here, custom sort order will be applied using regexes. Files will be sorted according to the place in the array, and then according to the file name. For example, if we have files 'c:\sql\dir1\test1.sql', 'c:\sql\dir1\test2.sql' and we pass CustomSortOrder = 'dir1\\test2.sql' (or just 'test2.sql'), then 'test2.sql' will run first.
       
-    See also [[Deploy-SqlPackage]].
+    See also [[Build-SqlScriptsPackage]] and [[Deploy-SqlPackage]].
 
     .PARAMETER Tokens
     (automatic parameter) Tokens hashtable - see description for details.

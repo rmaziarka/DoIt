@@ -44,7 +44,7 @@ function Deploy-SSISIspac {
     Destination SSIS folder (will be created if doesn't exist).
 
     .PARAMETER FolderDescription
-    Description of SSIS folder (when creating a new Folder). If not specified, 'Project folder' will be used'.
+    Description of SSIS folder (when creating a new Folder). If not specified, 'Project folder' will be used.
 
     .PARAMETER EnvironmentsDefinition
     SSIS environments to create, in following format:

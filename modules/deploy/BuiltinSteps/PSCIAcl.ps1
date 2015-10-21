@@ -30,6 +30,7 @@ configuration PSCIAcl {
     Ensures specific directories has specific Access Control Lists.
 
     .DESCRIPTION
+    This is DSC configuration, so it should be invoked locally (but can also be invoked with -RunRemotely).
     It uses following tokens:
     - **DirectoryAcls** - hashtable (or array of hashtables) with following keys:
       - **Path** - (required) path to directory
