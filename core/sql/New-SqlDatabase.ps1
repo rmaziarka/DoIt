@@ -25,16 +25,16 @@ SOFTWARE.
 function New-SqlDatabase {
     <# 
     .SYNOPSIS 
-    Creates a new SQL Server database.
+    Creates a new SQL Server database with default settings and simple recovery mode.
 
     .DESCRIPTION 
     Creates database using New-SqlDatabase.sql script with default settings.
 
-    .PARAMETER DatabaseName
-    Database name 
-
     .PARAMETER ConnectionString
     Connection string
+
+    PARAMETER DatabaseName
+    Database name - if not specified, Initial Catalog from ConnectionString will be used.
 
     .PARAMETER Credential
     Credential to impersonate in Integrated Security mode.
@@ -51,11 +51,11 @@ function New-SqlDatabase {
     param(
         [Parameter(Mandatory=$true)] 
         [string]
-        $DatabaseName, 
-
-        [Parameter(Mandatory=$true)] 
-        [string]
         $ConnectionString,
+
+        [Parameter(Mandatory=$false)]
+        [string]
+        $DatabaseName, 
 
         [Parameter(Mandatory=$false)]
         [PSCredential] 
@@ -68,6 +68,15 @@ function New-SqlDatabase {
     )
 
     $sqlScript = Join-Path -Path $PSScriptRoot -ChildPath "New-SqlDatabase.sql"
+
+    if (!$DatabaseName) { 
+        $csb = New-Object -TypeName System.Data.SqlClient.SqlConnectionStringBuilder -ArgumentList $ConnectionString
+        $DatabaseName = $csb.InitialCatalog
+    }
+    if (!$DatabaseName) {
+        throw "No database name - please specify -DatabaseName or add Initial Catalog to ConnectionString."
+    }
+
     $parameters = @{ "DatabaseName" = $databaseName }
     [void](Invoke-Sql -ConnectionString $ConnectionString -InputFile $sqlScript -SqlCmdVariables $parameters -Credential $Credential -QueryTimeoutInSeconds $QueryTimeoutInSeconds -DatabaseName '')
 }

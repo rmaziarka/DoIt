@@ -30,14 +30,14 @@ function Restore-SqlDatabase {
     .DESCRIPTION 
     Uses Invoke-RestoreDatabase.sql sql script to restore database. 
 
-    .PARAMETER DatabaseName
-    Database name
-
     .PARAMETER ConnectionString
-    Connection string
+    Connection string.
+
+    .PARAMETER DatabaseName
+    Database name - if not specified, Initial Catalog from ConnectionString will be used.
 
     .PARAMETER Path
-    Backup file path
+    Backup file path.
 
     .PARAMETER Credential
     Credential to impersonate in Integrated Security mode.
@@ -58,11 +58,11 @@ function Restore-SqlDatabase {
     param(
         [Parameter(Mandatory=$true)]
         [string]
-        $DatabaseName, 
-
-        [Parameter(Mandatory=$true)]
-        [string]
         $ConnectionString,
+
+        [Parameter(Mandatory=$false)]
+        [string]
+        $DatabaseName, 
         
         [Parameter(Mandatory=$true)]
         [string]
@@ -78,10 +78,18 @@ function Restore-SqlDatabase {
             
         [Parameter(Mandatory=$false)] 
         [int]
-        $QueryTimeoutInSeconds = 600
+        $QueryTimeoutInSeconds = 3600
     )
 
     try { 
+        if (!$DatabaseName) { 
+            $csb = New-Object -TypeName System.Data.SqlClient.SqlConnectionStringBuilder -ArgumentList $ConnectionString
+            $DatabaseName = $csb.InitialCatalog
+        }
+        if (!$DatabaseName) {
+            throw "No database name - please specify -DatabaseName or add Initial Catalog to ConnectionString."
+        }
+
         if ($RemoteShareCredential) {
             $shareDir = Split-Path -Path $Path -Parent
             #TODO: disconnect-share by prefix

@@ -31,7 +31,7 @@ function Update-SqlUser {
     Connection string.
 
     .PARAMETER DatabaseName
-    Database name.
+    Database name - if not specified, Initial Catalog from ConnectionString will be used.
 
     .PARAMETER Username
     Username.

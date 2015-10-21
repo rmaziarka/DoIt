@@ -31,10 +31,10 @@ function Backup-SqlDatabase {
     Uses Invoke-Sql cmdlet to run Backup-SqlDatabase SQL script to backup database. 
 
     .PARAMETER ConnectionString
-    Connection string
+    Connection string.
   
     .PARAMETER DatabaseName
-    The name of the database to be backed up.
+    The name of the database to be backed up - if not specified, Initial Catalog from ConnectionString will be used.
 
     .PARAMETER BackupPath
     The folder path where backup will be stored.
@@ -55,7 +55,7 @@ function Backup-SqlDatabase {
         [string]
         $ConnectionString,
 
-        [Parameter(Mandatory=$true)]
+        [Parameter(Mandatory=$false)]
         [string]
         $DatabaseName, 
 
@@ -76,6 +76,13 @@ function Backup-SqlDatabase {
     $BackupFullPath = Join-Path -Path $BackupPath -ChildPath $BackupName
 
     $sqlScript = Join-Path -Path $PSScriptRoot -ChildPath "Backup-SqlDatabase.sql"
+    if (!$DatabaseName) { 
+        $csb = New-Object -TypeName System.Data.SqlClient.SqlConnectionStringBuilder -ArgumentList $ConnectionString
+        $DatabaseName = $csb.InitialCatalog
+    }
+    if (!$DatabaseName) {
+        throw "No database name - please specify -DatabaseName or add Initial Catalog to ConnectionString."
+    }
     $parameters = @{ 
         DatabaseName = $DatabaseName
         BackupPath = $BackupFullPath

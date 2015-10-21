@@ -30,11 +30,11 @@ function Remove-SqlDatabase {
     .DESCRIPTION 
     Drop database using DropDatabase.sql script. Do nothing when database does not exists.
 
-    .PARAMETER DatabaseName
-    Database name 
-
     .PARAMETER ConnectionString
-    Connection string
+    Connection string.
+
+    .PARAMETER DatabaseName
+    Database name - if not specified, Initial Catalog from ConnectionString will be used.
 
     .PARAMETER Credential
     Credential to impersonate in Integrated Security mode.
@@ -51,11 +51,11 @@ function Remove-SqlDatabase {
     param(
         [Parameter(Mandatory=$true)] 
         [string]
-        $DatabaseName, 
-
-        [Parameter(Mandatory=$true)] 
-        [string]
         $ConnectionString,
+
+        [Parameter(Mandatory=$false)] 
+        [string]
+        $DatabaseName, 
 
         [Parameter(Mandatory=$false)]
         [PSCredential] 
@@ -68,6 +68,13 @@ function Remove-SqlDatabase {
     )
 
     $sqlScript = Join-Path -Path $PSScriptRoot -ChildPath "Remove-SqlDatabase.sql"
+    if (!$DatabaseName) { 
+        $csb = New-Object -TypeName System.Data.SqlClient.SqlConnectionStringBuilder -ArgumentList $ConnectionString
+        $DatabaseName = $csb.InitialCatalog
+    }
+    if (!$DatabaseName) {
+        throw "No database name - please specify -DatabaseName or add Initial Catalog to ConnectionString."
+    }
     $parameters = @{ "DatabaseName" = $databaseName }
     [void](Invoke-Sql -ConnectionString $ConnectionString -InputFile $sqlScript -SqlCmdVariables $parameters -Credential $Credential -QueryTimeoutInSeconds $QueryTimeoutInSeconds -DatabaseName '')
     
