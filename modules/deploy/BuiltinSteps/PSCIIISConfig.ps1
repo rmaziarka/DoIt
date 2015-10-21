@@ -22,7 +22,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 #>
 
-Configuration PSCIWebServerConfig {
+Configuration PSCIIISConfig {
 
     <#
     .SYNOPSIS
@@ -72,7 +72,7 @@ Configuration PSCIWebServerConfig {
 
     Environment Local { 
         ServerConnection WebServer -Nodes localhost
-        ServerRole Web -Steps 'PSCIWebServerConfig' -ServerConnection WebServer
+        ServerRole Web -Steps 'PSCIIISConfig' -ServerConnection WebServer
 
         Tokens Web @{
             ApplicationPool = @( @{ Name = 'MyWebAppPool'; Identity = 'ApplicationPoolIdentity' },
@@ -119,7 +119,7 @@ Configuration PSCIWebServerConfig {
         $webApplication = Get-TokenValue -Name 'WebApplication'
 
         if (!$applicationPool -and !$website -and !$virtualDirectory -and $webApplication) {
-            Write-Log -Warn "No configuration specified for PSCIWebServerConfig. Please ensure there is at least one token entry with name 'ApplicationPool', 'Website', 'VirtualDirectory' or 'WebApplication'."
+            Write-Log -Warn "No configuration specified for PSCIIISConfig. Please ensure there is at least one token entry with name 'ApplicationPool', 'Website', 'VirtualDirectory' or 'WebApplication'."
             return
         }
 
