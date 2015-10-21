@@ -50,12 +50,12 @@ Configuration PSCIIISConfig {
       - **AuthenticationMethodsToEnable** - list of authentication methods to enable (e.g. Windows) - note it should not be normally used (you should put it into Web.config of your web application)
       - **AuthenticationMethodsToDisable** - list of authentication methods to disable (e.g. Anonymous) - note it should not be normally used (you should put it into Web.config of your web application)
     
-    - **VirtualDirectories** - hashtable (or array of hashtables) describing configuration of Virtual Directories created under websites, each entry should contain following keys:
+    - **VirtualDirectory** - hashtable (or array of hashtables) describing configuration of Virtual Directories created under websites, each entry should contain following keys:
       - **Name** (required)
       - **PhysicalPath** (required)
       - **Website** (required)
 
-    - **WebApplications** - hashtable (or array of hashtables) describing configuration of Web Applications, each entry should contain following keys:
+    - **WebApplication** - hashtable (or array of hashtables) describing configuration of Web Applications, each entry should contain following keys:
       - **Name** (required)
       - **PhysicalPath** (required)
       - **Website** (required)

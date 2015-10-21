@@ -1,5 +1,5 @@
-[ClassVersion("1.0"), FriendlyName("xPfxImport")]
-class MSFT_xPfxImport : OMI_BaseResource
+[ClassVersion("1.0"), FriendlyName("cPfxImport")]
+class OBJ_cPfxImport : OMI_BaseResource
 {
 [Key] string Thumbprint;
 [Key] string Path;

@@ -1,4 +1,4 @@
-OBJ_cWebApplication - copied from xWebApplication (wave 10 - https://gallery.technet.microsoft.com/scriptcenter/DSC-Resource-Kit-All-c449312d),
+OBJ_cWebApplication - copied from xWebApplication (https://github.com/PowerShell/xWebAdministration),
 
 OBJ_cWebsite - copied from xWebsite with following modifications:
     - Each "Get-Website $Name" invocation replaced with "Get-Item "IIS:\sites\$Name" due to known IIS7 Get-Website bug where parameter -Name is ignored, see http://forums.iis.net/p/1167298/1943273.aspxm

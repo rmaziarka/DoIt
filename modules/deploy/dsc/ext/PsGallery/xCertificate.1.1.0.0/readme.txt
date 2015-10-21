@@ -1,1 +1,0 @@
-This version comes from https://github.com/briantist/xCertificate
