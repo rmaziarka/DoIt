@@ -93,7 +93,7 @@ configuration PSCIAcl {
         }
 
         foreach ($directoryAcl in $directoryAcls) {
-            Write-Log -Info ("Starting PSCIAcl, node ${NodeName}: {0}" -f (Convert-HashtableToString -Hashtable $directoryAcl))
+            Write-Log -Info ("Preparing PSCIAcl, node ${NodeName}: {0}" -f (Convert-HashtableToString -Hashtable $directoryAcl))
 
             $path = $directoryAcl.Path
             $pathDscName = $path -replace '\\', '_'

@@ -110,6 +110,8 @@ configuration PSCIScheduledTask {
                 throw "ScheduledTasks token must be a hashtable or array of hashtables."
             }
 
+            Write-Log -Info ("Preparing PSCIScheduledTask, node ${NodeName}: {0}" -f (Convert-HashtableToString -Hashtable $task))
+
             if ($task.PowershellCommandToRun) {
                 $task.Execute = 'powershell.exe'
                 $task.Argument = '-Command "{0}"' -f $task.PowershellCommandToRun

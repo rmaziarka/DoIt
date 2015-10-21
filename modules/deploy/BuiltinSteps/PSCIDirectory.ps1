@@ -37,7 +37,7 @@ function PSCIDirectory {
         - AlwaysCalculateHash - files are uploaded to the servers if their hashes calculated in local path and in remote path are different
         - UseHashFile - files are uploaded to the servers if there doesn't exist a syncHash_<hash> file, where hash is hash calculated in local path. The file is created/replaced automatically.
 
-    See also [[Copy-FilesToRemoteServer]].
+    See also [[Copy-FilesToRemoteServer]] and [[Build-DirPackage]].
 
     .PARAMETER NodeName
     (automatic parameter) Name of node where the directories will be uploaded to.
