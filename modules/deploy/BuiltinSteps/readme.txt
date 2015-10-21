@@ -4,7 +4,7 @@ You can also use them as a reference for your own deployment steps - just copy t
 See any of the builtin step listed below for a complete example.
 
 Note tokens for each builtin step can be passed by convention or explicitly. 
-For example, if token named `SourcePath` is requied by builtin step, you just need to have token `SourcePath` anywhere in your 
+For example, if token named `SourcePath` is required by builtin step, you just need to have token `SourcePath` anywhere in your 
 token structure. If this token is not unique, you can narrow it down by putting it in the category with the same name as current server role, 
 or pass whole category explicitly using `Step`:
 

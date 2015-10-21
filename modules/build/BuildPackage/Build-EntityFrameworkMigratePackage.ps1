@@ -37,7 +37,7 @@ function Build-EntityFrameworkMigratePackage {
     Name of the package. It determines OutputPath if it's not provided.
 
     .PARAMETER MigrationsDir
-    Path to the directory containing the compiled migrations. They must already exist if $ProjectPat is not specified.
+    Path to the directory containing the compiled migrations. They must already exist if $ProjectPath is not specified.
 
     .PARAMETER MigrationsFileWildcard
     Wildcard for migrations assembly. If not specified, *.dll.
