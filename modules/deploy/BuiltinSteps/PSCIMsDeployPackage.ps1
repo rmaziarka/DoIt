@@ -129,7 +129,7 @@ function PSCIMsDeployPackage {
     $msDeployPackages = Get-TokenValue -Name 'MsDeployPackages'
 
     if (!$msDeployPackages) {
-        Write-Log -Info "No MsDeployPackages defined in tokens."
+        Write-Log -Warn "No MsDeployPackages defined in tokens."
         return
     }
 

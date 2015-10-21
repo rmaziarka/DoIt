@@ -98,7 +98,7 @@ function PSCISSDTDacpac {
     $ssdtPackages = Get-TokenValue -Name 'SSDTPackages'
 
     if (!$ssdtPackages) {
-        Write-Log -Info "No SSDTPackages defined in tokens."
+        Write-Log -Warn "No SSDTPackages defined in tokens."
         return
     }
 

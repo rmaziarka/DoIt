@@ -103,7 +103,7 @@ function PSCISqlServerUser {
     $sqlServerUsers = Get-TokenValue -Name 'SqlServerUsers'
 
     if (!$sqlServerUsers) {
-        Write-Log -Info "No SqlServerUsers defined in tokens."
+        Write-Log -Warn "No SqlServerUsers defined in tokens."
         return
     }
 

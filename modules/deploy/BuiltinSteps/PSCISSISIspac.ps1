@@ -113,7 +113,7 @@ function PSCISSISIspac {
     $ssisPackages = Get-TokenValue -Name 'SSISPackages'
 
     if (!$ssisPackages) {
-        Write-Log -Info "No SSISPackages defined in tokens."
+        Write-Log -Warn "No SSISPackages defined in tokens."
         return
     }
 

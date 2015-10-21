@@ -96,7 +96,7 @@ function PSCISqlServerScriptsPackage {
     $sqlServerScriptPackages = Get-TokenValue -Name 'SqlServerScriptPackages'
 
     if (!$sqlServerScriptPackages) {
-        Write-Log -Info "No SqlServerScriptPackages defined in tokens."
+        Write-Log -Warn "No SqlServerScriptPackages defined in tokens."
         return
     }
 
