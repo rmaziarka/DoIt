@@ -38,7 +38,13 @@ Configuration PSCIWebServerConfig {
 
     - **Website** - hashtable (or array of hashtables) describing configuration of Websites, each entry should contain following keys:
       - **Name** (required)
-      - **Port** (required)
+      - **Binding** (required) - hashtable (or array of hashtables) describing binding:
+        - **Port** (required)
+        - **Protocol** - http (default) or https
+        - **HostName**
+        - **IPAddress**
+        - **CertificateStoreName** - for https only - allowed values: My (default), WebHosting
+        - **CertificateThumbprint** - for https only
       - **PhysicalPath** (required)
       - **ApplicationPool** (default: DefaultAppPool) - note if application pool is configured in the same step, also proper ACLs to PhysicalPath will be added.
       - **AuthenticationMethodsToEnable** - list of authentication methods to enable (e.g. Windows) - note it should not be normally used (you should put it into Web.config of your web application)
@@ -73,8 +79,16 @@ Configuration PSCIWebServerConfig {
                                  @{ Name = 'MySecondAppPool'; Identity = 'ApplicationPoolIdentity' }
                                  #@{ Name = 'MyThirdAppPool'; Identity = 'SpecificUser'; Credential = { $Tokens.Credentials.MyCredential } }
                               )
-            Website = @( @{ Name = 'MyWebsite'; Port = 801; PhysicalPath = 'c:\inetpub\wwwroot\MyWebsite'; ApplicationPool = 'MyWebAppPool' },
-                         @{ Name = 'MySecondWebsite'; Port = 802; PhysicalPath = 'c:\inetpub\wwwroot\MySecondWebsite'; ApplicationPool = 'MySecondAppPool' }
+            Website = @( @{ Name = 'MyWebsite'; 
+                            Binding = @{ Port = 801 }; 
+                            PhysicalPath = 'c:\inetpub\wwwroot\MyWebsite'; 
+                            ApplicationPool = 'MyWebAppPool' 
+                         },
+                         @{ Name = 'MySecondWebsite'; 
+                            Binding = @{ Port = 802; IPAddress = '192.168.1.1' }; 
+                            PhysicalPath = 'c:\inetpub\wwwroot\MySecondWebsite'; 
+                            ApplicationPool = 'MySecondAppPool' 
+                         }
                        )
             #VirtualDirectory = @{ Name = 'MyVirtualDir'; PhysicalPath = 'c:\inetpub\wwwroot\MyWebSite\VirtualDir'; Website = 'MyWebsite' }
             WebApplication = @{ Name = 'MyApp'; PhysicalPath = 'c:\inetpub\wwwroot\MyApp'; Website = 'MyWebsite'; ApplicationPool = 'MyWebAppPool' }
@@ -163,8 +177,8 @@ Configuration PSCIWebServerConfig {
             if (!$site.PhysicalPath) {
                 throw "Missing site physical path - token 'Website' (name '$($site.Name)'), key 'PhysicalPath'"
             }
-            if (!$site.Port) {
-                throw "Missing site port - token 'Website' (name '$($site.Name)'), key 'Port'"
+            if (!$site.Binding -or $site.Binding -isnot [hashtable]) {
+                throw "Missing / invalid binding information - token 'Website' (name '$($site.Name)'), key 'Binding'"
             }
             if (!$site.ApplicationPool) {
                 $site.ApplicationPool = 'DefaultAppPool'
@@ -195,8 +209,18 @@ Configuration PSCIWebServerConfig {
                 Name   = $site.Name
                 Ensure = 'Present'
                 State  = 'Started'
-                BindingInfo = OBJ_cWebBindingInformation { 
-                    Port = $site.Port
+                BindingInfo = foreach ($binding in $site.Binding) {
+                    if (!$binding.Port) {
+                        throw "Missing binding port - token 'Website' (name '$($site.Name)'), key 'Binding'"
+                    }
+                    OBJ_cWebBindingInformation {
+                        Port = $binding.Port
+                        Protocol = if ($binding.ContainsKey('Protocol')) { $binding.Protocol } else { 'http' }
+                        HostName = $binding.HostName
+                        IPAddress = $binding.IPAddress
+                        CertificateStoreName = if ($binding.ContainsKey('CertificateStoreName')) { $binding.CertificateStoreName } else { 'My' }
+                        CertificateThumbprint = $binding.CertificateThumbprint
+                    }
                 }
                 PhysicalPath = $site.PhysicalPath
                 ApplicationPool = $site.ApplicationPool
