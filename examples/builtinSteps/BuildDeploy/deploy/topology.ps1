@@ -37,15 +37,15 @@ For ServerRole examples, see .EXAMPLES section in PSCI\deployment\Configuration\
 Environment Default {
     ServerConnection TestNode -Nodes localhost
 
-    # There are two steps - 'PSCIWindowsFeatures' which is defined implictly and uses $Tokens.WindowsFeaturesTestRole by convention and
-    # 'Custom-WindowsFeaturesStep' which invokes custom scriptblock that invokes PSCIWindowsFeatures with $Tokens.CustomWindowsFeatures
+    # There are two steps - 'PSCIWindowsFeature' which is defined implictly and uses $Tokens.WindowsFeaturesTestRole by convention and
+    # 'Custom-WindowsFeaturesStep' which invokes custom scriptblock that invokes PSCIWindowsFeature with $Tokens.CustomWindowsFeatures
     ServerRole WindowsFeaturesTestRole -Steps @('PSCIWindowsFeature', 'Custom-WindowsFeaturesStep') -ServerConnections TestNode
 
     ServerRole UploadDirectoriesTestRole -Steps @('PSCIDirectory') -ServerConnection TestNode
 
     ServerRole IISConfigTestRole -Steps 'PSCIWebServerConfig' -ServerConnections TestNode
 
-    Step Custom-WindowsFeaturesStep -ScriptBlock { PSCIWindowsFeatures -Tokens $Tokens.CustomWindowsFeatures }
+    Step Custom-WindowsFeaturesStep -ScriptBlock { PSCIWindowsFeature -Tokens $Tokens.CustomWindowsFeatures }
 }
 
 Environment Test {
