@@ -309,6 +309,12 @@ Configuration PSCIIISConfig {
             }
 
             $depends = @()
+            $matchingWebsite = $website.Where({ $_.Name -ieq $virtualDir.Website })
+
+            if ($matchingWebsite) {
+                $depends += "[cWebsite]Website_$($matchingWebsite.Name)"
+            }
+
             if (!$directoriesToCreate.ContainsKey($virtualDir.PhysicalPath)) { 
                 File "VirtualDirectoryDir_$($virtualDir.Name)" {
                     DestinationPath = $virtualDir.PhysicalPath
@@ -347,6 +353,15 @@ Configuration PSCIIISConfig {
             Write-Log -Info "Preparing web application '$($webApp.Name)', PhysicalPath '$($webApp.PhysicalPath)', Website '$($webApp.Website)', ApplicationPool '$($webApp.ApplicationPool)'"
 
             $depends = @()
+
+            if ($matchingWebsite) {
+                $depends += "[cWebsite]Website_$($matchingWebsite.Name)"
+            }
+
+            if ($matchingWebAppPool) {
+                $depends += "[cAppPool]AppPool_$($matchingWebAppPool.Name)"
+            }
+
             if (!$directoriesToCreate.ContainsKey($webApp.PhysicalPath)) { 
                 File "WebApplicationDir_$($webApp.Name)" {
                     DestinationPath = $webApp.PhysicalPath
@@ -356,11 +371,6 @@ Configuration PSCIIISConfig {
                 $directoriesToCreate[$webApp.PhysicalPath] = $true
                 $depends += "[File]WebApplicationDir_$($webApp.Name)"
             }
-
-            if ($matchingWebsite) {
-                $depends += "[cWebsite]Website_$($site.Name)"
-            }
-
             cWebApplication "WebApplication_$($webApp.Name)" {
                 Name = $webApp.Name
                 Ensure = 'Present'
