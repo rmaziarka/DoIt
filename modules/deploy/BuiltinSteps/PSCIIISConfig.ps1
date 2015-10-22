@@ -115,10 +115,10 @@ Configuration PSCIIISConfig {
 
     Node $AllNodes.NodeName {
 
-        $applicationPool = Get-TokenValue -Name 'ApplicationPool'
-        $website = Get-TokenValue -Name 'Website'
-        $virtualDirectory = Get-TokenValue -Name 'VirtualDirectory'
-        $webApplication = Get-TokenValue -Name 'WebApplication'
+        $applicationPool = @((Get-TokenValue -Name 'ApplicationPool') | Where-Object { $_ })
+        $website = @((Get-TokenValue -Name 'Website') | Where-Object { $_ })
+        $virtualDirectory = @((Get-TokenValue -Name 'VirtualDirectory') | Where-Object { $_ })
+        $webApplication = @((Get-TokenValue -Name 'WebApplication') | Where-Object { $_ })
 
         if (!$applicationPool -and !$website -and !$virtualDirectory -and $webApplication) {
             Write-Log -Warn "No configuration specified for PSCIIISConfig. Please ensure there is at least one token entry with name 'ApplicationPool', 'Website', 'VirtualDirectory' or 'WebApplication'."

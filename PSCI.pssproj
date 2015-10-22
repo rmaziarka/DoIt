@@ -3,7 +3,7 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <SchemaVersion>2.0</SchemaVersion>
-    <ProjectGuid>6CAFC0C6-A428-4d30-A9F9-700E829FEA51</ProjectGuid>
+    <ProjectGuid>{ca67ef38-212e-4e5b-91db-6441e61a549f}</ProjectGuid>
     <OutputType>Exe</OutputType>
     <RootNamespace>PSCI</RootNamespace>
     <AssemblyName>PSCI</AssemblyName>
@@ -915,11 +915,25 @@
     <Compile Include="modules\build\readme.txt" />
     <Compile Include="modules\build\TestsRunners\Invoke-RunJasmineTests.ps1" />
     <Compile Include="modules\build\TestsRunners\Invoke-RunNUnitTests.ps1" />
-    <Compile Include="modules\deploy\BuiltinSteps\PSCI-Upload-Directories.ps1" />
+    <Compile Include="modules\deploy\BuiltinSteps\PSCIDirectory.ps1" />
+    <Compile Include="modules\deploy\BuiltinSteps\PSCIEntityFrameworkMigratePackage.ps1" />
+    <Compile Include="modules\deploy\BuiltinSteps\PSCIEventLogSource.ps1" />
+    <Compile Include="modules\deploy\BuiltinSteps\PSCIFileSystemAcl.ps1" />
+    <Compile Include="modules\deploy\BuiltinSteps\PSCIFileSystemItem.ps1" />
+    <Compile Include="modules\deploy\BuiltinSteps\PSCIIISConfig.ps1" />
+    <Compile Include="modules\deploy\BuiltinSteps\PSCIMsDeployPackage.ps1" />
     <Compile Include="modules\deploy\BuiltinSteps\PSCIScheduledTask.ps1" />
     <Compile Include="modules\deploy\BuiltinSteps\PSCISqlServer.ps1" />
-    <Compile Include="modules\deploy\BuiltinSteps\PSCIWebServerConfig.ps1" />
-    <Compile Include="modules\deploy\BuiltinSteps\PSCIWindowsFeatures.ps1" />
+    <Compile Include="modules\deploy\BuiltinSteps\PSCISqlServerAgentJobRun.ps1" />
+    <Compile Include="modules\deploy\BuiltinSteps\PSCISqlServerAgentPackage.ps1" />
+    <Compile Include="modules\deploy\BuiltinSteps\PSCISqlServerDatabase.ps1" />
+    <Compile Include="modules\deploy\BuiltinSteps\PSCISqlServerScriptsPackage.ps1" />
+    <Compile Include="modules\deploy\BuiltinSteps\PSCISqlServerUser.ps1" />
+    <Compile Include="modules\deploy\BuiltinSteps\PSCISSDTDacpac.ps1" />
+    <Compile Include="modules\deploy\BuiltinSteps\PSCISSISIspac.ps1" />
+    <Compile Include="modules\deploy\BuiltinSteps\PSCISSRSReportsPackage.ps1" />
+    <Compile Include="modules\deploy\BuiltinSteps\PSCIWindowsFeature.ps1" />
+    <Compile Include="modules\deploy\BuiltinSteps\readme.txt" />
     <Compile Include="modules\deploy\DeployPackage\Deploy-DBDeploySqlScriptsPackage.ps1" />
     <Compile Include="modules\deploy\DeployPackage\Deploy-DBDeploySqlScriptsPackage.Tests.ps1" />
     <Compile Include="modules\deploy\DeployPackage\Deploy-EntityFrameworkMigratePackage.ps1" />
@@ -2112,6 +2126,7 @@
     <Compile Include="modules\deploy\PrivateHelpers\Configuration\Resolve-BasedOnHierarchy.ps1" />
     <Compile Include="modules\deploy\PrivateHelpers\Configuration\Resolve-DeploymentPlanSteps.ps1" />
     <Compile Include="modules\deploy\PrivateHelpers\Configuration\Resolve-DeploymentPlanSteps.Tests.ps1" />
+    <Compile Include="modules\deploy\PrivateHelpers\Configuration\Resolve-OverrideTokenValue.ps1" />
     <Compile Include="modules\deploy\PrivateHelpers\Configuration\Resolve-ScriptedToken.ps1" />
     <Compile Include="modules\deploy\PrivateHelpers\Configuration\Resolve-ServerConnectionConfigElement.ps1" />
     <Compile Include="modules\deploy\PrivateHelpers\Configuration\Resolve-ServerConnections.ps1" />
@@ -2124,6 +2139,8 @@
     <Compile Include="modules\deploy\PrivateHelpers\Configuration\Resolve-Token.ps1" />
     <Compile Include="modules\deploy\PrivateHelpers\Configuration\Resolve-Tokens.ps1" />
     <Compile Include="modules\deploy\PrivateHelpers\Configuration\Resolve-Tokens.Tests.ps1" />
+    <Compile Include="modules\deploy\PrivateHelpers\Configuration\Resolve-TokensForEnvironment.ps1" />
+    <Compile Include="modules\deploy\PrivateHelpers\Configuration\Resolve-TokensSinglePass.ps1" />
     <Compile Include="modules\deploy\PrivateHelpers\Configuration\Start-DeploymentByMSDeploy.ps1" />
     <Compile Include="modules\deploy\PrivateHelpers\Configuration\Start-DeploymentByPSRemoting.ps1" />
     <Compile Include="modules\deploy\PrivateHelpers\Configuration\Start-DeploymentPlan.ps1" />

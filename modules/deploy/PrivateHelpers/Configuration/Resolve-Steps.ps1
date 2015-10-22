@@ -110,7 +110,7 @@ function Resolve-Steps {
         } elseif ($DeployType -eq 'Deploy') {
             $Steps = $StepsDeploy
         } else {
-            $Steps = $StepsProvision + $StepsDeploy
+            $Steps = @($StepsProvision) + @($StepsDeploy)
         }
         $Steps = $Steps | Where-Object { $_ }
         # remove steps not matching StepsFilter

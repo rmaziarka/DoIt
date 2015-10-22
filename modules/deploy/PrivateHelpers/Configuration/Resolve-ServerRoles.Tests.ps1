@@ -653,47 +653,104 @@ Describe -Tag "PSCI.unit" "ServerRole" {
 
             Environment Default {
                 ServerConnection WebServer -Nodes 'node1', 'node2'
-                ServerRole Web -StepsProvision @('Prov1', 'Prov2') -StepsDeploy 'Deploy1' -ServerConnections WebServer
+                ServerRole One -StepsProvision 'Prov1' -StepsDeploy 'Deploy1' -ServerConnections WebServer
+                ServerRole Two -StepsProvision @('Prov1','Prov2') -StepsDeploy @('Deploy1','Deploy2') -ServerConnections WebServer
 
                 Step TestFunc -ScriptBlock $null
-            }           
+            }
+            
+            Environment Specific {
+                ServerRole One -StepsProvision $null -StepsDeploy @('Deploy1','Deploy2')
+                ServerRole Two -StepsProvision 'Prov1'
+
+                Step TestFunc -ScriptBlock $null
+            }
 
             It "should return all steps by default" {
                 $resolvedRoles = Resolve-ServerRoles -AllEnvironments $Global:Environments -Environment Default -ResolvedTokens @{}
 
-                $resolvedRoles.Count | Should Be 1
+                $resolvedRoles.Count | Should Be 2
             
-                $resolvedRoles.Web | Should Not Be $null
-                $resolvedRoles.Web.Steps.Name | Should Be @('Prov1', 'Prov2', 'Deploy1')
-                $resolvedRoles.Web.ServerConnections.Count | Should Be 1
-                $resolvedRoles.Web.ServerConnections.Name | Should Be 'WebServer'
-                $resolvedRoles.Web.ServerConnections.Nodes | Should Be @('node1','node2')
+                $resolvedRoles.One | Should Not Be $null
+                $resolvedRoles.One.Steps.Name | Should Be @('Prov1', 'Deploy1')
+                $resolvedRoles.One.ServerConnections.Count | Should Be 1
+                $resolvedRoles.One.ServerConnections.Name | Should Be 'WebServer'
+                $resolvedRoles.One.ServerConnections.Nodes | Should Be @('node1','node2')
+                $resolvedRoles.Two | Should Not Be $null
+                $resolvedRoles.Two.Steps.Name | Should Be @('Prov1', 'Prov2', 'Deploy1', 'Deploy2')
+                $resolvedRoles.Two.ServerConnections.Count | Should Be 1
+                $resolvedRoles.Two.ServerConnections.Name | Should Be 'WebServer'
+                $resolvedRoles.Two.ServerConnections.Nodes | Should Be @('node1','node2')
             }
 
             It "should return only provision steps when DeployType = Provision" {
                 $resolvedRoles = Resolve-ServerRoles -AllEnvironments $Global:Environments -Environment Default -ResolvedTokens @{} `
                     -Deploytype Provision
 
-                $resolvedRoles.Count | Should Be 1
+                $resolvedRoles.Count | Should Be 2
             
-                $resolvedRoles.Web | Should Not Be $null
-                $resolvedRoles.Web.Steps.Name | Should Be @('Prov1', 'Prov2')
-                $resolvedRoles.Web.ServerConnections.Count | Should Be 1
-                $resolvedRoles.Web.ServerConnections.Name | Should Be 'WebServer'
-                $resolvedRoles.Web.ServerConnections.Nodes | Should Be @('node1','node2')
+                $resolvedRoles.One | Should Not Be $null
+                $resolvedRoles.One.Steps.Name | Should Be @('Prov1')
+                $resolvedRoles.One.ServerConnections.Count | Should Be 1
+                $resolvedRoles.One.ServerConnections.Name | Should Be 'WebServer'
+                $resolvedRoles.One.ServerConnections.Nodes | Should Be @('node1','node2')
+                $resolvedRoles.Two | Should Not Be $null
+                $resolvedRoles.Two.Steps.Name | Should Be @('Prov1', 'Prov2')
+                $resolvedRoles.Two.ServerConnections.Count | Should Be 1
+                $resolvedRoles.Two.ServerConnections.Name | Should Be 'WebServer'
+                $resolvedRoles.Two.ServerConnections.Nodes | Should Be @('node1','node2')
             }
 
             It "should return only deploy steps when DeployType = Deploy" {
                 $resolvedRoles = Resolve-ServerRoles -AllEnvironments $Global:Environments -Environment Default -ResolvedTokens @{} `
                     -Deploytype Deploy
 
+                $resolvedRoles.Count | Should Be 2
+            
+                $resolvedRoles.One | Should Not Be $null
+                $resolvedRoles.One.Steps.Name | Should Be @('Deploy1')
+                $resolvedRoles.One.ServerConnections.Count | Should Be 1
+                $resolvedRoles.One.ServerConnections.Name | Should Be 'WebServer'
+                $resolvedRoles.One.ServerConnections.Nodes | Should Be @('node1','node2')
+                $resolvedRoles.Two | Should Not Be $null
+                $resolvedRoles.Two.Steps.Name | Should Be @('Deploy1','Deploy2')
+                $resolvedRoles.Two.ServerConnections.Count | Should Be 1
+                $resolvedRoles.Two.ServerConnections.Name | Should Be 'WebServer'
+                $resolvedRoles.Two.ServerConnections.Nodes | Should Be @('node1','node2')
+            }
+
+            It "should return all steps for overridden roles" {
+                $resolvedRoles = Resolve-ServerRoles -AllEnvironments $Global:Environments -Environment Specific -ResolvedTokens @{}
+
+                $resolvedRoles.Count | Should Be 2
+            
+                $resolvedRoles.One | Should Not Be $null
+                $resolvedRoles.One.Steps.Name | Should Be @('Deploy1', 'Deploy2')
+                $resolvedRoles.Two | Should Not Be $null
+                $resolvedRoles.Two.Steps.Name | Should Be @('Prov1', 'Deploy1', 'Deploy2')
+            }
+
+            It "should return only provision steps when DeployType = Provision for overridden roles" {
+                $resolvedRoles = Resolve-ServerRoles -AllEnvironments $Global:Environments -Environment Specific -ResolvedTokens @{} `
+                    -Deploytype Provision
+
                 $resolvedRoles.Count | Should Be 1
             
-                $resolvedRoles.Web | Should Not Be $null
-                $resolvedRoles.Web.Steps.Name | Should Be @('Deploy1')
-                $resolvedRoles.Web.ServerConnections.Count | Should Be 1
-                $resolvedRoles.Web.ServerConnections.Name | Should Be 'WebServer'
-                $resolvedRoles.Web.ServerConnections.Nodes | Should Be @('node1','node2')
+                $resolvedRoles.One | Should Be $null
+                $resolvedRoles.Two | Should Not Be $null
+                $resolvedRoles.Two.Steps.Name | Should Be @('Prov1')
+            }
+
+            It "should return only deploy steps when DeployType = Deploy for overridden roles" {
+                $resolvedRoles = Resolve-ServerRoles -AllEnvironments $Global:Environments -Environment Specific -ResolvedTokens @{} `
+                    -Deploytype Deploy
+
+                $resolvedRoles.Count | Should Be 2
+            
+                $resolvedRoles.One | Should Not Be $null
+                $resolvedRoles.One.Steps.Name | Should Be @('Deploy1', 'Deploy2')
+                $resolvedRoles.Two | Should Not Be $null
+                $resolvedRoles.Two.Steps.Name | Should Be @('Deploy1','Deploy2')
             }
         }
 
