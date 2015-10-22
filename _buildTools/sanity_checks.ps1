@@ -50,7 +50,7 @@ SOFTWARE.
 
 $customSources = Get-ChildItem -Path "$PSScriptRoot\.." -File -Filter "*.ps*1" -Recurse | 
                  Select-Object -ExpandProperty FullName |
-                 Where-Object { $_ -inotmatch '(_buildTools\\Pester|_buildtools\\ScriptCop|externalLibs\\|dsc\\ext|cIIS\\|PSHOrg|examples\\|OBJ_cServiceResource)' }
+                 Where-Object { $_ -inotmatch '(_buildTools\\Pester|_buildtools\\ScriptCop|externalLibs\\|dsc\\ext|cIIS\\|PSHOrg|examples\\|OBJ_cServiceResource|cCertificate\\)' }
 
 
 $licenseNotMatching = New-Object -TypeName System.Collections.ArrayList
