@@ -818,7 +818,7 @@ function Update-WebsiteBinding
                 } else {
                     $dnsName = $HostName
                 }
-                $cert = Get-ChildItem -Path 'cert:\LocalMachine\My' | Where-Object { $_.Subject -imatch "CN=$dnsName" } | Select-Object -First 1
+                $cert = Get-ChildItem -Path 'cert:\LocalMachine\My' | Where-Object { $_.Subject -imatch "CN=$dnsName" } | Sort-Object NotBefore -Descending | Select-Object -First 1
                 
                 if ($cert) { 
                     Write-Verbose("Using existing certificate: $($cert.Name)")

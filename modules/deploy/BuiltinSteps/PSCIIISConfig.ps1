@@ -45,6 +45,7 @@ Configuration PSCIIISConfig {
         - **IPAddress**
         - **CertificateStoreName** - for https only - allowed values: My (default), WebHosting
         - **CertificateThumbprint** - for https only
+        - **CertificateSelfSigned** - if $true, self-signed certificate will be created (if doesn't exist) and bound to https (this should NOT be used together with CertificateStoreName or CertificateThumbprint)
       - **PhysicalPath** (required)
       - **ApplicationPool** (default: DefaultAppPool) - note if application pool is configured in the same step, also proper ACLs to PhysicalPath will be added.
       - **AuthenticationMethodsToEnable** - list of authentication methods to enable (e.g. Windows) - note it should not be normally used (you should put it into Web.config of your web application)
@@ -85,7 +86,7 @@ Configuration PSCIIISConfig {
                             ApplicationPool = 'MyWebAppPool' 
                          },
                          @{ Name = 'MySecondWebsite'; 
-                            Binding = @{ Port = 802; IPAddress = '192.168.1.1' }; 
+                            Binding = @{ Port = 802; Protocol = 'https'; CertificateSelfSigned = $true }; 
                             PhysicalPath = 'c:\inetpub\wwwroot\MySecondWebsite'; 
                             ApplicationPool = 'MySecondAppPool' 
                          }
@@ -110,6 +111,7 @@ Configuration PSCIIISConfig {
 
     Import-DSCResource -Module cIIS
     Import-DSCResource -Module cACL
+    Import-DSCResource -Module cCertificate
 
     Node $AllNodes.NodeName {
 
@@ -186,9 +188,7 @@ Configuration PSCIIISConfig {
 
             $matchingWebAppPool = $applicationPool.Where({ $_.Name -ieq $site.ApplicationPool })
 
-            # TODO: SSL
-
-            Write-Log -Info "Preparing website '$($site.Name)', Port '$($site.Port), PhysicalPath '$($site.PhysicalPath)', ApplicationPool '$($site.ApplicationPool)'"
+            Write-Log -Info "Preparing website '$($site.Name)', Port '$($site.Port)', PhysicalPath '$($site.PhysicalPath)', ApplicationPool '$($site.ApplicationPool)'"
 
             $depends = @()
             if (!$directoriesToCreate.ContainsKey($site.PhysicalPath)) { 
@@ -205,6 +205,14 @@ Configuration PSCIIISConfig {
                 $depends += "[cAppPool]AppPool_$($matchingWebAppPool.Name)"
             }
 
+            if (@($site.Binding).Where({ $_.CertificateSelfSigned -eq $true})) {
+                Write-Log -Info 'Preparing self-signed certificate'
+                cSelfSignedCert MyCert {
+                    StoreLocation = 'My'
+                    AutoRenew = $true
+                }
+            }
+
             cWebsite "Website_$($site.Name)" { 
                 Name   = $site.Name
                 Ensure = 'Present'
@@ -213,13 +221,26 @@ Configuration PSCIIISConfig {
                     if (!$binding.Port) {
                         throw "Missing binding port - token 'Website' (name '$($site.Name)'), key 'Binding'"
                     }
-                    OBJ_cWebBindingInformation {
-                        Port = $binding.Port
-                        Protocol = if ($binding.ContainsKey('Protocol')) { $binding.Protocol } else { 'http' }
-                        HostName = $binding.HostName
-                        IPAddress = $binding.IPAddress
-                        CertificateStoreName = if ($binding.ContainsKey('CertificateStoreName')) { $binding.CertificateStoreName } else { 'My' }
-                        CertificateThumbprint = $binding.CertificateThumbprint
+                    if ($binding.Protocol -ne 'https' -and ($binding.CertificateSelfSigned -or $binding.CertificateStoreName -or $binding.CertificateThumbprint)) {
+                        throw "Binding protocol is not https but has certificate settings, please set protocol to https or remove certificate settings - token 'Website' (name '$($site.Name)'), key 'Binding'"
+                    }
+                    if ($binding.CertificateSelfSigned) { 
+                        OBJ_cWebBindingInformation {
+                            Port = $binding.Port
+                            Protocol = if ($binding.ContainsKey('Protocol')) { $binding.Protocol } else { 'http' }
+                            HostName = $binding.HostName
+                            IPAddress = $binding.IPAddress
+                            SelfSignedCertificate = $true
+                        }
+                    } else {
+                        OBJ_cWebBindingInformation {
+                            Port = $binding.Port
+                            Protocol = if ($binding.ContainsKey('Protocol')) { $binding.Protocol } else { 'http' }
+                            HostName = $binding.HostName
+                            IPAddress = $binding.IPAddress
+                            CertificateStoreName = if ($binding.ContainsKey('CertificateStoreName')) { $binding.CertificateStoreName } else { 'My' }
+                            CertificateThumbprint = $binding.CertificateThumbprint
+                        }
                     }
                 }
                 PhysicalPath = $site.PhysicalPath
