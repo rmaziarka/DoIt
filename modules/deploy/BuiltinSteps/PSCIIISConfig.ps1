@@ -30,7 +30,7 @@ Configuration PSCIIISConfig {
 
     .DESCRIPTION
     This is DSC configuration, so it should be invoked locally (but can also be invoked with -RunRemotely).
-    It uses following tokens (every entry is optional):
+    It uses token `IISConfig`, which should be a hashtable (or array of hashtables) with following keys:
     - **ApplicationPool** - hashtable (or array of hashtables) describing configuration of Application Pools, each entry should contain following keys:
       - **Name** (required)
       - **Identity** - one of ApplicationPoolIdentity, LocalSystem, LocalService, NetworkService, SpecificUser (default: ApplicationPoolIdentity)
@@ -76,28 +76,30 @@ Configuration PSCIIISConfig {
         ServerRole Web -Steps 'PSCIIISConfig' -ServerConnection WebServer
 
         Tokens Web @{
-            ApplicationPool = @( @{ Name = 'MyWebAppPool'; Identity = 'ApplicationPoolIdentity' },
-                                 @{ Name = 'MySecondAppPool'; Identity = 'ApplicationPoolIdentity' }
-                                 #@{ Name = 'MyThirdAppPool'; Identity = 'SpecificUser'; Credential = { $Tokens.Credentials.MyCredential } }
-                              )
-            Website = @( @{ Name = 'MyWebsite'; 
-                            Binding = @{ Port = 801 }; 
-                            PhysicalPath = 'c:\inetpub\wwwroot\MyWebsite'; 
-                            ApplicationPool = 'MyWebAppPool' 
-                         },
-                         @{ Name = 'MySecondWebsite'; 
-                            Binding = @{ Port = 802; Protocol = 'https'; CertificateSelfSigned = $true }; 
-                            PhysicalPath = 'c:\inetpub\wwwroot\MySecondWebsite'; 
-                            ApplicationPool = 'MySecondAppPool' 
-                         }
-                       )
-            #VirtualDirectory = @{ Name = 'MyVirtualDir'; PhysicalPath = 'c:\inetpub\wwwroot\MyWebSite\VirtualDir'; Website = 'MyWebsite' }
-            WebApplication = @{ Name = 'MyApp'; PhysicalPath = 'c:\inetpub\wwwroot\MyApp'; Website = 'MyWebsite'; ApplicationPool = 'MyWebAppPool' }
+            IISConfig = @{
+                ApplicationPool = @( @{ Name = 'MyWebAppPool'; Identity = 'ApplicationPoolIdentity' },
+                                     @{ Name = 'MySecondAppPool'; Identity = 'ApplicationPoolIdentity' }
+                                     #@{ Name = 'MyThirdAppPool'; Identity = 'SpecificUser'; Credential = { $Tokens.Credentials.MyCredential } }
+                                  )
+                Website = @( @{ Name = 'MyWebsite'; 
+                                Binding = @{ Port = 801 }; 
+                                PhysicalPath = 'c:\inetpub\wwwroot\MyWebsite'; 
+                                ApplicationPool = 'MyWebAppPool' 
+                             },
+                             @{ Name = 'MySecondWebsite'; 
+                                Binding = @{ Port = 802; Protocol = 'https'; CertificateSelfSigned = $true }; 
+                                PhysicalPath = 'c:\inetpub\wwwroot\MySecondWebsite'; 
+                                ApplicationPool = 'MySecondAppPool' 
+                             }
+                           )
+                #VirtualDirectory = @{ Name = 'MyVirtualDir'; PhysicalPath = 'c:\inetpub\wwwroot\MyWebSite\VirtualDir'; Website = 'MyWebsite' }
+                WebApplication = @{ Name = 'MyApp'; PhysicalPath = 'c:\inetpub\wwwroot\MyApp'; Website = 'MyWebsite'; ApplicationPool = 'MyWebAppPool' }
+            }
         }
 
     }
 
-    Install-DscResources -ModuleNames 'cIIS', 'cACL'
+    Install-DscResources -ModuleNames 'cIIS', 'cACL', 'cCertificate'
 
     try { 
         Start-Deployment -Environment Local -NoConfigFiles
@@ -115,292 +117,296 @@ Configuration PSCIIISConfig {
 
     Node $AllNodes.NodeName {
 
-        $applicationPool = @((Get-TokenValue -Name 'ApplicationPool') | Where-Object { $_ })
-        $website = @((Get-TokenValue -Name 'Website') | Where-Object { $_ })
-        $virtualDirectory = @((Get-TokenValue -Name 'VirtualDirectory') | Where-Object { $_ })
-        $webApplication = @((Get-TokenValue -Name 'WebApplication') | Where-Object { $_ })
+        $iisConfigs = Get-TokenValue -Name 'IISConfig'
 
-        if (!$applicationPool -and !$website -and !$virtualDirectory -and $webApplication) {
-            Write-Log -Warn "No configuration specified for PSCIIISConfig. Please ensure there is at least one token entry with name 'ApplicationPool', 'Website', 'VirtualDirectory' or 'WebApplication'."
+        if (!$iisConfigs) {
+            Write-Log -Warn "No IISConfig defined in tokens."
             return
         }
 
-        # we need to ensure each File resource has unique key
-        $directoriesToCreate = @{}
+        foreach ($iisConfig in $iisConfigs) { 
+            $applicationPool = @($iisConfig.ApplicationPool | Where-Object { $_ })
+            $website = @($iisConfig.Website | Where-Object { $_ })
+            $virtualDirectory = @($iisConfig.VirtualDirectory | Where-Object { $_ })
+            $webApplication = @($iisConfig.WebApplication | Where-Object { $_ })
 
-        foreach ($webAppPool in $applicationPool) {
-            if (!$webAppPool.Name) {
-                throw "Missing web application pool name - token 'ApplicationPool', key 'Name'"
-            }
-            $username = ''
-            $password = ''
-            if (!$webAppPool.Identity) {
-                $webAppPool.Identity = 'ApplicationPoolIdentity'
-            } elseif ($webAppPool.Identity -eq 'SpecificUser') {
-                if (!$webAppPool.Credential) {
-                    throw "Identity is set to 'SpecificUser' but Credential has not been provided - token 'ApplicationPool' (name '$($webAppPool.Name)'), key 'Credential'."
+            # we need to ensure each File resource has unique key
+            $directoriesToCreate = @{}
+
+            foreach ($webAppPool in $applicationPool) {
+                if (!$webAppPool.Name) {
+                    throw "Missing web application pool name - token 'ApplicationPool', key 'Name'"
                 }
-                if ($webAppPool.Credential -isnot [PSCredential]) {
-                    throw "Invalid credential type: $($webAppPool.Credential.GetType().ToString()) - token 'ApplicationPool' (name '$($webAppPool.Name)'), key 'Credential'."
-                }
-                $username = $webAppPool.Credential.UserName
-                $password = $webAppPool.Credential.GetNetworkCredential().Password
-            }
-
-            Write-Log -Info "Preparing application pool '$($webAppPool.Name)', IdentityType '$($webAppPool.Identity)', Username '$username'"
-
-            if ($username) { 
-                cAppPool "AppPool_$($webappPool.Name)" { 
-                    Name = $webAppPool.Name
-                    Ensure = 'Present'
-                    ManagedRuntimeVersion = 'v4.0'
-                    ManagedPipelineMode = 'Integrated'
-                    StartMode = 'AlwaysRunning'
-                    IdentityType = $webAppPool.Identity
-                    UserName = $username
-                    Password = $password
-                }
-            } else {
-                cAppPool "AppPool_$($webappPool.Name)" { 
-                    Name = $webAppPool.Name
-                    Ensure = 'Present'
-                    ManagedRuntimeVersion = 'v4.0'
-                    ManagedPipelineMode = 'Integrated'
-                    StartMode = 'AlwaysRunning'
-                    IdentityType = $webAppPool.Identity
-                }
-            }
-        }
-
-        foreach ($site in $Website) {
-            if (!$site.Name) {
-                throw "Missing site name - token 'Website', key 'Name'"
-            }
-            if (!$site.PhysicalPath) {
-                throw "Missing site physical path - token 'Website' (name '$($site.Name)'), key 'PhysicalPath'"
-            }
-            if (!$site.Binding -or $site.Binding -isnot [hashtable]) {
-                throw "Missing / invalid binding information - token 'Website' (name '$($site.Name)'), key 'Binding'"
-            }
-            if (!$site.ApplicationPool) {
-                $site.ApplicationPool = 'DefaultAppPool'
-            }
-
-            $matchingWebAppPool = $applicationPool.Where({ $_.Name -ieq $site.ApplicationPool })
-
-            Write-Log -Info "Preparing website '$($site.Name)', Port '$($site.Port)', PhysicalPath '$($site.PhysicalPath)', ApplicationPool '$($site.ApplicationPool)'"
-
-            $depends = @()
-            if (!$directoriesToCreate.ContainsKey($site.PhysicalPath)) { 
-                File "WebsiteDir_$($site.Name)" {
-                    DestinationPath = $site.PhysicalPath
-                    Ensure = 'Present'
-                    Type = 'Directory'
-                }
-                $directoriesToCreate[$site.PhysicalPath] = $true
-                $depends += "[File]WebsiteDir_$($site.Name)"
-            }
-
-            if ($matchingWebAppPool) {
-                $depends += "[cAppPool]AppPool_$($matchingWebAppPool.Name)"
-            }
-
-            if (@($site.Binding).Where({ $_.CertificateSelfSigned -eq $true})) {
-                Write-Log -Info 'Preparing self-signed certificate'
-                cSelfSignedCert MyCert {
-                    StoreLocation = 'My'
-                    AutoRenew = $true
-                }
-            }
-
-            cWebsite "Website_$($site.Name)" { 
-                Name   = $site.Name
-                Ensure = 'Present'
-                State  = 'Started'
-                BindingInfo = foreach ($binding in $site.Binding) {
-                    if (!$binding.Port) {
-                        throw "Missing binding port - token 'Website' (name '$($site.Name)'), key 'Binding'"
+                $username = ''
+                $password = ''
+                if (!$webAppPool.Identity) {
+                    $webAppPool.Identity = 'ApplicationPoolIdentity'
+                } elseif ($webAppPool.Identity -eq 'SpecificUser') {
+                    if (!$webAppPool.Credential) {
+                        throw "Identity is set to 'SpecificUser' but Credential has not been provided - token 'ApplicationPool' (name '$($webAppPool.Name)'), key 'Credential'."
                     }
-                    if ($binding.Protocol -ne 'https' -and ($binding.CertificateSelfSigned -or $binding.CertificateStoreName -or $binding.CertificateThumbprint)) {
-                        throw "Binding protocol is not https but has certificate settings, please set protocol to https or remove certificate settings - token 'Website' (name '$($site.Name)'), key 'Binding'"
+                    if ($webAppPool.Credential -isnot [PSCredential]) {
+                        throw "Invalid credential type: $($webAppPool.Credential.GetType().ToString()) - token 'ApplicationPool' (name '$($webAppPool.Name)'), key 'Credential'."
                     }
-                    if ($binding.CertificateSelfSigned) { 
-                        OBJ_cWebBindingInformation {
-                            Port = $binding.Port
-                            Protocol = if ($binding.ContainsKey('Protocol')) { $binding.Protocol } else { 'http' }
-                            HostName = $binding.HostName
-                            IPAddress = $binding.IPAddress
-                            SelfSignedCertificate = $true
-                        }
-                    } else {
-                        OBJ_cWebBindingInformation {
-                            Port = $binding.Port
-                            Protocol = if ($binding.ContainsKey('Protocol')) { $binding.Protocol } else { 'http' }
-                            HostName = $binding.HostName
-                            IPAddress = $binding.IPAddress
-                            CertificateStoreName = if ($binding.ContainsKey('CertificateStoreName')) { $binding.CertificateStoreName } else { 'My' }
-                            CertificateThumbprint = $binding.CertificateThumbprint
-                        }
-                    }
+                    $username = $webAppPool.Credential.UserName
+                    $password = $webAppPool.Credential.GetNetworkCredential().Password
                 }
-                PhysicalPath = $site.PhysicalPath
-                ApplicationPool = $site.ApplicationPool
-                DependsOn = $depends
-            }
 
-            if (!$matchingWebAppPool) { 
-                Write-Log -Warn "Web application pool ('$($site.ApplicationPool)') is not configured (website '$($site.Name)') - ACL will not be set. Please add this pool to 'ApplicationPool' token."
-            } else {
-                $aclUserName = $null
-                if ($matchingWebAppPool.Identity -eq 'ApplicationPoolIdentity') {
-                    $aclUserName = "IIS AppPool\$($matchingWebAppPool.Name)"
-                } elseif ($matchingWebAppPool.Identity -eq 'SpecificUser') {
-                    $aclUserName = $matchingWebAppPool.Credential.UserName
-                } 
+                Write-Log -Info "Preparing application pool '$($webAppPool.Name)', IdentityType '$($webAppPool.Identity)', Username '$username'"
 
-                if ($aclUserName) { 
-                    Write-Log -Info "Preparing ACL - R for directory '$($site.PhysicalPath)' to user '$aclUserName'"
-
-                    cSimpleAcl "WebsiteAcl_$($site.Name)" {
-                        Path = $site.PhysicalPath
+                if ($username) { 
+                    cAppPool "AppPool_$($webappPool.Name)" { 
+                        Name = $webAppPool.Name
                         Ensure = 'Present'
-                        Username = $aclUserName
-                        Permission = 'Read'
-                        Type = 'Allow'
-                        Inherit = $true
-                        DependsOn = "[cWebsite]Website_$($site.Name)"
+                        ManagedRuntimeVersion = 'v4.0'
+                        ManagedPipelineMode = 'Integrated'
+                        StartMode = 'AlwaysRunning'
+                        IdentityType = $webAppPool.Identity
+                        UserName = $username
+                        Password = $password
                     }
-                }
-            }
-
-            if ($site.AuthenticationMethodsToEnable) {
-                Write-Log -Info "Enabling following authentication methods: $($site.AuthenticationMethodsToEnable -join ', ') on site '$($site.Name)'"
-                foreach ($authMethodToEnable in $site.AuthenticationMethodsToEnable) {
-                    cIISWebsiteAuthentication "$($site.Name)_Auth$authMethodToEnable" {
-                        WebsiteName = $site.Name
+                } else {
+                    cAppPool "AppPool_$($webappPool.Name)" { 
+                        Name = $webAppPool.Name
                         Ensure = 'Present'
-                        AuthenticationMethod = $authMethodToEnable
+                        ManagedRuntimeVersion = 'v4.0'
+                        ManagedPipelineMode = 'Integrated'
+                        StartMode = 'AlwaysRunning'
+                        IdentityType = $webAppPool.Identity
                     }
                 }
             }
 
-            if ($site.AuthenticationMethodsToDisable) {
-                Write-Log -Info "Enabling following authentication methods: $($site.AuthenticationMethodsToDisable -join ', ') on site '$($site.Name)'"
-                foreach ($authMethodToDisable in $site.AuthenticationMethodsToDisable) {
-                    cIISWebsiteAuthentication "$($site.Name)_Auth$authMethodToDisable" {
-                        WebsiteName = $site.Name
-                        Ensure = 'Absent'
-                        AuthenticationMethod = $authMethodToDisable
+            foreach ($site in $Website) {
+                if (!$site.Name) {
+                    throw "Missing site name - token 'Website', key 'Name'"
+                }
+                if (!$site.PhysicalPath) {
+                    throw "Missing site physical path - token 'Website' (name '$($site.Name)'), key 'PhysicalPath'"
+                }
+                if (!$site.Binding -or $site.Binding -isnot [hashtable]) {
+                    throw "Missing / invalid binding information - token 'Website' (name '$($site.Name)'), key 'Binding'"
+                }
+                if (!$site.ApplicationPool) {
+                    $site.ApplicationPool = 'DefaultAppPool'
+                }
+
+                $matchingWebAppPool = $applicationPool.Where({ $_.Name -ieq $site.ApplicationPool })
+
+                Write-Log -Info "Preparing website '$($site.Name)', Port '$($site.Port)', PhysicalPath '$($site.PhysicalPath)', ApplicationPool '$($site.ApplicationPool)'"
+
+                $depends = @()
+                if (!$directoriesToCreate.ContainsKey($site.PhysicalPath)) { 
+                    File "WebsiteDir_$($site.Name)" {
+                        DestinationPath = $site.PhysicalPath
+                        Ensure = 'Present'
+                        Type = 'Directory'
+                    }
+                    $directoriesToCreate[$site.PhysicalPath] = $true
+                    $depends += "[File]WebsiteDir_$($site.Name)"
+                }
+
+                if ($matchingWebAppPool) {
+                    $depends += "[cAppPool]AppPool_$($matchingWebAppPool.Name)"
+                }
+
+                if (@($site.Binding).Where({ $_.CertificateSelfSigned -eq $true})) {
+                    Write-Log -Info 'Preparing self-signed certificate'
+                    cSelfSignedCert MyCert {
+                        StoreLocation = 'My'
+                        AutoRenew = $true
                     }
                 }
-            }
+
+                cWebsite "Website_$($site.Name)" { 
+                    Name   = $site.Name
+                    Ensure = 'Present'
+                    State  = 'Started'
+                    BindingInfo = foreach ($binding in $site.Binding) {
+                        if (!$binding.Port) {
+                            throw "Missing binding port - token 'Website' (name '$($site.Name)'), key 'Binding'"
+                        }
+                        if ($binding.Protocol -ne 'https' -and ($binding.CertificateSelfSigned -or $binding.CertificateStoreName -or $binding.CertificateThumbprint)) {
+                            throw "Binding protocol is not https but has certificate settings, please set protocol to https or remove certificate settings - token 'Website' (name '$($site.Name)'), key 'Binding'"
+                        }
+                        if ($binding.CertificateSelfSigned) { 
+                            OBJ_cWebBindingInformation {
+                                Port = $binding.Port
+                                Protocol = if ($binding.ContainsKey('Protocol')) { $binding.Protocol } else { 'http' }
+                                HostName = $binding.HostName
+                                IPAddress = $binding.IPAddress
+                                SelfSignedCertificate = $true
+                            }
+                        } else {
+                            OBJ_cWebBindingInformation {
+                                Port = $binding.Port
+                                Protocol = if ($binding.ContainsKey('Protocol')) { $binding.Protocol } else { 'http' }
+                                HostName = $binding.HostName
+                                IPAddress = $binding.IPAddress
+                                CertificateStoreName = if ($binding.ContainsKey('CertificateStoreName')) { $binding.CertificateStoreName } else { 'My' }
+                                CertificateThumbprint = $binding.CertificateThumbprint
+                            }
+                        }
+                    }
+                    PhysicalPath = $site.PhysicalPath
+                    ApplicationPool = $site.ApplicationPool
+                    DependsOn = $depends
+                }
+
+                if (!$matchingWebAppPool) { 
+                    Write-Log -Warn "Web application pool ('$($site.ApplicationPool)') is not configured (website '$($site.Name)') - ACL will not be set. Please add this pool to 'ApplicationPool' token."
+                } else {
+                    $aclUserName = $null
+                    if ($matchingWebAppPool.Identity -eq 'ApplicationPoolIdentity') {
+                        $aclUserName = "IIS AppPool\$($matchingWebAppPool.Name)"
+                    } elseif ($matchingWebAppPool.Identity -eq 'SpecificUser') {
+                        $aclUserName = $matchingWebAppPool.Credential.UserName
+                    } 
+
+                    if ($aclUserName) { 
+                        Write-Log -Info "Preparing ACL - R for directory '$($site.PhysicalPath)' to user '$aclUserName'"
+
+                        cSimpleAcl "WebsiteAcl_$($site.Name)" {
+                            Path = $site.PhysicalPath
+                            Ensure = 'Present'
+                            Username = $aclUserName
+                            Permission = 'Read'
+                            Type = 'Allow'
+                            Inherit = $true
+                            DependsOn = "[cWebsite]Website_$($site.Name)"
+                        }
+                    }
+                }
+
+                if ($site.AuthenticationMethodsToEnable) {
+                    Write-Log -Info "Enabling following authentication methods: $($site.AuthenticationMethodsToEnable -join ', ') on site '$($site.Name)'"
+                    foreach ($authMethodToEnable in $site.AuthenticationMethodsToEnable) {
+                        cIISWebsiteAuthentication "$($site.Name)_Auth$authMethodToEnable" {
+                            WebsiteName = $site.Name
+                            Ensure = 'Present'
+                            AuthenticationMethod = $authMethodToEnable
+                        }
+                    }
+                }
+
+                if ($site.AuthenticationMethodsToDisable) {
+                    Write-Log -Info "Enabling following authentication methods: $($site.AuthenticationMethodsToDisable -join ', ') on site '$($site.Name)'"
+                    foreach ($authMethodToDisable in $site.AuthenticationMethodsToDisable) {
+                        cIISWebsiteAuthentication "$($site.Name)_Auth$authMethodToDisable" {
+                            WebsiteName = $site.Name
+                            Ensure = 'Absent'
+                            AuthenticationMethod = $authMethodToDisable
+                        }
+                    }
+                }
             
-        }
-
-        foreach ($virtualDir in $virtualDirectory) {
-            if (!$virtualDir.Name) {
-                throw "Missing virtual directory name - token 'VirtualDirectory', key 'Name'"
-            }
-            if (!$virtualDir.PhysicalPath) {
-                throw "Missing virtual directory physical path - token 'VirtualDirectory' (name '$($virtualDir.Name)'), key 'PhysicalPath'"
-            }
-            if (!$virtualDir.Website) {
-                throw "Missing virtual directory website - token 'VirtualDirectory' (name '$($virtualDir.Name)'), key 'Website'"
             }
 
-            $depends = @()
-            $matchingWebsite = $website.Where({ $_.Name -ieq $virtualDir.Website })
-
-            if ($matchingWebsite) {
-                $depends += "[cWebsite]Website_$($matchingWebsite.Name)"
-            }
-
-            if (!$directoriesToCreate.ContainsKey($virtualDir.PhysicalPath)) { 
-                File "VirtualDirectoryDir_$($virtualDir.Name)" {
-                    DestinationPath = $virtualDir.PhysicalPath
-                    Ensure = 'Present'
-                    Type = 'Directory'
+            foreach ($virtualDir in $virtualDirectory) {
+                if (!$virtualDir.Name) {
+                    throw "Missing virtual directory name - token 'VirtualDirectory', key 'Name'"
                 }
-                $directoriesToCreate[$virtualDir.PhysicalPath] = $true
-                $depends += "[File]VirtualDirectoryDir_$($virtualDir.Name)"
-            }
+                if (!$virtualDir.PhysicalPath) {
+                    throw "Missing virtual directory physical path - token 'VirtualDirectory' (name '$($virtualDir.Name)'), key 'PhysicalPath'"
+                }
+                if (!$virtualDir.Website) {
+                    throw "Missing virtual directory website - token 'VirtualDirectory' (name '$($virtualDir.Name)'), key 'Website'"
+                }
 
-            cWebVirtualDirectory "VirtualDirectory_$($virtualDir.Name)" {
-                Name = $virtualDir.Name
-                Website = $virtualDir.Website
-                WebApplication = ''
-                PhysicalPath = $virtualDir.PhysicalPath
-                Ensure = 'Present'
-                DependsOn = $depends
-            }
+                $depends = @()
+                $matchingWebsite = $website.Where({ $_.Name -ieq $virtualDir.Website })
 
-        }
+                if ($matchingWebsite) {
+                    $depends += "[cWebsite]Website_$($matchingWebsite.Name)"
+                }
+
+                if (!$directoriesToCreate.ContainsKey($virtualDir.PhysicalPath)) { 
+                    File "VirtualDirectoryDir_$($virtualDir.Name)" {
+                        DestinationPath = $virtualDir.PhysicalPath
+                        Ensure = 'Present'
+                        Type = 'Directory'
+                    }
+                    $directoriesToCreate[$virtualDir.PhysicalPath] = $true
+                    $depends += "[File]VirtualDirectoryDir_$($virtualDir.Name)"
+                }
+
+                cWebVirtualDirectory "VirtualDirectory_$($virtualDir.Name)" {
+                    Name = $virtualDir.Name
+                    Website = $virtualDir.Website
+                    WebApplication = ''
+                    PhysicalPath = $virtualDir.PhysicalPath
+                    Ensure = 'Present'
+                    DependsOn = $depends
+                }
+
+            }
       
-        foreach ($webApp in $webApplication) {
-            if (!$webApp.Name) {
-                throw "Missing web application name - token 'WebApplication', key 'Name'"
-            }
-            if (!$webApp.PhysicalPath) {
-                throw "Missing web application physical path - token 'WebApplication' (name '$($webApp.Name)'), key 'PhysicalPath'"
-            }
-            if (!$webApp.Website) {
-                throw "Missing web application website - token 'WebApplication' (name '$($webApp.Name)'), key 'Website'"
-            }
-            
-            $matchingWebsite = $website.Where({ $_.Name -ieq $webApp.Website })
-            $matchingWebAppPool = $applicationPool.Where({ $_.Name -ieq $webApp.ApplicationPool })
-
-            Write-Log -Info "Preparing web application '$($webApp.Name)', PhysicalPath '$($webApp.PhysicalPath)', Website '$($webApp.Website)', ApplicationPool '$($webApp.ApplicationPool)'"
-
-            $depends = @()
-
-            if ($matchingWebsite) {
-                $depends += "[cWebsite]Website_$($matchingWebsite.Name)"
-            }
-
-            if ($matchingWebAppPool) {
-                $depends += "[cAppPool]AppPool_$($matchingWebAppPool.Name)"
-            }
-
-            if (!$directoriesToCreate.ContainsKey($webApp.PhysicalPath)) { 
-                File "WebApplicationDir_$($webApp.Name)" {
-                    DestinationPath = $webApp.PhysicalPath
-                    Ensure = 'Present'
-                    Type = 'Directory'
+            foreach ($webApp in $webApplication) {
+                if (!$webApp.Name) {
+                    throw "Missing web application name - token 'WebApplication', key 'Name'"
                 }
-                $directoriesToCreate[$webApp.PhysicalPath] = $true
-                $depends += "[File]WebApplicationDir_$($webApp.Name)"
-            }
-            cWebApplication "WebApplication_$($webApp.Name)" {
-                Name = $webApp.Name
-                Ensure = 'Present'
-                Website = $webApp.Website
-                WebAppPool = $webApp.ApplicationPool
-                PhysicalPath = $webApp.PhysicalPath
-                DependsOn = $depends
-            }
+                if (!$webApp.PhysicalPath) {
+                    throw "Missing web application physical path - token 'WebApplication' (name '$($webApp.Name)'), key 'PhysicalPath'"
+                }
+                if (!$webApp.Website) {
+                    throw "Missing web application website - token 'WebApplication' (name '$($webApp.Name)'), key 'Website'"
+                }
+            
+                $matchingWebsite = $website.Where({ $_.Name -ieq $webApp.Website })
+                $matchingWebAppPool = $applicationPool.Where({ $_.Name -ieq $webApp.ApplicationPool })
 
-            if (!$matchingWebAppPool) { 
-                Write-Log -Warn "Web application pool ('$($webAppPool.ApplicationPool)') is not configured (web application '$($webApp.Name)') - ACL will not be set. Please add this pool to 'ApplicationPool' token."
-            } else {
-                $aclUserName = $null
-                if ($matchingWebAppPool.Identity -eq 'ApplicationPoolIdentity') {
-                    $aclUserName = "IIS AppPool\$($matchingWebAppPool.Name)"
-                } elseif ($matchingWebAppPool.Identity -eq 'SpecificUser') {
-                    $aclUserName = $matchingWebAppPool.Credential.UserName
-                } 
+                Write-Log -Info "Preparing web application '$($webApp.Name)', PhysicalPath '$($webApp.PhysicalPath)', Website '$($webApp.Website)', ApplicationPool '$($webApp.ApplicationPool)'"
 
-                if ($aclUserName) { 
-                    Write-Log -Info "Preparing ACL - R for directory '$($site.PhysicalPath)' to user '$aclUserName'"
+                $depends = @()
 
-                    cSimpleAcl "WebApplicationAcl_$($webApp.Name)" {
-                        Path = $webApp.PhysicalPath
+                if ($matchingWebsite) {
+                    $depends += "[cWebsite]Website_$($matchingWebsite.Name)"
+                }
+
+                if ($matchingWebAppPool) {
+                    $depends += "[cAppPool]AppPool_$($matchingWebAppPool.Name)"
+                }
+
+                if (!$directoriesToCreate.ContainsKey($webApp.PhysicalPath)) { 
+                    File "WebApplicationDir_$($webApp.Name)" {
+                        DestinationPath = $webApp.PhysicalPath
                         Ensure = 'Present'
-                        Username = $aclUserName
-                        Permission = 'Read'
-                        Type = 'Allow'
-                        Inherit = $true
-                        DependsOn = "[cWebApplication]WebApplication_$($webApp.Name)"
+                        Type = 'Directory'
+                    }
+                    $directoriesToCreate[$webApp.PhysicalPath] = $true
+                    $depends += "[File]WebApplicationDir_$($webApp.Name)"
+                }
+                cWebApplication "WebApplication_$($webApp.Name)" {
+                    Name = $webApp.Name
+                    Ensure = 'Present'
+                    Website = $webApp.Website
+                    WebAppPool = $webApp.ApplicationPool
+                    PhysicalPath = $webApp.PhysicalPath
+                    DependsOn = $depends
+                }
+
+                if (!$matchingWebAppPool) { 
+                    Write-Log -Warn "Web application pool ('$($webAppPool.ApplicationPool)') is not configured (web application '$($webApp.Name)') - ACL will not be set. Please add this pool to 'ApplicationPool' token."
+                } else {
+                    $aclUserName = $null
+                    if ($matchingWebAppPool.Identity -eq 'ApplicationPoolIdentity') {
+                        $aclUserName = "IIS AppPool\$($matchingWebAppPool.Name)"
+                    } elseif ($matchingWebAppPool.Identity -eq 'SpecificUser') {
+                        $aclUserName = $matchingWebAppPool.Credential.UserName
+                    } 
+
+                    if ($aclUserName) { 
+                        Write-Log -Info "Preparing ACL - R for directory '$($site.PhysicalPath)' to user '$aclUserName'"
+
+                        cSimpleAcl "WebApplicationAcl_$($webApp.Name)" {
+                            Path = $webApp.PhysicalPath
+                            Ensure = 'Present'
+                            Username = $aclUserName
+                            Permission = 'Read'
+                            Type = 'Allow'
+                            Inherit = $true
+                            DependsOn = "[cWebApplication]WebApplication_$($webApp.Name)"
+                        }
                     }
                 }
             }

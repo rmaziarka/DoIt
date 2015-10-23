@@ -32,7 +32,7 @@ configuration PSCIFileSystemAcl {
     .DESCRIPTION
     This is DSC configuration, so it should be invoked locally (but can also be invoked with -RunRemotely).
     It uses following tokens:
-    - **DirectoryAcls** - hashtable (or array of hashtables) with following keys:
+    - **FileSystemAcls** - hashtable (or array of hashtables) with following keys:
       - **Path** - (required) path to directory
       - **Account** - (required) account name that will be allowed/denied to the directory
       - **Access** - Allow (default) or Deny
@@ -54,7 +54,7 @@ configuration PSCIFileSystemAcl {
         ServerRole Web -Steps 'PSCIFileSystemAcl' -ServerConnection WebServer
 
         Tokens Web @{
-            DirectoryAcls = @(
+            FileSystemAcls = @(
                 @{
                     Path = 'c:\test1'
                     Account = 'DOMAIN\myuser'
@@ -85,26 +85,26 @@ configuration PSCIFileSystemAcl {
     Import-DSCResource -Module GraniResource
 
     Node $AllNodes.NodeName {        
-        $directoryAcls = Get-TokenValue -Name 'DirectoryAcls'
+        $FileSystemAcls = Get-TokenValue -Name 'FileSystemAcls'
 
-        if (!$directoryAcls) {
-            Write-Log -Warn 'No DirectoryAcls defined in tokens.'
+        if (!$FileSystemAcls) {
+            Write-Log -Warn 'No FileSystemAcls defined in tokens.'
             return
         }
 
-        foreach ($directoryAcl in $directoryAcls) {
-            Write-Log -Info ("Preparing PSCIFileSystemAcl, node ${NodeName}: {0}" -f (Convert-HashtableToString -Hashtable $directoryAcl))
+        foreach ($fileSystemAcl in $FileSystemAcls) {
+            Write-Log -Info ("Preparing PSCIFileSystemAcl, node ${NodeName}: {0}" -f (Convert-HashtableToString -Hashtable $fileSystemAcl))
 
-            $path = $directoryAcl.Path
+            $path = $fileSystemAcl.Path
             $pathDscName = $path -replace '\\', '_'
 
             cACL "acl_$path" {
                 Path = $path
-                Account = $directoryAcl.Account
-                Access = if ($directoryAcl.ContainsKey('Allow')) { $directoryAcl.Access } else { 'Allow' }
-                Rights = if ($directoryAcl.ContainsKey('Rights')) { $directoryAcl.Rights } else { 'ReadAndExecute' }
-                Inherit = if ($directoryAcl.ContainsKey('Inherit')) { $directoryAcl.Inherit } else { $true }
-                Strict = if ($directoryAcl.ContainsKey('Strict')) { $directoryAcl.Strict } else { $false }
+                Account = $fileSystemAcl.Account
+                Access = if ($fileSystemAcl.ContainsKey('Allow')) { $fileSystemAcl.Access } else { 'Allow' }
+                Rights = if ($fileSystemAcl.ContainsKey('Rights')) { $fileSystemAcl.Rights } else { 'ReadAndExecute' }
+                Inherit = if ($fileSystemAcl.ContainsKey('Inherit')) { $fileSystemAcl.Inherit } else { $true }
+                Strict = if ($fileSystemAcl.ContainsKey('Strict')) { $fileSystemAcl.Strict } else { $false }
             }
         }
     }

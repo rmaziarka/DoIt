@@ -49,13 +49,15 @@ Environment Default {
     }
 
     Tokens IISConfigTestRole @{
-        ApplicationPool = @( @{ Name = 'PSCITestAppPool1'; Identity = 'ApplicationPoolIdentity' },
-                             @{ Name = 'PSCITestAppPool2'; Identity = 'ApplicationPoolIdentity' }
-                          )
-        Website = @( @{ Name = 'PSCITestWebsite1'; Binding = @{ Port = 801 }; PhysicalPath = 'c:\inetpub\wwwroot\PSCITestWebsite'; ApplicationPool = 'PSCITestAppPool1' },
-                     @{ Name = 'PSCITestWebsite2'; Binding = @{ Port = 802 }; PhysicalPath = 'c:\inetpub\wwwroot\PSCITestWebsite2'; ApplicationPool = 'PSCITestAppPool2' }
-                       )
-        WebApplication = @{ Name = 'PSCITestWebApp'; PhysicalPath = 'c:\inetpub\wwwroot\PSCIMyApp'; Website = 'PSCITestWebsite1'; ApplicationPool = 'PSCITestAppPool1' }
+        IISConfig = @{
+            ApplicationPool = @( @{ Name = 'PSCITestAppPool1'; Identity = 'ApplicationPoolIdentity' },
+                                 @{ Name = 'PSCITestAppPool2'; Identity = 'ApplicationPoolIdentity' }
+                              )
+            Website = @( @{ Name = 'PSCITestWebsite1'; Binding = @{ Port = 801 }; PhysicalPath = 'c:\inetpub\wwwroot\PSCITestWebsite'; ApplicationPool = 'PSCITestAppPool1' },
+                         @{ Name = 'PSCITestWebsite2'; Binding = @{ Port = 802 }; PhysicalPath = 'c:\inetpub\wwwroot\PSCITestWebsite2'; ApplicationPool = 'PSCITestAppPool2' }
+                           )
+            WebApplication = @{ Name = 'PSCITestWebApp'; PhysicalPath = 'c:\inetpub\wwwroot\PSCIMyApp'; Website = 'PSCITestWebsite1'; ApplicationPool = 'PSCITestAppPool1' }
+        }
 
     }
 }
