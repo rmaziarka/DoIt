@@ -50,7 +50,7 @@ function Resolve-StepScriptBlock {
     Server role name - will be passed as 'ServerRole' to the configuration.
 
     .PARAMETER MofOutputPath
-    Base output path for MOF files that will be generated - only relevent if StepName is a DSC configuration.
+    Base output path for MOF files that will be generated - only relevant if StepName is a DSC configuration.
     A specific folder structure will be created for the StepName / Node.
 
     .EXAMPLE
@@ -99,7 +99,7 @@ function Resolve-StepScriptBlock {
         PackagesPath = '$packagesPath'
     }
 
-    $stepMofDir = [System.IO.Path]::Combine($MofOutputPath, $Node, $StepName)
+    $stepMofDir = [System.IO.Path]::Combine($MofOutputPath, $Node, "${StepName}_${StepNumber}")
 
     if (!$StepScriptBlock) {
         $StepScriptBlock = [scriptblock]::Create($StepName)
