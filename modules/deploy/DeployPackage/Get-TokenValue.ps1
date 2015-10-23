@@ -108,7 +108,6 @@ function Get-TokenValue {
                 }
             }
             if ($tokenCategories.Length -ne 1) {
-                $env = $Context.Environment
                 throw "Token named '$Name' has been found in more than one categories: $categoriesAsString. Please add this token to category with the same name as server role ('$serverRole') or pass one of tokens category explicitly using Step (e.g. Step -ScriptBlock { MyStep -Tokens `$Tokens.$($tokenCategories[0]) })."
             }
             Write-Log -_debug "Token '$Name' resolved from category '$($tokenCategories[0])'."
