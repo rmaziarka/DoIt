@@ -760,6 +760,7 @@ Describe -Tag "PSCI.unit" "ServerRole" {
             Environment Default {
                 ServerConnection WebServer -Nodes 'node1', 'node2'
                 ServerRole Web -StepsProvision @('Prov1', 'Prov2') -ServerConnections WebServer
+                ServerRole Database -StepsProvision 'Prov3' -ServerConnections WebServer
 
                 Step TestFunc -ScriptBlock $null
             }           
@@ -767,17 +768,23 @@ Describe -Tag "PSCI.unit" "ServerRole" {
             It "should return all steps" {
                 $resolvedRoles = Resolve-ServerRoles -AllEnvironments $Global:Environments -Environment Default -ResolvedTokens @{}
 
-                $resolvedRoles.Count | Should Be 1
+                $resolvedRoles.Count | Should Be 2
             
                 $resolvedRoles.Web | Should Not Be $null
                 $resolvedRoles.Web.Steps.Name | Should Be @('Prov1', 'Prov2')
                 $resolvedRoles.Web.ServerConnections.Count | Should Be 1
                 $resolvedRoles.Web.ServerConnections.Name | Should Be 'WebServer'
                 $resolvedRoles.Web.ServerConnections.Nodes | Should Be @('node1','node2')
+
+                $resolvedRoles.Database | Should Not Be $null
+                $resolvedRoles.Database.Steps.Name | Should Be 'Prov3'
+                $resolvedRoles.Database.ServerConnections.Count | Should Be 1
+                $resolvedRoles.Database.ServerConnections.Name | Should Be 'WebServer'
+                $resolvedRoles.Database.ServerConnections.Nodes | Should Be @('node1','node2')
             }
         }
 
-         Context "when used with no Steps" {
+        Context "when used with no Steps" {
             $Global:Environments = @{}
 
             Environment Default {
@@ -795,6 +802,35 @@ Describe -Tag "PSCI.unit" "ServerRole" {
             
                 $resolvedRoles.Database | Should Not Be $null
                 $resolvedRoles.Database.Steps.Name | Should Be @('test')
+                $resolvedRoles.Database.ServerConnections.Count | Should Be 1
+                $resolvedRoles.Database.ServerConnections.Name | Should Be 'WebServer'
+                $resolvedRoles.Database.ServerConnections.Nodes | Should Be @('node1','node2')
+            }
+        }
+
+        Context "when used with the same Steps" {
+            $Global:Environments = @{}
+
+            Environment Default {
+                ServerConnection WebServer -Nodes 'node1', 'node2'
+                ServerRole Web -Steps 'PSCIWindowsFeature' -ServerConnections WebServer
+                ServerRole Database -Steps 'PSCIWindowsFeature', 'PSCIWindowsFeature' -ServerConnections WebServer
+
+                Step TestFunc -ScriptBlock $null
+            }           
+
+            It "should return server roles" {
+                $resolvedRoles = Resolve-ServerRoles -AllEnvironments $Global:Environments -Environment Default -ResolvedTokens @{}
+
+                $resolvedRoles.Count | Should Be 2
+            
+                $resolvedRoles.Web | Should Not Be $null
+                $resolvedRoles.Web.Steps.Name | Should Be @('PSCIWindowsFeature')
+                $resolvedRoles.Web.ServerConnections.Count | Should Be 1
+                $resolvedRoles.Web.ServerConnections.Name | Should Be 'WebServer'
+                $resolvedRoles.Web.ServerConnections.Nodes | Should Be @('node1','node2')
+                $resolvedRoles.Database | Should Not Be $null
+                $resolvedRoles.Database.Steps.Name | Should Be @('PSCIWindowsFeature', 'PSCIWindowsFeature')
                 $resolvedRoles.Database.ServerConnections.Count | Should Be 1
                 $resolvedRoles.Database.ServerConnections.Name | Should Be 'WebServer'
                 $resolvedRoles.Database.ServerConnections.Nodes | Should Be @('node1','node2')

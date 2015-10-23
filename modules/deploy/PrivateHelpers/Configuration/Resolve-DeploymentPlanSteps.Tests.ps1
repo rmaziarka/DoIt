@@ -212,7 +212,6 @@ Describe -Tag "PSCI.unit" "Resolve-DeploymentPlanSteps" {
             }
         }
 
-
         try { 
             Context "when running stepDsc without ScriptBlock" {
                 
@@ -224,7 +223,7 @@ Describe -Tag "PSCI.unit" "Resolve-DeploymentPlanSteps" {
                 $result = Resolve-DeploymentPlanSteps -DeploymentPlan $deploymentPlanEntry
 
                 It "should invoke the step with automatic tokens" { 
-                    $mofOutputPath = "$packagePath\_DscOutput\TestNode\stepDsc\TestNode.mof"              
+                    $mofOutputPath = "$packagePath\_DscOutput\TestNode\TestServerRole_stepDsc_1\TestNode.mof"              
                     Test-Path -Path $mofOutputPath | Should Be $true
                     (Get-Content -Path $mofOutputPath | Out-String) -match 'token1value' | Should Be $true
                 }
@@ -240,7 +239,7 @@ Describe -Tag "PSCI.unit" "Resolve-DeploymentPlanSteps" {
                 $result = Resolve-DeploymentPlanSteps -DeploymentPlan $deploymentPlanEntry
 
                 It "should invoke the step with automatic tokens" {   
-                    $mofOutputPath = "$packagePath\_DscOutput\TestNode\newName\TestNode.mof"            
+                    $mofOutputPath = "$packagePath\_DscOutput\TestNode\TestServerRole_newName_1\TestNode.mof"            
                     Test-Path -Path $mofOutputPath | Should Be $true
                     (Get-Content -Path $mofOutputPath | Out-String) -match 'token1value' | Should Be $true
                 }
@@ -256,7 +255,7 @@ Describe -Tag "PSCI.unit" "Resolve-DeploymentPlanSteps" {
                 $result = Resolve-DeploymentPlanSteps -DeploymentPlan $deploymentPlanEntry
 
                 It "should invoke the step with automatic tokens" {  
-                    $mofOutputPath = "$packagePath\_DscOutput\TestNode\newName\TestNode.mof"             
+                    $mofOutputPath = "$packagePath\_DscOutput\TestNode\TestServerRole_newName_1\TestNode.mof"             
                     Test-Path -Path $mofOutputPath | Should Be $true
                     (Get-Content -Path $mofOutputPath | Out-String) -match 'alttoken1value' | Should Be $true
                     (Get-Content -Path $mofOutputPath | Out-String) -match 'myParam' | Should Be $true
@@ -273,7 +272,7 @@ Describe -Tag "PSCI.unit" "Resolve-DeploymentPlanSteps" {
                 $result = Resolve-DeploymentPlanSteps -DeploymentPlan $deploymentPlanEntry
 
                 It "should invoke the step with automatic tokens" { 
-                    $mofOutputPath = "$packagePath\_DscOutput\TestNode\stepDscNoParams\TestNode.mof"              
+                    $mofOutputPath = "$packagePath\_DscOutput\TestNode\TestServerRole_stepDscNoParams_1\TestNode.mof"              
                     Test-Path -Path $mofOutputPath | Should Be $true
                     (Get-Content -Path $mofOutputPath | Out-String) -match 'token1value' | Should Be $true
                 }
@@ -289,7 +288,7 @@ Describe -Tag "PSCI.unit" "Resolve-DeploymentPlanSteps" {
                 $result = Resolve-DeploymentPlanSteps -DeploymentPlan $deploymentPlanEntry
 
                 It "should invoke the step with automatic tokens" {   
-                    $mofOutputPath = "$packagePath\_DscOutput\TestNode\newName\TestNode.mof"            
+                    $mofOutputPath = "$packagePath\_DscOutput\TestNode\TestServerRole_newName_1\TestNode.mof"            
                     Test-Path -Path $mofOutputPath | Should Be $true
                     (Get-Content -Path $mofOutputPath | Out-String) -match 'TestEnvironment' | Should Be $true
                     (Get-Content -Path $mofOutputPath | Out-String) -match 'token1value' | Should Be $true
@@ -305,11 +304,26 @@ Describe -Tag "PSCI.unit" "Resolve-DeploymentPlanSteps" {
                 $result = Resolve-DeploymentPlanSteps -DeploymentPlan $deploymentPlanEntry
 
                 It "should invoke the step with automatic tokens" {               
-                    $mofOutputPath = "$packagePath\_DscOutput\TestNode\newName\TestNode.mof"
+                    $mofOutputPath = "$packagePath\_DscOutput\TestNode\TestServerRole_newName_1\TestNode.mof"
                     Test-Path -Path $mofOutputPath | Should Be $true
                     (Get-Content -Path $mofOutputPath | Out-String) -match 'TestEnvironment' | Should Be $true
                     (Get-Content -Path $mofOutputPath | Out-String) -match 'alttoken1value' | Should Be $true
                     (Get-Content -Path $mofOutputPath | Out-String) -match 'myParam' | Should Be $true
+                }
+            }
+
+            Context "when running 2 entries with dsc with the same name" {
+                $deploymentPlanEntry.StepName = 'stepDsc'
+                $deploymentPlanEntry.StepScriptBlock = $null
+                $secondEntry = $deploymentPlanEntry.PSObject.Copy()
+            
+                $result = Resolve-DeploymentPlanSteps -DeploymentPlan @($deploymentPlanEntry, $secondEntry)
+                $invokeResult1 = Invoke-DeploymentStep @invokeDeploymentStepParams -StepScriptBlockResolved $result[0].StepScriptBlockResolved
+                $invokeResult2 = Invoke-DeploymentStep @invokeDeploymentStepParams -StepScriptBlockResolved $result[1].StepScriptBlockResolved
+
+                It "should generate two files in separate directories" {
+                    Test-Path -Path "$packagePath\_DscOutput\TestNode\TestServerRole_stepDsc_1\TestNode.mof" | Should Be $true
+                    Test-Path -Path "$packagePath\_DscOutput\TestNode\TestServerRole_stepDsc_2\TestNode.mof" | Should Be $true
                 }
             }
         } finally {

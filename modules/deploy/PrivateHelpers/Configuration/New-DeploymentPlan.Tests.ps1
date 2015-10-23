@@ -373,8 +373,8 @@ Describe -Tag "PSCI.unit" "New-DeploymentPlan" {
 
                     $deploymentPlan[0].StepName | Should Be 'dsc1'
                     $deploymentPlan[0].StepType | Should Be 'Configuration'
-                    Test-Path -LiteralPath '_dscOutput\node1\dsc1\node1.mof' -PathType Leaf | Should Be $true
-                    $deploymentPlan[0].StepMofDir | Should Be (Resolve-Path -LiteralPath '_dscOutput\node1\dsc1').Path
+                    Test-Path -LiteralPath '_dscOutput\node1\Web_dsc1_1\node1.mof' -PathType Leaf | Should Be $true
+                    $deploymentPlan[0].StepMofDir | Should Be (Resolve-Path -LiteralPath '_dscOutput\node1\Web_dsc1_1').Path
                     
                     $deploymentPlan[0].ConnectionParams | Should Not Be $null
                     $deploymentPlan[0].ConnectionParams.Nodes[0] | Should Be 'node1'
@@ -383,8 +383,8 @@ Describe -Tag "PSCI.unit" "New-DeploymentPlan" {
 
                     $deploymentPlan[1].StepName | Should Be 'dsc1'
                     $deploymentPlan[1].StepType | Should Be 'Configuration'
-                    Test-Path -LiteralPath '_dscOutput\node2\dsc1\node2.mof' -PathType Leaf | Should Be $true
-                    $deploymentPlan[1].StepMofDir | Should Be (Resolve-Path -LiteralPath '_dscOutput\node2\dsc1').Path
+                    Test-Path -LiteralPath '_dscOutput\node2\Web_dsc1_2\node2.mof' -PathType Leaf | Should Be $true
+                    $deploymentPlan[1].StepMofDir | Should Be (Resolve-Path -LiteralPath '_dscOutput\node2\Web_dsc1_2').Path
                     $deploymentPlan[1].ConnectionParams | Should Not Be $null
                     $deploymentPlan[1].ConnectionParams.Nodes[0] | Should Be 'node2'
                     $deploymentPlan[1].RunOnConnectionParams | Should Be $null

@@ -99,7 +99,7 @@ function Resolve-StepScriptBlock {
         PackagesPath = '$packagesPath'
     }
 
-    $stepMofDir = [System.IO.Path]::Combine($MofOutputPath, $Node, "${StepName}_${StepNumber}")
+    $stepMofDir = [System.IO.Path]::Combine($MofOutputPath, $Node, "${ServerRole}_${StepName}_${StepNumber}")
 
     if (!$StepScriptBlock) {
         $StepScriptBlock = [scriptblock]::Create($StepName)

@@ -66,8 +66,16 @@ function Resolve-DeploymentPlanSteps {
 
     # get command for each entry and filter by DeployType
     $currentServerRole = $null
+    
     $stepNumber = 1
     foreach ($entry in $DeploymentPlan) {
+        if ($currentServerRole -ne $entry.ServerRole) {
+            $currentServerRole = $entry.ServerRole
+            $stepNumber = 1
+        } else {
+            $stepNumber++
+        }
+
         $resolvedStepScriptBlock = Resolve-StepScriptBlock `
                                         -StepNumber $stepNumber `
                                         -StepName $entry.StepName `
@@ -80,12 +88,6 @@ function Resolve-DeploymentPlanSteps {
         $entry.StepScriptBlockResolved = $resolvedStepScriptBlock.StepScriptBlockResolved
         $entry.StepMofDir = $resolvedStepScriptBlock.StepMofDir
         $entry.StepType = $resolvedStepScriptBlock.StepType
-        if ($currentServerRole -ne $entry.ServerRole) {
-            $currentServerRole = $entry.ServerRole
-            $stepNumber = 1
-        } else {
-            $stepNumber++
-        }
 
         if ($entry.StepScriptBlockResolved.Trim()) { 
             [void]($filteredDeploymentPlan.Add($entry))
