@@ -80,7 +80,6 @@ function Resolve-TokensSinglePass {
         [switch]
         $ValidateExistence
     )
-    Write-Log -Info "PASS"
     foreach ($category in $resolvedTokens.Keys) {
         $tokensCatKeys = @()
         $ResolvedTokens[$category].Keys | Foreach-Object { $tokensCatKeys += $_ }
