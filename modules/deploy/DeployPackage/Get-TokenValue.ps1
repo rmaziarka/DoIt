@@ -89,15 +89,29 @@ function Get-TokenValue {
     $tokenFound = $false
     if ($tokens -and $tokens -is [hashtable]) {
         if ($tokens.ContainsKey($Name)) {
+            Write-Log -_debug "Token '$Name' resolved from custom tokens context."
             $result = $tokens.$Name
             $tokenFound = $true
         } elseif ($serverRole -and $tokens.ContainsKey($serverRole) -and $tokens.$serverRole -is [hashtable] -and $tokens.$serverRole.ContainsKey($Name)) {
+            Write-Log -_debug "Token '$Name' resolved from category '$serverRole'."
             $result = $tokens.$serverRole.$Name
             $tokenFound = $true
         } elseif ($tokens.ContainsKey('All') -and $tokens.All.ContainsKey($Name)) { 
             $result = $tokens.All.$Name
             $tokenFound = $true
-        
+            # ensure the token does not appear in more than one category
+            $tokenCategories = @()
+            foreach ($token in $tokens.GetEnumerator()) {
+                $category = $token.Key
+                if ($category -ne 'All' -and $tokens.$category.ContainsKey($Name)) {
+                    $tokenCategories += $category
+                }
+            }
+            if ($tokenCategories.Length -ne 1) {
+                $env = $Context.Environment
+                throw "Token named '$Name' has been found in more than one categories: $categoriesAsString. Please add this token to category with the same name as server role ('$serverRole') or pass one of tokens category explicitly using Step (e.g. Step -ScriptBlock { MyStep -Tokens `$Tokens.$($tokenCategories[0]) })."
+            }
+            Write-Log -_debug "Token '$Name' resolved from category '$($tokenCategories[0])'."
         }
     }
 
