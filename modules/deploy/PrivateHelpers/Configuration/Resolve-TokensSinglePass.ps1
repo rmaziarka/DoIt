@@ -28,6 +28,12 @@ function Resolve-TokensSinglePass {
     .SYNOPSIS
     Helper function to run one pass of tokens resolve.
 
+    .PARAMETER ResolveStrings
+    If true, tokens with type string will be resolved.
+
+    .PARAMETER ResolveScriptBlocks
+    If true, tokens with type scriptblock will be resolved.
+
     .PARAMETER ResolvedTokens
     Resolved tokens (result hashtable)
 
@@ -50,13 +56,17 @@ function Resolve-TokensSinglePass {
     [CmdletBinding()]
     [OutputType([void])]
     param(
+        [Parameter(Mandatory=$false)]
+        [switch]
+        $ResolveStrings,
+
+        [Parameter(Mandatory=$false)]
+        [switch]
+        $ResolveScriptBlocks,
+
         [Parameter(Mandatory=$true)]
         [hashtable]
         $ResolvedTokens,
-
-        [Parameter(Mandatory=$true)]
-        [scriptblock]
-        $ResolveFunction,
 
         [Parameter(Mandatory=$true)]
         [string]
@@ -70,7 +80,7 @@ function Resolve-TokensSinglePass {
         [switch]
         $ValidateExistence
     )
-
+    Write-Log -Info "PASS"
     foreach ($category in $resolvedTokens.Keys) {
         $tokensCatKeys = @()
         $ResolvedTokens[$category].Keys | Foreach-Object { $tokensCatKeys += $_ }
@@ -82,11 +92,12 @@ function Resolve-TokensSinglePass {
             }
             
             $params = @{
+                ResolveStrings = $ResolveStrings
+                ResolveScriptBlocks = $ResolveScriptBlocks
                 TokenName = $tokenKey
                 TokenCategory = $category
                 TokenValue = $tokenValue
                 ResolvedTokens = $ResolvedTokens
-                ResolveFunction = $ResolveFunction
                 Environment = $Environment
                 Node = $Node
                 ValidateExistence = $ValidateExistence
@@ -102,6 +113,12 @@ function Resolve-SingleTokenRecursively {
     .SYNOPSIS
     Helper function to resolve single token recursively (if it's a hashtable or array).
 
+    .PARAMETER ResolveStrings
+    If true, tokens with type string will be resolved.
+
+    .PARAMETER ResolveScriptBlocks
+    If true, tokens with type scriptblock will be resolved.
+
     .PARAMETER TokenName
     Token name.
 
@@ -113,9 +130,6 @@ function Resolve-SingleTokenRecursively {
 
     .PARAMETER ResolvedTokens
     Resolved tokens (result hashtable)
-
-    .PARAMETER ResolveFunction
-    Scriptblock that will be invoked to resolve specific token value.
 
     .PARAMETER Environment
     Environment name - will be used for selecting proper sub-hashtable from $AllEnvironments.
@@ -133,6 +147,14 @@ function Resolve-SingleTokenRecursively {
     [CmdletBinding()]
     [OutputType([object])]
     param(
+        [Parameter(Mandatory=$false)]
+        [switch]
+        $ResolveStrings,
+
+        [Parameter(Mandatory=$false)]
+        [switch]
+        $ResolveScriptBlocks,
+
         [Parameter(Mandatory=$true)]
         [object]
         $TokenName,
@@ -150,10 +172,6 @@ function Resolve-SingleTokenRecursively {
         $ResolvedTokens,
 
         [Parameter(Mandatory=$true)]
-        [scriptblock]
-        $ResolveFunction,
-
-        [Parameter(Mandatory=$true)]
         [string]
         $Environment,
 
@@ -167,16 +185,17 @@ function Resolve-SingleTokenRecursively {
     )
 
     $params = @{
+        ResolveStrings = $ResolveStrings
+        ResolveScriptBlocks = $ResolveScriptBlocks
         TokenCategory = $TokenCategory
         ResolvedTokens = $ResolvedTokens
         Environment = $Environment
         Node = $Node
         ValidateExistence = $ValidateExistence
+        
     }
-    
     if ($TokenValue -is [hashtable]) {
         $newHashTable = @{}
-        $params.ResolveFunction = $ResolveFunction
         foreach ($tokenValueEnumerator in $tokenValue.GetEnumerator()) {
             $params.TokenName = "$TokenName.$($tokenValueEnumerator.Key)"
             $params.TokenValue = $tokenValueEnumerator.Value
@@ -186,7 +205,6 @@ function Resolve-SingleTokenRecursively {
     } elseif ($TokenValue -is [array]) {
         $newArray = @()
         $i = 0
-        $params.ResolveFunction = $ResolveFunction
         foreach ($entry in $TokenValue) {
             $params.TokenName = "${TokenName}[$i]"
             $params.TokenValue = $entry
@@ -194,14 +212,17 @@ function Resolve-SingleTokenRecursively {
             $i++
         }
         return $newArray
-    } else {
-        $params.TokenName = $TokenName
-        $params.TokenValue = $TokenValue
+    } elseif ($ResolveStrings -and $TokenValue -is [string]) {
+        $newValue = Resolve-Token -Name $TokenName -Value $TokenValue -Category $TokenCategory -ResolvedTokens $ResolvedTokens -ValidateExistence:$ValidateExistence
+        return $newValue
+    } elseif ($ResolveScriptBlocks -and $TokenValue -is [scriptblock]) {
         try { 
-            $newValue = & $ResolveFunction @params 
+            $newValue = Resolve-ScriptedToken -TokenName $TokenName -ScriptedToken $TokenValue -TokenCategory $TokenCategory -ResolvedTokens $ResolvedTokens -Node $Node -Environment $Environment
         } catch {
             throw ("Cannot evaluate token '$Environment / $TokenCategory / $TokenName'. Error message: {0} / token value: {{ {1} }}" -f $_.Exception.Message, $TokenValue)
         }
+        
         return $newValue
-    }   
+    }
+    return $TokenValue
 }

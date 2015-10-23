@@ -137,30 +137,20 @@ function Resolve-Tokens {
     $resolvedTokens.Common.Node = $Node
     $resolvedTokens.Common.Environment = $Environment
 
-    $resolveTokenFunction = { 
-        param($TokenName, $TokenCategory, $TokenValue, $ResolvedTokens, $Node, $Environment, $ValidateExistence)    
-        Resolve-Token -Name $TokenName -Value $TokenValue -Category $TokenCategory -ResolvedTokens $ResolvedTokens -ValidateExistence:$ValidateExistence
-    }
-
-    $resolveScriptedTokenFunction = { 
-        param($TokenName, $TokenCategory, $TokenValue, $ResolvedTokens, $Node, $Environment, $ValidateExistence)
-        Resolve-ScriptedToken -TokenName $TokenName -ScriptedToken $TokenValue -TokenCategory $TokenCategory -ResolvedTokens $ResolvedTokens -Node $Node -Environment $Environment
-    }
 
     $params = @{
         ResolvedTokens = $resolvedTokens
         Environment = $Environment
         Node = $Node
     }
-
     # 1st pass resolve each string token (apart from ones with [scriptblock] value).
-    Resolve-TokensSinglePass @params -ResolveFunction $resolveTokenFunction -ValidateExistence:$false
+    Resolve-TokensSinglePass @params -ResolveStrings -ValidateExistence:$false
 
     # 2st pass - resolve each scriptblock token
-    Resolve-TokensSinglePass @params -ResolveFunction $resolveScriptedTokenFunction -ValidateExistence:$false
+    Resolve-TokensSinglePass @params -ResolveScriptBlocks -ValidateExistence:$false
 
     # 3st pass - resolve each string token again
-    Resolve-TokensSinglePass @params -ResolveFunction $resolveTokenFunction -ValidateExistence:$true
+    Resolve-TokensSinglePass @params -ResolveStrings -ValidateExistence:$true
 
     # add 'All' category that contains flat hashtable of all tokens
     Add-AllTokensCategory -Tokens $resolvedTokens
