@@ -135,25 +135,32 @@ function Resolve-ServerRoles {
 
     $envHierarchy = @(Resolve-BasedOnHierarchy -AllElements $AllEnvironments -SelectedElement $Environment -ConfigElementName 'Environment')
 
-    $result = [ordered]@{}
+    $serverRolesResolved = [ordered]@{}
 
     # traverse environments from top to bottom to set / override ServerRole properties
     foreach ($env in $envHierarchy) {
         $serverRoles = $AllEnvironments[$env].ServerRoles.Values | Where-Object { !$ServerRolesFilter -or $ServerRolesFilter -icontains $_.Name }
         foreach ($serverRole in $serverRoles) {
-            if ($serverRole.ContainsKey('Enabled')) { 
-                $serverRoleEnabled = Resolve-ScriptedToken -ScriptedToken $serverRole.Enabled -ResolvedTokens $ResolvedTokens -Environment $Environment -TokenName "[ServerRole '$($serverRole.Name)' / -Enabled]"
-                if ($serverRoleEnabled -eq $false) {
-                    continue
-                }
-            }
-            if (!$result.Contains($serverRole.Name)) {
-                $result[$serverRole.Name] = @{}
+            if (!$serverRolesResolved.Contains($serverRole.Name)) {
+                $serverRolesResolved[$serverRole.Name] = @{}
             }
             foreach ($entry in $serverRole.GetEnumerator()) {
-                $result[$serverRole.Name][$entry.Key] = $entry.Value
+                $serverRolesResolved[$serverRole.Name][$entry.Key] = $entry.Value
             }
         }
+    }
+
+    # get only enabled server roles
+    $serverRoles = [ordered]@{}
+    foreach ($serverRole in $serverRolesResolved.GetEnumerator()) {
+        $serverRoleValue = $serverRole.Value
+        if ($serverRoleValue.ContainsKey('Enabled')) { 
+            $serverRoleEnabled = Resolve-ScriptedToken -ScriptedToken $serverRoleValue.Enabled -ResolvedTokens $ResolvedTokens -Environment $Environment -TokenName "[ServerRole '$($serverRole.Name)' / -Enabled]"
+            if ($serverRoleEnabled -eq $false) {
+                continue
+            }
+        }
+        $serverRoles[$serverRole.Key] = $serverRoleValue
     }
 
     $allServerConnections = Resolve-ServerConnectionsConfigElements -AllEnvironments $AllEnvironments -Environment $Environment -ResolvedTokens $resolvedTokens
@@ -161,7 +168,7 @@ function Resolve-ServerRoles {
     $StepsDefinitions = Resolve-StepsDefinitions -AllEnvironments $AllEnvironments -Environment $Environment -StepsFilter $StepsFilter
 
     $serverRolesToRemove = @()
-    foreach ($serverRole in $result.Values) {
+    foreach ($serverRole in $serverRoles.Values) {
         
         $serverRole.Steps = Resolve-Steps `
                                         -Environment $Environment `
@@ -199,8 +206,8 @@ function Resolve-ServerRoles {
     }
 
     foreach ($serverRoleName in $serverRolesToRemove) {
-        $result.Remove($serverRoleName)
+        $serverRoles.Remove($serverRoleName)
     }
 
-    return $result
+    return $serverRoles
 }

@@ -811,9 +811,14 @@ Describe -Tag "PSCI.unit" "ServerRole" {
 
                 Step Prov1 -Enabled $false
                 Step Prov3 -Enabled { $true }
-            }           
+            }      
+            
+            Environment Dev {
+                Step Prov2 -Enabled $false
+                ServerRole Database -Enabled $true
+            }     
 
-            It "should return only enabled steps" {
+            It "should return only enabled steps for env Default" {
                 $resolvedRoles = Resolve-ServerRoles -AllEnvironments $Global:Environments -Environment Default -ResolvedTokens @{}
 
                 $resolvedRoles.Count | Should Be 1
@@ -823,6 +828,23 @@ Describe -Tag "PSCI.unit" "ServerRole" {
                 $resolvedRoles.Web.ServerConnections.Count | Should Be 1
                 $resolvedRoles.Web.ServerConnections.Name | Should Be 'WebServer'
                 $resolvedRoles.Web.ServerConnections.Nodes | Should Be @('node1','node2')
+            }
+
+            It "should return only enabled steps for env Dev" {
+                $resolvedRoles = Resolve-ServerRoles -AllEnvironments $Global:Environments -Environment Dev -ResolvedTokens @{}
+
+                $resolvedRoles.Count | Should Be 2
+            
+                $resolvedRoles.Web | Should Not Be $null
+                $resolvedRoles.Web.Steps.Name | Should Be @('Prov3', 'Deploy1')
+                $resolvedRoles.Web.ServerConnections.Count | Should Be 1
+                $resolvedRoles.Web.ServerConnections.Name | Should Be 'WebServer'
+                $resolvedRoles.Web.ServerConnections.Nodes | Should Be @('node1','node2')
+                $resolvedRoles.Database | Should Not Be $null
+                $resolvedRoles.Database.Steps.Name | Should Be 'Deploy1'
+                $resolvedRoles.Database.ServerConnections.Count | Should Be 1
+                $resolvedRoles.Database.ServerConnections.Name | Should Be 'WebServer'
+                $resolvedRoles.Database.ServerConnections.Nodes | Should Be @('node1','node2')
             }
         }
     }
