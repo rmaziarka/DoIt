@@ -84,28 +84,28 @@ Describe -Tag "PSCI.unit" "New-DeploymentPlan" {
                 $deploymentPlan[0].RunOnConnectionParams.Nodes[0] | Should Be 'machine1'
                 $deploymentPlan[0].PackageDirectory | Should Be 'folder'
                 $deploymentPlan[0].IsLocalRun | Should Be $true
-                
+
                 $deploymentPlan[1].ServerRole | Should Be 'Web'
-                $deploymentPlan[1].StepName | Should Be 'config1'
+                $deploymentPlan[1].StepName | Should Be 'config2'
+                $deploymentPlan[1].StepType | Should Be 'Function'
                 $deploymentPlan[1].ConnectionParams | Should Not Be $null
-                $deploymentPlan[1].ConnectionParams.Nodes[0] | Should Be 'machine2'
+                $deploymentPlan[1].ConnectionParams.Nodes[0] | Should Be 'machine1'
                 $deploymentPlan[1].ConnectionParams.RemotingMode | Should Be 'PSRemoting'
                 $deploymentPlan[1].RunOnConnectionParams | Should Not Be $null
                 $deploymentPlan[1].RunOnConnectionParams.Nodes[0] | Should Be 'machine1'
                 $deploymentPlan[1].PackageDirectory | Should Be 'folder'
-                $deploymentPlan[1].IsLocalRun | Should Be $false
+                $deploymentPlan[1].IsLocalRun | Should Be $true
                 
-
                 $deploymentPlan[2].ServerRole | Should Be 'Web'
-                $deploymentPlan[2].StepName | Should Be 'config2'
-                $deploymentPlan[2].StepType | Should Be 'Function'
+                $deploymentPlan[2].StepName | Should Be 'config1'
                 $deploymentPlan[2].ConnectionParams | Should Not Be $null
-                $deploymentPlan[2].ConnectionParams.Nodes[0] | Should Be 'machine1'
+                $deploymentPlan[2].ConnectionParams.Nodes[0] | Should Be 'machine2'
                 $deploymentPlan[2].ConnectionParams.RemotingMode | Should Be 'PSRemoting'
                 $deploymentPlan[2].RunOnConnectionParams | Should Not Be $null
                 $deploymentPlan[2].RunOnConnectionParams.Nodes[0] | Should Be 'machine1'
                 $deploymentPlan[2].PackageDirectory | Should Be 'folder'
-                $deploymentPlan[2].IsLocalRun | Should Be $true
+                $deploymentPlan[2].IsLocalRun | Should Be $false
+                
 
                 $deploymentPlan[3].ServerRole | Should Be 'Web'
                 $deploymentPlan[3].StepName | Should Be 'config2'
@@ -473,15 +473,15 @@ Describe -Tag "PSCI.unit" "New-DeploymentPlan" {
                     $deploymentPlan[0].ConnectionParams.Nodes | Should Be 'node1'
                     $deploymentPlan[0].RunOnConnectionParams | Should Be $null
                     $deploymentPlan[0].RequiredPackages | Should Be 'package1'
-                    
-                    $deploymentPlan[1].StepName | Should Be 'dsc1'
-                    $deploymentPlan[1].ConnectionParams.Nodes | Should Be 'node2'
-                    $deploymentPlan[1].RunOnConnectionParams | Should Be $null
-                    $deploymentPlan[1].RequiredPackages | Should Be 'package1'
 
-                    $deploymentPlan[2].StepName | Should Be 'config1'
-                    $deploymentPlan[2].ConnectionParams.Nodes | Should Be 'node1'
-                    $deploymentPlan[2].RunOnConnectionParams.Nodes | Should Be 'node1'
+                    $deploymentPlan[1].StepName | Should Be 'config1'
+                    $deploymentPlan[1].ConnectionParams.Nodes | Should Be 'node1'
+                    $deploymentPlan[1].RunOnConnectionParams.Nodes | Should Be 'node1'
+                    $deploymentPlan[1].RequiredPackages | Should Be 'package1'
+                    
+                    $deploymentPlan[2].StepName | Should Be 'dsc1'
+                    $deploymentPlan[2].ConnectionParams.Nodes | Should Be 'node2'
+                    $deploymentPlan[2].RunOnConnectionParams | Should Be $null
                     $deploymentPlan[2].RequiredPackages | Should Be 'package1'
 
                     $deploymentPlan[3].StepName | Should Be 'config1'
@@ -498,16 +498,16 @@ Describe -Tag "PSCI.unit" "New-DeploymentPlan" {
                     $deploymentPlan[0].ConnectionParams.Nodes | Should Be 'node1'
                     $deploymentPlan[0].RunOnConnectionParams | Should Be $null
                     $deploymentPlan[0].RequiredPackages | Should Be 'package2'
-                    
-                    $deploymentPlan[1].StepName | Should Be 'dsc1'
-                    $deploymentPlan[1].ConnectionParams.Nodes | Should Be 'node2'
-                    $deploymentPlan[1].RunOnConnectionParams | Should Be $null
-                    $deploymentPlan[1].RequiredPackages | Should Be 'package2'
 
-                    $deploymentPlan[2].StepName | Should Be 'config1'
-                    $deploymentPlan[2].ConnectionParams.Nodes | Should Be 'node1'
-                    $deploymentPlan[2].RunOnConnectionParams.Nodes | Should Be 'node1'
-                    $deploymentPlan[2].RequiredPackages | Should Be 'package1'
+                    $deploymentPlan[1].StepName | Should Be 'config1'
+                    $deploymentPlan[1].ConnectionParams.Nodes | Should Be 'node1'
+                    $deploymentPlan[1].RunOnConnectionParams.Nodes | Should Be 'node1'
+                    $deploymentPlan[1].RequiredPackages | Should Be 'package1'
+                    
+                    $deploymentPlan[2].StepName | Should Be 'dsc1'
+                    $deploymentPlan[2].ConnectionParams.Nodes | Should Be 'node2'
+                    $deploymentPlan[2].RunOnConnectionParams | Should Be $null
+                    $deploymentPlan[2].RequiredPackages | Should Be 'package2'
 
                     $deploymentPlan[3].StepName | Should Be 'config1'
                     $deploymentPlan[3].ConnectionParams.Nodes[0] | Should Be 'node2'
@@ -524,15 +524,15 @@ Describe -Tag "PSCI.unit" "New-DeploymentPlan" {
                     $deploymentPlan[0].RunOnConnectionParams | Should Be $null
                     $deploymentPlan[0].RequiredPackages | Should Be 'packagen1'
                     
-                    $deploymentPlan[1].StepName | Should Be 'dsc1'
-                    $deploymentPlan[1].ConnectionParams.Nodes | Should Be 'node2'
-                    $deploymentPlan[1].RunOnConnectionParams | Should Be $null
-                    $deploymentPlan[1].RequiredPackages | Should Be 'packagen2'
+                    $deploymentPlan[1].StepName | Should Be 'config1'
+                    $deploymentPlan[1].ConnectionParams.Nodes | Should Be 'node1'
+                    $deploymentPlan[1].RunOnConnectionParams.Nodes | Should Be 'node1'
+                    $deploymentPlan[1].RequiredPackages | Should Be 'package1'
 
-                    $deploymentPlan[2].StepName | Should Be 'config1'
-                    $deploymentPlan[2].ConnectionParams.Nodes | Should Be 'node1'
-                    $deploymentPlan[2].RunOnConnectionParams.Nodes | Should Be 'node1'
-                    $deploymentPlan[2].RequiredPackages | Should Be 'package1'
+                    $deploymentPlan[2].StepName | Should Be 'dsc1'
+                    $deploymentPlan[2].ConnectionParams.Nodes | Should Be 'node2'
+                    $deploymentPlan[2].RunOnConnectionParams | Should Be $null
+                    $deploymentPlan[2].RequiredPackages | Should Be 'packagen2'
 
                     $deploymentPlan[3].StepName | Should Be 'config1'
                     $deploymentPlan[3].ConnectionParams.Nodes[0] | Should Be 'node2'
@@ -550,15 +550,15 @@ Describe -Tag "PSCI.unit" "New-DeploymentPlan" {
                     $deploymentPlan[0].RunOnConnectionParams | Should Be $null
                     $deploymentPlan[0].RequiredPackages | Should Be 'package1'
                     
-                    $deploymentPlan[1].StepName | Should Be 'dsc1'
-                    $deploymentPlan[1].StepScriptBlock | Should Be ' dsc1; func2; '
-                    $deploymentPlan[1].ConnectionParams.Nodes | Should Be 'node2'
-                    $deploymentPlan[1].RunOnConnectionParams | Should Be $null
+                    $deploymentPlan[1].StepName | Should Be 'config1'
+                    $deploymentPlan[1].ConnectionParams.Nodes | Should Be 'node1'
+                    $deploymentPlan[1].RunOnConnectionParams.Nodes | Should Be 'node1'
                     $deploymentPlan[1].RequiredPackages | Should Be 'package1'
 
-                    $deploymentPlan[2].StepName | Should Be 'config1'
-                    $deploymentPlan[2].ConnectionParams.Nodes | Should Be 'node1'
-                    $deploymentPlan[2].RunOnConnectionParams.Nodes | Should Be 'node1'
+                    $deploymentPlan[2].StepName | Should Be 'dsc1'
+                    $deploymentPlan[2].StepScriptBlock | Should Be ' dsc1; func2; '
+                    $deploymentPlan[2].ConnectionParams.Nodes | Should Be 'node2'
+                    $deploymentPlan[2].RunOnConnectionParams | Should Be $null
                     $deploymentPlan[2].RequiredPackages | Should Be 'package1'
 
                     $deploymentPlan[3].StepName | Should Be 'config1'

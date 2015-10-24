@@ -141,11 +141,13 @@ function New-DeploymentPlan {
         $entryNo = 1
         foreach ($serverRoleName in $serverRoles.Keys) {
             $serverRole = $serverRoles[$serverRoleName]
-            foreach ($step in $serverRole.Steps) {
-                foreach ($serverConnection in $serverRole.ServerConnections) {
-                    foreach ($node in $serverConnection.Nodes) {
+            foreach ($serverConnection in $serverRole.ServerConnections) {
+                foreach ($node in $serverConnection.Nodes) {
 
-                        $resolvedTokens = Resolve-Tokens -AllEnvironments $AllEnvironments -Environment $env -Node $node -TokensOverride $TokensOverride
+                    $resolvedTokens = Resolve-Tokens -AllEnvironments $AllEnvironments -Environment $env -Node $node -TokensOverride $TokensOverride
+
+                    foreach ($step in $serverRole.Steps) {
+    
                         $createDeploymentPlanEntryParams = @{ 
                             EntryNo = $entryNo
                             Environment = $env
