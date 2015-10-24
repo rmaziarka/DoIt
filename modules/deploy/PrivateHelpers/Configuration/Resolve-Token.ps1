@@ -22,6 +22,8 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 #>
 
+$Global:PSCIDefaultTokenRegex = New-Object System.Text.RegularExpressions.Regex ('\$\{(([\w-]+)\.?([\w-]+)?([^\}]*))\}', [System.Text.RegularExpressions.RegexOptions]::Compiled)
+
 function Resolve-Token {
      <#
     .SYNOPSIS
@@ -79,21 +81,27 @@ function Resolve-Token {
 
         [Parameter(Mandatory=$false)]
         [string] 
-        $TokenRegex = '\$\{(([\w-]+)\.?([\w-]+)?([^\}]*))\}'
+        $TokenRegex
     )
-    if (!$Value -or $Value.GetType().FullName -ne "System.String") {
+    if (!$Value -or $Value -isnot [string]) {
         return $Value
+    }
+    if (!$TokenRegex) {
+        $tokenRegexObject = $Global:PSCIDefaultTokenRegex
+    } else {
+        $tokenRegexObject = New-Object System.Text.RegularExpressions.Regex $TokenRegex
     }
     $i = 0
     do {
-        $substituted = $false    
-        if ($Value -match $TokenRegex) {
-            $origStrToReplace = $Matches[0]
+        $substituted = $false
+        foreach ($regexMatch in $tokenRegexObject.Matches($Value)) {
+            $regexGroups = $regexMatch.Groups
+            $origStrToReplace = $regexGroups[0].Value
             $strToReplace = $origStrToReplace -replace '\$', '\$'
-            $token = $Matches[1]
-            $keyFirstPart = $Matches[2]
-            $keySecondPart = $Matches[3]
-            $suffix = $Matches[4]
+            $token = $regexGroups[1].Value
+            $keyFirstPart = $regexGroups[2].Value
+            $keySecondPart = $regexGroups[3].Value
+            $suffix = $regexGroups[4].Value
 
             $tokenFound = $false
             # if we have ${Category.Key}, we just get token 'Key' from 'Category'

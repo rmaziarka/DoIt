@@ -124,7 +124,7 @@ function Resolve-DeploymentPlanSteps {
                 -Tokens $entry.Tokens `
                 -ConnectionParams $entry.ConnectionParams)
 
-            if (!(Get-ChildItem -Path $entry.StepMofDir -Filter "*.mof")) {
+            if (!(Get-ChildItem -Path $entry.StepMofDir -Filter "*.mof" -ErrorAction SilentlyContinue)) {
                 if (!$entry.StepIsBuiltin) { 
                     # Builtin steps have their own logging
                     Write-Log -Warn "Mof file has not been generated for step named '$($entry.StepName)' (Environment '$($entry.Environment)' / ServerRole '$($entry.ServerRole)'). Please ensure your configuration definition is correct and your DSC configuration contains 'Node `$AllNodes.NodeName' or 'Node `$NodeName'. This step will not be deployed."
