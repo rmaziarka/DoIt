@@ -2299,7 +2299,7 @@
     <Compile Include="modules\teamcityExtensions\Utils\Invoke-RemotePowershellMetaRunner.Tests.ps1" />
     <Compile Include="modules\teamcityExtensions\Utils\Invoke-SqlMetaRunner.ps1" />
     <Compile Include="modules\teamcityExtensions\Utils\Test-RunCondition.ps1" />
-    <Compile Include="modules\teamcityExtensions\Zap\Shutdown-Zap.ps1" />
+    <Compile Include="modules\teamcityExtensions\Zap\Close-Zap.ps1" />
     <Compile Include="modules\teamcityExtensions\Zap\Start-Zap.ps1" />
     <Compile Include="modules\teamcityExtensions\Zap\Start-ZapAScan.ps1" />
     <Compile Include="modules\teamcityExtensions\Zap\Start-ZapSpider.ps1" />
@@ -2355,6 +2355,7 @@
     <Compile Include="PSCI.nuspec" />
     <Compile Include="PSCI.psd1" />
     <Compile Include="PSCI.psm1" />
+    <Compile Include="Wait-Zap.ps1" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="core\" />
