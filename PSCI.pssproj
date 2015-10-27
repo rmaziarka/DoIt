@@ -2299,6 +2299,10 @@
     <Compile Include="modules\teamcityExtensions\Utils\Invoke-RemotePowershellMetaRunner.Tests.ps1" />
     <Compile Include="modules\teamcityExtensions\Utils\Invoke-SqlMetaRunner.ps1" />
     <Compile Include="modules\teamcityExtensions\Utils\Test-RunCondition.ps1" />
+    <Compile Include="modules\teamcityExtensions\Zap\Shutdown-Zap.ps1" />
+    <Compile Include="modules\teamcityExtensions\Zap\Start-Zap.ps1" />
+    <Compile Include="modules\teamcityExtensions\Zap\Start-ZapAScan.ps1" />
+    <Compile Include="modules\teamcityExtensions\Zap\Start-ZapSpider.ps1" />
     <Compile Include="modules\teamcityExtensions\_deploy\configuration\deployPsci.ps1" />
     <Compile Include="modules\teamcityExtensions\_deploy\configuration\tokens.ps1" />
     <Compile Include="modules\teamcityExtensions\_deploy\configuration\tokensSensitive.ps1" />
@@ -3176,6 +3180,7 @@
     <Folder Include="modules\teamcityExtensions\MetaRunners\" />
     <Folder Include="modules\teamcityExtensions\TestTrend\" />
     <Folder Include="modules\teamcityExtensions\Utils\" />
+    <Folder Include="modules\teamcityExtensions\Zap\" />
     <Folder Include="modules\teamcityExtensions\_deploy\" />
     <Folder Include="modules\teamcityExtensions\_deploy\configuration\" />
     <Folder Include="modules\teamcityMaintenance\" />
