@@ -26,22 +26,22 @@ SOFTWARE.
 function Set-SSRSItemSecurity {
     <#
     .SYNOPSIS
-        Set user permissions in SQL Reporting Services using Web Service
+        Set user permissions in SQL Reporting Services using Web Service.
  
     .DESCRIPTION
-        Set user permissions in SQL Reporting Services using Web Service
+        Set user permissions in SQL Reporting Services using Web Service for give item path and user or group and list of roles.
         
     .PARAMETER Proxy
         ReportingService2010 web service proxy.
     
     .PARAMETER ItemPath
-        Path to the SSRS project folder   
+        Path to the SSRS project folder. 
 
     .PARAMETER GroupUserNameAndRoles
         Hashtable with group or user name and roles.
  
     .EXAMPLE
-    Add-SSRSItemSecurity -Proxy $Proxy -ItemPath "Visium/Reports/Planner" -GroupUserAndName = @{ "IIS APPPOOL\DefaultAppPool" = @('Browser', 'Publisher') }
+        Set-SSRSItemSecurity -Proxy $Proxy -ItemPath "Visium/Reports/Planner" -GroupUserNameAndRoles = @{ "IIS APPPOOL\DefaultAppPool" = @('Browser', 'Publisher') }
      
     #>
     [CmdletBinding()]
