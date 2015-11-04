@@ -53,7 +53,7 @@ function Get-PSCIBuildNumber {
         throw "No build version file at '$Path'. PSCI library has not been packaged properly."
     }
     if (@($buildFile).Length -ne 1) {
-        throw "More than one build version file. PSCI library has not been packaged properly."
+        throw "More than one PSCI build version file found at '$Path'. PSCI library has not been packaged properly. If this is TeamCity run, please ensure you're clearing all files in the checkout directory before the build (in 'Version Control Settings' / advanced options)."
     }
     if (!($buildFile -match "build.(\w+)$")) {
         throw "Invalid build version filename: '$buildFile' - should match 'build.local' or 'build.<number>'. PSCI library has not been packaged properly."
