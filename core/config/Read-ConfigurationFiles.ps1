@@ -55,7 +55,7 @@ function Read-ConfigurationFiles {
 
     Write-Log -Info "Reading configuration files from '$configPath'."
     # Load file with 'tokens' in the name first, since other files can make use of it
-    $configScripts = Get-ChildItem -Recurse $configPath -Include *.ps*1 | Sort-Object -Property { $_.Name -inotmatch "tokens" }, { $_.Name }
+    $configScripts = Get-ChildItem -Recurse $configPath -Include *.ps*1 -Exclude *.Tests.ps*1 | Sort-Object -Property { $_.Name -inotmatch "tokens" }, { $_.Name }
     if (!$configScripts) {
         throw "There are no configuration files at '$configPath'. Please ensure you have passed valid 'DeployConfigurationPath' parameter."
     }

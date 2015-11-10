@@ -177,6 +177,21 @@ Configuration PSCIIISConfig {
                 }
             }
 
+            $addSelfSignedCert = $false
+            foreach ($site in $Website) {
+                if (@($site.Binding).Where({ $_.CertificateSelfSigned -eq $true})) {
+                    $addSelfSignedCert = $true
+                }
+            }
+
+            if ($addSelfSignedCert) {
+                Write-Log -Info 'Preparing self-signed certificate'
+                cSelfSignedCert MyCert {
+                    StoreLocation = 'My'
+                    AutoRenew = $true
+                }
+            }
+
             foreach ($site in $Website) {
                 if (!$site.Name) {
                     throw "Missing site name - token 'Website', key 'Name'"
@@ -210,12 +225,8 @@ Configuration PSCIIISConfig {
                     $depends += "[cAppPool]AppPool_$($matchingWebAppPool.Name)"
                 }
 
-                if (@($site.Binding).Where({ $_.CertificateSelfSigned -eq $true})) {
-                    Write-Log -Info 'Preparing self-signed certificate'
-                    cSelfSignedCert MyCert {
-                        StoreLocation = 'My'
-                        AutoRenew = $true
-                    }
+                if ($binding.CertificateSelfSigned) {
+                    $depends += "[cSelfSignedCert]MyCert"
                 }
 
                 cWebsite "Website_$($site.Name)" { 
