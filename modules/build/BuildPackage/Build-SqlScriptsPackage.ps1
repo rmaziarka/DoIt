@@ -49,13 +49,16 @@ function Build-SqlScriptsPackage {
     .PARAMETER Zip
     If true, package will be compressed.
 
+    .PARAMETER DeleteOutputPathContents
+    If true, files from OutputPath will be deleted before copying files from SourceDirectory.
+
     .LINK
     Deploy-DBDeploySqlScriptsPackage
     Deploy-SqlPackage
     Build-DBDeployPackage
 
     .EXAMPLE
-    Build-SqlScriptsPackage -PackageName 'YourProject.SqlScriptsDBName' -ScriptsPath 'Database\DbName\changes'
+    Build-SqlScriptsPackage -PackageName 'YourProject.SqlScriptsDBName' -ScriptsPath 'Database\DbName\changes' -DeleteOutputPathContents:true
 
     #>
     [CmdletBinding()]
@@ -83,8 +86,12 @@ function Build-SqlScriptsPackage {
 
         [Parameter(Mandatory=$false)]
         [switch]
-        $Zip
+        $Zip,
+
+        [Parameter(Mandatory=$false)]
+        [switch]
+        $DeleteOutputPathContents
     )
 
-    Build-DirPackage -PackageName $PackageName -SourcePath $ScriptsPath -OutputPath $OutputPath -Include $Include -Exclude $Exclude -Zip:$Zip
+    Build-DirPackage -PackageName $PackageName -SourcePath $ScriptsPath -OutputPath $OutputPath -Include $Include -Exclude $Exclude -Zip:$Zip -DeleteOutputPathContents:$DeleteOutputPathContents
 }

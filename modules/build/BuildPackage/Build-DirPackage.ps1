@@ -45,8 +45,11 @@ function Build-DirPackage {
     .PARAMETER Zip
     If true, package will be compressed.
 
+    .PARAMETER DeleteOutputPathContents
+    If true, files from OutputPath will be deleted before copying files from SourceDirectory.
+
     .EXAMPLE
-    Build-DirPackage -PackageName 'TestsPerformance' -SourcePath 'Performance\JMeter'
+    Build-DirPackage -PackageName 'TestsPerformance' -SourcePath 'Performance\JMeter' -DeleteOutputPathContents:true
     #>
     [CmdletBinding()]
     [OutputType([void])]
@@ -73,7 +76,11 @@ function Build-DirPackage {
 
         [Parameter(Mandatory=$false)]
         [switch]
-        $Zip
+        $Zip,
+
+        [Parameter(Mandatory=$false)]
+        [switch]
+        $DeleteOutputPathContents=$false
     )
 
     Write-ProgressExternal -Message "Building package $PackageName"
@@ -94,6 +101,11 @@ function Build-DirPackage {
         $OutputPath = Split-Path -Path $OutputPath -Parent
     } elseif ($Zip) {
         $zipPath = Join-Path -Path $OutputPath -ChildPath "${PackageName}.zip"
+    }
+
+    if ($DeleteOutputPathContents -and (Test-Path -Path $OutputPath)) {
+        Write-Log -Info "Removing all files from '$OutputPath'"
+        Remove-Item -Recurse -Force $OutputPath
     }
 
     [void](New-Item -Path $OutputPath -ItemType Directory -Force)
