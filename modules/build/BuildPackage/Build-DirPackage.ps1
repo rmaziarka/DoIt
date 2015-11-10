@@ -105,7 +105,7 @@ function Build-DirPackage {
 
     if ($DeleteOutputPathContents -and (Test-Path -Path $OutputPath)) {
         Write-Log -Info "Removing all files from '$OutputPath'"
-        Remove-Item -Recurse -Force $OutputPath
+        Remove-Item -Path $OutputPath -Recurse -Force 
     }
 
     [void](New-Item -Path $OutputPath -ItemType Directory -Force)
