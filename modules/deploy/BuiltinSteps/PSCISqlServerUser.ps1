@@ -36,6 +36,7 @@ function PSCISqlServerUser {
       - **Username** - (required) name of user/login to create
       - **DbRoles** - list of database-level roles to assign to the user (db_owner, db_datawriter, db_datareader etc.)
       - **DatabaseName** - name of database where the user will be created (if not specified will be taken from ConnectionString / Initial Catalog)
+      - **CreateUser** - determines whether user will be created if it doesn't exist
       - **CreateLogin** - determines whether login will be created for the user if it doesn't exist
       - **LoginWindowsAuthentication** - determines login type (Windows / SQL Server Authentication)
       - **LoginPassword** - password for login to create (only if CreateLogin = true and LoginWindowsAuthentication = false)
@@ -62,7 +63,7 @@ function PSCISqlServerUser {
                 @{
                     ConnectionString = { $Tokens.Database.ConnectionString }
                     Username = 'DOMAIN\myuser'
-                    CreateLogin = $true
+                    CreateUser = $false
                     LoginWindowsAuthentication = $true
                     LoginServerRoles = 'sysadmin'
                 },
@@ -70,7 +71,7 @@ function PSCISqlServerUser {
                     ConnectionString = { $Tokens.Database.ConnectionString }
                     Username = 'test'
                     DatabaseRoles = 'db_datareader'
-                    CreateLogin = $true
+                    CreateLogin = $false
                     LoginWindowsAuthentication = $false
                     LoginPassword = 'test%123'
                 }
@@ -107,9 +108,14 @@ function PSCISqlServerUser {
         return
     }
 
+    if ($sqlServerUser.CreateUser -eq $false -and $sqlServerUser.CreateLogin -eq $false) {
+        Write-Log -Warn "PSCISqlServerUser used with no login and no user option."
+        return
+    }
+
     foreach ($sqlServerUser in $sqlServerUsers) {
         Write-Log -Info ("Starting PSCISqlServerUser, node ${NodeName}: {0}" -f (Convert-HashtableToString -Hashtable $sqlServerUser))
-        if ($sqlServerUser.CreateLogin) {
+        if ($sqlServerUser.CreateLogin -ne $false) {
             $params = @{
                 ConnectionString = $sqlServerUser.ConnectionString
                 Username = $sqlServerUser.Username
@@ -120,13 +126,15 @@ function PSCISqlServerUser {
             Update-SqlLogin @params
         }
 
-        $params = @{
-            ConnectionString = $sqlServerUser.ConnectionString
-            DatabaseName = $sqlServerUser.DatabaseName
-            Username = $sqlServerUser.Username
-            DbRoles = $sqlServerUser.DbRoles
+        if ($sqlServerUser.CreateUser -ne $false) {
+            $params = @{
+                ConnectionString = $sqlServerUser.ConnectionString
+                DatabaseName = $sqlServerUser.DatabaseName
+                Username = $sqlServerUser.Username
+                DbRoles = $sqlServerUser.DbRoles
+            }
+            Update-SqlUser @params
         }
-        Update-SqlUser @params
     }
     
 }
