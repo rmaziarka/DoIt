@@ -96,6 +96,6 @@ function Copy-Directory {
         if ($destFolder -and !(Test-Path -LiteralPath $destFolder)) {
             [void](New-Item -Path $destFolder -ItemType Directory -Force)
         }
-        Copy-Item -Path $file.FullName -Destination $destFile -Force
+        Copy-Item -LiteralPath $file.FullName -Destination $destFile -Force 
     }
 }
