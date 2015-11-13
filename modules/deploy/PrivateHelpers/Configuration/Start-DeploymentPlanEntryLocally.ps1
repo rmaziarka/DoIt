@@ -47,7 +47,8 @@ function Start-DeploymentPlanEntryLocally {
 
     $stepNumber = 0
     foreach ($configInfo in $DeploymentPlanGroupedEntry.GroupedConfigurationInfo) {
-        Write-ProgressExternal -MessageType BlockOpened -Message ('Step {0}/{1}: {2}' -f ++$stepNumber, $DeploymentPlanGroupedEntry.GroupedConfigurationInfo.count, $configInfo.StepName)
+        $blockMessage = 'Step {0}/{1}: {2}.{3}' -f ++$stepNumber, $DeploymentPlanGroupedEntry.GroupedConfigurationInfo.count, $configInfo.ServerRole, $configInfo.StepName
+        Write-ProgressExternal -MessageType BlockOpened -Message $blockMessage
         Write-Log -Info ("[START] RUN LOCAL STEP '{0}' / NODE '{1}'" -f $configInfo.StepName, $configInfo.ConnectionParams.NodesAsString) -Emphasize
         Write-ProgressExternal -Message ('Deploying {0} to {1}' -f $configInfo.StepName, $configInfo.ConnectionParams.NodesAsString) `
                                -ErrorMessage ('Deploy error - node {0}, step {1}' -f $configInfo.ConnectionParams.NodesAsString, $configInfo.StepName)
@@ -77,6 +78,6 @@ function Start-DeploymentPlanEntryLocally {
            }
         }
         Write-Log -Info ("[END] RUN LOCAL STEP '{0}' / NODE '{1}'" -f $configInfo.StepName, $configInfo.ConnectionParams.NodesAsString) -Emphasize
-        Write-ProgressExternal -MessageType BlockClosed -Message ('Step {0}/{1}: {2}' -f $stepNumber, $DeploymentPlanGroupedEntry.GroupedConfigurationInfo.count, $configInfo.StepName)
+        Write-ProgressExternal -MessageType BlockClosed -Message $blockMessage
     }   
 }
