@@ -34,6 +34,9 @@ function Invoke-RunNUnitTests {
     .PARAMETER NUnitRunnerPath
     Path to NUnit console runner executable. If not specified NUnit runners will be downloaded from Nuget.
 
+    .PARAMETER NUnitVersion
+    The version of NUnit.Runners nuget to use if no runner path is specified. Version 3 is not yet supported.
+
     .PARAMETER TestsDirectory
     Path to the directory which is root of assemblies with tests. If not specified project root will be used.
 
@@ -68,6 +71,10 @@ function Invoke-RunNUnitTests {
         
         [Parameter(Mandatory=$false)]
         [string]
+        $NUnitVersion = '2.6.4',
+
+        [Parameter(Mandatory=$false)]
+        [string]
         $TestsDirectory,
 
         [Parameter(Mandatory=$true)]
@@ -88,8 +95,8 @@ function Invoke-RunNUnitTests {
 
         [Parameter(Mandatory=$false)]
         [string]
-        $NetFrameworkVersion = '4.0',
-                        
+        $NetFrameworkVersion = '4.5',
+
         [Parameter(Mandatory=$false)]
         [string]
         $ResultPath
@@ -106,7 +113,7 @@ function Invoke-RunNUnitTests {
         $NUnitRunnerPath = "$nugetPackagesPath\NUnit.Runners\tools\nunit-console.exe"
 
         if (!(Test-Path -Path $NUnitRunnerPath) ) {
-            Install-NugetPackage -PackageId NUnit.Runners -OutputDirectory $nugetPackagesPath -ExcludeVersionInOutput
+            Install-NugetPackage -PackageId NUnit.Runners -Version $NUnitVersion -OutputDirectory $nugetPackagesPath -ExcludeVersionInOutput
         }
     } else {
         $NUnitRunnerPath = Resolve-PathRelativeToProjectRoot -Path $NUnitRunnerPath -CheckExistence:$false
