@@ -56,6 +56,9 @@ function Invoke-WebRequestWrapper {
       
     .PARAMETER WebSession
     Web session
+	
+	.PARAMETER OutFile
+	Saves the response body in the specified output file
 
     .PARAMETER FailOnErrorResponse
     If true and response is not OK, an exception will be thrown (default Invoke-WebRequest behavior). Otherwise, normal response will be returned.
@@ -102,6 +105,10 @@ function Invoke-WebRequestWrapper {
         [Parameter(Mandatory=$false)]
         [object] 
         $WebSession,
+
+		[Parameter(Mandatory=$false)]
+        [object] 
+        $OutFile,
 
         [Parameter(Mandatory=$false)]
         [switch]
