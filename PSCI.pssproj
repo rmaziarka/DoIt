@@ -2277,6 +2277,8 @@
     <Compile Include="modules\teamcityExtensions\MetaRunners\PSCI_UpdateConfigFileWebAppConfigOrAppProperties.xml" />
     <Compile Include="modules\teamcityExtensions\MetaRunners\PSCI_UpdateTextFileRegex.xml" />
     <Compile Include="modules\teamcityExtensions\MetaRunners\PSCI_UpdateXmlUsingXdtXslt.xml" />
+    <Compile Include="modules\teamcityExtensions\MetaRunners\PSCI_ZapAction.xml" />
+    <Compile Include="modules\teamcityExtensions\MetaRunners\PSCI_ZapStart.xml" />
     <Compile Include="modules\teamcityExtensions\MetaRunners\readme.txt" />
     <Compile Include="modules\teamcityExtensions\PSCI.teamcityExtensions.psd1" />
     <Compile Include="modules\teamcityExtensions\PSCI.teamcityExtensions.psm1" />
@@ -2284,6 +2286,7 @@
     <Compile Include="modules\teamcityExtensions\TestTrend\Get-TestTimeThresholdData.ps1" />
     <Compile Include="modules\teamcityExtensions\TestTrend\New-TeamcityTrendReport.ps1" />
     <Compile Include="modules\teamcityExtensions\TestTrend\New-TeamcityTrendReport.Tests.ps1" />
+    <Compile Include="core\utils\Enable-Proxy.ps1" />
     <Compile Include="modules\teamcityExtensions\Utils\Get-TeamcityArrayParameter.ps1" />
     <Compile Include="modules\teamcityExtensions\Utils\Get-TeamcityArrayParameter.Tests.ps1" />
     <Compile Include="modules\teamcityExtensions\Utils\Get-TeamcityConnectionParameters.ps1" />
@@ -2300,6 +2303,7 @@
     <Compile Include="modules\teamcityExtensions\Utils\Invoke-SqlMetaRunner.ps1" />
     <Compile Include="modules\teamcityExtensions\Utils\Test-RunCondition.ps1" />
     <Compile Include="modules\teamcityExtensions\Zap\Close-Zap.ps1" />
+    <Compile Include="modules\teamcityExtensions\Zap\Report-Zap.ps1" />
     <Compile Include="modules\teamcityExtensions\Zap\Start-Zap.ps1" />
     <Compile Include="modules\teamcityExtensions\Zap\Start-ZapAScan.ps1" />
     <Compile Include="modules\teamcityExtensions\Zap\Start-ZapSpider.ps1" />
@@ -2355,7 +2359,6 @@
     <Compile Include="PSCI.nuspec" />
     <Compile Include="PSCI.psd1" />
     <Compile Include="PSCI.psm1" />
-    <Compile Include="Wait-Zap.ps1" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="core\" />
