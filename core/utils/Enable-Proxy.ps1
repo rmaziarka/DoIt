@@ -48,24 +48,23 @@ function Enable-Proxy {
         [int]
         $Port
     )
-	    
-	$regKey="HKCU:\Software\Microsoft\Windows\CurrentVersion\Internet Settings"
-	$proxyServer = ""
-	$proxyServerToDefine = "${Server}:${Port}"
-	Write-Log -Info "Retrieve the proxy server ..."
-	$proxyServer = Get-ItemProperty -path $regKey ProxyServer -ErrorAction SilentlyContinue
-	$proxyEnabled = Get-ItemProperty -path $regKey ProxyEnable -ErrorAction SilentlyContinue
 
-	Write-Log -Info $proxyServer
-	if($proxyEnabled.ProxyEnable -eq 0 -or $proxyServer.ProxyServer -ne $proxyServerToDefine)
-	{
-		Write-Log -Info "Proxy $proxyServerToDefine is disabled."
-		Set-ItemProperty -path $regKey ProxyEnable -value 1
-		Set-ItemProperty -path $regKey ProxyServer -value $proxyServerToDefine
-		Write-Log -Info "Proxy $proxyServerToDefine is now enabled."
-	}
-	else
-	{
-		Write-Log -Info "Proxy $proxyServerToDefine is already enabled."
-	}
+    $regKey="HKCU:\Software\Microsoft\Windows\CurrentVersion\Internet Settings"
+    $proxyServer = ""
+    $proxyServerToDefine = "${Server}:${Port}"
+    Write-Log -Info "Retrieve the proxy server ..."
+    $proxyServer = Get-ItemProperty -path $regKey ProxyServer -ErrorAction SilentlyContinue
+    $proxyEnabled = Get-ItemProperty -path $regKey ProxyEnable -ErrorAction SilentlyContinue
+    Write-Log -Info $proxyServer
+    if($proxyEnabled.ProxyEnable -eq 0 -or $proxyServer.ProxyServer -ne $proxyServerToDefine)
+    {
+        Write-Log -Info "Proxy $proxyServerToDefine is disabled."
+        Set-ItemProperty -path $regKey ProxyEnable -value 1
+        Set-ItemProperty -path $regKey ProxyServer -value $proxyServerToDefine
+        Write-Log -Info "Proxy $proxyServerToDefine is now enabled."
+    }
+    else
+    {
+        Write-Log -Info "Proxy $proxyServerToDefine is already enabled."
+    }
 }

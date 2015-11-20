@@ -53,12 +53,12 @@ function Invoke-WebRequestWrapper {
     
     .PARAMETER UseDefaultCredentials
     Set if you want default credentials
-      
+
     .PARAMETER WebSession
     Web session
-	
-	.PARAMETER OutFile
-	Saves the response body in the specified output file
+
+    .PARAMETER OutFile
+    Saves the response body in the specified output file
 
     .PARAMETER FailOnErrorResponse
     If true and response is not OK, an exception will be thrown (default Invoke-WebRequest behavior). Otherwise, normal response will be returned.
@@ -106,7 +106,7 @@ function Invoke-WebRequestWrapper {
         [object] 
         $WebSession,
 
-		[Parameter(Mandatory=$false)]
+        [Parameter(Mandatory=$false)]
         [object] 
         $OutFile,
 
