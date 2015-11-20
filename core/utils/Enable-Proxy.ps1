@@ -24,17 +24,17 @@ SOFTWARE.
 
 function Enable-Proxy {
     <#
-    .SYNOPSIS.
-        Enables proxy on specified address and port
+    .SYNOPSIS
+    Enables proxy on specified address and port
 
     .PARAMETER Server
-        Server
+    The address of the proxy server.
 
     .PARAMETER Port
-        Port
+    The port number.
 
     .EXAMPLE            
-        Enable-Proxy -Server "localhost" -Port 8080
+    Enable-Proxy -Server "localhost" -Port 8080
 
     #>
     [CmdletBinding()]
