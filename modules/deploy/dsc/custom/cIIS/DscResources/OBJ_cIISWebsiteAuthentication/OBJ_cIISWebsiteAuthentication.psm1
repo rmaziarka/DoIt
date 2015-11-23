@@ -40,17 +40,30 @@ function Get-TargetResource
        
         [parameter(Mandatory=$true)]
         [ValidateNotNullOrEmpty()]
+        [ValidateSet("Anonymous", "Basic", "Windows","ClientCertificateMapping", "Digest", "IISClientCertificateMapping", "Forms")]
         [string]
         $AuthenticationMethod
     )
 
     $authFilter = "System.WebServer/security/authentication/${AuthenticationMethod}Authentication"
     try {
-        $isEnabled = (Get-WebConfigurationProperty -Filter "/$authFilter" -Name enabled -Location $WebsiteName).Value
-        if ([System.Boolean]::Parse($isEnabled)) {
-           $ensure = 'Present'
-        } else {
-           $ensure = 'Absent'
+        if ($AuthenticationMethod -eq 'Forms')
+        {
+            $siteName = "IIS:\sites\${WebsiteName}"
+            $config = (Get-WebConfiguration system.web/authentication $siteName)
+            if ($config.mode -eq "Forms"){
+               $ensure = 'Present'
+            } else {
+               $ensure = 'Absent'
+            }
+        }
+        else{
+            $isEnabled = (Get-WebConfigurationProperty -Filter "/$authFilter" -Name enabled -Location $WebsiteName).Value
+            if ([System.Boolean]::Parse($isEnabled)) {
+               $ensure = 'Present'
+            } else {
+               $ensure = 'Absent'
+            }
         }
     } catch {
         # This can happen if on 2008 R2 and Web.config contains entries from .NET 4.0 - see https://social.microsoft.com/Forums/en-US/37b6a7c1-632e-458e-9e96-c5c544329ffe/powershell-webadministration-module-update?forum=whatforum
@@ -90,16 +103,30 @@ function Set-TargetResource
         $Ensure = "Present",
         
         [parameter(Mandatory=$true)]
-        [ValidateNotNullOrEmpty()]
+        [ValidateNotNullOrEmpty()]        
+        [ValidateSet("Anonymous", "Basic", "Windows","ClientCertificateMapping", "Digest", "IISClientCertificateMapping", "Forms")]
         [string]
         $AuthenticationMethod
-
     )
 
     Write-Verbose "Website '$WebsiteName', authentication method '$AuthenticationMethod' ensure = '$Ensure'"
     $authFilter = "System.WebServer/security/authentication/${AuthenticationMethod}Authentication"
     try {
-        Set-WebConfigurationProperty -Filter "/$authFilter" -Name enabled -Location $WebsiteName -Value ($Ensure -eq "Present")
+        if ($AuthenticationMethod -eq 'Forms')
+        {
+            $siteName = "IIS:\sites\${WebsiteName}"
+            $config = (Get-WebConfiguration system.web/authentication $siteName)
+            if ($Ensure -eq "Present"){
+                $config.mode = "Forms"
+            } else {
+                if ($config.mode -eq "Forms"){
+                    $config.mode = "Windows"
+                }
+            }
+            $config | Set-WebConfiguration system.web/authentication
+        } else {
+            Set-WebConfigurationProperty -Filter "/$authFilter" -Name enabled -Location $WebsiteName -Value ($Ensure -eq "Present")
+        }
     } catch {
         # This can happen if on 2008 R2 and Web.config contains entries from .NET 4.0 - see https://social.microsoft.com/Forums/en-US/37b6a7c1-632e-458e-9e96-c5c544329ffe/powershell-webadministration-module-update?forum=whatforum
         Write-Verbose -Message ("Set-WebConfigurationProperty failed with message: {0} - falling back to appcmd." -f $_)
@@ -107,7 +134,6 @@ function Set-TargetResource
         Run-AppCmd -Arguments "unlock config -section:$authFilter"
         Run-AppCmd -Arguments ("set config `"$WebsiteName`" /section:$authFilter -enabled:{0}" -f ($Ensure -eq "Present").ToString().ToLower())
     }
-
 }
 
 #
