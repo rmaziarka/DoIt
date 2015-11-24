@@ -113,7 +113,7 @@ function Invoke-WebRequestWrapper {
         [object] 
         $OutFile,
 
-		[Parameter(Mandatory=$false)]
+        [Parameter(Mandatory=$false)]
         [Uri] 
         $Proxy,
 
