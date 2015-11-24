@@ -60,6 +60,9 @@ function Invoke-WebRequestWrapper {
     .PARAMETER OutFile
     Saves the response body in the specified output file
 
+    .PARAMETER Proxy
+    Uses a proxy server for the request, rather than connecting directly to the Internet resource. Enter the URI of a network proxy server.
+
     .PARAMETER FailOnErrorResponse
     If true and response is not OK, an exception will be thrown (default Invoke-WebRequest behavior). Otherwise, normal response will be returned.
 
@@ -109,6 +112,10 @@ function Invoke-WebRequestWrapper {
         [Parameter(Mandatory=$false)]
         [object] 
         $OutFile,
+
+		[Parameter(Mandatory=$false)]
+        [Uri] 
+        $Proxy,
 
         [Parameter(Mandatory=$false)]
         [switch]
