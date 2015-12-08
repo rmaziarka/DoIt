@@ -2305,6 +2305,7 @@
     <Compile Include="modules\teamcityExtensions\Zap\Close-Zap.ps1" />
     <Compile Include="modules\teamcityExtensions\Zap\New-ZapReport.ps1" />
     <Compile Include="modules\teamcityExtensions\Zap\Start-Zap.ps1" />
+    <Compile Include="modules\teamcityExtensions\Zap\Start-ZapAjaxSpider.ps1" />
     <Compile Include="modules\teamcityExtensions\Zap\Start-ZapAScan.ps1" />
     <Compile Include="modules\teamcityExtensions\Zap\Start-ZapSpider.ps1" />
     <Compile Include="modules\teamcityExtensions\_deploy\configuration\deployPsci.ps1" />
