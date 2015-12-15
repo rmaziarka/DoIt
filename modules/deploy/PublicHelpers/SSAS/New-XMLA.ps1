@@ -35,6 +35,9 @@ function New-XMLA {
 
     .PARAMETER ConnectionString
     Connection string to the cube which the .xmla is generated for.
+    
+    .PARAMETER DeploymentToolPath
+        Path and name to application Microsoft.AnalysisServices.Deployment.exe - default value = 'C:\Program Files (x86)\Microsoft SQL Server\100\Tools\Binn\VSShell\Common7\IDE\Microsoft.AnalysisServices.Deployment.exe'.
 
     .EXAMPLE
     New-XMLA -ASDatabasePath "$BinDirPath\$ProjectName.asdatabase" -CubeXmlaFilePath $generatedXmlaFilePath -ConnectionString $CubeConnectionString

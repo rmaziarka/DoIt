@@ -64,6 +64,9 @@ function Deploy-SSASPackage {
 
     .PARAMETER ProcessType
     Name of the type of processing that will be applied during deployment.
+    
+    .PARAMETER DeploymentToolPath
+        Path and name to application Microsoft.AnalysisServices.Deployment.exe - default value = 'C:\Program Files (x86)\Microsoft SQL Server\100\Tools\Binn\VSShell\Common7\IDE\Microsoft.AnalysisServices.Deployment.exe'.
 
     .LINK
     Build-SSASPackage

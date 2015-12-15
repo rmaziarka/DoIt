@@ -26,6 +26,9 @@ function Get-SSASDeploymentCMDPath {
     <#
         .SYNOPSIS
             Gets path to Microsoft.Analysis.Services.Deployment.exe tool.
+            
+        .PARAMETER DeploymentToolPath
+            Path and name to application Microsoft.AnalysisServices.Deployment.exe - default value = 'C:\Program Files (x86)\Microsoft SQL Server\100\Tools\Binn\VSShell\Common7\IDE\Microsoft.AnalysisServices.Deployment.exe'.
 
         .EXAMPLE
             PS C:\> Get-SSASDeploymentCMDPath
