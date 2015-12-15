@@ -36,8 +36,11 @@ function Get-SSASDeploymentCMDPath {
     #>
     [CmdletBinding()]
     [OutputType([System.Int32])]
-    param()    
-
-    # TODO: get file path dynamically from registry/env
-    return "C:\Program Files (x86)\Microsoft SQL Server\100\Tools\Binn\VSShell\Common7\IDE\Microsoft.AnalysisServices.Deployment.exe"
+    param(
+        [Parameter(Mandatory=$false)]
+        [string] 
+        $DeploymentToolPath = 'C:\Program Files (x86)\Microsoft SQL Server\100\Tools\Binn\VSShell\Common7\IDE\Microsoft.AnalysisServices.Deployment.exe'
+    )
+    
+    return $DeploymentToolPath
 }

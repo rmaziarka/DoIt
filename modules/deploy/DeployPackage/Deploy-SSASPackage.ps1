@@ -107,7 +107,11 @@ function Deploy-SSASPackage {
         [Parameter(Mandatory=$false)]
         [ValidateSet('ProcessDefault', 'ProcessFull', 'DoNotProcess')]
         [string]
-        $ProcessType = 'ProcessDefault'
+        $ProcessType = 'ProcessDefault',
+        
+        [Parameter(Mandatory=$false)]
+        [string] 
+        $DeploymentToolPath
     )
 
     $configPaths = Get-ConfigurationPaths
@@ -123,7 +127,7 @@ function Deploy-SSASPackage {
 
     $generatedXmlaFilePath = "$BinDirPath\GeneratedScript.xmla"
     
-    New-XMLA -ASDatabasePath "$BinDirPath\$ProjectName.asdatabase" -CubeXmlaFilePath  $generatedXmlaFilePath -ConnectionString $CubeConnectionString
+    New-XMLA -ASDatabasePath "$BinDirPath\$ProjectName.asdatabase" -CubeXmlaFilePath  $generatedXmlaFilePath -ConnectionString $CubeConnectionString -DeploymentToolPath $DeploymentToolPath
 
     if ($RolesMapping) {
         Update-SSASXmlaRoleMembers -GeneratedXmlaFilePath $generatedXmlaFilePath -RolesMapping $RolesMapping

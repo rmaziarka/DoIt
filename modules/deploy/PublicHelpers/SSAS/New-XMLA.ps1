@@ -54,10 +54,14 @@ function New-XMLA {
 
         [Parameter(Mandatory=$true)]
         [string] 
-        $ConnectionString
+        $ConnectionString,
+        
+        [Parameter(Mandatory=$false)]
+        [string] 
+        $DeploymentToolPath
     )
 
-    $DeploymentToolPath = Get-SSASDeploymentCMDPath
+    $DeploymentToolPath = Get-SSASDeploymentCMDPath -DeploymentToolPath $DeploymentToolPath
     if (!(Test-Path -LiteralPath $DeploymentToolPath)) {
         throw "Analysis Services deployment tool has not been found at '$DeploymentToolPath'."
     }
