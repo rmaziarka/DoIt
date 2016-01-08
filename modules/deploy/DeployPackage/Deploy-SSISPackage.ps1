@@ -40,6 +40,9 @@ function Deploy-SSISPackage {
         .PARAMETER  DeleteExistingPackages
             If $true then delete existing SSIS packages before deploying new ones.
 
+        .PARAMETER  PackagesToDeploy
+    		If $null all SSIS packages will be deleted and deployed, when not null (list of packages names) then only specified packages will be deployed.
+
         .PARAMETER  Tokens
             Hashtable with tokens that will be used to replace placeholders in packages configuration files located in $ConfigurationPath.
 
@@ -70,6 +73,10 @@ function Deploy-SSISPackage {
         $DeleteExistingPackages = $true,
 
         [Parameter(Mandatory=$false)]
+        [string] 
+		$PackagesToDeploy,
+
+        [Parameter(Mandatory=$false)]
         [hashtable]
         $Tokens,
 
@@ -93,8 +100,15 @@ function Deploy-SSISPackage {
 
         Write-Log -Info "Deleting existing packages"
 
-        $packagesToRemove = Get-IsItem -Path $FolderPath -TopLevelFolder 'msdb' -ServerName localhost | 
-            Where-Object { $_.Flags -eq [Microsoft.SqlServer.Dts.Runtime.DTSPackageInfoFlags]::Package }
+        if (!$PackagesToDeploy) {
+			Write-Log -Info "Removing all existing packages"
+			$packagesToRemove = Get-IsItem -Path $FolderPath -TopLevelFolder 'msdb' -ServerName localhost | 
+				Where-Object { $_.Flags -eq [Microsoft.SqlServer.Dts.Runtime.DTSPackageInfoFlags]::Package }
+		} else {
+			Write-Log -Info "Removing custom list of existing packages"
+            $packagesToRemove = Get-IsItem -Path $FolderPath -TopLevelFolder 'msdb' -ServerName localhost | 
+                Where-Object { $_.name -match $PackagesToDeploy }
+		}	
 
         foreach ($package in $packagesToRemove) {
             Write-Log -Info "Removing $($package.LiteralPath)"
@@ -105,9 +119,13 @@ function Deploy-SSISPackage {
     Write-Log -Info "Copying configuration from $ConfigurationSourcePath\*.* to $ConfigurationPath..."
     Copy-Item -Path "$ConfigurationSourcePath\*.*" -Destination $ConfigurationPath -Recurse -Force
 
-    Write-Log -Info "Deploying packages..."
-
-    $pkgs = Get-ChildItem -Path $PackagePath
+    if (!$PackagesToDeploy) {
+		Write-Log -Info "Deploying all packages..."
+		$pkgs = Get-ChildItem -Path $PackagePath
+	} else {
+		Write-Log -Info "Deploying custom list of packages..."
+		$pkgs = Get-ChildItem -Path $PackagePath | Where-Object { $_.name -match $PackagesToDeploy }
+	}
     foreach ($pkgName in $pkgs) {
         $PackageFilePath = Join-Path -Path $PackagePath -ChildPath $pkgName
         $SSISPackageName = [io.path]::GetFileNameWithoutExtension($pkgName)
