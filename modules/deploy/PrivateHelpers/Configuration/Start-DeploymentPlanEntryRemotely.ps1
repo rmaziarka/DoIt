@@ -62,7 +62,7 @@ function Start-DeploymentPlanEntryRemotely {
 
     # need to do it here (not in New-DeploymentPlanEntry), because we don't want to affect grouping
     if ($packageDirectory -ieq 'auto') {
-        $packageDirectory = 'c:\PSCIPackage_{0}_{1}' -f (Get-Date -Format 'yyyyMMdd_HHmmss'), (([guid]::NewGuid()).Guid -split '-')[0]
+        $packageDirectory = 'c:\DoItPackage_{0}_{1}' -f (Get-Date -Format 'yyyyMMdd_HHmmss'), (([guid]::NewGuid()).Guid -split '-')[0]
         $packageDirectoryAutoRemove = $true
     }
     

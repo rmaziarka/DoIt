@@ -64,13 +64,13 @@ function Read-ConfigurationFiles {
     $dscResourceRegex = 'Import-DSCResource\s+(?:-Module)?(?:Name)?\s*([^-][^\s;]+)|Import-DSCResource.+-Module(?:Name)?\s*([^-][^\s;]+)'
     $sqlpsxSsisRegex = 'Deploy-SSISPackage|Import-SQLPSXSSIS'
     $nssmRegex = 'Set-NssmService'
-    $builtinStepRegex = '\b(PSCI[\w-]+)\b'
+    $builtinStepRegex = '\b(DoIt[\w-]+)\b'
     foreach ($script in $configScripts) {
         $contents = Get-Content -Path $script.FullName -ReadCount 0 | Out-String
         if ($contents -imatch $invalidLineRegex) {
             throw "File '$configPath' contains 'Import-DSCResource' line that ends with backtick, which is not allowed. Please change it to fit into one line. Offending line: $($matches[0])"
         }
-        $deployModulePath = Get-PSCIModulePath -ModuleName 'PSCI.Deploy'
+        $deployModulePath = Get-DoItModulePath -ModuleName 'DoIt.Deploy'
         $builtinStepMatches = Select-String -InputObject $contents -Pattern $builtinStepRegex -AllMatches
         foreach ($builtinStepMatch in $builtinStepMatches.Matches) {
             $stepName = $builtinStepMatch.Groups[1].Value

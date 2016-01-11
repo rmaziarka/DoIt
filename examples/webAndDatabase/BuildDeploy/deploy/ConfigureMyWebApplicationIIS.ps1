@@ -26,7 +26,7 @@ Configuration ConfigureMyWebApplicationIIS {
     param ($NodeName, $Environment, $Tokens)
 
     Import-DSCResource -Module cIIS
-    # DSC PSGallery resources are included in PSCI
+    # DSC PSGallery resources are included in DoIt
     Import-DSCResource -Module xNetworking
 
     Node $NodeName {

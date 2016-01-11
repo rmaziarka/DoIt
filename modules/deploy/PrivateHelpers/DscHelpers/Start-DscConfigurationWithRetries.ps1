@@ -98,7 +98,7 @@ function Start-DscConfigurationWithRetries
         $attempt++
 
         # if running on localhost or remotely by PSRemoting, don't pass neither ComputerName nor CimSession to Start-DscConfiguration (otherwise we can have double hop)
-        if ($PSCIGlobalConfiguration.RemotingMode -eq 'PSRemoting' -or (Test-ComputerNameIsLocalhost -ComputerName $ConnectionParams.Nodes[0])) {
+        if ($DoItGlobalConfiguration.RemotingMode -eq 'PSRemoting' -or (Test-ComputerNameIsLocalhost -ComputerName $ConnectionParams.Nodes[0])) {
             Write-Log -Info "Start-DscConfiguration will run in LOCAL mode - REBOOT '$RebootHandlingMode'"
             $cimSession = $null
         } else {            

@@ -51,14 +51,14 @@ function Copy-CarbonFilesToRemoteServer {
     )
 
     $carbonPath = Get-PathToExternalLib -ModulePath 'Carbon\Carbon'
-    $psciCorePath = Get-PSCIModulePath -ModuleName 'PSCI.core'
+    $DoItCorePath = Get-DoItModulePath -ModuleName 'DoIt.core'
 
     $files = @(
         "$carbonPath\Xml"
         "$carbonPath\Path\Resolve-FullPath.ps1"
         "$carbonPath\bin\Microsoft.Web.XmlTransform.dll"
         "$carbonPath\bin\Carbon.Xdt.dll"
-        "$psciCorePath\utils\Convert-XmlUsingXdt.ps1"
+        "$DoItCorePath\utils\Convert-XmlUsingXdt.ps1"
     )
 
     Copy-FilesToRemoteServer -Path $files -ConnectionParams $ConnectionParameters -Destination $DestinationPath -CheckHashMode UseHashFile

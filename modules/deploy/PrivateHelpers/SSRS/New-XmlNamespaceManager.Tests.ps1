@@ -22,10 +22,10 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 #>
 
-Import-Module -Name "$PSScriptRoot\..\..\..\..\PSCI.psd1"
+Import-Module -Name "$PSScriptRoot\..\..\..\..\DoIt.psd1"
 
-Describe -Tag "PSCI.unit" "New-XmlNamespaceManager" {
-    InModuleScope PSCI.deploy {
+Describe -Tag "DoIt.unit" "New-XmlNamespaceManager" {
+    InModuleScope DoIt.deploy {
         Context "when used with existing namespaces" { 
             It "should define default namespace" {
                 $doc = [xml] @"

@@ -55,7 +55,7 @@ function Start-Deployment {
     You can use it to validate global hashtables $Tokens, $ServerRoles and $DeploymentPlan.
 
     .PARAMETER AutoInstallDscResources
-    If true (default), custom DSC resources included in PSCI will be automatically copied to localhost (required for parsing DSC configurations)
+    If true (default), custom DSC resources included in DoIt will be automatically copied to localhost (required for parsing DSC configurations)
     and to the destination servers (required for running DSC configurations).  
 
     .PARAMETER TokensOverride
@@ -126,7 +126,7 @@ function Start-Deployment {
         $NoConfigFiles
      )  
 
-    if (!$PSCIGlobalConfiguration.RemotingMode) {
+    if (!$DoItGlobalConfiguration.RemotingMode) {
         Write-ProgressExternal -Message ("Starting deployment to env {0}" -f ($Environment -join ',')) -ErrorMessage "Deployment init error"
     }
     $configPaths = Get-ConfigurationPaths -DefaultDeployConfigurationPath $DeployConfigurationPath -NoConfigFiles:$NoConfigFiles
@@ -208,7 +208,7 @@ function Start-Deployment {
     }
 
     # if running remotely, return a string to let know that everything went ok (checked in Start-DeploymentByPSRemoting)
-    if ($PSCIGlobalConfiguration.RemotingMode) {
+    if ($DoItGlobalConfiguration.RemotingMode) {
         return "success"
     } else {
         Write-ProgressExternal -Message 'Deployment successful' -ErrorMessage ''

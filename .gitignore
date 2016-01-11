@@ -11,4 +11,4 @@ examples/**/packages
 StyleCop.cache
 *.nupkg
 .vs/
-/PSCI.pssproj.user
+/DoIt.pssproj.user

@@ -33,7 +33,7 @@ function Get-TokenValue {
     2) $Context.Tokens.<current ServerRole name> - available if Tokens are structured according to ServerRole convention
     3) $Context.Tokens.All.$Name
 
-    This function is used in builtin DSC configurations (for instance [[PSCIWindowsFeatures]]).
+    This function is used in builtin DSC configurations (for instance [[DoItWindowsFeatures]]).
 
     .PARAMETER AllPackagesPath
     Path to the directory that will be traversed.

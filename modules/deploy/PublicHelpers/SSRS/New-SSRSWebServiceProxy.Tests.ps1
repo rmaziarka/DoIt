@@ -22,9 +22,9 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 #>
 
-Import-Module -Name "$PSScriptRoot\..\..\..\..\PSCI.psd1"
+Import-Module -Name "$PSScriptRoot\..\..\..\..\DoIt.psd1"
 
-Describe -Tag "PSCI.SSRS" "New-SSRSWebServiceProxy" {
+Describe -Tag "DoIt.SSRS" "New-SSRSWebServiceProxy" {
     
     Context "when used with local server" { 
         $Uri = "http://localhost/reportserver"

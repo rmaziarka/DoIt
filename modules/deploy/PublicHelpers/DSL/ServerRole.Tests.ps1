@@ -22,10 +22,10 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 #>
 
-Import-Module -Name "$PSScriptRoot\..\..\..\..\PSCI.psd1" -Force
+Import-Module -Name "$PSScriptRoot\..\..\..\..\DoIt.psd1" -Force
 
-Describe -Tag "PSCI.unit" "ServerRole" {
-    InModuleScope PSCI.deploy {
+Describe -Tag "DoIt.unit" "ServerRole" {
+    InModuleScope DoIt.deploy {
         Context "when used with single role and environment" {
             $Global:Environments = @{}
 

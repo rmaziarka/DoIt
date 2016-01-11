@@ -42,13 +42,13 @@ function Get-PathToExternalLib {
         $ModulePath
     ) 
 
-    $psciPath = Get-PSCIModulePath
-    $result = Join-Path -Path $psciPath -ChildPath "externalLibs"
+    $DoItPath = Get-DoItModulePath
+    $result = Join-Path -Path $DoItPath -ChildPath "externalLibs"
     if ($ModulePath) {
         $result = Join-Path -Path $result -ChildPath $ModulePath
     }
     if (!(Test-Path -LiteralPath $result)) {
-        throw "Cannot find external library at '$result'. It is required for this part of PSCI to run."
+        throw "Cannot find external library at '$result'. It is required for this part of DoIt to run."
     }
     return ((Resolve-Path -LiteralPath $result).ProviderPath)
 }

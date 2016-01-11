@@ -37,7 +37,7 @@ function New-MarkdownDocModule {
     Base Git url to generate links to source files.
 
     .EXAMPLE
-    New-MarkdownDocModule -ModuleName 'PSCI.build' -OutputPath '..\PSCI.wiki'
+    New-MarkdownDocModule -ModuleName 'DoIt.build' -OutputPath '..\DoIt.wiki'
     #>
 
     [CmdletBinding()]
@@ -53,7 +53,7 @@ function New-MarkdownDocModule {
 
         [Parameter(Mandatory=$false)]
         [string]
-        $GitBaseUrl = 'https://github.com/ObjectivityBSS/PSCI/tree/master'
+        $GitBaseUrl = 'https://github.com/ObjectivityBSS/DoIt/tree/master'
     )
 
     $outputBasePath = Join-Path $OutputPath -ChildPath "api\$ModuleName"
@@ -64,7 +64,7 @@ function New-MarkdownDocModule {
     [void](New-Item -Path $outputBasePath -ItemType Directory -Force)
 
     $outputIndexString = New-Object -TypeName System.Text.StringBuilder
-    $modulePath = Get-PSCIModulePath -ModuleName $ModuleName
+    $modulePath = Get-DoItModulePath -ModuleName $ModuleName
     $readmePath = Join-Path -Path $modulePath -ChildPath 'readme.txt'
     [void]($OutputIndexString.Append("## Module $ModuleName`r`n"))
     if ((Test-Path -Path $readmePath)) {
@@ -99,7 +99,7 @@ function New-MarkdownDocDirectory {
     Base Git url to generate links to source files.
 
     .EXAMPLE
-    New-MarkdownDocDirectory -Path 'BuiltinSteps' -OutputPath '..\PSCI.wiki'
+    New-MarkdownDocDirectory -Path 'BuiltinSteps' -OutputPath '..\DoIt.wiki'
     #>
 
     [CmdletBinding()]
@@ -115,7 +115,7 @@ function New-MarkdownDocDirectory {
 
         [Parameter(Mandatory=$false)]
         [string]
-        $GitBaseUrl = 'https://github.com/ObjectivityBSS/PSCI/tree/master'
+        $GitBaseUrl = 'https://github.com/ObjectivityBSS/DoIt/tree/master'
     )
 
     $dirName = Split-Path -Path $Path -Leaf
@@ -191,7 +191,7 @@ function Get-AllFunctionsFromModule {
     )
 
     Write-Log -Info "Getting functions from $ModuleName"
-    $modulePath = Get-PSCIModulePath -ModuleName $ModuleName
+    $modulePath = Get-DoItModulePath -ModuleName $ModuleName
     $allPs1Files = Get-ChildItem -Path $modulePath -Include "*.ps1" -Recurse | Select-Object -ExpandProperty FullName
 
     $result = New-Object -TypeName System.Collections.ArrayList
@@ -307,9 +307,9 @@ function Generate-MarkdownForFunction {
 
     $funcName = $FunctionInfo.FunctionName
     $help = $FunctionInfo.Help
-    $psciBasePathSlash = (Get-PSCIModulePath) -ireplace '\\', '/'
+    $DoItBasePathSlash = (Get-DoItModulePath) -ireplace '\\', '/'
     if ($ModuleName) { 
-        $modulePath = Get-PSCIModulePath -ModuleName $ModuleName
+        $modulePath = Get-DoItModulePath -ModuleName $ModuleName
     } else {
         $ModuleName = Split-Path -Path (Split-Path -Path $FunctionInfo.Path -Parent) -Leaf
     }
@@ -333,7 +333,7 @@ function Generate-MarkdownForFunction {
     $outputString = New-Object -TypeName System.Text.StringBuilder
     [void]($OutputIndexString.Append("* [[$funcName]]"))
     [void]($outputString.Append("## $funcName`r`n"))
-    $gitLink = ($FunctionInfo.Path -ireplace '\\', '/').Replace($psciBasePathSlash, $GitBaseUrl)
+    $gitLink = ($FunctionInfo.Path -ireplace '\\', '/').Replace($DoItBasePathSlash, $GitBaseUrl)
     [void]($outputString.Append("[[$ModuleName]] -\> [$funcName.ps1]($gitLink)`r`n"))
         
     if ($help.Synopsis) {

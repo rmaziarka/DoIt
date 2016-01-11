@@ -22,11 +22,11 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 #>
 
-Import-Module -Name "$PSScriptRoot\..\..\..\..\PSCI.psd1" -Force
+Import-Module -Name "$PSScriptRoot\..\..\..\..\DoIt.psd1" -Force
 
-Describe -Tag "PSCI.unit" "Install-DscResources" {
+Describe -Tag "DoIt.unit" "Install-DscResources" {
 
-    InModuleScope PSCI.deploy {
+    InModuleScope DoIt.deploy {
 
         $Global:loggedMessage = ''
         $moduleNames = @('cIIS', 'StackExchangeResources', 'xWebAdministration')
@@ -41,7 +41,7 @@ Describe -Tag "PSCI.unit" "Install-DscResources" {
 
         Mock Write-Log $Global:writeLogMock
 
-        InModuleScope PSCI.core {
+        InModuleScope DoIt.core {
            Mock Write-Log $Global:writeLogMock
         }
 

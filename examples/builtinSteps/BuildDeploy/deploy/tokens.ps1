@@ -45,18 +45,18 @@ Environment Default {
     }
 
     Tokens UploadDirectoriesTestRole @{
-        UploadDirectories = @{ 'UploadDirectoriesTest' = 'c:\PSCIUploadTest' }
+        UploadDirectories = @{ 'UploadDirectoriesTest' = 'c:\DoItUploadTest' }
     }
 
     Tokens IISConfigTestRole @{
         IISConfig = @{
-            ApplicationPool = @( @{ Name = 'PSCITestAppPool1'; Identity = 'ApplicationPoolIdentity' },
-                                 @{ Name = 'PSCITestAppPool2'; Identity = 'ApplicationPoolIdentity' }
+            ApplicationPool = @( @{ Name = 'DoItTestAppPool1'; Identity = 'ApplicationPoolIdentity' },
+                                 @{ Name = 'DoItTestAppPool2'; Identity = 'ApplicationPoolIdentity' }
                               )
-            Website = @( @{ Name = 'PSCITestWebsite1'; Binding = @{ Port = 801 }; PhysicalPath = 'c:\inetpub\wwwroot\PSCITestWebsite'; ApplicationPool = 'PSCITestAppPool1' },
-                         @{ Name = 'PSCITestWebsite2'; Binding = @{ Port = 802 }; PhysicalPath = 'c:\inetpub\wwwroot\PSCITestWebsite2'; ApplicationPool = 'PSCITestAppPool2' }
+            Website = @( @{ Name = 'DoItTestWebsite1'; Binding = @{ Port = 801 }; PhysicalPath = 'c:\inetpub\wwwroot\DoItTestWebsite'; ApplicationPool = 'DoItTestAppPool1' },
+                         @{ Name = 'DoItTestWebsite2'; Binding = @{ Port = 802 }; PhysicalPath = 'c:\inetpub\wwwroot\DoItTestWebsite2'; ApplicationPool = 'DoItTestAppPool2' }
                            )
-            WebApplication = @{ Name = 'PSCITestWebApp'; PhysicalPath = 'c:\inetpub\wwwroot\PSCIMyApp'; Website = 'PSCITestWebsite1'; ApplicationPool = 'PSCITestAppPool1' }
+            WebApplication = @{ Name = 'DoItTestWebApp'; PhysicalPath = 'c:\inetpub\wwwroot\DoItMyApp'; Website = 'DoItTestWebsite1'; ApplicationPool = 'DoItTestAppPool1' }
         }
 
     }

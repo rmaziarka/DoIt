@@ -37,7 +37,7 @@ function Invoke-ScriptCop {
     List of files to run before running actual scans. Required e.g. if custom classes are used in the scanned files.
 
     .EXAMPLE
-    Invoke-SCriptCop -Path "c:\PSCI"
+    Invoke-SCriptCop -Path "c:\DoIt"
     #>
 
     [OutputType([int])]
@@ -54,7 +54,7 @@ function Invoke-ScriptCop {
     begin {
         $global:ErrorActionPreference = "Stop"
 
-        $prerequisitesPaths = @("$PSScriptRoot\..\PSCI.classes.ps1", "$PSScriptRoot\..\core\utils\Write-ProgressExternal.ps1")
+        $prerequisitesPaths = @("$PSScriptRoot\..\DoIt.classes.ps1", "$PSScriptRoot\..\core\utils\Write-ProgressExternal.ps1")
         foreach ($prereq in $prerequisitesPaths) {
             Write-Output -InputObject "Including '$prereq'"
             . $prereq

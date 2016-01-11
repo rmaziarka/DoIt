@@ -80,7 +80,7 @@ function Deploy-MsDeployPackage {
 
     .PARAMETER FilesToIgnoreTokensExistence
     List of .config files which will not have token placeholders replaced. 
-    Useful especially if another application uses the same variable placeholder as PSCI (e.g. NLog).
+    Useful especially if another application uses the same variable placeholder as DoIt (e.g. NLog).
 
     .PARAMETER TokenWildcard
     Wildcard to use to recognize config files where tokens should be replaced.

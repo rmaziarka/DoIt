@@ -98,7 +98,7 @@ function Get-FlatFileList {
         
     foreach ($p in $Path) {
         if (!(Test-Path -Path $p)) {
-            # this function can be run remotely without PSCI available
+            # this function can be run remotely without DoIt available
             if (Get-Command -Name Write-Log -ErrorAction SilentlyContinue) {
                 throw "Path '$p' does not exist."
             } else {

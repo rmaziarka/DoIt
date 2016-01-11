@@ -22,13 +22,13 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 #>
 
-Import-Module -Name "$PSScriptRoot\..\..\..\PSCI.psd1" -Force
+Import-Module -Name "$PSScriptRoot\..\..\..\DoIt.psd1" -Force
 
 <# TODO: find a place for this test in Teamcity
 
-Describe -Tag "PSCI.integration" "Deploy-DBDeploySqlScriptsPackage" {
-    InModuleScope PSCI.deploy {
-        Mock -ModuleName PSCI.core Write-Log { 
+Describe -Tag "DoIt.integration" "Deploy-DBDeploySqlScriptsPackage" {
+    InModuleScope DoIt.deploy {
+        Mock -ModuleName DoIt.core Write-Log { 
             Write-Output "$Message"
             if ($Critical) {
                 throw ("Exception: " + $Message)
@@ -39,8 +39,8 @@ Describe -Tag "PSCI.integration" "Deploy-DBDeploySqlScriptsPackage" {
 
         $connectionString = "data source=localhost;initial catalog=XYZ;integrated security=True"
         $packageName = "DatabseUpdate"
-        $scriptPath = Join-Path -Path (Get-PSCIModulePath) -ChildPath "_buildTools\testproject\database\changes\"
-        $dbDeployPath = Join-Path -Path (Get-PSCIModulePath) -ChildPath "_buildTools\testproject\database\dbdeploy\DatabaseDeploy.exe"
+        $scriptPath = Join-Path -Path (Get-DoItModulePath) -ChildPath "_buildTools\testproject\database\changes\"
+        $dbDeployPath = Join-Path -Path (Get-DoItModulePath) -ChildPath "_buildTools\testproject\database\dbdeploy\DatabaseDeploy.exe"
     
 
         Context "when Deploy-DBDeploySqlScriptsPackage is invoked with mocks" {

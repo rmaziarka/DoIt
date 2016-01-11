@@ -35,7 +35,7 @@ If token value is a scriptblock, you can use variables $Tokens, $Node and $Envir
 Environment Default {
 
     Tokens DatabaseConfig @{
-        DatabaseName = 'PSCITest'
+        DatabaseName = 'DoItTest'
         DatabaseDeploymentConnectionString = 'Server=${Node}\SQLEXPRESS;Integrated Security=SSPI;'
     }
 
@@ -48,9 +48,9 @@ Environment Default {
     }
 
     Tokens WebServerProvision @{
-        AppPoolName = 'PSCITest'
-        WebsitePhysicalPath = 'c:\inetpub\wwwroot\PSCITest'
-        WebsiteName = 'PSCITest'
+        AppPoolName = 'DoItTest'
+        WebsitePhysicalPath = 'c:\inetpub\wwwroot\DoItTest'
+        WebsiteName = 'DoItTest'
         WebsitePort = '${WebsitePortCategory.WebsitePort}'
     }
 }

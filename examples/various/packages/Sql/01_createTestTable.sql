@@ -1,5 +1,5 @@
-use PSCITest
+use DoItTest
 GO
 
-create table dbo.PSCITest(id int identity)
+create table dbo.DoItTest(id int identity)
 GO

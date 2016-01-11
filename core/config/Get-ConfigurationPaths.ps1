@@ -33,7 +33,7 @@ function Get-ConfigurationPaths {
     - **PackagesPath**            - path to directory with packages
     - **DeployConfigurationPath** - path to directory with configuration files
     - **DeployScriptsPath**       - path to directory with deploy.ps1  
-    - **PackagesContainDeployScripts** - $true if $PackagesPath exists and contains DeployScripts / PSCI (used internally)
+    - **PackagesContainDeployScripts** - $true if $PackagesPath exists and contains DeployScripts / DoIt (used internally)
 
     .PARAMETER DefaultDeployConfigurationPath
     (internal use) Default DeployConfigurationPath to use if configuration paths have not been initialized yet.
@@ -57,13 +57,13 @@ function Get-ConfigurationPaths {
         $NoConfigFiles
     )
 
-    if (!(Test-Path -LiteralPath variable:global:PSCIGlobalConfiguration)) {
-        throw 'No global PSCIGlobalConfiguration variable.'
+    if (!(Test-Path -LiteralPath variable:global:DoItGlobalConfiguration)) {
+        throw 'No global DoItGlobalConfiguration variable.'
     }
 
-    $configPaths = $Global:PSCIGlobalConfiguration.ConfigurationPaths
+    $configPaths = $Global:DoItGlobalConfiguration.ConfigurationPaths
     if (!$configPaths) {
         Initialize-ConfigurationPaths -DeployConfigurationPath $DefaultDeployConfigurationPath -NoConfigFiles:$NoConfigFiles
     }
-    return $Global:PSCIGlobalConfiguration.ConfigurationPaths
+    return $Global:DoItGlobalConfiguration.ConfigurationPaths
 }

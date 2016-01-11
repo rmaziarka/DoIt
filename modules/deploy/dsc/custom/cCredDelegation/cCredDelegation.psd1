@@ -30,6 +30,6 @@ Author = 'mgrzywa'
 CompanyName = 'Objectivity Bespoke Software Specialists'
 Copyright = '(c) 2015 Objectivity Bespoke Software Specialists'
 
-Description = 'Module containing custom PSCI DSC resources for PS credential delegation'
+Description = 'Module containing custom DoIt DSC resources for PS credential delegation'
 
 }

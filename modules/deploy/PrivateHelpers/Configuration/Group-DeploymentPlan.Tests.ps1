@@ -22,10 +22,10 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 #>
 
-Import-Module -Name "$PSScriptRoot\..\..\..\..\PSCI.psd1" -Force
+Import-Module -Name "$PSScriptRoot\..\..\..\..\DoIt.psd1" -Force
 
-Describe -Tag "PSCI.unit" "Group-DeploymentPlan" {
-    InModuleScope PSCI.deploy {
+Describe -Tag "DoIt.unit" "Group-DeploymentPlan" {
+    InModuleScope DoIt.deploy {
 
         $testEntryRemoteCredSSP1 = [PSCustomObject]@{ 
             EntryNo = 1

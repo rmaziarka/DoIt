@@ -105,7 +105,7 @@ function ServerConnection {
     .EXAMPLE
     ServerConnection WebServer1 -Node 'NODE1' -PackageDirectory 'c:\dir'
 
-    Deployment package will be copied to directory 'c:\dir' (instead of default 'c:\PSCIPackage').
+    Deployment package will be copied to directory 'c:\dir' (instead of default 'c:\DoItPackage').
 
     .EXAMPLE
     ServerConnection WebServer1 -Node 'NODE1' -RemotingMode WebDeployHandler -Authentication Basic `

@@ -12,9 +12,9 @@ or pass whole category explicitly using `Step`:
 Environment Local {
 
     ServerRole Database -Steps 'InstallSqlServerExplicitly'
-    ServerRole Web -Steps 'PSCIWindowsFeatures'
+    ServerRole Web -Steps 'DoItWindowsFeatures'
 
-    Step InstallSqlServerExplicitly -ScriptBlock { PSCISqlServer -Tokens $Tokens.MyTokens }
+    Step InstallSqlServerExplicitly -ScriptBlock { DoItSqlServer -Tokens $Tokens.MyTokens }
 
     Tokens Web {
         IsClientWindows = $false

@@ -57,7 +57,7 @@ Function Write-ProgressExternal {
         $MessageType
     )
 
-    if (!($Global:PSCIGlobalConfiguration.CIServer)) {
+    if (!($Global:DoItGlobalConfiguration.CIServer)) {
         return
     }
 

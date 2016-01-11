@@ -142,7 +142,7 @@ function Start-DeploymentByMSDeploy {
        $tokensOverrideString = Convert-HashtableToString -Hashtable $TokensOverride
        $deployScript += " -TokensOverride {0}" -f $tokensOverrideString
     }
-    $deployScript += ' -ProjectRootPath .. -PSCILibraryPath PSCI -PackagesPath .'
+    $deployScript += ' -ProjectRootPath .. -DoItLibraryPath DoIt -PackagesPath .'
   
     $msDeployDestinationString = $RunOnConnectionParams.MsDeployDestinationString
 
@@ -162,7 +162,7 @@ function Start-DeploymentByMSDeploy {
     }
 
     $powershellCmd = @"
-try { Set-Location -Path '$PackageDirectory'; `$Global:PSCIRemotingMode = '$($RunOnConnectionParams.RemotingMode)'; `$Global:PSCICIServer = '$($Global:PSCIGlobalConfiguration.CIServer)'; `$exitCode = 1; & $deployScript; `$exitCode = `$LASTEXITCODE
+try { Set-Location -Path '$PackageDirectory'; `$Global:DoItRemotingMode = '$($RunOnConnectionParams.RemotingMode)'; `$Global:DoItCIServer = '$($Global:DoItGlobalConfiguration.CIServer)'; `$exitCode = 1; & $deployScript; `$exitCode = `$LASTEXITCODE
 "@
     if ($PackageDirectoryAutoRemove) {
         $powershellCmd += "} finally { Set-Location -Path (Split-Path -Path '$PackageDirectory' -Parent); Remove-Item -LiteralPath '$PackageDirectory' -Force -Recurse; exit `$exitCode }"

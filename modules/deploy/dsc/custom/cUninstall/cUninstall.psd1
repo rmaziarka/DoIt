@@ -30,6 +30,6 @@ Author = 'mgrzywa'
 CompanyName = 'Objectivity Bespoke Software Specialists'
 Copyright = '(c) 2015 Objectivity Bespoke Software Specialists'
 
-Description = 'Module containing PSCI DSC resources for uninstalling software.'
+Description = 'Module containing DoIt DSC resources for uninstalling software.'
 
 }

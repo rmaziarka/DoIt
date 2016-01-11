@@ -22,7 +22,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 #>
 
-Import-Module "$PSScriptRoot\..\..\PSCI.psd1" -Force
+Import-Module "$PSScriptRoot\..\..\DoIt.psd1" -Force
 
 function Test-MSDeployRemoting {
     <#

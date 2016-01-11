@@ -25,7 +25,7 @@ SOFTWARE.
 function Initialize-ConfigurationPaths {
     <#
     .SYNOPSIS
-    Validates, converts configuration paths to canonical form and saves them in a global variable $PSCIConfigurationPaths.
+    Validates, converts configuration paths to canonical form and saves them in a global variable $DoItConfigurationPaths.
 
     .PARAMETER ProjectRootPath
     Path to the root project directory. This is used as a base directory, all other paths are relative to this path.
@@ -37,7 +37,7 @@ function Initialize-ConfigurationPaths {
     Path to the directory where configuration files reside, relative to $ProjectRootPath.
 
     .PARAMETER ValidatePackagesPath
-    If set, $PackagesPath will be validated for existence of folders DeployScripts and PSCI.
+    If set, $PackagesPath will be validated for existence of folders DeployScripts and DoIt.
 
     .PARAMETER NoConfigFiles
     If set, configuration files will not be read. You will need to run Environment blocks and Deployment Steps yourself.
@@ -93,7 +93,7 @@ function Initialize-ConfigurationPaths {
         $configPaths.ProjectRootPath = $configPaths.DeployScriptsPath
     } 
 
-    # PackagesPath - if not empty validate it exists (if -ValidatePackagesPath), then check if DeployScripts/PSCI subdirectories exist
+    # PackagesPath - if not empty validate it exists (if -ValidatePackagesPath), then check if DeployScripts/DoIt subdirectories exist
     $packagesLog = ''
     if ($PackagesPath) {
         if (![System.IO.Path]::IsPathRooted($PackagesPath)) {
@@ -112,8 +112,8 @@ function Initialize-ConfigurationPaths {
             if (!(Test-Path -LiteralPath (Join-Path -Path $configPaths.PackagesPath -ChildPath 'DeployScripts'))) {
                 $packagesNotExisting += 'DeployScripts'
             }
-            if (!(Test-Path -LiteralPath (Join-Path -Path $configPaths.PackagesPath -ChildPath 'PSCI'))) {
-                $packagesNotExisting += 'PSCI'
+            if (!(Test-Path -LiteralPath (Join-Path -Path $configPaths.PackagesPath -ChildPath 'DoIt'))) {
+                $packagesNotExisting += 'DoIt'
             }
             if (!$packagesNotExisting) {
                 $packagesLog = '[full]'
@@ -160,7 +160,7 @@ function Initialize-ConfigurationPaths {
         }
     }
 
-    $Global:PSCIGlobalConfiguration.ConfigurationPaths = $configPaths
+    $Global:DoItGlobalConfiguration.ConfigurationPaths = $configPaths
 
     Write-Log -Info -Message ("Using following configuration paths: `nProjectRootPath         = {0}`nPackagesPath            = {1} {2}`nDeployConfigurationPath = {3}" -f `
         $configPaths.ProjectRootPath, $configPaths.PackagesPath, $packagesLog, $configPaths.DeployConfigurationPath)

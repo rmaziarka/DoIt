@@ -28,7 +28,7 @@ function Stop-Execution {
     Stops execution of the script. 
 
     .DESCRIPTION
-    Depending on $Global:PSCIGlobalConfiguration.ExitImmediatelyOnError, it will either throw an exception or run 'exit 1'.
+    Depending on $Global:DoItGlobalConfiguration.ExitImmediatelyOnError, it will either throw an exception or run 'exit 1'.
 
     .PARAMETER ThrowObject
     Object to be thrown.
@@ -49,7 +49,7 @@ function Stop-Execution {
         Write-ProgressExternal -Message $Global:ProgressErrorMessage -MessageType Problem
     }
 
-    if ($Global:PSCIGlobalConfiguration.ExitImmediatelyOnError) {
+    if ($Global:DoItGlobalConfiguration.ExitImmediatelyOnError) {
         exit 1
     } else {
         if (!$ThrowObject) {

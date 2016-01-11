@@ -22,10 +22,10 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 #>
 
-Import-Module -Name "$PSScriptRoot\..\..\..\..\PSCI.psd1" -Force
+Import-Module -Name "$PSScriptRoot\..\..\..\..\DoIt.psd1" -Force
 
-Describe -Tag "PSCI.unit" "ServerRole" {
-    InModuleScope PSCI.deploy {
+Describe -Tag "DoIt.unit" "ServerRole" {
+    InModuleScope DoIt.deploy {
 
         Mock Write-Log { 
             Write-Host $Message
@@ -813,8 +813,8 @@ Describe -Tag "PSCI.unit" "ServerRole" {
 
             Environment Default {
                 ServerConnection WebServer -Nodes 'node1', 'node2'
-                ServerRole Web -Steps 'PSCIWindowsFeature' -ServerConnections WebServer
-                ServerRole Database -Steps 'PSCIWindowsFeature', 'PSCIWindowsFeature' -ServerConnections WebServer
+                ServerRole Web -Steps 'DoItWindowsFeature' -ServerConnections WebServer
+                ServerRole Database -Steps 'DoItWindowsFeature', 'DoItWindowsFeature' -ServerConnections WebServer
 
                 Step TestFunc -ScriptBlock $null
             }           
@@ -825,12 +825,12 @@ Describe -Tag "PSCI.unit" "ServerRole" {
                 $resolvedRoles.Count | Should Be 2
             
                 $resolvedRoles.Web | Should Not Be $null
-                $resolvedRoles.Web.Steps.Name | Should Be @('PSCIWindowsFeature')
+                $resolvedRoles.Web.Steps.Name | Should Be @('DoItWindowsFeature')
                 $resolvedRoles.Web.ServerConnections.Count | Should Be 1
                 $resolvedRoles.Web.ServerConnections.Name | Should Be 'WebServer'
                 $resolvedRoles.Web.ServerConnections.Nodes | Should Be @('node1','node2')
                 $resolvedRoles.Database | Should Not Be $null
-                $resolvedRoles.Database.Steps.Name | Should Be @('PSCIWindowsFeature', 'PSCIWindowsFeature')
+                $resolvedRoles.Database.Steps.Name | Should Be @('DoItWindowsFeature', 'DoItWindowsFeature')
                 $resolvedRoles.Database.ServerConnections.Count | Should Be 1
                 $resolvedRoles.Database.ServerConnections.Name | Should Be 'WebServer'
                 $resolvedRoles.Database.ServerConnections.Nodes | Should Be @('node1','node2')

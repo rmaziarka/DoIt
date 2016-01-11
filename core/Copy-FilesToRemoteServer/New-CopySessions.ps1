@@ -134,7 +134,7 @@ function New-CopySessions {
             if ($Destination) { 
                 $destinationDrive = ($Destination[0])[0]
                 $psDriveParams = @{
-                    Name = "PSCICopyDrive$serverIndex"
+                    Name = "DoItCopyDrive$serverIndex"
                     PSProvider = 'FileSystem'
                     Root = "\\$server\${destinationDrive}`$"
                     Scope = 'Script'

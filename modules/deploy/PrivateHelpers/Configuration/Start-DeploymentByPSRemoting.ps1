@@ -148,7 +148,7 @@ function Start-DeploymentByPSRemoting {
        $tokensOverrideString = Convert-HashtableToString -Hashtable $TokensOverride
        $deployScript += " -TokensOverride {0}" -f $tokensOverrideString
     }
-    $deployScript += ' -ProjectRootPath .. -PSCILibraryPath PSCI -PackagesPath .'
+    $deployScript += ' -ProjectRootPath .. -DoItLibraryPath DoIt -PackagesPath .'
 
     $scriptBlock = {
         param(
@@ -171,8 +171,8 @@ function Start-DeploymentByPSRemoting {
 
         try { 
             Set-Location -Path $PackageDirectory
-            $Global:PSCIRemotingMode = $RemotingMode
-            $Global:PSCICIServer = $CIServer
+            $Global:DoItRemotingMode = $RemotingMode
+            $Global:DoItCIServer = $CIServer
 
             Invoke-Expression -Command "& $DeployScript"
         } finally {
@@ -185,7 +185,7 @@ function Start-DeploymentByPSRemoting {
 
     Write-Log -Info "Running `"$deployScript`" using $($RunOnConnectionParams.RemotingMode) on `"$($RunOnConnectionParams.NodesAsString)`""
     $psSessionParams = $RunOnConnectionParams.PSSessionParams
-    $result = Invoke-Command @psSessionParams -ScriptBlock $scriptBlock -ArgumentList $PackageDirectory, $PackageDirectoryAutoRemove, $deployScript, $RunOnConnectionParams.RemotingMode, ($Global:PSCIGlobalConfiguration.CIServer)
+    $result = Invoke-Command @psSessionParams -ScriptBlock $scriptBlock -ArgumentList $PackageDirectory, $PackageDirectoryAutoRemove, $deployScript, $RunOnConnectionParams.RemotingMode, ($Global:DoItGlobalConfiguration.CIServer)
     if ($result -inotcontains 'success' -and $result -inotmatch 'success') {
         throw "Remote invocation failed: $result"
     }

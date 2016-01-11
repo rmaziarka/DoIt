@@ -64,7 +64,7 @@ function Start-NugetRestore {
     }
 
     if (!$nugetPath) {
-        Write-Log -Warn "Nuget.exe does not exist at '$projectDir\.nuget\nuget.exe' or any parent directory - using nuget distributed with PSCI."
+        Write-Log -Warn "Nuget.exe does not exist at '$projectDir\.nuget\nuget.exe' or any parent directory - using nuget distributed with DoIt."
         $nugetPath = Get-PathToExternalLib -ModulePath 'nuget\nuget.exe'
     }
 

@@ -34,7 +34,7 @@ function New-TempDirectory {
     Path where the temporary directory should be created.
 
     .PARAMETER DirName
-    Directory name - PSCI.temp by default.
+    Directory name - DoIt.temp by default.
 
     .EXAMPLE 
     New-TempDirectory -BasePath "C:\folder\"

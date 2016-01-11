@@ -22,10 +22,10 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 #>
 
-Import-Module -Name "$PSScriptRoot\..\..\PSCI.psd1" -Force
+Import-Module -Name "$PSScriptRoot\..\..\DoIt.psd1" -Force
 
-Describe -Tag "PSCI.unit" "Invoke-Sql" {
-    InModuleScope PSCI.core {
+Describe -Tag "DoIt.unit" "Invoke-Sql" {
+    InModuleScope DoIt.core {
         Mock Write-Log { 
             if ($Critical) {
                 throw $Message
@@ -77,27 +77,27 @@ Describe -Tag "PSCI.unit" "Invoke-Sql" {
             } 
 
             It "should return rows" {
-                $result = Invoke-Sql -ConnectionString $connectionString -Query "select * from ObjPSCITest.dbo.changelog`nselect * from ObjPSCITest.dbo.changelog"
+                $result = Invoke-Sql -ConnectionString $connectionString -Query "select * from ObjDoItTest.dbo.changelog`nselect * from ObjDoItTest.dbo.changelog"
                 $result.Count | Should be 1
                 $result.Tables.Count | Should be 2
             }
 
             It "should return rows when InputFile is specified" {
-                Set-Content -Path 'input.txt' -Value 'select * from ObjPSCITest.dbo.changelog' -Force
+                Set-Content -Path 'input.txt' -Value 'select * from ObjDoItTest.dbo.changelog' -Force
                 $result = Invoke-Sql -ConnectionString $connectionString -InputFile 'input.txt'
                 $result.Count | Should be 1
                 $result.Tables.Count | Should be 1
             }
 
             It "should run multiple commands when they are separated with GO" {
-                $result = Invoke-Sql -ConnectionString $connectionString -Query "select * from ObjPSCITest.dbo.changelog`nGO`nselect * from ObjPSCITest.dbo.changelog"
+                $result = Invoke-Sql -ConnectionString $connectionString -Query "select * from ObjDoItTest.dbo.changelog`nGO`nselect * from ObjDoItTest.dbo.changelog"
                 $result.Count | should be 2
                 $result[0].Tables.Count | Should be 1
                 $result[1].Tables.Count | Should be 1
             }
 
             It "should substitute sqlcmd variables" {
-                $result = Invoke-Sql -ConnectionString $connectionString -Query "select * from `$(param).dbo.changelog" -SqlCmdVariables @{ 'param' = 'ObjPSCITest' }
+                $result = Invoke-Sql -ConnectionString $connectionString -Query "select * from `$(param).dbo.changelog" -SqlCmdVariables @{ 'param' = 'ObjDoItTest' }
                 $result.Count | Should be 1
                 $result.Tables.Count | Should be 1
             }

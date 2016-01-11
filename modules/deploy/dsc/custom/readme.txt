@@ -1,1 +1,1 @@
-This folder contains custom PSCI resources.
+This folder contains custom DoIt resources.

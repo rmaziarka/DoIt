@@ -56,7 +56,7 @@ function Set-NssmService {
     Final status of the service to set.
 
     .PARAMETER NssmPath
-    Path to nssm.exe. If not specified, nssm.exe bundled with PSCI will be copied to Program Files and run from there.
+    Path to nssm.exe. If not specified, nssm.exe bundled with DoIt will be copied to Program Files and run from there.
 
     .PARAMETER Remove
     If $true, the service will be removed.

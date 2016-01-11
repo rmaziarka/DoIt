@@ -29,21 +29,21 @@ Configuration ConfigureIISWebApp {
 
     Node $NodeName {
 
-        cAppPool PSCITestAppPool { 
+        cAppPool DoItTestAppPool { 
             Name   = $Tokens.WebServerProvision.AppPoolName 
             managedRuntimeVersion = 'v4.0'
             managedPipelineMode = 'Integrated'
             Ensure = 'Present' 
         }
 
-        File PSCITestWebsiteDir {
+        File DoItTestWebsiteDir {
             DestinationPath = $Tokens.WebServerProvision.WebsitePhysicalPath
             Ensure = 'Present'
             Type = 'Directory'
-            DependsOn = @('[cAppPool]PSCITestAppPool')
+            DependsOn = @('[cAppPool]DoItTestAppPool')
         }
 
-        cWebsite PSCIWebsite { 
+        cWebsite DoItWebsite { 
             Name   = $Tokens.WebServerProvision.WebsiteName
             ApplicationPool = $Tokens.WebServerProvision.AppPoolName 
             Ensure = 'Present' 
@@ -52,22 +52,22 @@ Configuration ConfigureIISWebApp {
                         } 
             PhysicalPath = $Tokens.WebServerProvision.WebsitePhysicalPath
             State = 'Started' 
-            DependsOn = @('[File]PSCITestWebsiteDir')
+            DependsOn = @('[File]DoItTestWebsiteDir')
         } 
         
 
-        cIISWebsiteAuthentication PSCIWebsiteWindowsAuth {
+        cIISWebsiteAuthentication DoItWebsiteWindowsAuth {
             WebsiteName =  $Tokens.WebServerProvision.WebsiteName
             Ensure = 'Present'
             AuthenticationMethod = 'Windows'
-            DependsOn = @('[cWebsite]PSCIWebsite')
+            DependsOn = @('[cWebsite]DoItWebsite')
         }
 
-        cIISWebsiteAuthentication PSCIWebsiteAnonymousAuth {
+        cIISWebsiteAuthentication DoItWebsiteAnonymousAuth {
             WebsiteName =  $Tokens.WebServerProvision.WebsiteName
             Ensure = 'Present'
             AuthenticationMethod = 'Anonymous'
-            DependsOn = @('[cWebsite]PSCIWebsite')
+            DependsOn = @('[cWebsite]DoItWebsite')
         }
 
     }

@@ -49,7 +49,7 @@ function Set-PackageDeployScriptParameters {
 
     $variablesToReplace = @{ 
             'ProjectRootPath' = '..';
-            'PSCILibraryPath' = 'PSCI';
+            'DoItLibraryPath' = 'DoIt';
             'PackagesPath' = '.';
             'Environment' = '';
             'DeployConfigurationPath' = '';

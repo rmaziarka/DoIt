@@ -34,7 +34,7 @@ function Remove-TempDirectory {
     Path where the temporary directory should be removed from.
 
     .PARAMETER DirName
-    Directory name - PSCI.temp by default.
+    Directory name - DoIt.temp by default.
 
     .EXAMPLE
     Remove-TempDirectory -BasePath "C:\path\to\directory\"
@@ -49,7 +49,7 @@ function Remove-TempDirectory {
 
         [Parameter(Mandatory=$false)]
         [string]
-        $DirName = 'PSCI.temp'
+        $DirName = 'DoIt.temp'
     )
 
     if (!$BasePath) {

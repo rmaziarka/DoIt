@@ -88,8 +88,8 @@ function Get-UpdateXdtCmdParams {
 
             $configFileName = (Resolve-Path -LiteralPath $configFileName).ProviderPath
 
-            # in remote run we don't have PSCI - need to use files that have been copied earlier to C:\XDTTransform
-            if (!$PSCIGlobalConfiguration) {
+            # in remote run we don't have DoIt - need to use files that have been copied earlier to C:\XDTTransform
+            if (!$DoItGlobalConfiguration) {
                 if (!(Test-Path -LiteralPath 'C:\XDTTransform')) {
                     throw "Directory C:\XDTTransform does not exist."
                 }

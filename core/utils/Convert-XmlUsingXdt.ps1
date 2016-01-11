@@ -119,7 +119,7 @@ function Convert-XmlUsingXdt {
         $Force
     )
 
-    # NOTE: this function can run outside PSCI context
+    # NOTE: this function can run outside DoIt context
 
     # include part of Carbon (not whole Carbon for performance)
     if (Get-Command 'Get-PathToExternalLib' -ErrorAction SilentlyContinue) {
@@ -127,13 +127,13 @@ function Convert-XmlUsingXdt {
     }
 
     if (Test-Path -LiteralPath "$carbonPath\Xml\Convert-XmlFile.ps1") {
-        # this is normal scenario when run in context of PSCI
+        # this is normal scenario when run in context of DoIt
         # following includes and variables are required for Convert-XmlFile
         $Global:CarbonBinDir = "$carbonPath\bin"
         . "$carbonPath\Path\Resolve-FullPath.ps1"
         . "$carbonPath\Xml\Convert-XmlFile.ps1"
     } elseif (Test-Path -LiteralPath "Convert-XmlFile.ps1") {
-        # this is when run outside PSCI (e.g. in remote run)
+        # this is when run outside DoIt (e.g. in remote run)
         $Global:CarbonBinDir = "."
         . ".\Resolve-FullPath.ps1"
         . ".\Convert-XmlFile.ps1"

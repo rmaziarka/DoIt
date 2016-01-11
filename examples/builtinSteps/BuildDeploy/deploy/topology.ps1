@@ -30,22 +30,22 @@ ServerRoles 'go down' from parent to child environments, but any ServerRole para
 
 2) ServerRoles, defining which computers belong to which ServerRoles, and which steps are to be deployed to which ServerRoles.
 By default steps are run locally, but this behavior can be modified by using -RunOn / -RunOnCurrentNode parameters.
-For ServerRole examples, see .EXAMPLES section in PSCI\deployment\Configuration\ConfigElements\ServerRole.ps1.
+For ServerRole examples, see .EXAMPLES section in DoIt\deployment\Configuration\ConfigElements\ServerRole.ps1.
 #>
 
 # Default environment, parent for all others
 Environment Default {
     ServerConnection TestNode -Nodes localhost
 
-    # There are two steps - 'PSCIWindowsFeature' which is defined implictly and uses $Tokens.WindowsFeaturesTestRole by convention and
-    # 'Custom-WindowsFeaturesStep' which invokes custom scriptblock that invokes PSCIWindowsFeature with $Tokens.CustomWindowsFeatures
-    ServerRole WindowsFeaturesTestRole -Steps @('PSCIWindowsFeature', 'Custom-WindowsFeaturesStep') -ServerConnections TestNode
+    # There are two steps - 'DoItWindowsFeature' which is defined implictly and uses $Tokens.WindowsFeaturesTestRole by convention and
+    # 'Custom-WindowsFeaturesStep' which invokes custom scriptblock that invokes DoItWindowsFeature with $Tokens.CustomWindowsFeatures
+    ServerRole WindowsFeaturesTestRole -Steps @('DoItWindowsFeature', 'Custom-WindowsFeaturesStep') -ServerConnections TestNode
 
-    ServerRole UploadDirectoriesTestRole -Steps @('PSCIDirectory') -ServerConnection TestNode
+    ServerRole UploadDirectoriesTestRole -Steps @('DoItDirectory') -ServerConnection TestNode
 
-    ServerRole IISConfigTestRole -Steps 'PSCIIISConfig' -ServerConnections TestNode
+    ServerRole IISConfigTestRole -Steps 'DoItIISConfig' -ServerConnections TestNode
 
-    Step Custom-WindowsFeaturesStep -ScriptBlock { PSCIWindowsFeature -Tokens $Tokens.CustomWindowsFeatures }
+    Step Custom-WindowsFeaturesStep -ScriptBlock { DoItWindowsFeature -Tokens $Tokens.CustomWindowsFeatures }
 }
 
 Environment Test {

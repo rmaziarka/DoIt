@@ -153,17 +153,17 @@ function Invoke-ExternalCommand {
             if ($Credential) {
                 $execCommand = "&" + $command
                 $remotesession = New-PSSession -ComputerName localhost -Credential $Credential -Authentication Credssp
-                if ($PSCIGlobalConfiguration.LogFile -and !$Quiet) {
+                if ($DoItGlobalConfiguration.LogFile -and !$Quiet) {
                     Invoke-Command -Session $remotesession -ScriptBlock { Invoke-Expression -Command $using:execCommand } | 
-                        Tee-Object -File $PSCIGlobalConfiguration.LogFile -Append
+                        Tee-Object -File $DoItGlobalConfiguration.LogFile -Append
                 } else {
                     Invoke-Command -Session $remotesession -ScriptBlock { Invoke-Expression -Command $using:execCommand }
                 }
                 $global:lastexitcode = Invoke-Command -ScriptBlock { $lastexitcode } -Session $remotesession
                 Remove-PSSession -Session $remotesession
             } else {
-                if ($PSCIGlobalConfiguration.LogFile -and !$Quiet) {
-                    . $env:ComSpec /C """$Command"" $stdinRedirect" | Tee-Object -File $PSCIGlobalConfiguration.LogFile -Append
+                if ($DoItGlobalConfiguration.LogFile -and !$Quiet) {
+                    . $env:ComSpec /C """$Command"" $stdinRedirect" | Tee-Object -File $DoItGlobalConfiguration.LogFile -Append
                 } else {
                     . $env:ComSpec /C """$Command"" $stdinRedirect"
                 }

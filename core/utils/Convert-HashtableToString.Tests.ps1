@@ -22,10 +22,10 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 #>
 
-Import-Module -Name "$PSScriptRoot\..\..\PSCI.psd1" -Force
+Import-Module -Name "$PSScriptRoot\..\..\DoIt.psd1" -Force
 
-Describe -Tag "PSCI.unit" "Convert-HashtableToString" {
-    InModuleScope PSCI.core {
+Describe -Tag "DoIt.unit" "Convert-HashtableToString" {
+    InModuleScope DoIt.core {
 
         Context "When invoked for flat ordered hashtable" {
             $hash = [ordered]@{ 'testStr' = 'testValue1'; 'testInt' = 3 }

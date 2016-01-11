@@ -64,7 +64,7 @@ function Deploy-Cube {
     $server.Connect($ConnectionString)
 
     # create trace
-    $traceId = 'PSCISSASDeploymentTrace'
+    $traceId = 'DoItSSASDeploymentTrace'
     $trace = $server.Traces.FindByName($traceId)
     if ($trace) {
         $trace.Drop()

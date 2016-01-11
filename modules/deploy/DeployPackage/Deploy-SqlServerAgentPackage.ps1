@@ -147,7 +147,7 @@ function Deploy-SqlServerAgentPackage {
         }
         $jobName = $Matches[1]
         if ($sqlContent -imatch $spDeleteJobRegex) {
-            throw "File '$sqlPath' contains sp_delete_job with job_id parameter. This is not allowed as it is not idempotent (GUIDs will change). Please remove it - PSCI will remove this job while preserving its history for you."
+            throw "File '$sqlPath' contains sp_delete_job with job_id parameter. This is not allowed as it is not idempotent (GUIDs will change). Please remove it - DoIt will remove this job while preserving its history for you."
         }
 
         $sqlParams.SqlCommandMode = 'Scalar'

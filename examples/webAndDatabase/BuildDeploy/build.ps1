@@ -27,13 +27,13 @@ SOFTWARE.
 Starts the build process. 
 
 .DESCRIPTION
-It imports PSCI library and packages projects according to the commands in the 'try' block. The packages will be stored at $PackagesPath.
+It imports DoIt library and packages projects according to the commands in the 'try' block. The packages will be stored at $PackagesPath.
 
 .PARAMETER ProjectRootPath
 Base directory of the project, relative to the directory where this script resides. It is used as a base directory for other directories.
   
-.PARAMETER PSCILibraryPath
-Base directory where PSCI library resides, relative to $ProjectRootPath.
+.PARAMETER DoItLibraryPath
+Base directory where DoIt library resides, relative to $ProjectRootPath.
 
 .PARAMETER PackagesPath
 Path to the directory where packages will be created, relative to $ProjectRootPath.
@@ -55,8 +55,8 @@ param(
     
     [Parameter(Mandatory=$false)]
     [string]
-    $PSCILibraryPath = '..\..', # Modify this path according to your project structure. This is absolute or relative to $ProjectRootPath. 
-                                # If PSCI doesn't exist at this location, it will be downloaded from nuget.org.
+    $DoItLibraryPath = '..\..', # Modify this path according to your project structure. This is absolute or relative to $ProjectRootPath. 
+                                # If DoIt doesn't exist at this location, it will be downloaded from nuget.org.
     [Parameter(Mandatory=$false)]
     [string]
     $PackagesPath = 'bin', # Modify this path according to your project structure. This is absolute or relative to $ProjectRootPath.
@@ -77,43 +77,43 @@ param(
 $global:ErrorActionPreference = 'Stop'
 
 try {
-    ############# PSCI initialization
+    ############# DoIt initialization
     Push-Location -Path $PSScriptRoot
-    if (![System.IO.Path]::IsPathRooted($PSCILibraryPath)) {
-        $PSCILibraryPath = Join-Path -Path $ProjectRootPath -ChildPath $PSCILibraryPath
+    if (![System.IO.Path]::IsPathRooted($DoItLibraryPath)) {
+        $DoItLibraryPath = Join-Path -Path $ProjectRootPath -ChildPath $DoItLibraryPath
     }
     
-    if (!(Test-Path -LiteralPath "$PSCILibraryPath\PSCI.psd1")) {
-        if (Test-Path -LiteralPath "$PSScriptRoot\packages\PSCI\PSCI.psd1") {
-            Write-Host -Object "PSCI library found at '$PSScriptRoot\packages\PSCI'."
+    if (!(Test-Path -LiteralPath "$DoItLibraryPath\DoIt.psd1")) {
+        if (Test-Path -LiteralPath "$PSScriptRoot\packages\DoIt\DoIt.psd1") {
+            Write-Host -Object "DoIt library found at '$PSScriptRoot\packages\DoIt'."
         } else {
-            Write-Host -Object "Cannot find PSCI library at '$PSCILibraryPath' (current dir: '$PSScriptRoot') - downloading nuget.exe."
+            Write-Host -Object "Cannot find DoIt library at '$DoItLibraryPath' (current dir: '$PSScriptRoot') - downloading nuget.exe."
             Invoke-WebRequest -Uri 'http://nuget.org/nuget.exe' -OutFile "$env:TEMP\NuGet.exe"
             if (!(Test-Path "$env:TEMP\NuGet.exe")) {
-                Write-Host -Object "Failed to download nuget.exe to '$env:TEMP'. Please download PSCI manually and set PSCILibraryPath parameter to an existing path."
+                Write-Host -Object "Failed to download nuget.exe to '$env:TEMP'. Please download DoIt manually and set DoItLibraryPath parameter to an existing path."
                 exit 1
             }
-            Write-Host -Object 'Nuget.exe downloaded successfully - installing PSCI.'
+            Write-Host -Object 'Nuget.exe downloaded successfully - installing DoIt.'
 
-            & "$env:TEMP\NuGet.exe" install PSCI -ExcludeVersion -OutputDirectory "$PSScriptRoot\packages"
-            $PSCILibraryPath = "$PSScriptRoot\packages\PSCI"
+            & "$env:TEMP\NuGet.exe" install DoIt -ExcludeVersion -OutputDirectory "$PSScriptRoot\packages"
+            $DoItLibraryPath = "$PSScriptRoot\packages\DoIt"
 
-            if (!(Test-Path -LiteralPath "$PSCILibraryPath\PSCI.psd1")) {
-                Write-Host -Object "Cannot find PSCI library at '$PSCILibraryPath' (current dir: '$PSScriptRoot'). PSCI was not properly installed as nuget."
+            if (!(Test-Path -LiteralPath "$DoItLibraryPath\DoIt.psd1")) {
+                Write-Host -Object "Cannot find DoIt library at '$DoItLibraryPath' (current dir: '$PSScriptRoot'). DoIt was not properly installed as nuget."
                 exit 1
             }
         }
-        $PSCILibraryPath = "$PSScriptRoot\packages\PSCI"
+        $DoItLibraryPath = "$PSScriptRoot\packages\DoIt"
     } else {
-        $PSCILibraryPath = (Resolve-Path -Path $PSCILibraryPath).ProviderPath
-        Write-Host -Object "PSCI library found at '$PSCILibraryPath'."
+        $DoItLibraryPath = (Resolve-Path -Path $DoItLibraryPath).ProviderPath
+        Write-Host -Object "DoIt library found at '$DoItLibraryPath'."
     }
-    Import-Module "$PSCILibraryPath\PSCI.psd1" -Force 
+    Import-Module "$DoItLibraryPath\DoIt.psd1" -Force 
 
     ############# Running build
     try { 
-        $PSCIGlobalConfiguration.LogFile = "$PSScriptRoot\build.log.txt"
-        Remove-Item -LiteralPath $PSCIGlobalConfiguration.LogFile -ErrorAction SilentlyContinue
+        $DoItGlobalConfiguration.LogFile = "$PSScriptRoot\build.log.txt"
+        Remove-Item -LiteralPath $DoItGlobalConfiguration.LogFile -ErrorAction SilentlyContinue
 
         Initialize-ConfigurationPaths -ProjectRootPath $ProjectRootPath -PackagesPath $PackagesPath -DeployConfigurationPath $DeployConfigurationPath
         if (!$Tasks) { 

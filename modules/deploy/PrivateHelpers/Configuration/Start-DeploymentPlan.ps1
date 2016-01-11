@@ -42,7 +42,7 @@ function Start-DeploymentPlan {
                       (note the steps do not need to be defined in server roles)
 
     .PARAMETER AutoInstallDscResources
-    If true, custom DSC resources included in PSCI will be automatically copied to localhost (required for parsing DSC configurations)
+    If true, custom DSC resources included in DoIt will be automatically copied to localhost (required for parsing DSC configurations)
     and to the destination servers (required for running DSC configurations).
 
     .PARAMETER DscModuleNames
@@ -74,31 +74,31 @@ function Start-DeploymentPlan {
 
     )
 
-    if (!$PSCIGlobalConfiguration.RemotingMode) {
+    if (!$DoItGlobalConfiguration.RemotingMode) {
         Write-ProgressExternal -MessageType BlockOpened -Message 'Deploy'
         Write-Log -Info '[START] ACTUAL DEPLOYMENT' -Emphasize
     }
 
     $configPaths = Get-ConfigurationPaths
     
-    $psciPath = Get-PSCIModulePath
+    $DoItPath = Get-DoItModulePath
     $packagesPath = $configPaths.PackagesPath
     $deployConfigurationPath = $configPaths.DeployConfigurationPath
     
-    # When there is at least one RunOn/RunRemotely in deployment plan, and ('DeployScripts' and 'PSCI' directories are not found in the package) or
-    # PSCI/DeployScripts are included from different location than $packagesPath, we need to build temporary package
-    if (!$PSCIGlobalConfiguration.RemotingMode -and ($DeploymentPlan | Where { $_.RunOnConnectionParams })) {
+    # When there is at least one RunOn/RunRemotely in deployment plan, and ('DeployScripts' and 'DoIt' directories are not found in the package) or
+    # DoIt/DeployScripts are included from different location than $packagesPath, we need to build temporary package
+    if (!$DoItGlobalConfiguration.RemotingMode -and ($DeploymentPlan | Where { $_.RunOnConnectionParams })) {
         if (!$configPaths.PackagesContainDeployScripts) {
-            Write-Log -Info "'DeployScripts' and 'PSCI' directories have not been found in the package - creating temporary package."
+            Write-Log -Info "'DeployScripts' and 'DoIt' directories have not been found in the package - creating temporary package."
             Build-TemporaryPackage
-        } elseif (!$psciPath.ToLower().StartsWith($packagesPath.ToLower()) -or !$deployConfigurationPath.ToLower().StartsWith($packagesPath.ToLower())) {
-            Write-Log -Info "Imported PSCI or DeployScripts are not the one in the package - creating temporary package to include PSCI at '$psciPath'."
+        } elseif (!$DoItPath.ToLower().StartsWith($packagesPath.ToLower()) -or !$deployConfigurationPath.ToLower().StartsWith($packagesPath.ToLower())) {
+            Write-Log -Info "Imported DoIt or DeployScripts are not the one in the package - creating temporary package to include DoIt at '$DoItPath'."
             Build-TemporaryPackage
         }
     }
 
     # Group deployment plan entries by RunOnConnectionParams and PackageDirectory
-    if (!$PSCIGlobalConfiguration.RemotingMode) { 
+    if (!$DoItGlobalConfiguration.RemotingMode) { 
         $planByRunOn = Group-DeploymentPlan -DeploymentPlan $DeploymentPlan -GroupByRunOnConnectionParamsAndPackage -PreserveOrder
     } else {
         # if RemotingMode, every entry is run locally and we ignore RunOnConnectionsParams
@@ -109,7 +109,7 @@ function Start-DeploymentPlan {
     foreach ($entry in $planByRunOn) {
         $configInfo = $entry.GroupedConfigurationInfo
         $runOnParams = $configInfo[0].RunOnConnectionParams
-        if (!$runOnParams -and !$PSCIGlobalConfiguration.RemotingMode) {
+        if (!$runOnParams -and !$DoItGlobalConfiguration.RemotingMode) {
             $remotingMode = ''
             $runOnNodes = 'localhost'
         } else {
@@ -123,7 +123,7 @@ function Start-DeploymentPlan {
     Write-Log -Info ' '
 
     # Install DSC resources where required - on nodes where DSC will be applied to different nodes (remotely)
-    if (!$PSCIGlobalConfiguration.RemotingMode -and $AutoInstallDscResources) {
+    if (!$DoItGlobalConfiguration.RemotingMode -and $AutoInstallDscResources) {
         $entriesToInstallDSC = $DeploymentPlan | Where-Object { $_.StepType -eq 'Configuration' -and !$_.IsLocalRun }
         if ($entriesToInstallDSC) {
             $dscInstalledNodes = @()
@@ -144,7 +144,7 @@ function Start-DeploymentPlan {
 
     $i = 0
     foreach ($entry in $planByRunOn) {
-        if ($entry.GroupedConfigurationInfo[0].RunOnConnectionParams -and !$PSCIGlobalConfiguration.RemotingMode) {
+        if ($entry.GroupedConfigurationInfo[0].RunOnConnectionParams -and !$DoItGlobalConfiguration.RemotingMode) {
             $blockName = 'Step {0}/{1}: Deploy remotely from {2}' -f ++$i, $planByRunOn.count, $entry.GroupedConfigurationInfo[0].RunOnConnectionParams.NodesAsString
             Write-ProgressExternal -MessageType BlockOpened -Message $blockName 
             Start-DeploymentPlanEntryRemotely -DeploymentPlanGroupedEntry $entry -DeployType $DeployType           
@@ -156,7 +156,7 @@ function Start-DeploymentPlan {
 
         Write-ProgressExternal -MessageType BlockClosed -Message $blockName
     }
-    if (!$PSCIGlobalConfiguration.RemotingMode) {
+    if (!$DoItGlobalConfiguration.RemotingMode) {
         Write-Log -Info "[END] ACTUAL DEPLOYMENT" -Emphasize
         Write-ProgressExternal -MessageType BlockClosed -Message 'Deploy'
     }

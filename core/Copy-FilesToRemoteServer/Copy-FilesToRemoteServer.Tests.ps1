@@ -22,11 +22,11 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 #>
 
-Import-Module -Name "$PSScriptRoot\..\..\PSCI.psd1" -Force
+Import-Module -Name "$PSScriptRoot\..\..\DoIt.psd1" -Force
 
-Describe -Tag "PSCI.unit" "Copy-FilesToRemoteServer" {
+Describe -Tag "DoIt.unit" "Copy-FilesToRemoteServer" {
 
-    InModuleScope PSCI.core {
+    InModuleScope DoIt.core {
 
         $Global:loggedMessage = @('')
 
@@ -40,8 +40,8 @@ Describe -Tag "PSCI.unit" "Copy-FilesToRemoteServer" {
 
         $connectionParams = New-ConnectionParameters -Nodes 'localhost'
 
-        $dstDir = 'c:\PSCITestDir'
-        $dstDirGreen = 'c:\PSCITestDir2'
+        $dstDir = 'c:\DoItTestDir'
+        $dstDirGreen = 'c:\DoItTestDir2'
         Remove-Item -LiteralPath $dstDir -Force -Recurse -ErrorAction SilentlyContinue
 
         function New-TestDirStructure {
@@ -381,7 +381,7 @@ Describe -Tag "PSCI.unit" "Copy-FilesToRemoteServer" {
             New-TestDirStructure
 
             $fail = $false
-            Copy-FilesToRemoteServer -Path 'testFolder1' -Destination $dstDir -ConnectionParams $connectionParams -BlueGreenEnvVariableName 'PSCITest'
+            Copy-FilesToRemoteServer -Path 'testFolder1' -Destination $dstDir -ConnectionParams $connectionParams -BlueGreenEnvVariableName 'DoItTest'
 
           } catch {
             $fail = $true 
@@ -399,7 +399,7 @@ Describe -Tag "PSCI.unit" "Copy-FilesToRemoteServer" {
             New-TestDirStructure
 
             $fail = $false
-            Copy-FilesToRemoteServer -Path 'testFolder1' -Destination $dstDir,$dstDir -ConnectionParams $connectionParams -BlueGreenEnvVariableName 'PSCITest'
+            Copy-FilesToRemoteServer -Path 'testFolder1' -Destination $dstDir,$dstDir -ConnectionParams $connectionParams -BlueGreenEnvVariableName 'DoItTest'
 
           } catch {
             $fail = $true 
@@ -415,8 +415,8 @@ Describe -Tag "PSCI.unit" "Copy-FilesToRemoteServer" {
        Context "when supply BlueGreenEnvVariableName and env variable doesn't exist" {
             try {
                 New-TestDirStructure
-                [Environment]::SetEnvironmentVariable('PSCITest', '', 'Machine')
-                Copy-FilesToRemoteServer -Path 'testFolder1', 'testFolder2' -Destination $dstDir, $dstDirGreen -ConnectionParams $connectionParams -BlueGreenEnvVariableName 'PSCITest'
+                [Environment]::SetEnvironmentVariable('DoItTest', '', 'Machine')
+                Copy-FilesToRemoteServer -Path 'testFolder1', 'testFolder2' -Destination $dstDir, $dstDirGreen -ConnectionParams $connectionParams -BlueGreenEnvVariableName 'DoItTest'
 
                 It "should copy the files with structure intact to first directory" {
                     Validate-TestDirStructureFlat $dstDir
@@ -427,7 +427,7 @@ Describe -Tag "PSCI.unit" "Copy-FilesToRemoteServer" {
                 }  
                 
                 It "should set environment variable to first direcory" {
-                    [Environment]::GetEnvironmentVariable('PSCITest', 'Machine') | Should Be $dstDir
+                    [Environment]::GetEnvironmentVariable('DoItTest', 'Machine') | Should Be $dstDir
                 }  
 
                 It "should create .currentLive file in first directory" {
@@ -436,15 +436,15 @@ Describe -Tag "PSCI.unit" "Copy-FilesToRemoteServer" {
 
             } finally {
                 Remove-TestDirStructure
-                [Environment]::SetEnvironmentVariable('PSCITest', '', 'Machine')
+                [Environment]::SetEnvironmentVariable('DoItTest', '', 'Machine')
             }
         } 
 
         Context "when supply BlueGreenEnvVariableName and env variable exists" {
             try {
                 New-TestDirStructure
-                [Environment]::SetEnvironmentVariable('PSCITest', $dstDir, 'Machine')
-                Copy-FilesToRemoteServer -Path 'testFolder1', 'testFolder2' -Destination $dstDir, $dstDirGreen -ConnectionParams $connectionParams -BlueGreenEnvVariableName 'PSCITest'
+                [Environment]::SetEnvironmentVariable('DoItTest', $dstDir, 'Machine')
+                Copy-FilesToRemoteServer -Path 'testFolder1', 'testFolder2' -Destination $dstDir, $dstDirGreen -ConnectionParams $connectionParams -BlueGreenEnvVariableName 'DoItTest'
 
                 It "should copy the files with structure intact to second directory" {
                     Validate-TestDirStructureFlat $dstDirGreen
@@ -455,7 +455,7 @@ Describe -Tag "PSCI.unit" "Copy-FilesToRemoteServer" {
                 }             
                 
                 It "should set environment variable to second direcory" {
-                    [Environment]::GetEnvironmentVariable('PSCITest', 'Machine') | Should Be $dstDirGreen
+                    [Environment]::GetEnvironmentVariable('DoItTest', 'Machine') | Should Be $dstDirGreen
                 }  
 
                 It "should create .currentLive file in second directory" {
@@ -464,16 +464,16 @@ Describe -Tag "PSCI.unit" "Copy-FilesToRemoteServer" {
 
             } finally {
                 Remove-TestDirStructure
-                [Environment]::SetEnvironmentVariable('PSCITest', '', 'Machine')
+                [Environment]::SetEnvironmentVariable('DoItTest', '', 'Machine')
             }
         }
 
         Context "when supply BlueGreenEnvVariableName and env variable exists and first directory exists" {
             try {
                 New-TestDirStructure
-                [Environment]::SetEnvironmentVariable('PSCITest', '', 'Machine')
-                Copy-FilesToRemoteServer -Path 'testFolder1', 'testFolder2' -Destination $dstDir, $dstDirGreen -ConnectionParams $connectionParams -BlueGreenEnvVariableName 'PSCITest'
-                Copy-FilesToRemoteServer -Path 'testFolder1', 'testFolder2' -Destination $dstDir, $dstDirGreen -ConnectionParams $connectionParams -BlueGreenEnvVariableName 'PSCITest'
+                [Environment]::SetEnvironmentVariable('DoItTest', '', 'Machine')
+                Copy-FilesToRemoteServer -Path 'testFolder1', 'testFolder2' -Destination $dstDir, $dstDirGreen -ConnectionParams $connectionParams -BlueGreenEnvVariableName 'DoItTest'
+                Copy-FilesToRemoteServer -Path 'testFolder1', 'testFolder2' -Destination $dstDir, $dstDirGreen -ConnectionParams $connectionParams -BlueGreenEnvVariableName 'DoItTest'
 
                 It "should copy the files with structure intact to second directory" {
                     Validate-TestDirStructureFlat $dstDirGreen
@@ -484,7 +484,7 @@ Describe -Tag "PSCI.unit" "Copy-FilesToRemoteServer" {
                 }             
                 
                 It "should set environment variable to second direcory" {
-                    [Environment]::GetEnvironmentVariable('PSCITest', 'Machine') | Should Be $dstDirGreen
+                    [Environment]::GetEnvironmentVariable('DoItTest', 'Machine') | Should Be $dstDirGreen
                 }  
 
                 It "should create .currentLive file in second directory" {
@@ -493,7 +493,7 @@ Describe -Tag "PSCI.unit" "Copy-FilesToRemoteServer" {
 
             } finally {
                 Remove-TestDirStructure
-                [Environment]::SetEnvironmentVariable('PSCITest', '', 'Machine')
+                [Environment]::SetEnvironmentVariable('DoItTest', '', 'Machine')
             }
         }
     }

@@ -1,3 +1,3 @@
-use PSCITest
+use DoItTest
 GO
-drop table dbo.PSCITest
+drop table dbo.DoItTest

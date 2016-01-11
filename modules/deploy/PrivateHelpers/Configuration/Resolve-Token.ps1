@@ -22,7 +22,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 #>
 
-$Global:PSCIDefaultTokenRegex = New-Object System.Text.RegularExpressions.Regex ('\$\{(([\w-]+)\.?([\w-]+)?([^\}]*))\}', [System.Text.RegularExpressions.RegexOptions]::Compiled)
+$Global:DoItDefaultTokenRegex = New-Object System.Text.RegularExpressions.Regex ('\$\{(([\w-]+)\.?([\w-]+)?([^\}]*))\}', [System.Text.RegularExpressions.RegexOptions]::Compiled)
 
 function Resolve-Token {
      <#
@@ -87,7 +87,7 @@ function Resolve-Token {
         return $Value
     }
     if (!$TokenRegex) {
-        $tokenRegexObject = $Global:PSCIDefaultTokenRegex
+        $tokenRegexObject = $Global:DoItDefaultTokenRegex
     } else {
         $tokenRegexObject = New-Object System.Text.RegularExpressions.Regex $TokenRegex
     }

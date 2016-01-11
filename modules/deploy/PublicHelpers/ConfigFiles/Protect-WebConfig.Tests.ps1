@@ -22,10 +22,10 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 #>
 
-Import-Module -Name "$PSScriptRoot\..\..\..\..\PSCI.psd1" -Force
+Import-Module -Name "$PSScriptRoot\..\..\..\..\DoIt.psd1" -Force
 
-Describe -Tag "PSCI.unit" "Protect-WebConfig" {
-    InModuleScope PSCI.deploy {
+Describe -Tag "DoIt.unit" "Protect-WebConfig" {
+    InModuleScope DoIt.deploy {
                 
         Mock Write-Log { 
             Write-Output $Message

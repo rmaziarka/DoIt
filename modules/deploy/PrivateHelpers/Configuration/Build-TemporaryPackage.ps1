@@ -25,7 +25,7 @@ SOFTWARE.
 function Build-TemporaryPackage {
     <#
     .SYNOPSIS
-    Creates a temporary package with 'DeployScripts' and 'PSCI'.
+    Creates a temporary package with 'DeployScripts' and 'DoIt'.
 
     .EXAMPLE
     Build-TemporaryPackage
@@ -35,7 +35,7 @@ function Build-TemporaryPackage {
     param()
 
     $configPaths = Get-ConfigurationPaths
-    $packageTempDir = New-TempDirectory -DirName 'PSCI.temporaryPackage'
+    $packageTempDir = New-TempDirectory -DirName 'DoIt.temporaryPackage'
                                 
     # TODO: take only required packages
     if ($configPaths.PackagesPath) { 

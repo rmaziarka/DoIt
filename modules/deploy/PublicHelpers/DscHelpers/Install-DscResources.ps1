@@ -25,10 +25,10 @@ SOFTWARE.
 function Install-DscResources {
     <#
     .SYNOPSIS
-    Installs DSC resources that comes with PSCI to a local or remote computer.
+    Installs DSC resources that comes with DoIt to a local or remote computer.
 
     .DESCRIPTION
-    The DSC resources come from 'PSCI\modules\deploy\dsc' directory.
+    The DSC resources come from 'DoIt\modules\deploy\dsc' directory.
     If no parameter is provided, the DSC resources will be copied locally with robocopy.
     If $ComputerNames is provided, the DSC resources will be copied using Powershell remoting (using Copy-FilesToRemoteServers).
 

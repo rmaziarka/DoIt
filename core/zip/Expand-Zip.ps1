@@ -55,7 +55,7 @@ function Expand-Zip {
         $OutputDirectory
     )
     
-    # this function can be run remotely without PSCI available
+    # this function can be run remotely without DoIt available
 
     if (!(Test-Path -LiteralPath $ArchiveFile)) {
         throw "Archive file does not exist at '$ArchiveFile'."

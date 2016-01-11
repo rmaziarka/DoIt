@@ -25,12 +25,12 @@ SOFTWARE.
 function Validate-Website {
     param ($NodeName, $Tokens, $Environment, $ConnectionParams)
 
-    $website = Get-Website -Name 'PSCITest'
+    $website = Get-Website -Name 'DoItTest'
     if (!$website) {
-        throw 'Website PSCITest does not exist.'
+        throw 'Website DoItTest does not exist.'
     }
 
     if ($website.Bindings.Collection[0].bindingInformation -ne '*:82:') {
-        throw "Website PSCITest has been deployed on wrong port: $($website.Bindings.Collection[0].bindingInformation) instead of 82."
+        throw "Website DoItTest has been deployed on wrong port: $($website.Bindings.Collection[0].bindingInformation) instead of 82."
     }
 }

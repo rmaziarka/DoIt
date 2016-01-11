@@ -105,14 +105,14 @@ function ServerRole {
     ServerRole Web -Steps 'Deploy-Database' -ServerConnections @('DbServer1', 'DbServer2') -RunRemotely
 
     Run step 'Deploy-Database' remotely on nodes defined in DbServer1 (let's say NODE1) and DbServer2 (NODE2). 
-    Deployment package will be copied to both nodes (to "c:\PSCIPackage_<hash>"), 
+    Deployment package will be copied to both nodes (to "c:\DoItPackage_<hash>"), 
     and then function 'Deploy-Database' will be run on NODE1 (with $NodeName = NODE1) and NODE2 (with $NodeName = NODE2).
 
     .EXAMPLE
     ServerRole Web -Steps 'Deploy-Database' -ServerConnections @('DbServer1', 'DbServer2') -RunOn 'DbServer3'
 
     Run step 'Deploy-Database' remotely on nodes defined in DbServer1 (NODE1) and DbServer2 (NODE2). 
-    Deployment package will be copied to both nodes  (to "c:\PSCIPackage_<hash>"), 
+    Deployment package will be copied to both nodes  (to "c:\DoItPackage_<hash>"), 
     and then function 'Deploy-Database' will be run on NODE1 (with $NodeName = NODE1) and again on NODE1 (with $NodeName = NODE2).
 
     .EXAMPLE

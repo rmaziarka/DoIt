@@ -22,17 +22,17 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 #>
 
-Import-Module -Name "$PSScriptRoot\..\..\..\..\PSCI.psd1" -Force
+Import-Module -Name "$PSScriptRoot\..\..\..\..\DoIt.psd1" -Force
 
-Describe -Tag "PSCI.unit" "Resolve-DeploymentPlanSteps" {
-    InModuleScope PSCI.deploy {
+Describe -Tag "DoIt.unit" "Resolve-DeploymentPlanSteps" {
+    InModuleScope DoIt.deploy {
 
         function stepWithNoMyParamNoTokens { 'stepWithNoMyParamNoTokens output' }
         function stepWithNoMyParamTokens { param($Tokens) "stepWithNoMyParamTokens output: $($Tokens.TokensCat.token1)" }
         function stepWithMyParamTokens { param($MyParam, $Tokens) "stepWithMyParamTokens output: $MyParam / $($Tokens.TokensCat.token1)"}
         
 
-        $packagePath = 'c:\PSCITest'
+        $packagePath = 'c:\DoItTest'
         Mock Get-ConfigurationPaths { return @{ PackagesPath = $packagePath } }
         Mock Write-Log { 
             Write-Host $Message
@@ -46,7 +46,7 @@ Describe -Tag "PSCI.unit" "Resolve-DeploymentPlanSteps" {
 
             Node $NodeName {
                 File test1 {
-                    DestinationPath = 'c:\PSCItest\' + $Tokens.TokensCat.token1 + ".$MyParam"
+                    DestinationPath = 'c:\DoIttest\' + $Tokens.TokensCat.token1 + ".$MyParam"
                 }
             }
         }
@@ -56,7 +56,7 @@ Describe -Tag "PSCI.unit" "Resolve-DeploymentPlanSteps" {
 
             Node $AllNodes.NodeName {
                 File test1 {
-                    DestinationPath = 'c:\PSCItest\' + $Node.Environment + '.' + $Node.Tokens.TokensCat.token1 + ".$MyParam"
+                    DestinationPath = 'c:\DoIttest\' + $Node.Environment + '.' + $Node.Tokens.TokensCat.token1 + ".$MyParam"
                 }
             }
         }

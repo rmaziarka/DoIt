@@ -45,10 +45,10 @@ Environment Default {
 
     # IIS configuration
     Tokens WebConfig @{
-        AppPoolName = 'PSCI_TestAppPool'
-        WebsiteName = 'PSCI_TestWebsite'
+        AppPoolName = 'DoIt_TestAppPool'
+        WebsiteName = 'DoIt_TestWebsite'
         WebsitePort = 88
-        WebsitePhysicalPath = 'c:\inetpub\wwwroot\PSCI_TestWebsite'
+        WebsitePhysicalPath = 'c:\inetpub\wwwroot\DoIt_TestWebsite'
     }
 
     # Tokens used to update Web.config file - all occurrences of '${TestConnectionString}' string will be replaced
@@ -58,7 +58,7 @@ Environment Default {
 
     # Tokens related to database deployment
     Tokens DatabaseConfig @{
-        DatabaseName = 'PSCITest'
+        DatabaseName = 'DoItTest'
         ConnectionString = 'Server=localhost\SQLEXPRESS;Database=${DatabaseName};Integrated Security=SSPI'
         DropDatabase = $true
     }
@@ -70,10 +70,10 @@ Environment Test {
 
 Environment UAT {
     Tokens WebConfig @{
-        AppPoolName = 'PSCI_UATAppPool'
-        WebsiteName = 'PSCI_UATWebsite'
+        AppPoolName = 'DoIt_UATAppPool'
+        WebsiteName = 'DoIt_UATWebsite'
         WebsitePort = 888
-        WebsitePhysicalPath = 'c:\inetpub\wwwroot\PSCI_UATWebsite'
+        WebsitePhysicalPath = 'c:\inetpub\wwwroot\DoIt_UATWebsite'
     }
 
     Tokens DatabaseConfig @{

@@ -25,7 +25,7 @@ SOFTWARE.
 function Get-DscResourcesPaths {
     <#
     .SYNOPSIS
-    Gets paths to DSC resources (from 'PSCI\modules\deploy\dsc' directory.
+    Gets paths to DSC resources (from 'DoIt\modules\deploy\dsc' directory.
 
     .PARAMETER ModuleNames
     List of module names to resolve.
@@ -50,8 +50,8 @@ function Get-DscResourcesPaths {
     }
 
     $result = New-Object System.Collections.ArrayList
-    #note: this needs to get path to PSCI.deploy module
-    $modulePath = Get-PSCIModulePath -ModuleName 'PSCI.deploy'
+    #note: this needs to get path to DoIt.deploy module
+    $modulePath = Get-DoItModulePath -ModuleName 'DoIt.deploy'
     $baseDscDir = Join-Path -Path $modulePath -ChildPath 'dsc'
     # note: $Env:ProgramFiles gives Program Files (x86) if running Powershell x86...
     $baseDestPath = Join-Path -Path 'C:\Program Files' -ChildPath 'WindowsPowerShell\Modules'

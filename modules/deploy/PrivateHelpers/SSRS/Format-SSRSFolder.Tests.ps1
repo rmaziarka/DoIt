@@ -22,10 +22,10 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 #>
 
-Import-Module -Name "$PSScriptRoot\..\..\..\..\PSCI.psd1"
+Import-Module -Name "$PSScriptRoot\..\..\..\..\DoIt.psd1"
 
-Describe -Tag "PSCI.unit" "Format-SSRSFolder" {
-    InModuleScope PSCI.deploy {
+Describe -Tag "DoIt.unit" "Format-SSRSFolder" {
+    InModuleScope DoIt.deploy {
 
         Context "when used with Folder without '/' prefix" {
         $folder = "JiraReporting"

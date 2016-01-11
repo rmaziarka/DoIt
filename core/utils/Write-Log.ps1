@@ -28,7 +28,7 @@ Function Write-Log {
     Writes a nicely formatted Message to stdout/file/event log.
 
     .DESCRIPTION
-    Writes according to $PSCIGlobalConfiguration.Log* variables.
+    Writes according to $DoItGlobalConfiguration.Log* variables.
 
     .PARAMETER Critical
     DEPRECATED - throw an exception instead.
@@ -119,24 +119,24 @@ Function Write-Log {
         $severityNotSet = $false;
 
         if ($Critical) {
-            $Severity = [PSCI.LogSeverity]::CRITICAL
+            $Severity = [DoIt.LogSeverity]::CRITICAL
             $severityChar = 'C'
         } elseif ($Error) {
-            $Severity = [PSCI.LogSeverity]::ERROR
+            $Severity = [DoIt.LogSeverity]::ERROR
             $severityChar = 'E'
         } elseif ($warn) {
-            $Severity = [PSCI.LogSeverity]::WARN
+            $Severity = [DoIt.LogSeverity]::WARN
             $severityChar = 'W'
         } elseif ($info) {
-            $Severity = [PSCI.LogSeverity]::INFO
+            $Severity = [DoIt.LogSeverity]::INFO
             $severityChar = 'I'
         } elseif ($_debug) {
-            $Severity = [PSCI.LogSeverity]::DEBUG
+            $Severity = [DoIt.LogSeverity]::DEBUG
             $severityChar = 'D'
         } else {
             $severityNotSet = $true;
         }
-        if (!$severityNotSet -and [int]$Severity -lt [int]$PSCIGlobalConfiguration.LogLevel) {
+        if (!$severityNotSet -and [int]$Severity -lt [int]$DoItGlobalConfiguration.LogLevel) {
             return
         }
 
@@ -156,7 +156,7 @@ Function Write-Log {
         } else {
             $currentHostname = [system.environment]::MachineName
             $currentUsername = $env:USERNAME    
-            if ($PSCIGlobalConfiguration.RemotingMode) {
+            if ($DoItGlobalConfiguration.RemotingMode) {
                 $remotingFlag = '[R] '
             } else {
                 $remotingFlag = ''
@@ -168,7 +168,7 @@ Function Write-Log {
         }
     }
     Process { 
-        if (!$severityNotSet -and [int]$Severity -lt [int]$PSCIGlobalConfiguration.LogLevel) {
+        if (!$severityNotSet -and [int]$Severity -lt [int]$DoItGlobalConfiguration.LogLevel) {
             return
         }
         Write-LogMessage -Header (" " * $Indent + $outputHeader) -Message $Message -Severity $Severity -Emphasize:$Emphasize -PassThru:$PassThru
@@ -210,7 +210,7 @@ function Write-LogMessage() {
         [string[]] 
         $Message, 
         
-        [PSCI.LogSeverity] 
+        [DoIt.LogSeverity] 
         $Severity, 
         
         [switch] 
@@ -230,12 +230,12 @@ function Write-LogMessage() {
         $exception = $_.Exception
         $Message = "Writing to log failed - script will terminate.`r`n"
         $currentUser = Get-CurrentUser
-        if ($PSCIGlobalConfiguration.LogFile) {
-            $Message += "`r`nPlease ensure that current user ('{0}') has access to file '{1}' or change the path to log file in GlobalSettings.LogFile." -f $currentUser, $PSCIGlobalConfiguration.LogFile
+        if ($DoItGlobalConfiguration.LogFile) {
+            $Message += "`r`nPlease ensure that current user ('{0}') has access to file '{1}' or change the path to log file in GlobalSettings.LogFile." -f $currentUser, $DoItGlobalConfiguration.LogFile
         }
-        if ($PSCIGlobalConfiguration.LogEventLogSource) {
-            if (!$PSCIGlobalConfiguration.LogEventLogCreateIfNotExists) {
-                $Message += "`r`nPlease ensure that Event Log source named '{0}' exists in Application log or switch on 'GlobalSettings.LogEventLogCreateIfNotExists' setting (needs Administrator)." -f $PSCIGlobalConfiguration.LogEventLogSource
+        if ($DoItGlobalConfiguration.LogEventLogSource) {
+            if (!$DoItGlobalConfiguration.LogEventLogCreateIfNotExists) {
+                $Message += "`r`nPlease ensure that Event Log source named '{0}' exists in Application log or switch on 'GlobalSettings.LogEventLogCreateIfNotExists' setting (needs Administrator)." -f $DoItGlobalConfiguration.LogEventLogSource
             } else {
                 $Message += "`r`nPlease ensure that current user ('{0}') is able to create Event Log sources or create the source manually and switch off 'GlobalSettings.LogEventLogCreateIfNotExists' setting." -f $currentUser
             }
@@ -278,7 +278,7 @@ function Write-LogToStdOut() {
         [string[]] 
         $Message, 
         
-        [PSCI.LogSeverity] 
+        [DoIt.LogSeverity] 
         $Severity, 
         
         [switch] 
@@ -292,18 +292,18 @@ function Write-LogToStdOut() {
         Write-Host $Header -NoNewline -Fore "Gray"
 
         $color = switch ($Severity) {
-            ([PSCI.LogSeverity]::CRITICAL) { [ConsoleColor]::Red }
-            ([PSCI.LogSeverity]::ERROR) { [ConsoleColor]::Red }
-            ([PSCI.LogSeverity]::WARN) { [ConsoleColor]::Yellow }
-            ([PSCI.LogSeverity]::INFO) { 
-                if ($PSCIGlobalConfiguration.RemotingMode) {
+            ([DoIt.LogSeverity]::CRITICAL) { [ConsoleColor]::Red }
+            ([DoIt.LogSeverity]::ERROR) { [ConsoleColor]::Red }
+            ([DoIt.LogSeverity]::WARN) { [ConsoleColor]::Yellow }
+            ([DoIt.LogSeverity]::INFO) { 
+                if ($DoItGlobalConfiguration.RemotingMode) {
                     if ($Emphasize) { [ConsoleColor]::DarkCyan } else { [ConsoleColor]::Gray } 
                 } else {
                     if ($Emphasize) { [ConsoleColor]::Cyan } else { [ConsoleColor]::White } 
                 }
             }
-            ([PSCI.LogSeverity]::DEBUG) { 
-                if ($PSCIGlobalConfiguration.RemotingMode) { [ConsoleColor]::DarkGray } else { [ConsoleColor]::Gray }
+            ([DoIt.LogSeverity]::DEBUG) { 
+                if ($DoItGlobalConfiguration.RemotingMode) { [ConsoleColor]::DarkGray } else { [ConsoleColor]::Gray }
             }
             default { [ConsoleColor]::Red }
         }
@@ -341,14 +341,14 @@ function Write-LogToFile() {
         [string[]] 
         $Message, 
         
-        [PSCI.LogSeverity] 
+        [DoIt.LogSeverity] 
         $Severity
     )
     
-    if ($PSCIGlobalConfiguration.LogFile) {
-        if (![System.IO.Path]::IsPathRooted($PSCIGlobalConfiguration.LogFile)) {
+    if ($DoItGlobalConfiguration.LogFile) {
+        if (![System.IO.Path]::IsPathRooted($DoItGlobalConfiguration.LogFile)) {
             # we need to set absolute path to log file as .NET working directory would be c:\windows\system32
-            $PSCIGlobalConfiguration.LogFile = Join-Path -Path ((Get-Location).ProviderPath) -ChildPath $PSCIGlobalConfiguration.LogFile
+            $DoItGlobalConfiguration.LogFile = Join-Path -Path ((Get-Location).ProviderPath) -ChildPath $DoItGlobalConfiguration.LogFile
         }
 
         $strBuilder = New-Object System.Text.StringBuilder
@@ -357,7 +357,7 @@ function Write-LogToFile() {
             [void]($strBuilder.Append($msg).Append("`r`n"))
         }
         
-        [io.file]::AppendAllText($PSCIGlobalConfiguration.LogFile, ($strBuilder.ToString()), [System.Text.Encoding]::Unicode)
+        [io.file]::AppendAllText($DoItGlobalConfiguration.LogFile, ($strBuilder.ToString()), [System.Text.Encoding]::Unicode)
     }
 }
 
@@ -367,7 +367,7 @@ function Write-LogToEventLog() {
     Outputs the Message to event log.
     
     .DESCRIPTION
-    Creates new event log source if not exists and $PSCIGlobalConfiguration.LogEventLogCreateSourceIfNotExists is set. Helper function.
+    Creates new event log source if not exists and $DoItGlobalConfiguration.LogEventLogCreateSourceIfNotExists is set. Helper function.
 
      .PARAMETER Header
     Message Header
@@ -391,23 +391,23 @@ function Write-LogToEventLog() {
         [string[]] 
         $Message, 
         
-        [PSCI.LogSeverity] 
+        [DoIt.LogSeverity] 
         $Severity
     )
     
-    if ($PSCIGlobalConfiguration.LogEventLogSource) {
-        if ([int]$Severity -ge [int]$PSCIGlobalConfiguration.LogEventLogThreshold) {
+    if ($DoItGlobalConfiguration.LogEventLogSource) {
+        if ([int]$Severity -ge [int]$DoItGlobalConfiguration.LogEventLogThreshold) {
 
-            if ($Severity -eq [PSCI.LogSeverity]::ERROR -or $Severity -eq [PSCI.LogSeverity]::CRITICAL) {
+            if ($Severity -eq [DoIt.LogSeverity]::ERROR -or $Severity -eq [DoIt.LogSeverity]::CRITICAL) {
                 $entryType = [System.Diagnostics.EventLogEntryType]::Error
-            } elseif ($Severity -eq [PSCI.LogSeverity]::WARN) {
+            } elseif ($Severity -eq [DoIt.LogSeverity]::WARN) {
                 $entryType = [System.Diagnostics.EventLogEntryType]::Warning
             } else {
                 $entryType = [System.Diagnostics.EventLogEntryType]::Information
             }
 
-            if ($PSCIGlobalConfiguration.LogEventLogCreateSourceIfNotExists -and ![System.Diagnostics.EventLog]::SourceExists($PSCIGlobalConfiguration.LogEventLogSource)) {
-                [void](New-EventLog -LogName Application -Source $PSCIGlobalConfiguration.LogEventLogSource)
+            if ($DoItGlobalConfiguration.LogEventLogCreateSourceIfNotExists -and ![System.Diagnostics.EventLog]::SourceExists($DoItGlobalConfiguration.LogEventLogSource)) {
+                [void](New-EventLog -LogName Application -Source $DoItGlobalConfiguration.LogEventLogSource)
             }
 
             $strBuilder = New-Object System.Text.StringBuilder
@@ -415,7 +415,7 @@ function Write-LogToEventLog() {
             foreach ($msg in $Message) {
                 [void]($strBuilder.Append($msg).Append("`r`n"))
             }
-            Write-EventLog -LogName Application -Source $PSCIGlobalConfiguration.LogEventLogSource -EntryType $entryType -EventID 1 -Message ($strBuilder.ToString())
+            Write-EventLog -LogName Application -Source $DoItGlobalConfiguration.LogEventLogSource -EntryType $entryType -EventID 1 -Message ($strBuilder.ToString())
         }
     }
 }
@@ -450,7 +450,7 @@ function Write-LogToPSOutput() {
         [string[]] 
         $Message, 
         
-        [PSCI.LogSeverity] 
+        [DoIt.LogSeverity] 
         $Severity,
 
         [Parameter(Mandatory=$false)]
@@ -478,5 +478,5 @@ function Test-WebDeployRemotingMode() {
     [OutputType([bool])]
     param ()
 
-    return $PSCIGlobalConfiguration.RemotingMode -in @("WebDeployHandler", "WebDeployAgentService")
+    return $DoItGlobalConfiguration.RemotingMode -in @("WebDeployHandler", "WebDeployAgentService")
 }

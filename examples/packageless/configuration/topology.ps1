@@ -30,7 +30,7 @@ ServerRoles 'go down' from parent to child environments, but any ServerRole para
 
 2) ServerRoles, defining which computers belong to which ServerRoles, and which steps are to be deployed to which ServerRoles.
 By default steps are run locally, but this behavior can be modified by using -RunOn / -RunOnCurrentNode parameters.
-For ServerRole examples, see .EXAMPLES section in PSCI\deployment\Configuration\ConfigElements\ServerRole.ps1.
+For ServerRole examples, see .EXAMPLES section in DoIt\deployment\Configuration\ConfigElements\ServerRole.ps1.
 #>
 
 
@@ -47,7 +47,7 @@ Environment SecondEnv {
     
 }
 
-# In this environment PSCI will copy itself to the remote server and then run SimpleDscProvision and SimpleFunctionProvision remotely.
+# In this environment DoIt will copy itself to the remote server and then run SimpleDscProvision and SimpleFunctionProvision remotely.
 Environment RemoteRun {
     ServerRole TestRole -RunRemotely
 }

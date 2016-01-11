@@ -108,7 +108,7 @@ function New-Zip {
     )
 
     $msg = "Creating archive '$OutputFile' from '$($Path -join `"', '`")', include '$($Include -join `"', '`")'."
-    # this function can be run remotely without PSCI available
+    # this function can be run remotely without DoIt available
     if (Get-Command -Name Write-Log -ErrorAction SilentlyContinue) {
         Write-Log -Info $msg 
     } else {

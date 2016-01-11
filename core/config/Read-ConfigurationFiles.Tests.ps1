@@ -22,11 +22,11 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 #>
 
-Import-Module -Name "$PSScriptRoot\..\..\PSCI.psd1" -Force
+Import-Module -Name "$PSScriptRoot\..\..\DoIt.psd1" -Force
 
-Describe -Tag "PSCI.unit" "Read-ConfigurationFiles" {
+Describe -Tag "DoIt.unit" "Read-ConfigurationFiles" {
 
-    InModuleScope PSCI.core {
+    InModuleScope DoIt.core {
 
         Mock Write-Log { 
             Write-Host "$Message"
@@ -35,7 +35,7 @@ Describe -Tag "PSCI.unit" "Read-ConfigurationFiles" {
             }
         }
 
-        Mock Get-PSCIModulePath {
+        Mock Get-DoItModulePath {
             return '.'
         }
 
@@ -49,7 +49,7 @@ Describe -Tag "PSCI.unit" "Read-ConfigurationFiles" {
                 $fail = $false
                 try {
                     [void](New-Item -Path $testConfigDir -ItemType Directory -Force)
-                    $Global:PSCIGlobalConfiguration = @{ ConfigurationPaths = @{ DeployConfigurationPath = $testConfigDir } }
+                    $Global:DoItGlobalConfiguration = @{ ConfigurationPaths = @{ DeployConfigurationPath = $testConfigDir } }
                     Remove-Item -Path "$testConfigDir\*" 
                     Read-ConfigurationFiles
                 } catch {
@@ -66,7 +66,7 @@ Describe -Tag "PSCI.unit" "Read-ConfigurationFiles" {
                 try {
                     [void](New-Item -Path $testConfigDir -ItemType Directory -Force)
                     [void](New-Item -Path $testFileFunc -ItemType File -Force)
-                    $Global:PSCIGlobalConfiguration = @{ ConfigurationPaths = @{ DeployConfigurationPath = $testConfigDir } }
+                    $Global:DoItGlobalConfiguration = @{ ConfigurationPaths = @{ DeployConfigurationPath = $testConfigDir } }
                     $result = Read-ConfigurationFiles
                 
                     $result | Should Not Be $null
@@ -97,7 +97,7 @@ Describe -Tag "PSCI.unit" "Read-ConfigurationFiles" {
     }
 
 '@)
-                    $Global:PSCIGlobalConfiguration = @{ ConfigurationPaths = @{ DeployConfigurationPath = $testConfigDir } }
+                    $Global:DoItGlobalConfiguration = @{ ConfigurationPaths = @{ DeployConfigurationPath = $testConfigDir } }
                     $result = Read-ConfigurationFiles
                 
                     $result | Should Not Be $null
@@ -121,21 +121,21 @@ Describe -Tag "PSCI.unit" "Read-ConfigurationFiles" {
                     [void](New-Item -Path $testFileDSC -ItemType File -Force -Value @'
     Environment Default {
         ServerConnection TestNode -Nodes localhost
-        ServerRole TestRole -Steps @('PSCIWindowsFeatures') -ServerConnections TestNode
+        ServerRole TestRole -Steps @('DoItWindowsFeatures') -ServerConnections TestNode
 
-        Step PSCI-Step
+        Step DoIt-Step
     }
 '@)
                     [void](New-Item -Path 'BuiltinSteps' -ItemType Directory -Force)
-                    [void](New-Item -Path 'BuiltinSteps\PSCIWindowsFeatures.ps1' -ItemType File -Force -Value @'
+                    [void](New-Item -Path 'BuiltinSteps\DoItWindowsFeatures.ps1' -ItemType File -Force -Value @'
                          Configuration Test {
                             Import-DSCResource xDismFeature1
 '@)
-[void](New-Item -Path 'BuiltinSteps\PSCI-Step.ps1' -ItemType File -Force -Value @'
+[void](New-Item -Path 'BuiltinSteps\DoIt-Step.ps1' -ItemType File -Force -Value @'
                          Configuration Test {
                             Import-DSCResource xDismFeature2
 '@)
-                    $Global:PSCIGlobalConfiguration = @{ ConfigurationPaths = @{ DeployConfigurationPath = $testConfigDir } }
+                    $Global:DoItGlobalConfiguration = @{ ConfigurationPaths = @{ DeployConfigurationPath = $testConfigDir } }
                     $result = Read-ConfigurationFiles
                 
                     $result | Should Not Be $null
@@ -162,7 +162,7 @@ Describe -Tag "PSCI.unit" "Read-ConfigurationFiles" {
 '@)
                     $fail = $false
                     try { 
-                        $Global:PSCIGlobalConfiguration = @{ ConfigurationPaths = @{ DeployConfigurationPath = $testConfigDir } }
+                        $Global:DoItGlobalConfiguration = @{ ConfigurationPaths = @{ DeployConfigurationPath = $testConfigDir } }
                         Read-ConfigurationFiles
                     } catch {
                         $fail = $true
@@ -188,7 +188,7 @@ Describe -Tag "PSCI.unit" "Read-ConfigurationFiles" {
 '@)
                     $fail = $false
                     try { 
-                        $Global:PSCIGlobalConfiguration = @{ ConfigurationPaths = @{ DeployConfigurationPath = $testConfigDir } }
+                        $Global:DoItGlobalConfiguration = @{ ConfigurationPaths = @{ DeployConfigurationPath = $testConfigDir } }
                         Read-ConfigurationFiles
                     } catch {
                         $fail = $true

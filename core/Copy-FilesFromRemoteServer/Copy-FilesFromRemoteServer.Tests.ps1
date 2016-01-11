@@ -22,11 +22,11 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 #>
 
-Import-Module -Name "$PSScriptRoot\..\..\PSCI.psd1" -Force
+Import-Module -Name "$PSScriptRoot\..\..\DoIt.psd1" -Force
 
-Describe -Tag "PSCI.unit" "Copy-FilesFromRemoteServer" {
+Describe -Tag "DoIt.unit" "Copy-FilesFromRemoteServer" {
 
-    InModuleScope PSCI.core {
+    InModuleScope DoIt.core {
 
         $Global:loggedMessage = ''
 
@@ -40,8 +40,8 @@ Describe -Tag "PSCI.unit" "Copy-FilesFromRemoteServer" {
 
         $connectionParams = New-ConnectionParameters -Nodes 'localhost'
 
-        $srcDir = 'c:\PSCITestDirSrc'
-        $dstDir = 'c:\PSCITestDirDst'
+        $srcDir = 'c:\DoItTestDirSrc'
+        $dstDir = 'c:\DoItTestDirDst'
         
         Remove-Item -LiteralPath $dstDir -Force -Recurse -ErrorAction SilentlyContinue
 
