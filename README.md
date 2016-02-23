@@ -1,5 +1,7 @@
-### DoIt - Powershell Continuous Integration / Configuration as Code
+### DoIt - CI and Deploy in PowerShell like a real [Do'er](https://www.youtube.com/watch?v=ZXsQAXx_ao0)
 -------------
+![alt doit](https://i.ytimg.com/vi/Z6gG3tKDBlk/maxresdefault.jpg)
+
 DoIt is a build and deployment automation library that provides a simple Powershell DSC-like language allowing to express configuration as code. The general flow is presented on the image below:
 ![DoIt overview](https://github.com/ObjectivityBSS/DoIt/wiki/images/DoIt_overview.png)
 
